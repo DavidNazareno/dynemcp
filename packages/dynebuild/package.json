@@ -5,10 +5,24 @@
   "scripts": {
     "build": "tsc"
   },
+  "exports": {
+    "builder": {
+      "types": "./src/builder/index.ts",
+      "default": "./dist/builder/index.js"
+    },
+    "blunder": {
+      "types": "./src/blunder/index.ts",
+      "default": "./dist/blunder/index.js"
+    }
+  },
   "dependencies": {
-    "esbuild": "^0.20.1"
+    "esbuild": "^0.20.1",
+    "zod": "^3.22.4",
+    "fs-extra": "^11.2.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.19.0",
     "typescript": "^5.4.2"
   }
 }

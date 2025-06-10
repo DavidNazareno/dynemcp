@@ -1,5 +1,6 @@
 {
   "name": "@repo/dynemcp",
+  "description": "A Model Context Protocol (MCP) server framework",
   "type": "module",
   "scripts": {
     "build": "tsc"
@@ -27,7 +28,6 @@
     "@modelcontextprotocol/sdk": "^1.12.1"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
-    "typescript": "latest"
+    "typescript": "^5.4.2"
   }
 }

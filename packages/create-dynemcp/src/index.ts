@@ -17,7 +17,6 @@ import {
   validateTemplate,
 } from './helpers/validate.js'
 import {
-  detectPackageManager,
   installDependencies,
   getRunCommand,
   PackageManager,
