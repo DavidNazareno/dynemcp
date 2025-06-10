@@ -1,5 +1,5 @@
 {
-  "name": "dynemcp-project",
+  "name": "testproject2",
   "version": "0.1.0",
   "description": "A Model Context Protocol (MCP) server",
   "type": "module",
@@ -20,7 +20,7 @@
     "@typescript-eslint/eslint-plugin": "^8.33.1",
     "@typescript-eslint/parser": "^8.33.1",
     "cross-env": "^7.0.3",
-    "esbuild": "^0.20.0",
+    "esbuild": "^0.20.2",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.2.5",
