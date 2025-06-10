@@ -1,28 +1,49 @@
-// Importar directamente del SDK oficial de MCP
-// @ts-expect-error - El SDK puede no tener tipos correctamente definidos
-import { MCPServer, StdioServerTransport } from '@modelcontextprotocol/sdk'
+// Importar desde el paquete dynemcp local
+import { createMCPServer } from '@repo/dynemcp'
 import tools from '../tools/tools.js'
 import resources from '../resources/resource.js'
 import prompt from '../prompt/prompt.js'
 
-// Initialize the MCP server
-const server = new MCPServer({
-  name: 'dynemcp-project',
-  version: '0.1.0',
-  tools: tools || [],
-  resources: resources || [],
-  prompt: prompt || ''
-})
+// Inicializar el servidor MCP
+const server = createMCPServer('dynemcp-project', '0.1.0')
 
-// Conectar el servidor a la entrada/salida estándar
+// Registrar herramientas si están definidas
+if (tools && tools.length > 0) {
+  server.registerTools(tools)
+}
+
+// Registrar recursos si están definidos
+if (resources && resources.length > 0) {
+  server.registerResources(resources)
+}
+
+// Registrar prompt del sistema si está definido
+if (prompt) {
+  server.registerPrompt({
+    id: 'system-prompt',
+    name: 'System Prompt',
+    content: prompt,
+  })
+  console.log('Prompt del sistema configurado')
+}
+
+// Modo desarrollo vs producción
 if (process.env.NODE_ENV === 'development') {
   console.log(
     'Modo desarrollo: El servidor se iniciará a través del inspector MCP'
   )
 } else {
-  // En producción, conectar directamente
-  server.connect(new StdioServerTransport()).catch((error: Error) => {
-    console.error('Failed to start MCP server:', error)
-    process.exit(1)
-  })
+  console.log('Iniciando servidor MCP en modo producción')
 }
+
+// Iniciar el servidor
+server.start().catch((error: Error) => {
+  console.error('Error al iniciar el servidor:', error)
+  process.exit(1)
+})
+
+// Manejar errores
+process.on('uncaughtException', (error: Error) => {
+  console.error('Error no capturado:', error)
+  process.exit(1)
+})
