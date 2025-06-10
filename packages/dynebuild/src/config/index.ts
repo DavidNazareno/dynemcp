@@ -2,9 +2,9 @@
  * Configuration utilities for DyneMCP projects
  */
 
-import fs from "fs";
-import path from "path";
-import { z } from "zod";
+import fs from 'fs'
+import path from 'path'
+import { z } from 'zod'
 
 // Define the schema for dynemcp.config.json
 const DyneMCPConfigSchema = z.object({
@@ -12,50 +12,50 @@ const DyneMCPConfigSchema = z.object({
   version: z.string(),
   description: z.string().optional(),
   tools: z.object({
-    directory: z.string().default("./tools"),
+    directory: z.string().default('./tools'),
   }),
   resources: z.object({
-    directory: z.string().default("./resources"),
+    directory: z.string().default('./resources'),
   }),
   prompts: z.object({
-    directory: z.string().default("./prompt"),
+    directory: z.string().default('./prompt'),
   }),
   build: z
     .object({
-      entryPoint: z.string().default("./src/index.ts"),
-      outDir: z.string().default("./dist"),
-      format: z.enum(["esm", "cjs"]).default("esm"),
+      entryPoint: z.string().default('./src/index.ts'),
+      outDir: z.string().default('./dist'),
+      format: z.enum(['esm', 'cjs']).default('esm'),
       minify: z.boolean().default(false),
     })
     .optional(),
-});
+})
 
-export type DyneMCPConfig = z.infer<typeof DyneMCPConfigSchema>;
+export type DyneMCPConfig = z.infer<typeof DyneMCPConfigSchema>
 
 /**
  * Load the DyneMCP configuration file
  */
-export function loadConfig(configPath = "dynemcp.config.json"): DyneMCPConfig {
+export function loadConfig(configPath = 'dynemcp.config.json'): DyneMCPConfig {
   const absolutePath = path.isAbsolute(configPath)
     ? configPath
-    : path.join(process.cwd(), configPath);
+    : path.join(process.cwd(), configPath)
 
   try {
     if (!fs.existsSync(absolutePath)) {
-      throw new Error(`Configuration file not found: ${absolutePath}`);
+      throw new Error(`Configuration file not found: ${absolutePath}`)
     }
 
-    const configContent = fs.readFileSync(absolutePath, "utf-8");
-    const config = JSON.parse(configContent);
+    const configContent = fs.readFileSync(absolutePath, 'utf-8')
+    const config = JSON.parse(configContent)
 
-    return DyneMCPConfigSchema.parse(config);
+    return DyneMCPConfigSchema.parse(config)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error("Invalid configuration:", error.errors);
+      console.error('Invalid configuration:', error.errors)
     } else {
-      console.error("Failed to load configuration:", error);
+      console.error('Failed to load configuration:', error)
     }
-    process.exit(1);
+    process.exit(1)
   }
 }
 
@@ -64,31 +64,31 @@ export function loadConfig(configPath = "dynemcp.config.json"): DyneMCPConfig {
  */
 export function createDefaultConfig(
   name: string,
-  version = "1.0.0",
+  version = '1.0.0'
 ): DyneMCPConfig {
   return {
     name,
     version,
     description: `A Model Context Protocol (MCP) server named ${name}`,
     tools: {
-      directory: "./tools",
+      directory: './tools',
     },
     resources: {
-      directory: "./resources",
+      directory: './resources',
     },
     prompts: {
-      directory: "./prompt",
+      directory: './prompt',
     },
     build: {
-      entryPoint: "./src/index.ts",
-      outDir: "./dist",
-      format: "esm",
+      entryPoint: './src/index.ts',
+      outDir: './dist',
+      format: 'esm',
       minify: false,
     },
-  };
+  }
 }
 
 export default {
   loadConfig,
   createDefaultConfig,
-};
+}

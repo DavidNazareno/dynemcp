@@ -44,6 +44,7 @@ pnpm run build
 ```
 
 This command will:
+
 1. Create a single optimized file at `dist/server.js`
 2. Include all your code and dependencies in one bundle
 3. Minify the output for better performance

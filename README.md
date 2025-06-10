@@ -21,38 +21,41 @@ This project is organized as a monorepo using Turborepo and pnpm workspaces for 
 # Using npm
 npm create dynemcp@latest
 
-# Using pnpm
+# Using pnpm (recomendado)
 pnpm create dynemcp@latest
+
+# Using yarn
+yarn create dynemcp
 ```
 
-This command starts an interactive generator that guides you through creating an MCP server from a functional template or from scratch.
+Este comando inicia un generador interactivo que te guía a través de la creación de un servidor MCP a partir de una plantilla funcional.
 
 ## Building Your MCP Server
 
-DyneMCP uses the `dynebuild` package to create a unified, minified bundle for production deployment. When you create a new project with `pnpm create dynemcp@latest`, a build script is automatically set up for you.
+DyneMCP usa el paquete `dynebuild` para crear un bundle unificado y minificado para despliegue en producción. Cuando creas un nuevo proyecto con `pnpm create dynemcp`, un script de build se configura automáticamente para ti.
 
 ```bash
-# Build your MCP server
+# Construir tu servidor MCP
 pnpm run build
 ```
 
-This will create a single optimized file at `dist/server.js` that contains all your code and dependencies, ready for deployment.
+Esto creará un único archivo optimizado en `dist/server.js` que contiene todo tu código y dependencias, listo para despliegue.
 
 ## Project Structure
 
-### Monorepo Structure
+### Estructura del Monorepo
 
-This project is organized as a monorepo with the following structure:
+Este proyecto está organizado como un monorepo con la siguiente estructura:
 
 ```
 monorepo-root/
 │
-├── packages/                 → Core packages
-│   ├── dynemcp/              → Main DyneMCP framework
-│   ├── dynemcp-types/        → TypeScript types
-│   ├── dynemcp-tools/        → Common tools
-│   ├── dynebuild/            → Build utilities
-│   └── create-dynemcp/       → Project scaffolding CLI
+├── packages/                 → Paquetes principales
+│   ├── dynemcp/              → Framework principal DyneMCP
+│   ├── dynemcp-types/        → Tipos de TypeScript
+│   ├── dynemcp-tools/        → Herramientas comunes
+│   ├── dynebuild/            → Utilidades de construcción
+│   └── create-dynemcp/       → CLI para scaffolding de proyectos
 │
 ├── configs/                  → Shared configurations
 │   ├── eslint/               → ESLint configuration
@@ -68,47 +71,88 @@ monorepo-root/
 └── package.json              → Root package.json
 ```
 
-### Individual Project Structure
+### Estructura de Proyecto Individual
 
-When using DyneMCP to create a new MCP server, the framework uses a convention-based structure:
+Cuando usas DyneMCP para crear un nuevo servidor MCP, el framework utiliza una estructura basada en convenciones:
 
 ```
 project-root/
 │
-├── tools/            → MCP tools (functions executable by AI)
-│   └── tools.ts      → Central file registering tools
+├── src/              → Código fuente principal
+│   └── index.ts      → Punto de entrada del servidor
 │
-├── resources/        → Static or dynamic resources
-│   └── resource.ts   → Central file registering resources
+├── tools/            → Herramientas MCP (funciones ejecutables por IA)
+│   └── tools.ts      → Archivo central para registrar herramientas
 │
-├── prompt/           → Base or transformable prompts
-│   └── prompt.ts     → Central registry of prompts
+├── resources/        → Recursos estáticos o dinámicos
+│   └── resource.ts   → Archivo central para registrar recursos
 │
-├── dynemcp.config.json → MCP server configuration
-└── ...
+├── prompt/           → Prompts base o transformables
+│   └── prompt.ts     → Registro central de prompts
+│
+├── scripts/          → Scripts de utilidad
+│   └── build.js      → Script para construir el servidor usando dynebuild
+│
+├── dynemcp.config.json → Configuración del servidor MCP
+├── package.json      → Dependencias y scripts
+├── tsconfig.json     → Configuración de TypeScript
+└── README.md         → Documentación del proyecto
 ```
 
-## Building DyneMCP Servers
+## Construyendo Servidores DyneMCP
 
-DyneMCP includes a build script that generates a production-ready MCP server from your project structure. When you run the build script, it:
+DyneMCP incluye un script de construcción que genera un servidor MCP listo para producción a partir de la estructura de tu proyecto. Cuando ejecutas el script de construcción, este:
 
-1. Compiles your TypeScript code
-2. Collects all tools, resources, and prompts from their respective directories
-3. Bundles them into a single optimized file using the `dynebuild` package
-4. Creates a server that uses `dynemcp server` to run your MCP server
+1. Compila tu código TypeScript
+2. Recopila todas las herramientas, recursos y prompts de sus respectivos directorios
+3. Los empaqueta en un único archivo optimizado usando el paquete `dynebuild`
+4. Crea un servidor que utiliza la funcionalidad principal de DyneMCP para ejecutar tu servidor MCP
 
-### Configuration
+### CLI de DyneMCP
 
-The build process is configured through the `dynemcp.config.json` file:
+El CLI `create-dynemcp` te permite crear rápidamente nuevos proyectos MCP con la estructura correcta y todas las dependencias necesarias. Ofrece las siguientes opciones:
+
+```bash
+Usage: create-dynemcp [options] [project-directory]
+
+Create DyneMCP apps with one command
+
+Arguments:
+  project-directory  El directorio donde crear la aplicación
+
+Options:
+  -V, --version      Muestra la versión
+  --template <n>     La plantilla a usar (default, minimal, full)
+  --use-npm          Usar npm como gestor de paquetes
+  --use-yarn         Usar yarn como gestor de paquetes
+  --use-pnpm         Usar pnpm como gestor de paquetes (por defecto)
+  --typescript       Inicializar como proyecto TypeScript
+  --no-typescript    Inicializar como proyecto JavaScript
+  --eslint           Incluir configuración de ESLint
+  --no-eslint        Omitir configuración de ESLint
+  --git              Inicializar repositorio git
+  --no-git           Omitir inicialización de repositorio git
+  -y, --yes          Omitir todas las preguntas y usar valores por defecto
+  -h, --help         Mostrar ayuda
+```
+
+### Configuración
+
+El proceso de construcción se configura a través del archivo `dynemcp.config.json`:
 
 ```json
 {
-  "name": "your-project-name",
+  "name": "nombre-de-tu-proyecto",
   "version": "1.0.0",
-  "description": "Your project description",
-  "server": {
-    "name": "your-server-name",
-    "version": "1.0.0"
+  "description": "Descripción de tu proyecto",
+  "tools": {
+    "directory": "./tools"
+  },
+  "resources": {
+    "directory": "./resources"
+  },
+  "prompts": {
+    "directory": "./prompt"
   },
   "build": {
     "outDir": "./dist",
@@ -118,90 +162,90 @@ The build process is configured through the `dynemcp.config.json` file:
 }
 ```
 
-### Usage
+### Uso
 
-To build your MCP server:
+Para construir tu servidor MCP:
 
-### Building for Production
+### Construyendo para Producción
 
-To build a production-ready MCP server, run:
+Para construir un servidor MCP listo para producción, ejecuta:
 
 ```bash
 pnpm run build
 ```
 
-This will:
+Esto hará:
 
-1. Compile TypeScript code to JavaScript
-2. Bundle the server into a single file using the `dynebuild` package
+1. Compilar el código TypeScript a JavaScript
+2. Empaquetar el servidor en un solo archivo usando el paquete `dynebuild`
 
-The resulting output will be a minified, optimized file in the `dist/server.js` that you can deploy to any Node.js environment.
+El resultado será un archivo minificado y optimizado en `dist/server.js` que puedes desplegar en cualquier entorno Node.js.
 
-### How the Build Process Works
+### Cómo Funciona el Proceso de Construcción
 
-Each example includes a custom build script (`scripts/build.js`) that:
+Cada proyecto creado con DyneMCP incluye un script de construcción personalizado (`scripts/build.js`) que:
 
-1. Reads the `dynemcp.config.json` configuration
-2. Detects the entry point (`src/index.ts` or `src/index.js`)
-3. Uses the `dynebuild` package to create a unified, minified bundle
+1. Lee la configuración de `dynemcp.config.json`
+2. Detecta el punto de entrada (`src/index.ts` o `src/index.js`)
+3. Utiliza el paquete `dynebuild` para crear un bundle unificado y minificado
 
-The `dynebuild` package is included as a workspace dependency in each example, ensuring that the build process works correctly without external dependencies.
+El paquete `dynebuild` se incluye como dependencia en cada proyecto, asegurando que el proceso de construcción funcione correctamente sin dependencias externas.
 
-### Building All Examples
+### Construyendo Todos los Ejemplos
 
-To build all examples in the monorepo:
+Para construir todos los ejemplos en el monorepo:
 
 ```bash
-# From the root directory
+# Desde el directorio raíz
 pnpm run build:examples
 ```
 
-## Environment Variables
+## Variables de Entorno
 
-DyneMCP supports environment variables natively, similar to Next.js:
+DyneMCP soporta variables de entorno de forma nativa, similar a Next.js:
 
 ```typescript
-import { env } from "dynemcp/env";
+import { env } from 'dynemcp/env'
 
-const token = env("OPENAI_API_KEY");
+const token = env('OPENAI_API_KEY')
 ```
 
-It automatically loads these files:
+Automáticamente carga estos archivos:
 
 - `.env`
 - `.env.local`
-- `.env.production` (depending on execution mode)
+- `.env.production` (dependiendo del modo de ejecución)
 
-## Development Mode
+## Modo Desarrollo
 
-For interactive development:
+Para desarrollo interactivo:
 
 ```bash
 npx @modelcontextprotocol/inspector dev
 ```
 
-This launches a live mode that simulates how an AI model would consume the MCP server, facilitating debugging and testing of tools, resources, and prompts in real-time.
+Esto lanza un modo en vivo que simula cómo un modelo de IA consumiría el servidor MCP, facilitando la depuración y prueba de herramientas, recursos y prompts en tiempo real.
 
-## Optimized Build
+## Build Optimizado
 
-The framework includes a production-ready build system:
+El framework incluye un sistema de construcción listo para producción:
 
 ```bash
 pnpm build
 ```
 
-This creates:
+Esto crea:
 
-- A single minified file for all tools
-- A single file for resources
-- A single file for prompts
-- A final server file including the entire runtime
+- Un único archivo minificado para todas las herramientas
+- Un único archivo para recursos
+- Un único archivo para prompts
+- Un archivo final del servidor que incluye todo el runtime
 
-The output is ready for deployment on traditional servers, serverless platforms, or edge functions.
+La salida está lista para despliegue en servidores tradicionales, plataformas serverless o funciones edge.
 
-## Configuration
+## Configuración
 
-The `dynemcp.config.json` file defines server parameters:
+El archivo `dynemcp.config.json` define los parámetros del servidor:
 
 ```json
 {
@@ -214,187 +258,187 @@ The `dynemcp.config.json` file defines server parameters:
 }
 ```
 
-Valid options for `outputMode` include: `server`, `edge`, or `local`.
-Valid options for `promptStyle` include: `chatml`, `plain`, or `custom`.
+Opciones válidas para `outputMode` incluyen: `server`, `edge`, o `local`.
+Opciones válidas para `promptStyle` incluyen: `chatml`, `plain`, o `custom`.
 
-## Example Usage
+## Ejemplo de Uso
 
-### Defining a Tool
+### Definiendo una Herramienta
 
 ```typescript
-import { z } from "zod";
-import { createTool } from "dynemcp/tools";
+import { z } from 'zod'
+import { createTool } from 'dynemcp/tools'
 
 export const calculatorTool = createTool(
-  "calculator",
-  "Performs basic arithmetic operations",
+  'calculator',
+  'Realiza operaciones aritméticas básicas',
   z.object({
-    operation: z.enum(["add", "subtract", "multiply", "divide"]),
+    operation: z.enum(['add', 'subtract', 'multiply', 'divide']),
     a: z.number(),
     b: z.number(),
   }),
-  async (params) => {
+  async params => {
     switch (params.operation) {
-      case "add":
-        return { result: params.a + params.b };
-      case "subtract":
-        return { result: params.a - params.b };
-      case "multiply":
-        return { result: params.a * params.b };
-      case "divide":
-        if (params.b === 0) throw new Error("Division by zero");
-        return { result: params.a / params.b };
+      case 'add':
+        return { result: params.a + params.b }
+      case 'subtract':
+        return { result: params.a - params.b }
+      case 'multiply':
+        return { result: params.a * params.b }
+      case 'divide':
+        if (params.b === 0) throw new Error('División por cero')
+        return { result: params.a / params.b }
     }
-  },
-);
+  }
+)
 
-// Export all tools
-export default [calculatorTool];
+// Exportar todas las herramientas
+export default [calculatorTool]
 ```
 
-### Defining a Resource
+### Definiendo un Recurso
 
 ```typescript
-import { createDynamicResource } from "dynemcp/resources";
+import { createDynamicResource } from 'dynemcp/resources'
 
 export const timeResource = createDynamicResource(
-  "current-time",
-  "Current Time",
+  'current-time',
+  'Hora Actual',
   () => {
-    const now = new Date();
+    const now = new Date()
     return JSON.stringify({
       time: now.toISOString(),
       timestamp: now.getTime(),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    });
+    })
   },
   {
-    description: "Returns the current server time",
-    contentType: "application/json",
-  },
-);
+    description: 'Devuelve la hora actual del servidor',
+    contentType: 'application/json',
+  }
+)
 
-// Export all resources
-export default [timeResource];
+// Exportar todos los recursos
+export default [timeResource]
 ```
 
-### Defining a Prompt
+### Definiendo un Prompt
 
 ```typescript
-import { createSystemPrompt } from "dynemcp/prompt";
+import { createSystemPrompt } from 'dynemcp/prompt'
 
 export const assistantPrompt = createSystemPrompt(
-  "assistant",
-  "Assistant Prompt",
-  "You are a helpful AI assistant. Answer questions accurately and concisely.",
+  'assistant',
+  'Prompt del Asistente',
+  'Eres un asistente de IA útil. Responde a las preguntas con precisión y concisión.',
   {
-    description: "Basic assistant system prompt",
-  },
-);
+    description: 'Prompt de sistema básico para asistente',
+  }
+)
 
-// Export all prompts
-export default [assistantPrompt];
+// Exportar todos los prompts
+export default [assistantPrompt]
 ```
 
-## Development Workflow
+## Flujo de Trabajo de Desarrollo
 
-### Setup
+### Configuración
 
 ```bash
-# Clone the repository
+# Clonar el repositorio
 git clone https://github.com/your-org/dynemcp-core.git
 cd dynemcp-core
 
-# Install dependencies
+# Instalar dependencias
 pnpm install
 ```
 
-### Common Commands
+### Comandos Comunes
 
 ```bash
-# Build all packages
+# Construir todos los paquetes
 pnpm run build
 
-# Run development mode with watch
+# Ejecutar modo desarrollo con watch
 pnpm run dev
 
-# Run tests
+# Ejecutar pruebas
 pnpm run test
 
-# Run linting
+# Ejecutar linting
 pnpm run lint
 
-# Format code
+# Formatear código
 pnpm run format
 
-# Clean build artifacts
+# Limpiar artefactos de build
 pnpm run clean
 ```
 
-### Using Turborepo
+### Usando Turborepo
 
-This project uses Turborepo to manage the build system. The pipeline is defined in `turbo.json` and includes tasks for building, testing, linting, and more.
+Este proyecto utiliza Turborepo para gestionar el sistema de build. El pipeline está definido en `turbo.json` e incluye tareas para construcción, pruebas, linting y más.
 
-## Contributing
+## Contribuir
 
-We welcome contributions to DyneMCP! Here's how you can contribute:
+¡Damos la bienvenida a las contribuciones a DyneMCP! Así es cómo puedes contribuir:
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Make your changes
-4. Run tests: `pnpm test`
-5. Run linting: `pnpm lint`
-6. Format code: `pnpm format`
-7. Commit your changes: `git commit -m 'Add my feature'`
-8. Push to the branch: `git push origin feature/my-feature`
-9. Submit a pull request
+1. Haz un fork del repositorio
+2. Crea una rama de funcionalidad: `git checkout -b feature/mi-funcionalidad`
+3. Realiza tus cambios
+4. Ejecuta pruebas: `pnpm test`
+5. Ejecuta linting: `pnpm lint`
+6. Formatea el código: `pnpm format`
+7. Haz commit de tus cambios: `git commit -m 'Añadir mi funcionalidad'`
+8. Haz push a la rama: `git push origin feature/mi-funcionalidad`
+9. Envía un pull request
 
-## SDK Integration
+## Integración con SDK
 
-DyneMCP has been fully refactored to use the official MCP TypeScript SDK. This integration brings several benefits:
+DyneMCP ha sido completamente refactorizado para usar el SDK oficial de TypeScript para MCP. Esta integración trae varios beneficios:
 
-- **Standardized Implementation**: Uses the official SDK interfaces and types
-- **Future-proof**: Automatically benefits from updates to the official SDK
-- **Simplified Architecture**: Removes custom server implementations in favor of the official SDK
-- **Better Type Safety**: Leverages TypeScript and Zod for complete type safety
+- **Implementación estandarizada**: Utiliza las interfaces y tipos oficiales del SDK
+- **Preparado para el futuro**: Se beneficia automáticamente de las actualizaciones del SDK oficial
+- **Arquitectura simplificada**: Elimina implementaciones de servidor personalizadas en favor del SDK oficial
+- **Mayor seguridad de tipos**: Aprovecha TypeScript y Zod para una completa seguridad de tipos
 
-### Migration from Legacy Implementation
+### Migración desde Implementación Anterior
 
-If you're upgrading from a previous version of DyneMCP that used the custom server implementation, here are the key changes:
+Si estás actualizando desde una versión anterior de DyneMCP que usaba la implementación de servidor personalizada, estos son los cambios clave:
 
-1. The `MCPServer` class from `core/server.ts` has been replaced with `DyneMCP` from `core/dynemcp.ts`
-2. Tools, resources, and prompts now use adapters to ensure compatibility with the SDK
-3. Event handlers are now managed by the SDK instead of custom event emitters
+1. La clase `MCPServer` de `core/server.ts` ha sido reemplazada por `DyneMCP` de `core/dynemcp.ts`
+2. Las herramientas, recursos y prompts ahora usan adaptadores para asegurar la compatibilidad con el SDK
+3. Los manejadores de eventos ahora son gestionados por el SDK en lugar de emisores de eventos personalizados
 
-### Example of Using the SDK
+### Ejemplo de Uso del SDK
 
 ```typescript
-import { createMCPServer } from "dynemcp";
-import { z } from "zod";
+import { createMCPServer } from 'dynemcp'
+import { z } from 'zod'
 
-// Create a server
-const server = createMCPServer("my-server", "1.0.0");
+// Crear un servidor
+const server = createMCPServer('mi-servidor', '1.0.0')
 
-// Register a tool
+// Registrar una herramienta
 server.registerTool({
-  name: "hello",
-  description: "Says hello to someone",
+  name: 'hola',
+  description: 'Saluda a alguien',
   parameters: {
-    type: "object",
+    type: 'object',
     properties: {
-      name: { type: "string" },
+      nombre: { type: 'string' },
     },
-    required: ["name"],
+    required: ['nombre'],
   },
-  handler: async ({ name }) => {
-    return { message: `Hello, ${name}!` };
+  handler: async ({ nombre }) => {
+    return { mensaje: `¡Hola, ${nombre}!` }
   },
-});
+})
 
-// Start the server
-server.start();
+// Iniciar el servidor
+server.start()
 ```
 
-## License
+## Licencia
 
 ISC
