@@ -1,0 +1,69 @@
+/**
+ * Configuration module for DyneMCP
+ * Provides utilities to load and validate configuration from various sources
+ */
+
+import { z } from 'zod'
+
+// Define the schema for configuration validation
+const ConfigSchema = z
+  .object({
+    server: z
+      .object({
+        name: z.string().default('dynemcp-server'),
+        version: z.string().default('1.0.0'),
+      })
+      .default({}),
+    tools: z
+      .object({
+        directory: z.string().optional(),
+        autoRegister: z.boolean().default(true),
+      })
+      .default({}),
+    resources: z
+      .object({
+        directory: z.string().optional(),
+        autoRegister: z.boolean().default(true),
+      })
+      .default({}),
+    prompts: z
+      .object({
+        directory: z.string().optional(),
+        autoRegister: z.boolean().default(true),
+      })
+      .default({}),
+  })
+  .default({})
+
+// Define the type for the configuration
+export type DyneMCPConfig = z.infer<typeof ConfigSchema>
+
+/**
+ * Load configuration from various sources
+ * @param configPath Path to configuration file (optional)
+ * @returns Validated configuration object
+ */
+export function loadConfig(configPath?: string): DyneMCPConfig {
+  // Default configuration
+  const defaultConfig: DyneMCPConfig = {
+    server: {
+      name: 'dynemcp-server',
+      version: '1.0.0',
+    },
+    tools: {
+      autoRegister: true,
+    },
+    resources: {
+      autoRegister: true,
+    },
+    prompts: {
+      autoRegister: true,
+    },
+  }
+
+  // TODO: Load configuration from file if provided
+  // TODO: Merge with environment variables
+
+  // Validate and return the configuration
+  return ConfigSchema.parse(defaultConfig)
+}

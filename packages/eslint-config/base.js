@@ -13,6 +13,35 @@ export const config = [
   js.configs.recommended,
   eslintConfigPrettier,
   ...tseslint.configs.recommended,
+  ...tseslint.configs.stylistic,
+  {
+    languageOptions: {
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: ".",
+      },
+    },
+  },
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    rules: {
+      // TypeScript Strict Rules
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/explicit-function-return-type": "warn",
+      "@typescript-eslint/explicit-module-boundary-types": "warn",
+      "@typescript-eslint/no-unused-vars": ["warn", { 
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_" 
+      }],
+      "@typescript-eslint/no-non-null-assertion": "warn",
+      "@typescript-eslint/consistent-type-imports": ["warn", { "prefer": "type-imports" }],
+      "@typescript-eslint/consistent-type-definitions": ["warn", "interface"],
+      "@typescript-eslint/prefer-nullish-coalescing": "warn",
+      "@typescript-eslint/prefer-optional-chain": "warn",
+      "@typescript-eslint/ban-ts-comment": "warn",
+    },
+  },
   {
     plugins: {
       turbo: turboPlugin,
@@ -27,6 +56,6 @@ export const config = [
     },
   },
   {
-    ignores: ["dist/**"],
+    ignores: ["dist/**", "node_modules/**", ".turbo/**"],
   },
 ];

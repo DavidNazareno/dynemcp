@@ -1,0 +1,14 @@
+{
+  "name": "@repo/dynebuild",
+  "description": "Build tools for DyneMCP framework",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "esbuild": "^0.20.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.2"
+  }
+}

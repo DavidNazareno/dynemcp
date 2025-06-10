@@ -1,0 +1,33 @@
+{
+  "name": "@repo/dynemcp",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "exports": {
+    "./core": {
+      "types": "./src/core/index.ts",
+      "default": "./dist/core/index.js"
+    },
+    "./resources": {
+      "types": "./src/resources/index.ts",
+      "default": "./dist/resources/index.js"
+    },
+    "./tools": {
+      "types": "./src/tools/index.ts",
+      "default": "./dist/tools/index.js"
+    },
+    "./prompt": {
+      "types": "./src/prompt/index.ts",
+      "default": "./dist/prompt/index.js"
+    }
+  },
+  "dependencies": {
+    "zod": "^3.22.4",
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "typescript": "latest"
+  }
+}
