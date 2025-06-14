@@ -16,10 +16,10 @@ import {
   validateProjectPath,
   validateTemplate,
 } from './helpers/validate.js'
+import type { PackageManager } from './helpers/package-manager.js'
 import {
   installDependencies,
   getRunCommand,
-  PackageManager,
 } from './helpers/package-manager.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -48,25 +48,20 @@ const program = new Command('create-dynemcp')
   .option('-y, --yes', 'Skip all prompts and use default values')
   .parse(process.argv)
 
-// Función principal
-async function run() {
+async function run(): Promise<void> {
   const options = program.opts()
   let projectDirectory = program.args[0]
 
-  // Spinner para mostrar progreso
   const spinner = ora()
 
   try {
-    // Detectar gestor de paquetes
-    let packageManager: PackageManager = 'pnpm' // Default to pnpm based on user rules
+    let packageManager: PackageManager = 'pnpm'
     if (options.useNpm) packageManager = 'npm'
     if (options.useYarn) packageManager = 'yarn'
     if (options.usePnpm) packageManager = 'pnpm'
 
-    // Obtener plantillas disponibles
     const availableTemplates = await getAvailableTemplates()
 
-    // Si no se especificó un directorio o se necesita interacción, mostrar prompts
     if (!projectDirectory || !options.yes) {
       const answers = await inquirer.prompt([
         {
@@ -75,7 +70,7 @@ async function run() {
           message: 'What is your project named?',
           default: 'my-mcp-project',
           when: !projectDirectory,
-          validate: input => {
+          validate: (input: string): boolean | string => {
             const { valid, problems } = validateProjectName(input)
             if (valid) return true
             return `Invalid project name: ${problems?.join(', ')}`
@@ -122,9 +117,7 @@ async function run() {
     }
 
     // Asegurarse de que tenemos un directorio de proyecto
-    if (!projectDirectory) {
-      projectDirectory = 'my-mcp-project'
-    }
+    projectDirectory ??= 'my-mcp-project'
 
     // Validar nombre del proyecto
     const { valid: validName, problems } = validateProjectName(projectDirectory)
@@ -144,7 +137,7 @@ async function run() {
     }
 
     // Validar plantilla
-    const template = options.template || 'default'
+    const template = options.template ?? 'default'
     const { valid: validTemplate, message: templateMessage } = validateTemplate(
       template,
       availableTemplates

@@ -28,6 +28,8 @@
     "@modelcontextprotocol/sdk": "^1.12.1"
   },
   "devDependencies": {
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.19.0"
   }
 }

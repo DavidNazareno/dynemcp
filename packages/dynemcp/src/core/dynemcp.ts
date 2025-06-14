@@ -86,7 +86,6 @@ export class DyneMCP {
     this.tools.push(tool)
 
     // Registrar directamente en el servidor MCP
-    // @ts-expect-error - El SDK puede tener una API diferente
     this.server.tool(tool.name, tool.description, tool.schema, tool.handler)
   }
 
@@ -129,7 +128,6 @@ export class DyneMCP {
     }
 
     // Usamos un objeto vacío para el esquema de parámetros
-    // @ts-expect-error - El SDK puede tener una API diferente
     this.server.tool(
       `resource:${resource.uri}`,
       resource.description || `Resource: ${resource.name}`,
@@ -159,7 +157,6 @@ export class DyneMCP {
 
     // Registrar el prompt en el servidor MCP
     // Similar a los recursos, implementamos como una herramienta
-    // @ts-expect-error - El SDK puede tener una API diferente
     this.server.tool(
       `prompt:${prompt.id}`,
       prompt.description || `Prompt: ${prompt.name}`,
@@ -196,7 +193,6 @@ export class DyneMCP {
     const transport = new StdioServerTransport()
 
     // Conectar el servidor al transporte
-    // @ts-expect-error - El SDK puede tener una API diferente
     await this.server.connect(transport)
     console.log('Servidor MCP iniciado correctamente')
   }

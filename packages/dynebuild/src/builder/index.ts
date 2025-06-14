@@ -34,7 +34,6 @@ export async function watch(options: BuildOptions): Promise<void> {
       platform: 'node',
       format: 'esm',
       bundle: true,
-      watch: true,
       sourcemap: true,
     })
   } catch (error) {

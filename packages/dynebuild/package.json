@@ -2,10 +2,18 @@
   "name": "@repo/dynebuild",
   "description": "Build tools for DyneMCP framework",
   "type": "module",
+  "bin": {
+    "dynebuild": "./dist/bin/cli.js"
+  },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "postbuild": "chmod +x ./dist/bin/cli.js"
   },
   "exports": {
+    "bin": {
+      "types": "./src/bin/cli.ts",
+      "default": "./dist/bin/cli.js"
+    },
     "builder": {
       "types": "./src/builder/index.ts",
       "default": "./dist/builder/index.js"
@@ -18,7 +26,8 @@
   "dependencies": {
     "esbuild": "^0.20.1",
     "zod": "^3.22.4",
-    "fs-extra": "^11.2.0"
+    "fs-extra": "^11.2.0",
+    "chalk": "^5.3.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
