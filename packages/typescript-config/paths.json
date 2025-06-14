@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@repo/dynemcp": ["../dynemcp/src"],
+      "@repo/dynemcp/*": ["../dynemcp/src/*"],
+      "@repo/dynebuild": ["../dynebuild/src"],
+      "@repo/dynebuild/*": ["../dynebuild/src/*"],
+      "@repo/create-dynemcp": ["../create-dynemcp/src"],
+      "@repo/create-dynemcp/*": ["../create-dynemcp/src/*"]
+    }
+  }
+}

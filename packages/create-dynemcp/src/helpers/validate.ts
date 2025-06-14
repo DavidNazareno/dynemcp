@@ -1,5 +1,4 @@
 import validateNpmPackageName from 'validate-npm-package-name'
-import path from 'path'
 import fs from 'fs-extra'
 import chalk from 'chalk'
 
@@ -14,8 +13,8 @@ export function validateProjectName(name: string): {
   }
 
   const problems = [
-    ...(validation.errors || []),
-    ...(validation.warnings || []),
+    ...(validation.errors ?? []),
+    ...(validation.warnings ?? []),
   ]
 
   return {

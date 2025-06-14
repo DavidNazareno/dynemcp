@@ -10,17 +10,25 @@
     "postbuild": "chmod +x ./dist/bin/cli.js"
   },
   "exports": {
-    "bin": {
-      "types": "./src/bin/cli.ts",
-      "default": "./dist/bin/cli.js"
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
-    "builder": {
+    "./bin": {
+      "types": "./src/bin/index.ts",
+      "import": "./dist/bin/index.js",
+      "default": "./dist/bin/index.js"
+    },
+    "./builder": {
       "types": "./src/builder/index.ts",
+      "import": "./dist/builder/index.js",
       "default": "./dist/builder/index.js"
     },
-    "blunder": {
-      "types": "./src/blunder/index.ts",
-      "default": "./dist/blunder/index.js"
+    "./bundler": {
+      "types": "./src/bundler/index.ts",
+      "import": "./dist/bundler/index.js",
+      "default": "./dist/bundler/index.js"
     }
   },
   "dependencies": {

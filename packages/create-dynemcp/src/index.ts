@@ -10,24 +10,24 @@ import ora from 'ora'
 import {
   createProject,
   getAvailableTemplates,
-} from './helpers/create-project.js'
+} from './helpers/create-project'
 import {
   validateProjectName,
   validateProjectPath,
   validateTemplate,
-} from './helpers/validate.js'
-import type { PackageManager } from './helpers/package-manager.js'
+} from './helpers/validate'
+import type { PackageManager } from './helpers/package-manager'
 import {
   installDependencies,
   getRunCommand,
-} from './helpers/package-manager.js'
+} from './helpers/package-manager'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 // Versión del paquete
 const { version } = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8')
+  fs.readFileSync(path.join(__dirname, '../packageon'), 'utf8')
 )
 
 // Configuración del programa

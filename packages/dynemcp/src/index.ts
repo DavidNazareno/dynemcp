@@ -51,16 +51,12 @@ export const prompt = {
   applyPromptParameters,
 }
 
-// Export environment utilities
 export { loadConfig }
 
-// Export a function to create a new MCP server
 export function createMCPServer(name: string, version?: string) {
-  // Usar el SDK oficial de MCP para crear un servidor
   return new DyneMCP(name, version || '1.0.0')
 }
 
-// Export a default object with all the exports
 export default {
   createMCPServer,
   loadConfig,

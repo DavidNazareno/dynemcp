@@ -12,4 +12,4 @@ export * from './bundler/index'
 export * from './config/index'
 
 // Export cli utilities
-export * from './bin'
+export * from './bin/index'

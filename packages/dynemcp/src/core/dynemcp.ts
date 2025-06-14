@@ -7,9 +7,8 @@ import { Server } from '@modelcontextprotocol/sdk/server'
 // @ts-expect-error - El SDK puede no tener tipos correctamente definidos
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio'
 import { z } from 'zod'
-import { loadConfig, DyneMCPConfig } from './config.js'
+import { loadConfig, DyneMCPConfig } from './config'
 
-// Tipos para herramientas, recursos y prompts
 export interface ToolDefinition {
   name: string
   description: string
@@ -85,7 +84,6 @@ export class DyneMCP {
   registerTool(tool: ToolDefinition): void {
     this.tools.push(tool)
 
-    // Registrar directamente en el servidor MCP
     this.server.tool(tool.name, tool.description, tool.schema, tool.handler)
   }
 
@@ -108,9 +106,6 @@ export class DyneMCP {
   registerResource(resource: ResourceDefinition): void {
     this.resources.push(resource)
 
-    // Registrar el recurso en el servidor MCP
-    // Nota: El SDK actual no tiene un método directo para recursos,
-    // pero podemos implementarlo como una herramienta que devuelve el contenido
     const handler = async (_args: any, _extra: any) => {
       const content =
         typeof resource.content === 'function'
