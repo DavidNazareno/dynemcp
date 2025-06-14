@@ -5,6 +5,9 @@
   "bin": {
     "dynebuild": "./dist/bin/cli.js"
   },
+  "imports": {
+    "#dynebuild/*": "./src/*"
+  },
   "scripts": {
     "build": "tsc",
     "postbuild": "chmod +x ./dist/bin/cli.js"

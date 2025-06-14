@@ -27,7 +27,7 @@ const __dirname = path.dirname(__filename)
 
 // Versión del paquete
 const { version } = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../packageon'), 'utf8')
+  fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8')
 )
 
 // Configuración del programa

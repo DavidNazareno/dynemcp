@@ -4,6 +4,9 @@
   "description": "A Model Context Protocol (MCP) server",
   "type": "module",
   "main": "dist/server.js",
+  "imports": {
+    "#app/*": "./src/*"
+  },
   "scripts": {
     "dev": "cross-env NODE_ENV=development npx @modelcontextprotocol/inspector serve src/index.ts",
     "build": "@repo/dynebuild",
