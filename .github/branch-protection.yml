@@ -1,0 +1,75 @@
+version: 2
+branches:
+  # Protección para la rama principal
+  main:
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+        require_last_push_approval: true
+        required_review_thread_resolution: true
+      required_status_checks:
+        strict: true
+        contexts:
+          - build
+          - test
+          - lint
+          - type-check
+      required_signatures: true
+      enforce_admins: false
+      required_linear_history: true
+      allow_force_pushes: false
+      allow_deletions: false
+
+  # Protección para la rama de desarrollo
+  develop:
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        dismiss_stale_reviews: true
+        required_review_thread_resolution: true
+      required_status_checks:
+        strict: true
+        contexts:
+          - build
+          - test
+          - lint
+      enforce_admins: false
+      required_linear_history: true
+      allow_force_pushes: false
+      allow_deletions: false
+
+  # Protección para ramas de release
+  'release/*':
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 2
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+        required_review_thread_resolution: true
+      required_status_checks:
+        strict: true
+        contexts:
+          - build
+          - test
+          - lint
+          - integration-tests
+      enforce_admins: false
+      required_linear_history: true
+      allow_force_pushes: false
+      allow_deletions: false
+
+  # Protección para ramas de feature
+  'feature/*':
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+      required_status_checks:
+        strict: false
+        contexts:
+          - build
+          - test
+      enforce_admins: false
+      allow_force_pushes: true
+      allow_deletions: false
