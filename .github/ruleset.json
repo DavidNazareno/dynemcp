@@ -2,167 +2,109 @@
   "rules": [
     {
       "id": "main-branch-protection",
+      "enforcement": "active",
       "name": "Main Branch Protection",
-      "target": ["branch:main"],
+      "target": "branch:main",
       "conditions": {
         "ref_name": {
-          "include": ["refs/heads/main"]
+          "include": ["refs/heads/main"],
+          "exclude": []
         }
       },
       "rules": [
         {
           "type": "pull_request",
           "parameters": {
-            "required_approving_review_count": 1,
             "dismiss_stale_reviews_on_push": true,
             "require_code_owner_reviews": true,
             "require_last_push_approval": true,
-            "required_review_thread_resolution": true
-          }
-        },
-        {
-          "type": "required_status_checks",
-          "parameters": {
-            "strict": true,
-            "contexts": [
-              "build",
-              "test",
-              "lint",
-              "type-check",
-              "security-scan"
-            ]
-          }
-        },
-        {
-          "type": "required_linear_history",
-          "parameters": {
-            "required": true
-          }
-        },
-        {
-          "type": "non_fast_forward",
-          "parameters": {
-            "enabled": true
-          }
-        },
-        {
-          "type": "required_signatures",
-          "parameters": {
-            "required": true
-          }
-        },
-        {
-          "type": "required_deployments",
-          "parameters": {
-            "required_deployment_environments": ["staging"]
-          }
-        }
-      ],
-      "bypass_actors": [
-        {
-          "actor_id": "davidnazareno",
-          "actor_type": "user",
-          "bypass_mode": "always"
-        }
-      ]
-    },
-    {
-      "id": "release-branch-protection",
-      "name": "Release Branch Protection",
-      "target": ["branch:release/*"],
-      "conditions": {
-        "ref_name": {
-          "include": ["refs/heads/release/*"]
-        }
-      },
-      "rules": [
-        {
-          "type": "pull_request",
-          "parameters": {
-            "required_approving_review_count": 2,
-            "dismiss_stale_reviews_on_push": true,
-            "require_code_owner_reviews": true,
-            "required_review_thread_resolution": true
-          }
-        },
-        {
-          "type": "required_status_checks",
-          "parameters": {
-            "strict": true,
-            "contexts": [
-              "build",
-              "test",
-              "lint",
-              "type-check",
-              "security-scan",
-              "integration-tests"
-            ]
-          }
-        },
-        {
-          "type": "required_linear_history",
-          "parameters": {
-            "required": true
-          }
-        }
-      ],
-      "bypass_actors": [
-        {
-          "actor_id": "davidnazareno",
-          "actor_type": "user",
-          "bypass_mode": "always"
-        }
-      ]
-    },
-    {
-      "id": "development-branch-protection",
-      "name": "Development Branch Protection",
-      "target": ["branch:develop"],
-      "conditions": {
-        "ref_name": {
-          "include": ["refs/heads/develop"]
-        }
-      },
-      "rules": [
-        {
-          "type": "pull_request",
-          "parameters": {
             "required_approving_review_count": 1,
-            "dismiss_stale_reviews_on_push": true,
             "required_review_thread_resolution": true
           }
         },
         {
           "type": "required_status_checks",
           "parameters": {
-            "strict": true,
-            "contexts": ["build", "test", "lint"]
+            "strict_required_status_checks_policy": true,
+            "required_status_checks": [
+              { "context": "build" },
+              { "context": "test" },
+              { "context": "lint" }
+            ]
+          }
+        },
+        {
+          "type": "required_linear_history"
+        },
+        {
+          "type": "required_signatures"
+        },
+        {
+          "type": "non_fast_forward"
+        }
+      ],
+      "bypass_actors": [
+        {
+          "actor_id": 1,
+          "actor_type": "RepositoryRole",
+          "bypass_mode": "always"
+        }
+      ]
+    },
+    {
+      "id": "develop-branch-protection",
+      "enforcement": "active",
+      "name": "Develop Branch Protection",
+      "target": "branch:develop",
+      "conditions": {
+        "ref_name": {
+          "include": ["refs/heads/develop"],
+          "exclude": []
+        }
+      },
+      "rules": [
+        {
+          "type": "pull_request",
+          "parameters": {
+            "dismiss_stale_reviews_on_push": true,
+            "required_approving_review_count": 1,
+            "required_review_thread_resolution": true
+          }
+        },
+        {
+          "type": "required_status_checks",
+          "parameters": {
+            "strict_required_status_checks_policy": true,
+            "required_status_checks": [
+              { "context": "build" },
+              { "context": "test" }
+            ]
           }
         }
       ],
       "bypass_actors": [
         {
-          "actor_id": "davidnazareno",
-          "actor_type": "user",
+          "actor_id": 1,
+          "actor_type": "RepositoryRole",
           "bypass_mode": "always"
         }
       ]
     },
     {
       "id": "feature-branch-naming",
+      "enforcement": "active",
       "name": "Feature Branch Naming Convention",
-      "target": ["branch:feature/*"],
+      "target": "branch",
       "conditions": {
         "ref_name": {
-          "include": ["refs/heads/feature/*"]
+          "include": ["refs/heads/feature/*"],
+          "exclude": []
         }
       },
       "rules": [
         {
           "type": "branch_name_pattern",
           "parameters": {
-            "name": "feature/*",
-            "negate": false,
             "operator": "regex",
             "pattern": "^feature/[a-z0-9][a-z0-9-_/]+$"
           }
@@ -170,57 +112,20 @@
       ]
     },
     {
-      "id": "bugfix-branch-naming",
-      "name": "Bugfix Branch Naming Convention",
-      "target": ["branch:bugfix/*"],
-      "conditions": {
-        "ref_name": {
-          "include": ["refs/heads/bugfix/*"]
-        }
-      },
-      "rules": [
-        {
-          "type": "branch_name_pattern",
-          "parameters": {
-            "name": "bugfix/*",
-            "negate": false,
-            "operator": "regex",
-            "pattern": "^bugfix/[a-z0-9][a-z0-9-_/]+$"
-          }
-        }
-      ]
-    },
-    {
-      "id": "hotfix-branch-naming",
-      "name": "Hotfix Branch Naming Convention",
-      "target": ["branch:hotfix/*"],
-      "conditions": {
-        "ref_name": {
-          "include": ["refs/heads/hotfix/*"]
-        }
-      },
-      "rules": [
-        {
-          "type": "branch_name_pattern",
-          "parameters": {
-            "name": "hotfix/*",
-            "negate": false,
-            "operator": "regex",
-            "pattern": "^hotfix/[a-z0-9][a-z0-9-_/]+$"
-          }
-        }
-      ]
-    },
-    {
       "id": "commit-message-pattern",
+      "enforcement": "active",
       "name": "Commit Message Pattern",
-      "target": ["repository"],
+      "target": "branch",
+      "conditions": {
+        "ref_name": {
+          "include": ["refs/heads/main", "refs/heads/develop"],
+          "exclude": []
+        }
+      },
       "rules": [
         {
           "type": "commit_message_pattern",
           "parameters": {
-            "name": "conventional-commits",
-            "negate": false,
             "operator": "regex",
             "pattern": "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\\([a-z0-9-_\\.]+\\))?!?: .+$"
           }
@@ -229,126 +134,7 @@
       "bypass_actors": [
         {
           "actor_id": "dependabot",
-          "actor_type": "integration",
-          "bypass_mode": "always"
-        },
-        {
-          "actor_id": "renovate",
-          "actor_type": "integration",
-          "bypass_mode": "always"
-        }
-      ]
-    },
-    {
-      "id": "tag-protection",
-      "name": "Tag Protection",
-      "target": ["tag:v*"],
-      "conditions": {
-        "ref_name": {
-          "include": ["refs/tags/v*"]
-        }
-      },
-      "rules": [
-        {
-          "type": "creation",
-          "parameters": {
-            "authorized_actor_ids": ["davidnazareno"]
-          }
-        },
-        {
-          "type": "update",
-          "parameters": {
-            "authorized_actor_ids": ["davidnazareno"]
-          }
-        },
-        {
-          "type": "deletion",
-          "parameters": {
-            "authorized_actor_ids": ["davidnazareno"]
-          }
-        }
-      ]
-    },
-    {
-      "id": "workflow-approval",
-      "name": "Workflow Approval",
-      "target": ["workflow"],
-      "rules": [
-        {
-          "type": "approval",
-          "parameters": {
-            "required_approving_review_count": 1,
-            "authorized_actor_ids": ["davidnazareno"]
-          }
-        }
-      ],
-      "bypass_actors": [
-        {
-          "actor_id": "davidnazareno",
-          "actor_type": "user",
-          "bypass_mode": "always"
-        }
-      ]
-    },
-    {
-      "id": "required-workflows",
-      "name": "Required Workflows",
-      "target": ["repository"],
-      "rules": [
-        {
-          "type": "required_workflow",
-          "parameters": {
-            "workflow_file_path": ".github/workflows/ci.yml"
-          }
-        },
-        {
-          "type": "required_workflow",
-          "parameters": {
-            "workflow_file_path": ".github/workflows/security.yml"
-          }
-        }
-      ]
-    },
-    {
-      "id": "secret-scanning",
-      "name": "Secret Scanning",
-      "target": ["repository"],
-      "rules": [
-        {
-          "type": "secret_scanning",
-          "parameters": {
-            "enabled": true
-          }
-        },
-        {
-          "type": "secret_scanning_push_protection",
-          "parameters": {
-            "enabled": true
-          }
-        }
-      ]
-    },
-    {
-      "id": "inactive-branch-cleanup",
-      "name": "Inactive Branch Cleanup",
-      "target": ["branch:feature/*", "branch:bugfix/*"],
-      "conditions": {
-        "ref_name": {
-          "include": ["refs/heads/feature/*", "refs/heads/bugfix/*"]
-        }
-      },
-      "rules": [
-        {
-          "type": "deletion",
-          "parameters": {
-            "days_inactive": 60
-          }
-        }
-      ],
-      "bypass_actors": [
-        {
-          "actor_id": "davidnazareno",
-          "actor_type": "user",
+          "actor_type": "Integration",
           "bypass_mode": "always"
         }
       ]
