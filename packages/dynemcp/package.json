@@ -3,7 +3,10 @@
   "description": "A Model Context Protocol (MCP) server framework",
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "eslint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
   },
   "imports": {
     "#dynemcp/*": "./src/*"
@@ -42,6 +45,8 @@
   "devDependencies": {
     "typescript": "^5.4.2",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^20.19.0"
+    "@types/node": "^20.19.0",
+    "eslint": "^9.28.0",
+    "eslint-config-prettier": "^9.1.0"
   }
 }

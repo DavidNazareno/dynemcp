@@ -6,9 +6,14 @@
     "build": "pnpm run clean:buildinfo && turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "eslint:fix": "turbo run eslint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "beautify": "pnpm run format && pnpm run eslint:fix",
     "check-types": "turbo run check-types",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "test:template": "cd packages/create-dynemcp && pnpm run test:template"
   },
   "devDependencies": {
     "prettier": "^3.5.3",

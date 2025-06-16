@@ -10,7 +10,12 @@
   },
   "scripts": {
     "build": "tsc",
-    "postbuild": "chmod +x ./dist/bin/index.js"
+    "postbuild": "chmod +x ./dist/bin/index.js",
+    "test:watch": "vitest",
+    "test:template": "vitest run template.test.ts",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write .",
+    "eslint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
   },
   "exports": {
     ".": {
@@ -43,6 +48,7 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.19.0",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "vitest": "^1.4.0"
   }
 }

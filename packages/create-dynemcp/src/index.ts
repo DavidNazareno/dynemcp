@@ -7,20 +7,14 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import inquirer from 'inquirer'
 import ora from 'ora'
-import {
-  createProject,
-  getAvailableTemplates,
-} from './helpers/create-project'
+import { createProject, getAvailableTemplates } from './helpers/create-project'
 import {
   validateProjectName,
   validateProjectPath,
   validateTemplate,
 } from './helpers/validate'
 import type { PackageManager } from './helpers/package-manager'
-import {
-  installDependencies,
-  getRunCommand,
-} from './helpers/package-manager'
+import { installDependencies, getRunCommand } from './helpers/package-manager'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
