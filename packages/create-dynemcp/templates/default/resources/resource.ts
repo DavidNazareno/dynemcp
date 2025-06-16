@@ -1,5 +1,5 @@
 // @ts-expect-error - El SDK puede no tener tipos correctamente definidos
-import { Resource } from '@modelcontextprotocol/sdk'
+import type { Resource } from '@modelcontextprotocol/sdk'
 
 // Define your resources here
 // Example:

@@ -1,5 +1,5 @@
 // @ts-expect-error - El SDK puede no tener tipos correctamente definidos
-import { Tool } from '@modelcontextprotocol/sdk'
+import type { Tool } from '@modelcontextprotocol/sdk'
 
 // Define your tools here
 // Example:
