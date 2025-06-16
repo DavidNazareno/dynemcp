@@ -5,8 +5,10 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import chalk from 'chalk'
 import { Command } from 'commander'
+import Conf from 'conf'
 import inquirer from 'inquirer'
 import ora from 'ora'
+import updateCheck from 'update-check'
 import { createProject, getAvailableTemplates } from './helpers/create-project'
 import {
   validateProjectName,
@@ -14,100 +16,180 @@ import {
   validateTemplate,
 } from './helpers/validate'
 import type { PackageManager } from './helpers/package-manager'
-import { installDependencies, getRunCommand } from './helpers/package-manager'
+import { installDependencies, getRunCommand, getPkgManager } from './helpers/package-manager'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// Versión del paquete
-const { version } = JSON.parse(
+// Package version
+const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8')
 )
+const version = packageJson.version
 
-// Configuración del programa
+// Program configuration
 const program = new Command('create-dynemcp')
-  .version(version)
-  .description('Create DyneMCP apps with one command')
-  .argument('[project-directory]', 'The directory to create the app in')
+  .version(version, '-v, --version', 'Output the current version of create-dynemcp')
+  .argument('[directory]', 'The directory to create the app in')
+  .usage('[directory] [options]')
+  .helpOption('-h, --help', 'Display this help message.')
   .option('--template <name>', 'The template to use (default, minimal, full)')
-  .option('--use-npm', 'Use npm as package manager')
-  .option('--use-yarn', 'Use yarn as package manager')
-  .option('--use-pnpm', 'Use pnpm as package manager (default)')
-  .option('--typescript', 'Initialize as a TypeScript project')
-  .option('--no-typescript', 'Initialize as a JavaScript project')
-  .option('--eslint', 'Include ESLint configuration')
+  .option('--ts, --typescript', 'Initialize as a TypeScript project (default)')
+  .option('--js, --javascript', 'Initialize as a JavaScript project')
+  .option('--eslint', 'Include ESLint configuration (default)')
   .option('--no-eslint', 'Skip ESLint configuration')
-  .option('--git', 'Initialize a git repository')
+  .option('--use-npm', 'Explicitly tell the CLI to bootstrap the application using npm')
+  .option('--use-yarn', 'Explicitly tell the CLI to bootstrap the application using Yarn')
+  .option('--use-pnpm', 'Explicitly tell the CLI to bootstrap the application using pnpm (default)')
+  .option('--git', 'Initialize a git repository (default)')
   .option('--no-git', 'Skip git repository initialization')
+  .option('--skip-install', 'Skip installing dependencies')
   .option('-y, --yes', 'Skip all prompts and use default values')
+  .option('--reset, --reset-preferences', 'Reset the preferences saved for create-dynemcp')
+  .allowUnknownOption()
   .parse(process.argv)
 
 async function run(): Promise<void> {
   const options = program.opts()
-  let projectDirectory = program.args[0]
+  const { args } = program
+  let projectDirectory = args[0]
 
   const spinner = ora()
+  const conf = new Conf({ projectName: 'create-dynemcp' })
+
+  // Check for updates
+  try {
+    const update = await updateCheck(packageJson)
+    if (update?.latest) {
+      const updateMessage = `Update available! ${packageJson.version} → ${update.latest}`
+      console.log()
+      console.log(chalk.yellow(`${updateMessage}`))
+      console.log(chalk.yellow('Run `pnpm i -g create-dynemcp` to update'))
+      console.log()
+    }
+  } catch (_err) {
+    // Ignore error
+  }
+
+  // Handle reset preferences option
+  if (options.resetPreferences) {
+    const { resetPreferences } = await inquirer.prompt({
+      type: 'confirm',
+      name: 'resetPreferences',
+      message: 'Would you like to reset the saved preferences?',
+      default: false,
+    })
+    if (resetPreferences) {
+      conf.clear()
+      console.log(chalk.green('The preferences have been reset successfully!'))
+    }
+    process.exit(0)
+  }
 
   try {
-    let packageManager: PackageManager = 'pnpm'
-    if (options.useNpm) packageManager = 'npm'
-    if (options.useYarn) packageManager = 'yarn'
-    if (options.usePnpm) packageManager = 'pnpm'
+    // Determine package manager
+    const packageManager: PackageManager = options.useNpm
+      ? 'npm'
+      : options.useYarn
+        ? 'yarn'
+        : options.usePnpm
+          ? 'pnpm'
+          : getPkgManager()
 
     const availableTemplates = await getAvailableTemplates()
+    const preferences = (conf.get('preferences') ?? {}) as Record<string, boolean | string>
 
-    if (!projectDirectory || !options.yes) {
-      const answers = await inquirer.prompt([
-        {
-          type: 'input',
-          name: 'projectName',
-          message: 'What is your project named?',
-          default: 'my-mcp-project',
-          when: !projectDirectory,
-          validate: (input: string): boolean | string => {
-            const { valid, problems } = validateProjectName(input)
-            if (valid) return true
-            return `Invalid project name: ${problems?.join(', ')}`
-          },
+    // If project directory is not provided or not using --yes flag, prompt for input
+    if (!projectDirectory) {
+      const res = await inquirer.prompt({
+        type: 'input',
+        name: 'path',
+        message: 'What is your project named?',
+        default: 'my-mcp-project',
+        validate: (name: string): boolean | string => {
+          const validation = validateProjectName(name)
+          if (validation.valid) return true
+          return 'Invalid project name: ' + (validation.problems?.[0] ?? 'Invalid name')
         },
-        {
+      })
+
+      if (typeof res.path === 'string') {
+        projectDirectory = res.path.trim()
+      }
+    }
+
+    if (!projectDirectory) {
+      console.log(
+        '\nPlease specify the project directory:\n' +
+        `  ${chalk.cyan('create-dynemcp')} ${chalk.green('<project-directory>')}\n` +
+        'For example:\n' +
+        `  ${chalk.cyan('create-dynemcp')} ${chalk.green('my-mcp-app')}\n\n` +
+        `Run ${chalk.cyan('create-dynemcp --help')} to see all options.`
+      )
+      process.exit(1)
+    }
+
+    // Skip prompts if --yes flag is provided
+    if (!options.yes) {
+      const defaults = {
+        typescript: true,
+        eslint: true,
+        template: 'default',
+        git: true,
+      }
+
+      const getPrefOrDefault = (field: string): boolean | string => 
+        preferences[field] ?? defaults[field as keyof typeof defaults]
+
+      // Prompt for template
+      if (!options.template) {
+        const { template } = await inquirer.prompt({
           type: 'list',
           name: 'template',
           message: 'Select a template:',
           choices: availableTemplates,
-          default: 'default',
-          when: !options.template && !options.yes,
-        },
-        {
+          default: getPrefOrDefault('template'),
+        })
+        options.template = template
+        preferences.template = template
+      }
+
+      // Prompt for TypeScript
+      if (!options.typescript && !options.javascript) {
+        const { typescript } = await inquirer.prompt({
           type: 'confirm',
           name: 'typescript',
-          message: 'Would you like to use TypeScript?',
-          default: true,
-          when: options.typescript === undefined && !options.yes,
-        },
-        {
+          message: `Would you like to use ${chalk.blue('TypeScript')}?`,
+          default: getPrefOrDefault('typescript'),
+        })
+        options.typescript = typescript
+        options.javascript = !typescript
+        preferences.typescript = typescript
+      }
+
+      // Prompt for ESLint
+      if (!options.eslint && !args.includes('--no-eslint')) {
+        const { eslint } = await inquirer.prompt({
           type: 'confirm',
           name: 'eslint',
-          message: 'Would you like to use ESLint?',
-          default: true,
-          when: options.eslint === undefined && !options.yes,
-        },
-        {
+          message: `Would you like to use ${chalk.blue('ESLint')}?`,
+          default: getPrefOrDefault('eslint'),
+        })
+        options.eslint = eslint
+        preferences.eslint = eslint
+      }
+
+      // Prompt for Git
+      if (!options.git && !args.includes('--no-git')) {
+        const { git } = await inquirer.prompt({
           type: 'confirm',
           name: 'git',
           message: 'Initialize a git repository?',
-          default: true,
-          when: options.git === undefined && !options.yes,
-        },
-      ])
-
-      // Combinar respuestas con opciones de línea de comandos
-      if (answers.projectName) projectDirectory = answers.projectName
-      if (answers.template) options.template = answers.template
-      if (answers.typescript !== undefined)
-        options.typescript = answers.typescript
-      if (answers.eslint !== undefined) options.eslint = answers.eslint
-      if (answers.git !== undefined) options.git = answers.git
+          default: getPrefOrDefault('git'),
+        })
+        options.git = git
+        preferences.git = git
+      }
     }
 
     // Asegurarse de que tenemos un directorio de proyecto
@@ -141,7 +223,10 @@ async function run(): Promise<void> {
       process.exit(1)
     }
 
-    // Crear proyecto
+    // Save preferences for next time
+    conf.set('preferences', preferences)
+
+    // Create project
     spinner.start('Creating project...')
     await createProject({
       projectPath,
@@ -151,12 +236,14 @@ async function run(): Promise<void> {
     })
     spinner.succeed('Project created')
 
-    // Instalar dependencias
-    spinner.start('Installing dependencies...')
-    await installDependencies(projectPath, packageManager)
-    spinner.succeed('Dependencies installed')
+    // Skip dependency installation if requested
+    if (!options.skipInstall) {
+      spinner.start(`Installing dependencies with ${packageManager}...`)
+      await installDependencies(projectPath, packageManager)
+      spinner.succeed('Dependencies installed')
+    }
 
-    // Inicializar git si se solicitó
+    // Initialize git if requested
     if (options.git !== false) {
       // Default to true
       spinner.start('Initializing git repository...')
@@ -168,24 +255,31 @@ async function run(): Promise<void> {
       }
     }
 
-    // Mostrar mensaje de éxito
-    console.log(
-      `\n${chalk.green('Success!')} Created ${chalk.cyan(projectDirectory)} at ${chalk.cyan(projectPath)}\n`
-    )
-
-    // Mostrar comandos para iniciar
-    const runCommand = getRunCommand(packageManager)
+    // Display success message
+    console.log()
+    console.log(`${chalk.green('Success!')} Created ${chalk.cyan(projectDirectory)} at ${chalk.cyan(projectPath)}`)
+    console.log()
+    
+    // Get the run command function for the selected package manager
+    const runCmd = getRunCommand(packageManager)
+    
+    // Display next steps
     console.log('Inside that directory, you can run several commands:')
-    console.log(`\n  ${chalk.cyan(runCommand('dev'))}`)
+    console.log()
+    console.log(`  ${chalk.cyan(runCmd('dev'))}`)
     console.log('    Starts the development server.')
-    console.log(`\n  ${chalk.cyan(runCommand('build'))}`)
+    console.log()
+    console.log(`  ${chalk.cyan(runCmd('build'))}`)
     console.log('    Builds the app for production.')
-    console.log(`\n  ${chalk.cyan(runCommand('start'))}`)
+    console.log()
+    console.log(`  ${chalk.cyan(runCmd('start'))}`)
     console.log('    Runs the built app in production mode.')
-
-    console.log('\nWe suggest that you begin by typing:')
-    console.log(`\n  ${chalk.cyan('cd')} ${projectDirectory}`)
-    console.log(`  ${chalk.cyan(runCommand('dev'))}\n`)
+    console.log()
+    console.log('We suggest that you begin by typing:')
+    console.log()
+    console.log(`  ${chalk.cyan('cd')} ${projectDirectory}`)
+    console.log(`  ${chalk.cyan(runCmd('dev'))}`)
+    console.log()
     console.log('Happy hacking!')
   } catch (error) {
     spinner.fail('Failed to create project')

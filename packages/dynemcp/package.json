@@ -48,5 +48,8 @@
     "@types/node": "^20.19.0",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^9.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

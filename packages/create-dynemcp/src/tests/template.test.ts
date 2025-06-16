@@ -111,6 +111,21 @@ describe.skip('Template E2E Tests', () => {
     expect(projectExists).toBe(true)
     console.log(`Building project in: ${projectPath}`)
 
+    // Instalar dependencias primero
+    console.log('Installing dependencies...')
+    const installResult = await execa('pnpm', ['install'], {
+      cwd: projectPath,
+      env: { ...process.env, CI: 'true' },
+    })
+
+    console.log(`Install output: ${installResult.stdout}`)
+    if (installResult.stderr) {
+      console.error(`Install errors: ${installResult.stderr}`)
+    }
+
+    // Verificar que la instalación fue exitosa
+    expect(installResult.exitCode).toBe(0)
+
     // Run build command
     const buildResult = await execa('pnpm', ['run', 'build'], {
       cwd: projectPath,
@@ -137,6 +152,16 @@ describe.skip('Template E2E Tests', () => {
     const projectExists = await fs.pathExists(projectPath)
     expect(projectExists).toBe(true)
     console.log(`Starting dev server in: ${projectPath}`)
+    
+    // Verificar que las dependencias estén instaladas
+    const nodeModulesExists = await fs.pathExists(path.join(projectPath, 'node_modules'))
+    if (!nodeModulesExists) {
+      console.log('Installing dependencies for dev server...')
+      await execa('pnpm', ['install'], {
+        cwd: projectPath,
+        env: { ...process.env, CI: 'true' },
+      })
+    }
 
     // Start the dev server
     const devProcess = execa('pnpm', ['run', 'dev'], {
@@ -168,6 +193,16 @@ describe.skip('Template E2E Tests', () => {
     const projectExists = await fs.pathExists(projectPath)
     expect(projectExists).toBe(true)
     console.log(`Building for production in: ${projectPath}`)
+    
+    // Verificar que las dependencias estén instaladas
+    const nodeModulesExists = await fs.pathExists(path.join(projectPath, 'node_modules'))
+    if (!nodeModulesExists) {
+      console.log('Installing dependencies for production server...')
+      await execa('pnpm', ['install'], {
+        cwd: projectPath,
+        env: { ...process.env, CI: 'true' },
+      })
+    }
 
     // First make sure it's built
     const buildResult = await execa('pnpm', ['run', 'build'], {

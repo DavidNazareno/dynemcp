@@ -1,24 +1,29 @@
 import { execSync } from 'child_process'
-import path from 'path'
-import fs from 'fs-extra'
 
 export type PackageManager = 'npm' | 'yarn' | 'pnpm'
 
-export function detectPackageManager(): PackageManager {
-  // Preferimos pnpm según las reglas del usuario
+/**
+ * Returns the package manager used in the project based on user preference
+ * or available package managers on the system.
+ */
+export function getPkgManager(): PackageManager {
+  // User rule: prefer pnpm
   try {
     execSync('pnpm --version', { stdio: 'ignore' })
     return 'pnpm'
-  } catch (e) {
-    // pnpm no está disponible, intentamos con yarn
+  } catch (_e) {
     try {
       execSync('yarn --version', { stdio: 'ignore' })
       return 'yarn'
-    } catch (e) {
-      // Por defecto, usamos npm
+    } catch (_e) {
       return 'npm'
     }
   }
+}
+
+// Legacy function, kept for backward compatibility
+export function detectPackageManager(): PackageManager {
+  return getPkgManager()
 }
 
 export function getInstallCommand(packageManager: PackageManager): string {

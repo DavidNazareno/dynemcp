@@ -4,11 +4,9 @@ import path from 'path'
 import os from 'os'
 import { execa } from 'execa'
 
-// Mock dependencies
 vi.mock('fs-extra')
 vi.mock('execa')
 
-// Mock create-project
 vi.mock('../helpers/create-project', () => ({
   createProject: vi.fn().mockResolvedValue(undefined),
   getAvailableTemplates: vi.fn().mockResolvedValue(['default']),
@@ -25,15 +23,12 @@ vi.mock('inquirer', () => ({
   },
 }))
 
-// Mock process.exit
 const mockExit = vi
   .spyOn(process, 'exit')
   .mockImplementation((_code?: number | string | null) => {
-    // process.exit nunca retorna, por lo que el tipo de retorno es 'never'
     return undefined as never
   })
 
-// Marcamos estos tests como pendientes hasta que se resuelvan los problemas de mocks
 describe.skip('CLI Integration', () => {
   const _testDir = path.join(os.tmpdir(), 'create-dynemcp-test')
   const scriptPath = path.resolve(__dirname, '../../dist/index.js')
@@ -41,21 +36,16 @@ describe.skip('CLI Integration', () => {
   beforeEach(() => {
     vi.resetAllMocks()
 
-    // Mock process.exit nuevamente en cada test
     mockExit.mockReset()
 
-    // Configure mock return values for fs-extra functions
     vi.mocked(fs.existsSync).mockImplementation(() => false)
     vi.mocked(fs.ensureDir).mockResolvedValue(undefined)
     vi.mocked(fs.copy).mockResolvedValue(undefined)
-    // Para pathExists, necesitamos asegurar que el tipo de retorno sea correcto
-    vi.mocked(fs.pathExists).mockImplementation(async () => {
-      return false
-    })
+    vi.mocked(fs.pathExists).mockReset()
+    vi.mocked(fs.pathExists).mockImplementation(() => false)
     vi.mocked(fs.readJson).mockResolvedValue({ version: '1.0.0' })
     vi.mocked(fs.writeJson).mockResolvedValue(undefined)
     vi.mocked(fs.writeFile).mockResolvedValue(undefined)
-    // Para readdir, necesitamos crear un array de Dirent
     vi.mocked(fs.readdir).mockImplementation(async () => {
       const mockDirent = {
         name: 'default',
@@ -103,16 +93,10 @@ describe.skip('CLI Integration', () => {
     vi.mocked(fs.readFileSync).mockImplementation(() =>
       Buffer.from(JSON.stringify({ version: '1.0.0' }))
     )
-    // Para los mocks de fs, usamos un enfoque más tipado para evitar warnings de lint
-    // Creamos un array de strings que es compatible con el tipo esperado por readdirSync
-    vi.mocked(fs.readdirSync).mockImplementation(() => {
-      return ['default'] as unknown as fs.Dirent[]
-    })
-    vi.mocked(fs.readdir).mockResolvedValue([
-      'default',
-    ] as unknown as fs.Dirent[])
+    vi.mocked(fs.readdirSync).mockImplementation(() => [])
 
-    // Mock execa
+    vi.mocked(fs.readdir).mockImplementation(() => [])
+
     vi.mocked(execa).mockImplementation(() => {
       const mockPromise = Promise.resolve({
         exitCode: 0,
@@ -137,43 +121,34 @@ describe.skip('CLI Integration', () => {
   })
 
   it('should create a project with default options when using --yes flag', async () => {
-    // Simular que el directorio del proyecto no existe
-    vi.mocked(fs.pathExists).mockResolvedValueOnce(false)
+    vi.mocked(fs.pathExists).mockResolvedValueOnce(false as unknown as void)
 
-    // Forzar que ensureDir sea llamado con el nombre del proyecto
     vi.mocked(fs.ensureDir).mockImplementationOnce(async path => {
       console.log(`ensureDir called with: ${path}`)
       return
     })
 
-    // Execute the CLI with --yes flag
     await execa('node', [scriptPath, 'test-project', '--yes'])
 
-    // Verify that the project was created
     expect(fs.ensureDir).toHaveBeenCalledWith(
       expect.stringContaining('test-project')
     )
     expect(fs.copy).toHaveBeenCalled()
     expect(fs.writeJson).toHaveBeenCalled()
 
-    // Verify that dependencies were installed
     expect(execa).toHaveBeenCalledWith('pnpm', ['install'], expect.any(Object))
 
-    // Verify that git was initialized
     expect(execa).toHaveBeenCalledWith('git', ['init'], expect.any(Object))
   })
 
   it('should create a project with specified options', async () => {
-    // Simular que el directorio del proyecto no existe
-    vi.mocked(fs.pathExists).mockResolvedValueOnce(false)
+    vi.mocked(fs.pathExists).mockResolvedValueOnce(false as unknown as void)
 
-    // Forzar que ensureDir sea llamado con el nombre del proyecto
     vi.mocked(fs.ensureDir).mockImplementationOnce(async path => {
       console.log(`ensureDir called with: ${path}`)
       return
     })
 
-    // Execute the CLI with specific options
     await execa('node', [
       scriptPath,
       'custom-project',
@@ -184,15 +159,12 @@ describe.skip('CLI Integration', () => {
       '--no-git',
     ])
 
-    // Verify that the project was created with correct options
     expect(fs.ensureDir).toHaveBeenCalledWith(
       expect.stringContaining('custom-project')
     )
 
-    // Verify that dependencies were installed with npm
     expect(execa).toHaveBeenCalledWith('npm', ['install'], expect.any(Object))
 
-    // Verify that git was not initialized
     const gitInitCalls = vi
       .mocked(execa)
       .mock.calls.filter(
@@ -203,7 +175,6 @@ describe.skip('CLI Integration', () => {
   })
 
   it('should handle invalid project names', async () => {
-    // Mock validateProjectName to return invalid
     const _validateNpmPackageName = await import('validate-npm-package-name')
     vi.mock('validate-npm-package-name', () => ({
       default: vi.fn().mockReturnValue({
@@ -212,24 +183,19 @@ describe.skip('CLI Integration', () => {
       }),
     }))
 
-    // Execute the CLI with an invalid project name
     await execa('node', [scriptPath, 'Invalid Name'])
 
-    // Verify that process.exit was called with code 1
     expect(mockExit).toHaveBeenCalledWith(1)
   })
 
   it('should handle existing non-empty directories', async () => {
-    // Mock existsSync and readdirSync to simulate non-empty directory
     vi.mocked(fs.existsSync).mockReturnValue(true)
     vi.mocked(fs.readdirSync).mockReturnValue([
       'existing-file',
     ] as unknown as never)
 
-    // Execute the CLI
     await execa('node', [scriptPath, 'existing-dir'])
 
-    // Verify that process.exit was called with code 1
     expect(mockExit).toHaveBeenCalledWith(1)
   })
 })
