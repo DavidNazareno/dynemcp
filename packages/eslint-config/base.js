@@ -15,10 +15,22 @@ export const config = [
   ...tseslint.configs.recommended,
   ...tseslint.configs.stylistic,
   {
+    files: ["**/*.ts", "**/*.tsx"],
+    ignores: ["**/eslint.config.mjs", "**/vitest.config.ts"],
     languageOptions: {
       parserOptions: {
         project: true,
         tsconfigRootDir: ".",
+      },
+    },
+  },
+  {
+    // Configuration for non-TypeScript files
+    files: ["**/*.js", "**/*.mjs", "**/*.cjs"],
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
       },
     },
   },

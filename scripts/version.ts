@@ -10,7 +10,7 @@ async function bumpVersions() {
 
   console.log(`Bumping ${bumpType} version for ${releaseType} release`)
 
-  try { 
+  try {
     // Get the root package.json to determine the current version
     const rootPkgPath = join(process.cwd(), 'package.json')
     const rootPkg = JSON.parse(await readFile(rootPkgPath, 'utf8'))
@@ -27,7 +27,7 @@ async function bumpVersions() {
     // Find all package.json files in the monorepo
     const packageJsonPaths = await fastGlob('**/package.json', {
       ignore: ['**/node_modules/**/package.json'],
-      absolute: true
+      absolute: true,
     })
 
     // Update the version in each package.json

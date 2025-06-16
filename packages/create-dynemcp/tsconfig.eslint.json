@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.json", "eslint.config.mjs"],
+  "exclude": ["node_modules", "dist"]
+}

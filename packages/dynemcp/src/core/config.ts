@@ -40,10 +40,10 @@ export type DyneMCPConfig = z.infer<typeof ConfigSchema>
 
 /**
  * Load configuration from various sources
- * @param configPath Path to configuration file (optional)
+ * @param _configPath Path to configuration file (optional)
  * @returns Validated configuration object
  */
-export function loadConfig(configPath?: string): DyneMCPConfig {
+export function loadConfig(_configPath?: string): DyneMCPConfig {
   // Default configuration
   const defaultConfig: DyneMCPConfig = {
     server: {

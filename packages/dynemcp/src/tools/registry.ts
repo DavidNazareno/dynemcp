@@ -35,11 +35,11 @@ export function getAllTools(): ToolDefinition[] {
 /**
  * Get a specific tool by name
  *
- * @param name - The name of the tool to get
+ * @param _name - The name of the tool to get
  * @returns The tool or undefined if not found
  */
-export function getTool(name: string): ToolDefinition | undefined {
-  return toolRegistry.get(name)
+export function getTool(_name: string): ToolDefinition | undefined {
+  return toolRegistry.get(_name)
 }
 
 /**
@@ -56,7 +56,7 @@ export function clearTools(): void {
  * @param description - The description of the tool
  * @param schema - The Zod schema for the tool parameters
  * @param handler - The function that implements the tool
- * @param options - Additional tool options
+ * @param _options - Additional tool options
  * @returns The created tool
  */
 export function createTool<T extends z.ZodType>(
@@ -64,7 +64,7 @@ export function createTool<T extends z.ZodType>(
   description: string,
   schema: T,
   handler: (params: z.infer<T>) => any | Promise<any>,
-  options: {
+  _options: {
     returns?: {
       type: string
       description?: string
@@ -94,14 +94,14 @@ export function createTool<T extends z.ZodType>(
  * @param name - The name of the tool
  * @param description - The description of the tool
  * @param schema - The Zod schema for the tool parameters
- * @param options - Additional tool options
+ * @param _options - Additional tool options
  * @returns The method decorator
  */
 export function tool<T extends z.ZodType>(
   name: string,
   description: string,
   schema: T,
-  options: {
+  _options: {
     returns?: {
       type: string
       description?: string

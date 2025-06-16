@@ -2,6 +2,7 @@
   "name": "dynemcp",
   "private": true,
   "type": "module",
+  "version": "0.0.0",
   "scripts": {
     "prepare": "husky",
     "clean:buildinfo": "rimraf **/*.tsbuildinfo **/tsconfig.build.info",

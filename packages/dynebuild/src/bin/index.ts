@@ -38,7 +38,7 @@ async function run(): Promise<void> {
         if (packageJson.dynebuild?.outdir) {
           outdir = packageJson.dynebuild.outdir
         }
-      } catch (err) {
+      } catch (_err) {
         console.warn(
           'Failed to parse package.json, using default configuration'
         )
