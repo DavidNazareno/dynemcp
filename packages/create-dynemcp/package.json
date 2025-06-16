@@ -1,6 +1,6 @@
 {
   "name": "@repo/create-dynemcp",
-  "version": "1.0.0",
+  "version": "2.0.0-canary.1",
   "description": "Create DyneMCP apps with one command",
   "type": "module",
   "bin": {
@@ -32,10 +32,12 @@
     "test:template": "vitest run template.test.ts"
   },
   "dependencies": {
+    "async-sema": "^3.1.1",
     "chalk": "^5.3.0",
     "commander": "^12.0.0",
     "conf": "^13.0.1",
-    "fs-extra": "^11.2.0",
+    "fast-glob": "^3.3.3",
+    "fs-extra": "^11.3.0",
     "inquirer": "^9.2.16",
     "ora": "^8.0.1",
     "picocolors": "^1.0.0",

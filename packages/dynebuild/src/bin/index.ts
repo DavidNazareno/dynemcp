@@ -30,12 +30,12 @@ async function run(): Promise<void> {
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
 
         // Check if there's a custom entry point defined
-        if (packageJson.dynebuild && packageJson.dynebuild.entryPoint) {
+        if (packageJson.dynebuild?.entryPoint) {
           entryPoint = packageJson.dynebuild.entryPoint
         }
 
         // Check if there's a custom output directory defined
-        if (packageJson.dynebuild && packageJson.dynebuild.outdir) {
+        if (packageJson.dynebuild?.outdir) {
           outdir = packageJson.dynebuild.outdir
         }
       } catch (err) {

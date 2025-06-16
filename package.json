@@ -1,6 +1,7 @@
 {
   "name": "dynemcp",
   "private": true,
+  "type": "module",
   "scripts": {
     "clean:buildinfo": "rimraf **/*.tsbuildinfo **/tsconfig.build.info",
     "build": "pnpm run clean:buildinfo && turbo run build",
@@ -13,13 +14,22 @@
     "clean": "turbo run clean",
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
-    "test:template": "cd packages/create-dynemcp && pnpm run test:template"
+    "test:template": "cd packages/create-dynemcp && pnpm run test:template",
+    "version": "node scripts/version.js",
+    "publish": "node scripts/publish.js",
+    "release:canary": "RELEASE_TYPE=canary pnpm run version && RELEASE_TYPE=canary pnpm run publish",
+    "release:stable": "RELEASE_TYPE=stable pnpm run version && RELEASE_TYPE=stable pnpm run publish"
   },
   "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.19.0",
+    "execa": "^9.6.0",
+    "fs-extra": "^11.3.0",
     "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.20.3",
     "turbo": "^2.5.4",
-    "typescript": "5.8.2",
-    "rimraf": "^6.0.1"
+    "typescript": "5.8.2"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {

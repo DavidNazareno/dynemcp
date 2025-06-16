@@ -16,7 +16,11 @@ import {
   validateTemplate,
 } from './helpers/validate'
 import type { PackageManager } from './helpers/package-manager'
-import { installDependencies, getRunCommand, getPkgManager } from './helpers/package-manager'
+import {
+  installDependencies,
+  getRunCommand,
+  getPkgManager,
+} from './helpers/package-manager'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -29,7 +33,11 @@ const version = packageJson.version
 
 // Program configuration
 const program = new Command('create-dynemcp')
-  .version(version, '-v, --version', 'Output the current version of create-dynemcp')
+  .version(
+    version,
+    '-v, --version',
+    'Output the current version of create-dynemcp'
+  )
   .argument('[directory]', 'The directory to create the app in')
   .usage('[directory] [options]')
   .helpOption('-h, --help', 'Display this help message.')
@@ -38,14 +46,26 @@ const program = new Command('create-dynemcp')
   .option('--js, --javascript', 'Initialize as a JavaScript project')
   .option('--eslint', 'Include ESLint configuration (default)')
   .option('--no-eslint', 'Skip ESLint configuration')
-  .option('--use-npm', 'Explicitly tell the CLI to bootstrap the application using npm')
-  .option('--use-yarn', 'Explicitly tell the CLI to bootstrap the application using Yarn')
-  .option('--use-pnpm', 'Explicitly tell the CLI to bootstrap the application using pnpm (default)')
+  .option(
+    '--use-npm',
+    'Explicitly tell the CLI to bootstrap the application using npm'
+  )
+  .option(
+    '--use-yarn',
+    'Explicitly tell the CLI to bootstrap the application using Yarn'
+  )
+  .option(
+    '--use-pnpm',
+    'Explicitly tell the CLI to bootstrap the application using pnpm (default)'
+  )
   .option('--git', 'Initialize a git repository (default)')
   .option('--no-git', 'Skip git repository initialization')
   .option('--skip-install', 'Skip installing dependencies')
   .option('-y, --yes', 'Skip all prompts and use default values')
-  .option('--reset, --reset-preferences', 'Reset the preferences saved for create-dynemcp')
+  .option(
+    '--reset, --reset-preferences',
+    'Reset the preferences saved for create-dynemcp'
+  )
   .allowUnknownOption()
   .parse(process.argv)
 
@@ -97,7 +117,10 @@ async function run(): Promise<void> {
           : getPkgManager()
 
     const availableTemplates = await getAvailableTemplates()
-    const preferences = (conf.get('preferences') ?? {}) as Record<string, boolean | string>
+    const preferences = (conf.get('preferences') ?? {}) as Record<
+      string,
+      boolean | string
+    >
 
     // If project directory is not provided or not using --yes flag, prompt for input
     if (!projectDirectory) {
@@ -109,7 +132,10 @@ async function run(): Promise<void> {
         validate: (name: string): boolean | string => {
           const validation = validateProjectName(name)
           if (validation.valid) return true
-          return 'Invalid project name: ' + (validation.problems?.[0] ?? 'Invalid name')
+          return (
+            'Invalid project name: ' +
+            (validation.problems?.[0] ?? 'Invalid name')
+          )
         },
       })
 
@@ -121,10 +147,10 @@ async function run(): Promise<void> {
     if (!projectDirectory) {
       console.log(
         '\nPlease specify the project directory:\n' +
-        `  ${chalk.cyan('create-dynemcp')} ${chalk.green('<project-directory>')}\n` +
-        'For example:\n' +
-        `  ${chalk.cyan('create-dynemcp')} ${chalk.green('my-mcp-app')}\n\n` +
-        `Run ${chalk.cyan('create-dynemcp --help')} to see all options.`
+          `  ${chalk.cyan('create-dynemcp')} ${chalk.green('<project-directory>')}\n` +
+          'For example:\n' +
+          `  ${chalk.cyan('create-dynemcp')} ${chalk.green('my-mcp-app')}\n\n` +
+          `Run ${chalk.cyan('create-dynemcp --help')} to see all options.`
       )
       process.exit(1)
     }
@@ -138,7 +164,7 @@ async function run(): Promise<void> {
         git: true,
       }
 
-      const getPrefOrDefault = (field: string): boolean | string => 
+      const getPrefOrDefault = (field: string): boolean | string =>
         preferences[field] ?? defaults[field as keyof typeof defaults]
 
       // Prompt for template
@@ -257,12 +283,14 @@ async function run(): Promise<void> {
 
     // Display success message
     console.log()
-    console.log(`${chalk.green('Success!')} Created ${chalk.cyan(projectDirectory)} at ${chalk.cyan(projectPath)}`)
+    console.log(
+      `${chalk.green('Success!')} Created ${chalk.cyan(projectDirectory)} at ${chalk.cyan(projectPath)}`
+    )
     console.log()
-    
+
     // Get the run command function for the selected package manager
     const runCmd = getRunCommand(packageManager)
-    
+
     // Display next steps
     console.log('Inside that directory, you can run several commands:')
     console.log()

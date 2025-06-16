@@ -152,9 +152,11 @@ describe.skip('Template E2E Tests', () => {
     const projectExists = await fs.pathExists(projectPath)
     expect(projectExists).toBe(true)
     console.log(`Starting dev server in: ${projectPath}`)
-    
+
     // Verificar que las dependencias estén instaladas
-    const nodeModulesExists = await fs.pathExists(path.join(projectPath, 'node_modules'))
+    const nodeModulesExists = await fs.pathExists(
+      path.join(projectPath, 'node_modules')
+    )
     if (!nodeModulesExists) {
       console.log('Installing dependencies for dev server...')
       await execa('pnpm', ['install'], {
@@ -193,9 +195,11 @@ describe.skip('Template E2E Tests', () => {
     const projectExists = await fs.pathExists(projectPath)
     expect(projectExists).toBe(true)
     console.log(`Building for production in: ${projectPath}`)
-    
+
     // Verificar que las dependencias estén instaladas
-    const nodeModulesExists = await fs.pathExists(path.join(projectPath, 'node_modules'))
+    const nodeModulesExists = await fs.pathExists(
+      path.join(projectPath, 'node_modules')
+    )
     if (!nodeModulesExists) {
       console.log('Installing dependencies for production server...')
       await execa('pnpm', ['install'], {
