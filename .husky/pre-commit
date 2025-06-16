@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Ejecutar beautify (formato y eslint fix)
+pnpm run beautify
+
+# Ejecutar tests
+pnpm test

@@ -1,6 +1,5 @@
 {
   "name": "@repo/create-dynemcp",
-  "version": "2.0.0-canary.1",
   "description": "Create DyneMCP apps with one command",
   "type": "module",
   "bin": {
