@@ -20,7 +20,7 @@ interface PackageJson {
 async function publishPackages(): Promise<void> {
   try {
     // Determine the npm tag based on the release type
-    const releaseType = process.env.RELEASE_TYPE
+    const releaseType = process.env.RELEASE_TYPE || 'canary'
     let npmTag = 'latest'
 
     switch (releaseType) {

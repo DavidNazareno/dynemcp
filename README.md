@@ -1,30 +1,36 @@
 # DyneMCP Framework
 
-A scalable TypeScript framework for building Model Context Protocol (MCP) servers using the official MCP TypeScript SDK.
+[![License: MIT with Attribution](https://img.shields.io/badge/License-MIT%20with%20Attribution-blue.svg)](LICENSE)
+[![pnpm](https://img.shields.io/badge/pnpm-9.0.0-orange.svg)](https://pnpm.io/)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-brightgreen.svg)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-blue.svg)](https://www.typescriptlang.org/)
 
-This project is organized as a monorepo using Turborepo and pnpm workspaces for efficient development and package management.
+Un framework escalable en TypeScript para construir servidores Model Context Protocol (MCP) utilizando el SDK oficial de MCP para TypeScript.
 
-## Features
+Este proyecto está organizado como un monorepo utilizando Turborepo y pnpm workspaces para un desarrollo eficiente y una gestión óptima de paquetes.
 
-- Built on top of the official MCP TypeScript SDK
-- Easy creation and organization of MCP servers
-- Standardized way to expose tools, resources, and prompts
-- CLI tools for development, live testing, and deployment
-- Production-optimized MCP servers
-- Built-in environment variable support
-- Hot reloading during development
-- Type-safe development with Zod schema validation
+## Características principales
 
-## Installation
+- **Basado en SDK oficial**: Construido sobre el SDK oficial de TypeScript para MCP
+- **Organización simplificada**: Fácil creación y organización de servidores MCP
+- **Estandarización**: Forma estandarizada de exponer herramientas, recursos y prompts
+- **Herramientas de desarrollo**: CLI para desarrollo, pruebas en vivo y despliegue
+- **Optimizado para producción**: Servidores MCP listos para entornos de producción
+- **Variables de entorno**: Soporte integrado para gestión de variables de entorno
+- **Hot reloading**: Recarga en caliente durante el desarrollo
+- **Desarrollo type-safe**: Validación de esquemas con Zod para mayor seguridad
+- **Monorepo optimizado**: Gestión eficiente de dependencias y paquetes
+
+## Instalación
 
 ```bash
-# Using npm
+# Usando npm
 npm create dynemcp@latest
 
-# Using pnpm (recomendado)
+# Usando pnpm (recomendado)
 pnpm create dynemcp@latest
 
-# Using yarn
+# Usando yarn
 yarn create dynemcp
 ```
 
@@ -399,6 +405,7 @@ DyneMCP ha sido completamente refactorizado para usar el SDK oficial de TypeScri
 
 - **Implementación estandarizada**: Utiliza las interfaces y tipos oficiales del SDK
 - **Preparado para el futuro**: Se beneficia automáticamente de las actualizaciones del SDK oficial
+
 - **Arquitectura simplificada**: Elimina implementaciones de servidor personalizadas en favor del SDK oficial
 - **Mayor seguridad de tipos**: Aprovecha TypeScript y Zod para una completa seguridad de tipos
 
@@ -441,4 +448,8 @@ server.start()
 
 ## Licencia
 
-ISC
+Este proyecto está licenciado bajo la [Licencia MIT con Atribución](LICENSE). Esto significa que puedes usar, modificar y distribuir este software libremente, pero debes incluir el siguiente texto de agradecimiento en tu documentación:
+
+> Este proyecto utiliza DyneMCP Framework creado por David Nazareno.
+
+Para más detalles, consulta el archivo [LICENSE](LICENSE).

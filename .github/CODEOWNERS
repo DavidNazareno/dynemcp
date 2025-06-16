@@ -1,0 +1,14 @@
+# This file defines who is responsible for reviewing and approving changes in different parts of the repository
+# For more information, see: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for all code
+* @davidnazareno
+
+# Specific owners for key directories
+/packages/dynemcp/ @davidnazareno
+/packages/create-dynemcp/ @davidnazareno
+/packages/dynebuild/ @davidnazareno
+
+# Owners for configurations
+/scripts/ @davidnazareno
+/*.json @davidnazareno
