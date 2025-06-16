@@ -2,7 +2,8 @@
   "name": "dynemcp",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
+    "clean:buildinfo": "rimraf **/*.tsbuildinfo **/tsconfig.build.info",
+    "build": "pnpm run clean:buildinfo && turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

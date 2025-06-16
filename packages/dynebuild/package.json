@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "postbuild": "chmod +x ./dist/bin/cli.js"
+    "postbuild": "chmod +x ./dist/bin/index.js"
   },
   "exports": {
     ".": {

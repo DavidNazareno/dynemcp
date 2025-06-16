@@ -7,7 +7,7 @@
 import chalk from 'chalk'
 import path from 'path'
 import fs from 'fs-extra'
-import { build } from '../builder'
+import { build } from '@repo/dynebuild/builder'
 
 // Default entry point
 const defaultEntryPoint = 'src/index.ts'
