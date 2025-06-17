@@ -21,7 +21,6 @@ import { applyPromptParameters } from './prompt/registry'
 import { loadConfig } from './core/config'
 import { DyneMCP } from './core/dynemcp/dynemcp'
 
-
 // Export namespaces for better organization
 export const tools = {
   createTool,
