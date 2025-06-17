@@ -1,6 +1,6 @@
 import { createFileResource } from './resources/registry'
-import { createTool } from './tools/ToolDecorator'
-import { tool } from './tools/ToolDecorator'
+import { createTool } from './tools/registry'
+import { tool } from './tools/registry'
 import { registerTool } from './tools/registry'
 import { getAllTools } from './tools/registry'
 import { getTool } from './tools/registry'
@@ -19,7 +19,8 @@ import { getPrompt } from './prompt/registry'
 import { clearPrompts } from './prompt/registry'
 import { applyPromptParameters } from './prompt/registry'
 import { loadConfig } from './core/config'
-import { DyneMCP } from './core/dynemcp'
+import { DyneMCP } from './core/dynemcp/dynemcp'
+
 
 // Export namespaces for better organization
 export const tools = {

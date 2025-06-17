@@ -54,11 +54,6 @@ async function run(): Promise<void> {
     await build({
       entryPoints: [entryPointPath],
       outdir: path.join(cwd, outdir),
-      platform: 'node',
-      format: 'esm',
-      bundle: true,
-      minify: process.env.NODE_ENV === 'production',
-      sourcemap: process.env.NODE_ENV !== 'production',
     })
 
     console.log('Build completed successfully!')

@@ -1,7 +1,8 @@
 /**
  * Prompt registry for DyneMCP framework
  */
-import { PromptDefinition } from '../core/dynemcp'
+
+import { PromptDefinition } from '../core/dynemcp/interfaces'
 
 // Collection of registered prompts
 const promptRegistry: Map<string, PromptDefinition> = new Map()

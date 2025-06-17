@@ -1,37 +1,18 @@
 /**
- * Core de DyneMCP - Envoltorio para el SDK oficial de MCP
+ * DyneMCP Core - Wrapper for the official MCP SDK
  */
 
-// @ts-expect-error - El SDK puede no tener tipos correctamente definidos
 import { Server } from '@modelcontextprotocol/sdk/server'
-// @ts-expect-error - El SDK puede no tener tipos correctamente definidos
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio'
-import { z } from 'zod'
-import { loadConfig, DyneMCPConfig } from './config'
+import { loadConfig, DyneMCPConfig } from '../config'
+import {
+  ToolDefinition,
+  ResourceDefinition,
+  PromptDefinition,
+} from './interfaces'
+import { SERVER_VERSION } from '../constants'
 
-export interface ToolDefinition {
-  name: string
-  description: string
-  schema: Record<string, z.ZodType>
-  handler: (params: any) => Promise<any> | any
-}
-
-export interface ResourceDefinition {
-  uri: string
-  name: string
-  content: string | (() => string | Promise<string>)
-  description?: string
-  contentType?: string
-}
-
-export interface PromptDefinition {
-  id: string
-  name: string
-  content: string
-  description?: string
-}
-
-// Clase principal de DyneMCP
+// Main DyneMCP class
 export class DyneMCP {
   private server: Server
   private tools: ToolDefinition[] = []
@@ -40,12 +21,12 @@ export class DyneMCP {
   private config: DyneMCPConfig
 
   /**
-   * Crea una nueva instancia de DyneMCP
+   * Creates a new DyneMCP instance
    *
-   * @param name - Nombre del servidor
-   * @param version - Versión del servidor
+   * @param name - Server name
+   * @param version - Server version
    */
-  constructor(name: string, version: string = '1.0.0') {
+  constructor(name: string, version: string = SERVER_VERSION) {
     this.server = new Server({
       name,
       version,
@@ -68,18 +49,18 @@ export class DyneMCP {
   }
 
   /**
-   * Inicializa el servidor con la configuración
+   * Initializes the server with configuration
    *
-   * @param configPath - Ruta al archivo de configuración
+   * @param configPath - Path to configuration file
    */
   async init(configPath?: string): Promise<void> {
     this.config = await loadConfig(configPath)
   }
 
   /**
-   * Registra una herramienta en el servidor
+   * Registers a tool in the server
    *
-   * @param tool - Definición de la herramienta
+   * @param tool - Tool definition
    */
   registerTool(tool: ToolDefinition): void {
     this.tools.push(tool)
@@ -88,9 +69,9 @@ export class DyneMCP {
   }
 
   /**
-   * Registra múltiples herramientas en el servidor
+   * Registers multiple tools in the server
    *
-   * @param tools - Array de definiciones de herramientas
+   * @param tools - Array of tool definitions
    */
   registerTools(tools: ToolDefinition[]): void {
     for (const tool of tools) {
@@ -99,9 +80,9 @@ export class DyneMCP {
   }
 
   /**
-   * Registra un recurso en el servidor
+   * Registers a resource in the server
    *
-   * @param resource - Definición del recurso
+   * @param resource - Resource definition
    */
   registerResource(resource: ResourceDefinition): void {
     this.resources.push(resource)
@@ -122,7 +103,7 @@ export class DyneMCP {
       }
     }
 
-    // Usamos un objeto vacío para el esquema de parámetros
+    // We use an empty object for parameter schema
     this.server.tool(
       `resource:${resource.uri}`,
       resource.description || `Resource: ${resource.name}`,
@@ -132,9 +113,9 @@ export class DyneMCP {
   }
 
   /**
-   * Registra múltiples recursos en el servidor
+   * Registers multiple resources in the server
    *
-   * @param resources - Array de definiciones de recursos
+   * @param resources - Array of resource definitions
    */
   registerResources(resources: ResourceDefinition[]): void {
     for (const resource of resources) {
@@ -143,15 +124,15 @@ export class DyneMCP {
   }
 
   /**
-   * Registra un prompt en el servidor
+   * Registers a prompt in the server
    *
-   * @param prompt - Definición del prompt
+   * @param prompt - Prompt definition
    */
   registerPrompt(prompt: PromptDefinition): void {
     this.prompts.push(prompt)
 
-    // Registrar el prompt en el servidor MCP
-    // Similar a los recursos, implementamos como una herramienta
+    // Register the prompt in the MCP server
+    // Similar to resources, we implement it as a tool
     this.server.tool(
       `prompt:${prompt.id}`,
       prompt.description || `Prompt: ${prompt.name}`,
@@ -170,9 +151,9 @@ export class DyneMCP {
   }
 
   /**
-   * Registra múltiples prompts en el servidor
+   * Registers multiple prompts in the server
    *
-   * @param prompts - Array de definiciones de prompts
+   * @param prompts - Array of prompt definitions
    */
   registerPrompts(prompts: PromptDefinition[]): void {
     for (const prompt of prompts) {
@@ -181,42 +162,42 @@ export class DyneMCP {
   }
 
   /**
-   * Inicia el servidor MCP
+   * Starts the MCP server
    */
   async start(): Promise<void> {
-    // Por defecto, usar stdio
+    // By default, use stdio
     const transport = new StdioServerTransport()
 
-    // Conectar el servidor al transporte
+    // Connect the server to the transport
     await this.server.connect(transport)
-    console.log('Servidor MCP iniciado correctamente')
+    console.log('MCP server started successfully')
   }
 
   /**
-   * Detiene el servidor MCP
+   * Stops the MCP server
    */
   async stop(): Promise<void> {
-    // El SDK actual no tiene un método directo para detener el servidor
-    console.log('Deteniendo servidor MCP...')
-    // Implementar lógica de cierre si es necesario
+    // The current SDK doesn't have a direct method to stop the server
+    console.log('Stopping MCP server...')
+    // Implement closing logic if necessary
   }
 
   /**
-   * Devuelve todas las herramientas registradas
+   * Returns all registered tools
    */
   get registeredTools(): ToolDefinition[] {
     return [...this.tools]
   }
 
   /**
-   * Devuelve todos los recursos registrados
+   * Returns all registered resources
    */
   get registeredResources(): ResourceDefinition[] {
     return [...this.resources]
   }
 
   /**
-   * Devuelve todos los prompts registrados
+   * Returns all registered prompts
    */
   get registeredPrompts(): PromptDefinition[] {
     return [...this.prompts]
@@ -224,15 +205,15 @@ export class DyneMCP {
 }
 
 /**
- * Crea una nueva instancia de DyneMCP
+ * Creates a new DyneMCP instance
  *
- * @param name - Nombre del servidor
- * @param version - Versión del servidor
- * @returns Nueva instancia de DyneMCP
+ * @param name - Server name
+ * @param version - Server version
+ * @returns New DyneMCP instance
  */
 export function createMCPServer(
   name: string,
-  version: string = '1.0.0'
+  version: string = SERVER_VERSION
 ): DyneMCP {
   return new DyneMCP(name, version)
 }

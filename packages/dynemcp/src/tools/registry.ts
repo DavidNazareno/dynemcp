@@ -3,7 +3,7 @@
  */
 
 import { z } from 'zod'
-import { ToolDefinition } from '../core/dynemcp'
+import { ToolDefinition } from '../core/dynemcp/interfaces'
 
 // Collection of registered tools
 const toolRegistry: Map<string, ToolDefinition> = new Map()
