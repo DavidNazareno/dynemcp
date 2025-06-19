@@ -5,10 +5,9 @@
   "private": false,
   "type": "module",
   "bin": {
-    "dynebuild": "./dist/bin/cli.js"
+    "dynebuild": "./dist/bin/index.js"
   },
   "scripts": {
-    "postbuild": "chmod +x ./dist/bin/index.js"
   },
   "exports": {
     ".": {

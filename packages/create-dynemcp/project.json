@@ -5,13 +5,19 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "@nx/esbuild:esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "packages/create-dynemcp/dist",
         "main": "packages/create-dynemcp/src/index.ts",
         "tsConfig": "packages/create-dynemcp/tsconfig.lib.json",
-        "assets": ["packages/create-dynemcp/*.md", "packages/create-dynemcp/templates/**/*"]
+        "assets": ["packages/create-dynemcp/*.md", "packages/create-dynemcp/templates/**/*"],
+        "format": ["cjs"],
+        "bundle": true,
+        "platform": "node",
+        "thirdParty": true,
+        "external": ["fs", "path", "os", "child_process"],
+        "outputFileName": "index.js"
       },
       "configurations": {
         "production": {

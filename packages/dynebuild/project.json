@@ -5,13 +5,18 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "@nx/esbuild:esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "packages/dynebuild/dist",
         "main": "packages/dynebuild/src/index.ts",
         "tsConfig": "packages/dynebuild/tsconfig.lib.json",
-        "assets": []
+        "additionalEntryPoints": ["packages/dynebuild/src/bin/index.ts"],
+        "assets": [],
+        "format": ["esm"],
+        "bundle": true,
+        "platform": "node",
+        "thirdParty": true
       },
       "configurations": {
         "production": {

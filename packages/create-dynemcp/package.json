@@ -3,9 +3,9 @@
   "description": "Create DyneMCP apps with one command",
   "version": "0.0.1-canary.20250619T14503",
   "private": false,
-  "type": "module",
+  "type": "commonjs",
   "bin": {
-    "create-dynemcp": "./dist/index.js"
+    "create-dynemcp": "./dist/index.cjs"
   },
   "files": [
     "dist",

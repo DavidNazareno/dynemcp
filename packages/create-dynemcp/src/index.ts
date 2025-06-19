@@ -2,7 +2,6 @@
 
 import fs from 'fs-extra';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import chalk from 'chalk';
 import { Command } from 'commander';
 import Conf from 'conf';
@@ -21,12 +20,22 @@ const checkUpdate = updateCheck as unknown as (
   config?: any,
 ) => Promise<{ latest: string; fromCache: boolean } | null>;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// En CommonJS __dirname ya está disponible
+// En ESM necesitamos usar import.meta.url
+// Usaremos __dirname directamente en el código
 
 // Package version
-const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
-const version = packageJson.version;
+let version = '0.0.1';
+try {
+  // Intentar leer el package.json del paquete create-dynemcp
+  const packageJsonPath = path.resolve(__dirname, '../package.json');
+  if (fs.existsSync(packageJsonPath)) {
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    version = packageJson.version;
+  }
+} catch (error) {
+  console.warn('No se pudo leer la versión del package.json:', error);
+}
 
 // Program configuration
 const program = new Command('create-dynemcp')
@@ -58,9 +67,11 @@ async function run(): Promise<void> {
 
   // Check for updates
   try {
-    const update = await checkUpdate(packageJson);
+    // Crear un objeto con la versión actual para checkUpdate
+    const pkgInfo = { name: 'create-dynemcp', version };
+    const update = await checkUpdate(pkgInfo);
     if (update?.latest) {
-      const updateMessage = `Update available! ${packageJson.version} → ${update.latest}`;
+      const updateMessage = `Update available! ${version} → ${update.latest}`;
       console.log();
       console.log(chalk.yellow(`${updateMessage}`));
       console.log(chalk.yellow('Run `pnpm i -g create-dynemcp` to update'));

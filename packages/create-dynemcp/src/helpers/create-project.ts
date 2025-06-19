@@ -1,5 +1,17 @@
 import fs from 'fs-extra';
 import path from 'path';
+
+// Determinamos el directorio actual
+let templatesDir: string;
+try {
+  // Intentamos el enfoque ESM primero
+  const url = import.meta?.url || '';
+  const currentDir = path.dirname(new URL(url, 'file://').pathname);
+  templatesDir = path.resolve(currentDir, '../..', 'templates');
+} catch (e) {
+  // Si falla, asumimos que estamos en CommonJS
+  templatesDir = path.resolve(__dirname, '../..', 'templates');
+}
 import chalk from 'chalk';
 // Removed unused imports
 // import { execSync as _execSync } from 'child_process';
@@ -18,8 +30,6 @@ interface CreateProjectOptions {
 }
 
 export async function getAvailableTemplates(): Promise<string[]> {
-  const templatesDir = path.join(__dirname, '../../templates');
-
   try {
     const templates = await fs.readdir(templatesDir);
     return templates.filter((template) =>
@@ -39,7 +49,7 @@ export async function createProject(options: CreateProjectOptions): Promise<void
   await fs.ensureDir(projectPath);
 
   // Copy template files
-  const templatePath = path.join(__dirname, '../../templates', template);
+  const templatePath = path.join(templatesDir, template);
 
   try {
     await fs.copy(templatePath, projectPath, {

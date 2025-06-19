@@ -5,26 +5,36 @@ import fastGlob from 'fast-glob';
 import os from 'os';
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
+
 import { Sema } from 'async-sema';
 // Import package.json for version detection
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+
+// Determinamos el directorio actual
+let currentDir: string;
+try {
+  // Intentamos el enfoque ESM primero
+  const url = import.meta?.url || '';
+  currentDir = dirname(new URL(url, 'file://').pathname);
+} catch (e) {
+  // Si falla, asumimos que estamos en CommonJS
+  currentDir = __dirname || process.cwd();
+}
 
 import type { GetTemplateFileArgs, InstallTemplateArgs } from './types';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
 
 // Read package.json manually since direct JSON imports have compatibility issues
-const fileContent = readFileSync(join(__dirname, '../../package.json'), 'utf8');
+const fileContent = readFileSync(join(currentDir, '../../package.json'), 'utf8');
 const pkg: { version: string } = JSON.parse(fileContent) as { version: string };
 
 /**
  * Get the file path for a given file in a template, e.g. "dynemcp.config.json".
  */
 export const getTemplateFile = ({ template, mode, file }: GetTemplateFileArgs): string => {
-  return path.join(__dirname, '../../templates', template, mode, file);
+  return join(currentDir, '../../templates', template, mode, file);
 };
 
 export const SRC_DIR_NAMES = ['src', 'prompt', 'resources', 'tools'];
@@ -51,7 +61,7 @@ export const installTemplate = async ({
    * Copy the template files to the target directory.
    */
   console.log('\nInitializing project with template:', template, '\n');
-  const templatePath = path.join(__dirname, '../../templates', template);
+  const templatePath = join(currentDir, '../../templates', template);
   const copySource = ['**'];
   if (!eslint) copySource.push('!.eslintrc.js', '!.eslintignore');
   if (!tailwind) copySource.push('!tailwind.config.js', '!postcss.config.js');

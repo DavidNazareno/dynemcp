@@ -15,6 +15,7 @@
   },
   "private": true,
   "devDependencies": {
+    "@nx/esbuild": "^21.2.1",
     "@nx/eslint": "21.2.0",
     "@nx/eslint-plugin": "21.2.0",
     "@nx/js": "21.2.0",
