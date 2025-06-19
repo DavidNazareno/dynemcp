@@ -84,7 +84,9 @@ export const installTemplate = async ({
 
   // update import alias in any files if not using the default
   if (importAlias !== '@/*') {
-    const files = await fastGlob('**/*', {
+    // Asegurarnos de que fastGlob se usa correctamente como módulo ES
+    const globFn = fastGlob.glob || fastGlob;
+    const files = await globFn('**/*', {
       cwd: root,
       dot: true,
       stats: false,
@@ -151,10 +153,8 @@ export const installTemplate = async ({
     private: true,
     scripts: {
       dev: 'cross-env NODE_ENV=development npx @modelcontextprotocol/inspector serve src/index.ts',
-      build: 'dynebuild',
+      build: 'build-dynemcp',
       start: 'node dist/server.js',
-      test: 'vitest run',
-      'test:watch': 'vitest',
       format: 'prettier --write .',
       lint: eslint ? 'eslint . --ext .js,.jsx,.ts,.tsx' : undefined,
       'eslint:fix': eslint ? 'eslint . --ext .js,.jsx,.ts,.tsx --fix' : undefined,
@@ -164,7 +164,8 @@ export const installTemplate = async ({
      */
     dependencies: {
       '@modelcontextprotocol/sdk': '^1.12.1',
-      '@dynemcp/server-dynemcp': 'workspace:*', // Usar referencia de workspace para server-dynemcp
+      '@dynemcp/server-dynemcp': `^${version}`,
+      '@dynemcp/build-dynemcp': `^${version}`,
       zod: '^3.22.4',
     },
     devDependencies: {},
@@ -212,7 +213,7 @@ export const installTemplate = async ({
   // Add common dev dependencies
   packageJson.devDependencies = {
     ...packageJson.devDependencies,
-    '@repo/dynebuild': version,
+    '@dynemcp/build-dynemcp': `^${version}`,
     'cross-env': '^7.0.3',
     esbuild: '^0.20.2',
     vitest: '^1.4.0',

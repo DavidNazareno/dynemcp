@@ -1,6 +1,12 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { glob } from 'fast-glob';
+import fastGlob from 'fast-glob'; // Importar como módulo completo
+
+// Definir un tipo para la función glob
+type GlobFunction = (patterns: string | string[], options?: object) => Promise<string[]>;
+
+// Extraer la función glob con el tipo correcto
+const { glob } = fastGlob as { glob: GlobFunction };
 
 interface CopyOptions {
   parents?: boolean;

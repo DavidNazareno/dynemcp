@@ -10,7 +10,8 @@
     "create-dynemcp": "./dist/index.js"
   },
   "scripts": {
-    "postbuild": "chmod +x ./dist/index.js"
+    "postbuild": "chmod +x ./dist/index.js && pnpm run copy-templates",
+    "copy-templates": "cp -r ./src/templates ./dist/"
   },
   "exports": {
     "./package.json": "./package.json",
