@@ -42,9 +42,12 @@ async function publishPackages(): Promise<void> {
     // Check if we're in a GitHub Actions environment
     const isGitHubActions = process.env.GITHUB_ACTIONS === 'true';
     const dryRun = process.env.DRY_RUN === 'true';
+    
+    // Check if --no-git-checks was passed as an argument
+    const noGitChecks = process.argv.includes('--no-git-checks');
 
     // Get all packages in the workspace
-    const { stdout } = await execa('pnpm', ['ls', '--json', '--depth', '-1']);
+    const { stdout } = await execa('pnpm', ['ls', '--json', '--depth', '-1', '--filter', './packages/*']);
     const workspaceInfo = JSON.parse(stdout) as Package[];
 
     console.log(`Found ${workspaceInfo.length} packages in the workspace`);
@@ -99,9 +102,9 @@ async function publishPackages(): Promise<void> {
           continue;
         }
 
-        // Use --no-git-checks in GitHub Actions to avoid issues with detached HEAD
+        // Use --no-git-checks in GitHub Actions or if explicitly requested
         const publishArgs = ['publish', '--tag', npmTag, '--access', 'public'];
-        if (isGitHubActions) {
+        if (isGitHubActions || noGitChecks) {
           publishArgs.push('--no-git-checks');
         }
 
