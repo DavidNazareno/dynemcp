@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/source",
-  "version": "0.0.5-canary.20250619T21251",
+  "version": "0.0.6-canary.20250619T22302",
   "license": "MIT",
   "scripts": {
     "build": "nx run-many --target=build --all",

@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/server-dynemcp",
-  "version": "0.0.5-canary.20250619T21251",
+  "version": "0.0.6-canary.20250619T22302",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
