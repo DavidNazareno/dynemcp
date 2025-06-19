@@ -1,20 +1,16 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@repo/dynemcp": ["packages/dynemcp/src"],
-      "@repo/dynemcp/*": ["packages/dynemcp/src/*"],
-      "@repo/dynebuild": ["packages/dynebuild/src"],
-      "@repo/dynebuild/*": ["packages/dynebuild/src/*"],
-      "@repo/create-dynemcp": ["packages/create-dynemcp/src"],
-      "@repo/create-dynemcp/*": ["packages/create-dynemcp/src/*"]
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/create-dynemcp"
+    },
+    {
+      "path": "./packages/build-dynemcp"
+    },
+    {
+      "path": "./packages/server-dynemcp"
     }
-  },
-  "files": [
-    "packages/dynemcp/src/index.ts",
-    "packages/dynebuild/src/index.ts",
-    "packages/create-dynemcp/src/index.ts"
-  ],
-  "exclude": ["node_modules"]
+  ]
 }

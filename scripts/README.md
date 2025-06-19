@@ -73,12 +73,14 @@ The versioning system is integrated with GitHub Actions:
 - **Canary Release Workflow**: Automatically runs on push to `main`
 - **Release Workflow**: Manually triggered for RC and stable releases
 
-## Turborepo Integration
+## NX Integration
 
-The versioning tasks are integrated with Turborepo for efficient caching and dependency management:
+The versioning tasks are integrated with NX for efficient caching and dependency management:
 
 - `version-packages`: Depends on build and uses changesets as inputs
 - `publish-packages`: Depends on build and version-packages
+
+NX's powerful caching system ensures that these tasks are only run when necessary, improving the overall development experience.
 
 ## Credits
 

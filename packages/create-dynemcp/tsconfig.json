@@ -1,13 +1,16 @@
 {
-  "extends": [
-    "../typescript-config/base.json",
-    "../typescript-config/paths.json"
-  ],
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
-    "composite": true
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.json"],
-  "exclude": ["node_modules", "dist"]
+  "extends": "../../tsconfig.base.json",
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "../server-dynemcp"
+    },
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }
