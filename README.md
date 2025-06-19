@@ -211,9 +211,9 @@ pnpm run build:examples
 DyneMCP soporta variables de entorno de forma nativa, similar a Next.js:
 
 ```typescript
-import { env } from 'dynemcp/env'
+import { env } from 'dynemcp/env';
 
-const token = env('OPENAI_API_KEY')
+const token = env('OPENAI_API_KEY');
 ```
 
 Automáticamente carga estos archivos:
@@ -272,8 +272,8 @@ Opciones válidas para `promptStyle` incluyen: `chatml`, `plain`, o `custom`.
 ### Definiendo una Herramienta
 
 ```typescript
-import { z } from 'zod'
-import { createTool } from 'dynemcp/tools'
+import { z } from 'zod';
+import { createTool } from 'dynemcp/tools';
 
 export const calculatorTool = createTool(
   'calculator',
@@ -283,55 +283,55 @@ export const calculatorTool = createTool(
     a: z.number(),
     b: z.number(),
   }),
-  async params => {
+  async (params) => {
     switch (params.operation) {
       case 'add':
-        return { result: params.a + params.b }
+        return { result: params.a + params.b };
       case 'subtract':
-        return { result: params.a - params.b }
+        return { result: params.a - params.b };
       case 'multiply':
-        return { result: params.a * params.b }
+        return { result: params.a * params.b };
       case 'divide':
-        if (params.b === 0) throw new Error('División por cero')
-        return { result: params.a / params.b }
+        if (params.b === 0) throw new Error('División por cero');
+        return { result: params.a / params.b };
     }
-  }
-)
+  },
+);
 
 // Exportar todas las herramientas
-export default [calculatorTool]
+export default [calculatorTool];
 ```
 
 ### Definiendo un Recurso
 
 ```typescript
-import { createDynamicResource } from 'dynemcp/resources'
+import { createDynamicResource } from 'dynemcp/resources';
 
 export const timeResource = createDynamicResource(
   'current-time',
   'Hora Actual',
   () => {
-    const now = new Date()
+    const now = new Date();
     return JSON.stringify({
       time: now.toISOString(),
       timestamp: now.getTime(),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    })
+    });
   },
   {
     description: 'Devuelve la hora actual del servidor',
     contentType: 'application/json',
-  }
-)
+  },
+);
 
 // Exportar todos los recursos
-export default [timeResource]
+export default [timeResource];
 ```
 
 ### Definiendo un Prompt
 
 ```typescript
-import { createSystemPrompt } from 'dynemcp/prompt'
+import { createSystemPrompt } from 'dynemcp/prompt';
 
 export const assistantPrompt = createSystemPrompt(
   'assistant',
@@ -339,11 +339,11 @@ export const assistantPrompt = createSystemPrompt(
   'Eres un asistente de IA útil. Responde a las preguntas con precisión y concisión.',
   {
     description: 'Prompt de sistema básico para asistente',
-  }
-)
+  },
+);
 
 // Exportar todos los prompts
-export default [assistantPrompt]
+export default [assistantPrompt];
 ```
 
 ## Flujo de Trabajo de Desarrollo
@@ -420,11 +420,11 @@ Si estás actualizando desde una versión anterior de DyneMCP que usaba la imple
 ### Ejemplo de Uso del SDK
 
 ```typescript
-import { createMCPServer } from 'dynemcp'
-import { z } from 'zod'
+import { createMCPServer } from 'dynemcp';
+import { z } from 'zod';
 
 // Crear un servidor
-const server = createMCPServer('mi-servidor', '1.0.0')
+const server = createMCPServer('mi-servidor', '1.0.0');
 
 // Registrar una herramienta
 server.registerTool({
@@ -438,12 +438,12 @@ server.registerTool({
     required: ['nombre'],
   },
   handler: async ({ nombre }) => {
-    return { mensaje: `¡Hola, ${nombre}!` }
+    return { mensaje: `¡Hola, ${nombre}!` };
   },
-})
+});
 
 // Iniciar el servidor
-server.start()
+server.start();
 ```
 
 ## Licencia
