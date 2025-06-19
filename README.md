@@ -7,7 +7,7 @@
 
 Un framework escalable en TypeScript para construir servidores Model Context Protocol (MCP) utilizando el SDK oficial de MCP para TypeScript.
 
-Este proyecto está organizado como un monorepo utilizando Turborepo y pnpm workspaces para un desarrollo eficiente y una gestión óptima de paquetes.
+Este proyecto está organizado como un monorepo utilizando NX y pnpm workspaces para un desarrollo eficiente y una gestión óptima de paquetes.
 
 ## Características principales
 
@@ -19,7 +19,7 @@ Este proyecto está organizado como un monorepo utilizando Turborepo y pnpm work
 - **Variables de entorno**: Soporte integrado para gestión de variables de entorno
 - **Hot reloading**: Recarga en caliente durante el desarrollo
 - **Desarrollo type-safe**: Validación de esquemas con Zod para mayor seguridad
-- **Monorepo optimizado**: Gestión eficiente de dependencias y paquetes
+- **Monorepo optimizado con NX**: Gestión eficiente de dependencias, paquetes y caché de compilación
 
 ## Instalación
 
@@ -51,7 +51,7 @@ Esto creará un único archivo optimizado en `dist/server.js` que contiene todo 
 
 ### Estructura del Monorepo
 
-Este proyecto está organizado como un monorepo con la siguiente estructura:
+Este proyecto está organizado como un monorepo con NX y tiene la siguiente estructura:
 
 ```
 monorepo-root/
@@ -72,7 +72,7 @@ monorepo-root/
 │   ├── basic-server/         → Simple MCP server with standard structure
 │   └── custom-tools/         → Server with custom tools implementation
 │
-├── turbo.json                → Turborepo configuration
+├── nx.json                   → NX configuration
 ├── pnpm-workspace.yaml       → pnpm workspace configuration
 └── package.json              → Root package.json
 ```

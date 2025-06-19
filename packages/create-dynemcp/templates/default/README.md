@@ -1,6 +1,6 @@
 # DyneMCP Project
 
-A Model Context Protocol (MCP) server built with DyneMCP.
+A Model Context Protocol (MCP) server built with DyneMCP, powered by NX.
 
 ## Project Structure
 
@@ -33,6 +33,19 @@ pnpm install
 
 # Start the development server
 pnpm run dev
+```
+
+This project uses NX for efficient builds and dependency management. You can use NX commands directly:
+
+```bash
+# Run development server
+nx serve
+
+# Run linting
+nx lint
+
+# Run tests
+nx test
 ```
 
 ## Building for Production

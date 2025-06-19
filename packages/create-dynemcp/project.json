@@ -6,12 +6,19 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/create-dynemcp",
+        "outputPath": "packages/create-dynemcp/dist",
         "main": "packages/create-dynemcp/src/index.ts",
         "tsConfig": "packages/create-dynemcp/tsconfig.lib.json",
         "assets": ["packages/create-dynemcp/*.md", "packages/create-dynemcp/templates/**/*"]
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "generatePackageJson": true
+        }
       }
     },
     "typecheck": {
