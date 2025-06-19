@@ -1,7 +1,7 @@
 {
   "name": "@dynemcp/create-dynemcp",
   "version": "0.0.5-canary.20250619T21251",
-  "private": true,
+  "private": false,
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

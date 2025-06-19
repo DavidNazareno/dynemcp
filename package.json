@@ -24,7 +24,7 @@
     "publish:rc": "RELEASE_TYPE=release-candidate tsx scripts/publish-packages.ts",
     "publish:dry-run": "DRY_RUN=true tsx scripts/publish-packages.ts"
   },
-  "private": true,
+  "private": false,
   "devDependencies": {
     "@nx/eslint": "21.2.0",
     "@nx/eslint-plugin": "21.2.0",
