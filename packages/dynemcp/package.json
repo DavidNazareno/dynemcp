@@ -1,17 +1,9 @@
 {
-  "name": "@repo/dynemcp",
+  "name": "@dynemcporg/dynemcp",
   "description": "A Model Context Protocol (MCP) server framework",
   "private": false,
   "type": "module",
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "vitest run",
-    "lint": "eslint . --ext .ts",
-    "eslint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
-    "format": "prettier --write .",
-    "test:watch": "vitest"
-  },
+  "scripts": {},
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -46,14 +38,10 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.19.0",
-    "prettier": "^3.2.5",
-    "typescript": "latest",
-    "vitest": "^3.0.7",
-    "@repo/typescript-config": "workspace:*",
-    "@repo/vitest-config": "workspace:*",
     "@vitest/coverage-istanbul": "^3.0.7"
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "version": "0.0.1-canary.20250619T14503"
 }

@@ -1,0 +1,36 @@
+{
+  "name": "dynebuild",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dynebuild/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/dynebuild/dist",
+        "main": "packages/dynebuild/src/index.ts",
+        "tsConfig": "packages/dynebuild/tsconfig.lib.json",
+        "assets": []
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "generatePackageJson": true
+        }
+      }
+    },
+    "typecheck": {
+      "executor": "@nx/js:typecheck",
+      "options": {
+        "tsConfig": "packages/dynebuild/tsconfig.lib.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags": []
+}

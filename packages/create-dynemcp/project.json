@@ -1,0 +1,33 @@
+{
+  "name": "create-dynemcp",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/create-dynemcp/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
+      "options": {
+        "outputPath": "dist/packages/create-dynemcp",
+        "main": "packages/create-dynemcp/src/index.ts",
+        "tsConfig": "packages/create-dynemcp/tsconfig.lib.json",
+        "assets": ["packages/create-dynemcp/*.md", "packages/create-dynemcp/templates/**/*"]
+      }
+    },
+    "typecheck": {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "tsConfig": "packages/create-dynemcp/tsconfig.json",
+        "noEmit": true
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/create-dynemcp/**/*.ts"]
+      }
+    }
+  },
+  "tags": []
+}

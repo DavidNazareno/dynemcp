@@ -2,9 +2,9 @@
  * Configuration utilities for DyneMCP projects
  */
 
-import fs from 'fs'
-import path from 'path'
-import { z } from 'zod'
+import fs from 'fs';
+import path from 'path';
+import { z } from 'zod';
 
 // Define the schema for dynemcp.config.json
 const DyneMCPConfigSchema = z.object({
@@ -28,9 +28,9 @@ const DyneMCPConfigSchema = z.object({
       minify: z.boolean().default(false),
     })
     .optional(),
-})
+});
 
-export type DyneMCPConfig = z.infer<typeof DyneMCPConfigSchema>
+export type DyneMCPConfig = z.infer<typeof DyneMCPConfigSchema>;
 
 /**
  * Load the DyneMCP configuration file
@@ -38,34 +38,31 @@ export type DyneMCPConfig = z.infer<typeof DyneMCPConfigSchema>
 export function loadConfig(configPath = 'dynemcp.config.json'): DyneMCPConfig {
   const absolutePath = path.isAbsolute(configPath)
     ? configPath
-    : path.join(process.cwd(), configPath)
+    : path.join(process.cwd(), configPath);
 
   try {
     if (!fs.existsSync(absolutePath)) {
-      throw new Error(`Configuration file not found: ${absolutePath}`)
+      throw new Error(`Configuration file not found: ${absolutePath}`);
     }
 
-    const configContent = fs.readFileSync(absolutePath, 'utf-8')
-    const config = JSON.parse(configContent)
+    const configContent = fs.readFileSync(absolutePath, 'utf-8');
+    const config: unknown = JSON.parse(configContent);
 
-    return DyneMCPConfigSchema.parse(config)
+    return DyneMCPConfigSchema.parse(config);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('Invalid configuration:', error.errors)
+      console.error('Invalid configuration:', error.errors);
     } else {
-      console.error('Failed to load configuration:', error)
+      console.error('Failed to load configuration:', error);
     }
-    process.exit(1)
+    process.exit(1);
   }
 }
 
 /**
  * Create a default DyneMCP configuration
  */
-export function createDefaultConfig(
-  name: string,
-  version = '1.0.0'
-): DyneMCPConfig {
+export function createDefaultConfig(name: string, version = '1.0.0'): DyneMCPConfig {
   return {
     name,
     version,
@@ -85,10 +82,10 @@ export function createDefaultConfig(
       format: 'esm',
       minify: false,
     },
-  }
+  };
 }
 
 export default {
   loadConfig,
   createDefaultConfig,
-}
+};

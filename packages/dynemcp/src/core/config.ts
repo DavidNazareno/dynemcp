@@ -3,7 +3,7 @@
  * Provides utilities to load and validate configuration from various sources
  */
 
-import { z } from 'zod'
+import { z } from 'zod';
 
 // Define the schema for configuration validation
 const ConfigSchema = z
@@ -33,10 +33,10 @@ const ConfigSchema = z
       })
       .default({}),
   })
-  .default({})
+  .default({});
 
 // Define the type for the configuration
-export type DyneMCPConfig = z.infer<typeof ConfigSchema>
+export type DyneMCPConfig = z.infer<typeof ConfigSchema>;
 
 /**
  * Load configuration from various sources
@@ -59,11 +59,11 @@ export function loadConfig(_configPath?: string): DyneMCPConfig {
     prompts: {
       autoRegister: true,
     },
-  }
+  };
 
   // TODO: Load configuration from file if provided
   // TODO: Merge with environment variables
 
   // Validate and return the configuration
-  return ConfigSchema.parse(defaultConfig)
+  return ConfigSchema.parse(defaultConfig);
 }

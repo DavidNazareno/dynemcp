@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "composite": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["es2022", "dom"],
+    "types": ["node"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": false,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "target": "es2022",
+    "customConditions": ["development"],
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@dynemcporg/create-dynemcp": ["packages/create-dynemcp/src/index.ts"],
+      "@dynemcporg/dynebuild": ["packages/dynebuild/src/index.ts"],
+      "@dynemcporg/dynemcp": ["packages/dynemcp/src/index.ts"]
+    }
+  }
+}

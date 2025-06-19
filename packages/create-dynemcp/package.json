@@ -1,7 +1,7 @@
 {
-  "name": "@repo/create-dynemcp",
+  "name": "@dynemcporg/create-dynemcp",
   "description": "Create DyneMCP apps with one command",
-  "version": "0.0.0",
+  "version": "0.0.1-canary.20250619T14503",
   "private": false,
   "type": "module",
   "bin": {
@@ -19,13 +19,6 @@
     }
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "vitest run",
-    "lint": "eslint . --ext .ts",
-    "eslint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
-    "format": "prettier --write .",
-    "test:watch": "vitest",
     "postbuild": "chmod +x ./dist/index.js"
   },
   "dependencies": {
@@ -47,11 +40,6 @@
     "@types/node": "^20.19.0",
     "@types/validate-npm-package-name": "^4.0.2",
     "execa": "^9.6.0",
-    "prettier": "^3.2.5",
-    "typescript": "latest",
-    "vitest": "^3.0.7",
-    "@repo/typescript-config": "workspace:*",
-    "@repo/vitest-config": "workspace:*",
     "@vitest/coverage-istanbul": "^3.0.7"
   },
   "engines": {

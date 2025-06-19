@@ -2,8 +2,8 @@
  * Builder module for DyneMCP projects
  */
 
-import { build as esbuild } from 'esbuild'
-import type { BuildOptions } from 'esbuild'
+import { build as esbuild } from 'esbuild';
+import type { BuildOptions } from 'esbuild';
 
 /**
  * Build a DyneMCP project
@@ -17,10 +17,10 @@ export async function build(options: BuildOptions): Promise<void> {
       bundle: true,
       minify: process.env.NODE_ENV === 'production',
       sourcemap: process.env.NODE_ENV !== 'production',
-    })
+    });
   } catch (error) {
-    console.error('Build failed:', error)
-    process.exit(1)
+    console.error('Build failed:', error);
+    process.exit(1);
   }
 }
 
@@ -35,14 +35,14 @@ export async function watch(options: BuildOptions): Promise<void> {
       format: 'esm',
       bundle: true,
       sourcemap: true,
-    })
+    });
   } catch (error) {
-    console.error('Watch build failed:', error)
-    process.exit(1)
+    console.error('Watch build failed:', error);
+    process.exit(1);
   }
 }
 
 export default {
   build,
   watch,
-}
+};

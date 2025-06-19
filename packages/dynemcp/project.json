@@ -1,0 +1,36 @@
+{
+  "name": "dynemcp",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/dynemcp/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "packages/dynemcp/dist",
+        "main": "packages/dynemcp/src/index.ts",
+        "tsConfig": "packages/dynemcp/tsconfig.lib.json",
+        "assets": []
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "generatePackageJson": true
+        }
+      }
+    },
+    "typecheck": {
+      "executor": "@nx/js:typecheck",
+      "options": {
+        "tsConfig": "packages/dynemcp/tsconfig.lib.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags": []
+}

@@ -1,4 +1,4 @@
-import { execa } from 'execa'
+import execa from 'execa'
 import { existsSync } from 'fs'
 import { readFile } from 'fs/promises'
 import { join } from 'path'

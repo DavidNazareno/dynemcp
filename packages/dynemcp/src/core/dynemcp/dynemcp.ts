@@ -2,24 +2,20 @@
  * DyneMCP Core - Wrapper for the official MCP SDK
  */
 
-import type { DyneMCPConfig } from '../config.ts'
-import { loadConfig } from '../config.ts'
-import type {
-  ToolDefinition,
-  ResourceDefinition,
-  PromptDefinition,
-} from './interfaces.ts'
-import { SERVER_VERSION } from '../constants.ts'
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import type { DyneMCPConfig } from '../config';
+import { loadConfig } from '../config';
+import type { ToolDefinition, ResourceDefinition, PromptDefinition } from './interfaces.ts';
+import { SERVER_VERSION } from '../constants.ts';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
 // Main DyneMCP class
 export class DyneMCP {
-  private server: McpServer
-  private tools: ToolDefinition[] = []
-  private resources: ResourceDefinition[] = []
-  private prompts: PromptDefinition[] = []
-  private config: DyneMCPConfig
+  private server: McpServer;
+  private tools: ToolDefinition[] = [];
+  private resources: ResourceDefinition[] = [];
+  private prompts: PromptDefinition[] = [];
+  private config!: DyneMCPConfig; // Using definite assignment assertion
 
   /**
    * Creates a new DyneMCP instance
@@ -31,7 +27,7 @@ export class DyneMCP {
     this.server = new McpServer({
       name,
       version,
-    })
+    });
     this.config = {
       server: {
         name,
@@ -46,7 +42,7 @@ export class DyneMCP {
       prompts: {
         autoRegister: true,
       },
-    }
+    };
   }
 
   /**
@@ -55,7 +51,7 @@ export class DyneMCP {
    * @param configPath - Path to configuration file
    */
   async init(configPath?: string): Promise<void> {
-    this.config = await loadConfig(configPath)
+    this.config = await loadConfig(configPath);
   }
 
   /**
@@ -64,9 +60,9 @@ export class DyneMCP {
    * @param tool - Tool definition
    */
   registerTool(tool: ToolDefinition): void {
-    this.tools.push(tool)
+    this.tools.push(tool);
 
-    this.server.tool(tool.name, tool.description, tool.schema, tool.handler)
+    this.server.tool(tool.name, tool.description, tool.schema, tool.handler);
   }
 
   /**
@@ -76,7 +72,7 @@ export class DyneMCP {
    */
   registerTools(tools: ToolDefinition[]): void {
     for (const tool of tools) {
-      this.registerTool(tool)
+      this.registerTool(tool);
     }
   }
 
@@ -86,13 +82,11 @@ export class DyneMCP {
    * @param resource - Resource definition
    */
   registerResource(resource: ResourceDefinition): void {
-    this.resources.push(resource)
+    this.resources.push(resource);
 
     const handler = async (_args: any, _extra: any) => {
       const content =
-        typeof resource.content === 'function'
-          ? await resource.content()
-          : resource.content
+        typeof resource.content === 'function' ? await resource.content() : resource.content;
 
       return {
         content: [
@@ -101,16 +95,16 @@ export class DyneMCP {
             text: content,
           },
         ],
-      }
-    }
+      };
+    };
 
     // We use an empty object for parameter schema
     this.server.tool(
       `resource:${resource.uri}`,
       resource.description || `Resource: ${resource.name}`,
       {},
-      handler
-    )
+      handler,
+    );
   }
 
   /**
@@ -120,7 +114,7 @@ export class DyneMCP {
    */
   registerResources(resources: ResourceDefinition[]): void {
     for (const resource of resources) {
-      this.registerResource(resource)
+      this.registerResource(resource);
     }
   }
 
@@ -130,7 +124,7 @@ export class DyneMCP {
    * @param prompt - Prompt definition
    */
   registerPrompt(prompt: PromptDefinition): void {
-    this.prompts.push(prompt)
+    this.prompts.push(prompt);
 
     // Register the prompt in the MCP server
     // Similar to resources, we implement it as a tool
@@ -146,9 +140,9 @@ export class DyneMCP {
               text: prompt.content,
             },
           ],
-        }
-      }
-    )
+        };
+      },
+    );
   }
 
   /**
@@ -158,7 +152,7 @@ export class DyneMCP {
    */
   registerPrompts(prompts: PromptDefinition[]): void {
     for (const prompt of prompts) {
-      this.registerPrompt(prompt)
+      this.registerPrompt(prompt);
     }
   }
 
@@ -167,11 +161,11 @@ export class DyneMCP {
    */
   async start(): Promise<void> {
     // By default, use stdio
-    const transport = new StdioServerTransport()
+    const transport = new StdioServerTransport();
 
     // Connect the server to the transport
-    await this.server.connect(transport)
-    console.log('MCP server started successfully')
+    await this.server.connect(transport);
+    console.log('MCP server started successfully');
   }
 
   /**
@@ -179,7 +173,7 @@ export class DyneMCP {
    */
   async stop(): Promise<void> {
     // The current SDK doesn't have a direct method to stop the server
-    console.log('Stopping MCP server...')
+    console.log('Stopping MCP server...');
     // Implement closing logic if necessary
   }
 
@@ -187,21 +181,21 @@ export class DyneMCP {
    * Returns all registered tools
    */
   get registeredTools(): ToolDefinition[] {
-    return [...this.tools]
+    return [...this.tools];
   }
 
   /**
    * Returns all registered resources
    */
   get registeredResources(): ResourceDefinition[] {
-    return [...this.resources]
+    return [...this.resources];
   }
 
   /**
    * Returns all registered prompts
    */
   get registeredPrompts(): PromptDefinition[] {
-    return [...this.prompts]
+    return [...this.prompts];
   }
 }
 
@@ -212,9 +206,6 @@ export class DyneMCP {
  * @param version - Server version
  * @returns New DyneMCP instance
  */
-export function createMCPServer(
-  name: string,
-  version: string = SERVER_VERSION
-): DyneMCP {
-  return new DyneMCP(name, version)
+export function createMCPServer(name: string, version: string = SERVER_VERSION): DyneMCP {
+  return new DyneMCP(name, version);
 }

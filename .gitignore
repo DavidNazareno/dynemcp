@@ -39,3 +39,9 @@ tsconfig.build.info
 # Misc
 .DS_Store
 *.pem
+
+
+# Nx
+.nx
+.nxcloud
+

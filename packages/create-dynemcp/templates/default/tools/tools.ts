@@ -1,5 +1,5 @@
 // @ts-expect-error - El SDK puede no tener tipos correctamente definidos
-import type { Tool } from '@modelcontextprotocol/sdk'
+import type { Tool } from '@modelcontextprotocol/sdk';
 
 // Define your tools here
 // Example:
@@ -21,6 +21,6 @@ import type { Tool } from '@modelcontextprotocol/sdk'
 // Array of tools to export
 const tools: Tool[] = [
   // myTool
-]
+];
 
-export default tools
+export default tools;

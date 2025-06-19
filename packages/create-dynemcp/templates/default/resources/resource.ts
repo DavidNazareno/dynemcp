@@ -1,5 +1,5 @@
 // @ts-expect-error - El SDK puede no tener tipos correctamente definidos
-import type { Resource } from '@modelcontextprotocol/sdk'
+import type { Resource } from '@modelcontextprotocol/sdk';
 
 // Define your resources here
 // Example:
@@ -14,6 +14,6 @@ import type { Resource } from '@modelcontextprotocol/sdk'
 // Array of resources to export
 const resources: Resource[] = [
   // myResource
-]
+];
 
-export default resources
+export default resources;

@@ -2,12 +2,12 @@
  * Resource registry for DyneMCP framework
  */
 
-import fs from 'fs'
-import path from 'path'
-import { ResourceDefinition } from '../core/dynemcp/interfaces.ts'
+import fs from 'fs';
+import path from 'path';
+import { ResourceDefinition } from '../core/dynemcp/interfaces.ts';
 
 // Collection of registered resources
-const resourceRegistry: Map<string, ResourceDefinition> = new Map()
+const resourceRegistry: Map<string, ResourceDefinition> = new Map();
 
 /**
  * Register a resource in the registry
@@ -16,12 +16,10 @@ const resourceRegistry: Map<string, ResourceDefinition> = new Map()
  */
 export function registerResource(resource: ResourceDefinition): void {
   if (resourceRegistry.has(resource.uri)) {
-    console.warn(
-      `Resource '${resource.uri}' is already registered. It will be overwritten.`
-    )
+    console.warn(`Resource '${resource.uri}' is already registered. It will be overwritten.`);
   }
 
-  resourceRegistry.set(resource.uri, resource)
+  resourceRegistry.set(resource.uri, resource);
 }
 
 /**
@@ -30,7 +28,7 @@ export function registerResource(resource: ResourceDefinition): void {
  * @returns Array of registered resources
  */
 export function getAllResources(): ResourceDefinition[] {
-  return Array.from(resourceRegistry.values())
+  return Array.from(resourceRegistry.values());
 }
 
 /**
@@ -40,14 +38,14 @@ export function getAllResources(): ResourceDefinition[] {
  * @returns The resource or undefined if not found
  */
 export function getResource(uri: string): ResourceDefinition | undefined {
-  return resourceRegistry.get(uri)
+  return resourceRegistry.get(uri);
 }
 
 /**
  * Clear all registered resources
  */
 export function clearResources(): void {
-  resourceRegistry.clear()
+  resourceRegistry.clear();
 }
 
 /**
@@ -60,22 +58,20 @@ export function clearResources(): void {
 export function createFileResource(
   filePath: string,
   options: {
-    name?: string
-    description?: string
-    uri?: string
-    contentType?: string
-  } = {}
+    name?: string;
+    description?: string;
+    uri?: string;
+    contentType?: string;
+  } = {},
 ): ResourceDefinition {
-  const absolutePath = path.isAbsolute(filePath)
-    ? filePath
-    : path.resolve(process.cwd(), filePath)
+  const absolutePath = path.isAbsolute(filePath) ? filePath : path.resolve(process.cwd(), filePath);
 
   if (!fs.existsSync(absolutePath)) {
-    throw new Error(`File not found: ${absolutePath}`)
+    throw new Error(`File not found: ${absolutePath}`);
   }
 
-  const fileName = path.basename(absolutePath)
-  const fileContent = fs.readFileSync(absolutePath, 'utf-8')
+  const fileName = path.basename(absolutePath);
+  const fileContent = fs.readFileSync(absolutePath, 'utf-8');
 
   const resource: ResourceDefinition = {
     uri: options.uri || `file://${absolutePath}`,
@@ -83,12 +79,12 @@ export function createFileResource(
     content: fileContent,
     description: options.description,
     contentType: options.contentType || getContentType(fileName),
-  }
+  };
 
   // Register the resource
-  registerResource(resource)
+  registerResource(resource);
 
-  return resource
+  return resource;
 }
 
 /**
@@ -105,9 +101,9 @@ export function createDynamicResource(
   name: string,
   generator: () => string | Promise<string>,
   options: {
-    description?: string
-    contentType?: string
-  } = {}
+    description?: string;
+    contentType?: string;
+  } = {},
 ): ResourceDefinition {
   const resource: ResourceDefinition = {
     uri,
@@ -115,12 +111,12 @@ export function createDynamicResource(
     content: generator,
     description: options.description,
     contentType: options.contentType || 'application/octet-stream',
-  }
+  };
 
   // Register the resource
-  registerResource(resource)
+  registerResource(resource);
 
-  return resource
+  return resource;
 }
 
 /**
@@ -130,7 +126,7 @@ export function createDynamicResource(
  * @returns The content type
  */
 function getContentType(fileName: string): string {
-  const extension = path.extname(fileName).toLowerCase()
+  const extension = path.extname(fileName).toLowerCase();
 
   const contentTypes: Record<string, string> = {
     '.txt': 'text/plain',
@@ -150,7 +146,7 @@ function getContentType(fileName: string): string {
     '.csv': 'text/csv',
     '.yaml': 'application/yaml',
     '.yml': 'application/yaml',
-  }
+  };
 
-  return contentTypes[extension] || 'application/octet-stream'
+  return contentTypes[extension] || 'application/octet-stream';
 }
