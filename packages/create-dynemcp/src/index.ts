@@ -9,7 +9,12 @@ import Conf from 'conf'
 import inquirer from 'inquirer'
 import ora from 'ora'
 import updateCheck from 'update-check'
-import { createProject, getAvailableTemplates } from './helpers/create-project'
+// Workaround for TypeScript not recognizing the CommonJS module as callable
+
+import {
+  createProject,
+  getAvailableTemplates,
+} from './helpers/create-project'
 import {
   validateProjectName,
   validateProjectPath,
@@ -21,6 +26,11 @@ import {
   getRunCommand,
   getPkgManager,
 } from './helpers/package-manager'
+
+const checkUpdate = updateCheck as unknown as (
+  pkg: any,
+  config?: any
+) => Promise<{ latest: string; fromCache: boolean } | null>
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -43,16 +53,11 @@ const program = new Command('create-dynemcp')
   .helpOption('-h, --help', 'Display this help message.')
   .option('--template <name>', 'The template to use (default, minimal, full)')
   .option('--ts, --typescript', 'Initialize as a TypeScript project (default)')
-  .option('--js, --javascript', 'Initialize as a JavaScript project')
   .option('--eslint', 'Include ESLint configuration (default)')
   .option('--no-eslint', 'Skip ESLint configuration')
   .option(
     '--use-npm',
     'Explicitly tell the CLI to bootstrap the application using npm'
-  )
-  .option(
-    '--use-yarn',
-    'Explicitly tell the CLI to bootstrap the application using Yarn'
   )
   .option(
     '--use-pnpm',
@@ -79,7 +84,7 @@ async function run(): Promise<void> {
 
   // Check for updates
   try {
-    const update = await updateCheck(packageJson)
+    const update = await checkUpdate(packageJson)
     if (update?.latest) {
       const updateMessage = `Update available! ${packageJson.version} → ${update.latest}`
       console.log()

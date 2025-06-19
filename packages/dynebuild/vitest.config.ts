@@ -1,15 +1,3 @@
-import { defineConfig } from 'vitest/config'
-import { resolve } from 'path'
+import { baseConfig } from '@repo/vitest-config/base'
 
-export default defineConfig({
-  test: {
-    environment: 'node',
-    include: ['**/*.test.ts'],
-    exclude: ['**/node_modules/**', '**/dist/**'],
-  },
-  resolve: {
-    alias: {
-      '#dynebuild': resolve(__dirname, './src'),
-    },
-  },
-})
+export default baseConfig

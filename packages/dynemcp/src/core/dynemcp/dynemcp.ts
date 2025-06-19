@@ -2,19 +2,20 @@
  * DyneMCP Core - Wrapper for the official MCP SDK
  */
 
-import { Server } from '@modelcontextprotocol/sdk/server'
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio'
-import { loadConfig, DyneMCPConfig } from '../config'
-import {
+import type { DyneMCPConfig } from '../config.ts'
+import { loadConfig } from '../config.ts'
+import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
-} from './interfaces'
-import { SERVER_VERSION } from '../constants'
+} from './interfaces.ts'
+import { SERVER_VERSION } from '../constants.ts'
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 
 // Main DyneMCP class
 export class DyneMCP {
-  private server: Server
+  private server: McpServer
   private tools: ToolDefinition[] = []
   private resources: ResourceDefinition[] = []
   private prompts: PromptDefinition[] = []
@@ -27,7 +28,7 @@ export class DyneMCP {
    * @param version - Server version
    */
   constructor(name: string, version: string = SERVER_VERSION) {
-    this.server = new Server({
+    this.server = new McpServer({
       name,
       version,
     })

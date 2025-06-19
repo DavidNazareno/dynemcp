@@ -4,7 +4,7 @@
 
 import fs from 'fs'
 import path from 'path'
-import { ResourceDefinition } from '../core/dynemcp/interfaces'
+import { ResourceDefinition } from '../core/dynemcp/interfaces.ts'
 
 // Collection of registered resources
 const resourceRegistry: Map<string, ResourceDefinition> = new Map()

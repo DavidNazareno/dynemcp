@@ -1,4 +1,4 @@
-import { PackageManager } from './package-manager'
+import { PackageManager } from './package-manager.ts'
 
 /**
  * Installs dependencies using the specified package manager

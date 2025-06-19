@@ -4,7 +4,7 @@ import {
   validateProjectName,
   validateProjectPath,
   validateTemplate,
-} from '../helpers/validate'
+} from '../helpers/validate.ts'
 
 // Mock fs-extra
 vi.mock('fs-extra', async () => {

@@ -1,13 +1,11 @@
 {
   "name": "@repo/create-dynemcp",
   "description": "Create DyneMCP apps with one command",
-  "type": "module",
   "version": "0.0.0",
+  "private": false,
+  "type": "module",
   "bin": {
     "create-dynemcp": "./dist/index.js"
-  },
-  "imports": {
-    "#create-dynemcp/*": "./src/*"
   },
   "files": [
     "dist",
@@ -22,14 +20,13 @@
   },
   "scripts": {
     "build": "tsc",
-    "postbuild": "chmod +x ./dist/index.js",
     "dev": "tsc --watch",
     "test": "vitest run",
     "lint": "eslint . --ext .ts",
     "eslint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --write .",
     "test:watch": "vitest",
-    "test:template": "vitest run template.test.ts"
+    "postbuild": "chmod +x ./dist/index.js"
   },
   "dependencies": {
     "async-sema": "^3.1.1",
@@ -49,15 +46,15 @@
     "@types/inquirer": "^9.0.8",
     "@types/node": "^20.19.0",
     "@types/validate-npm-package-name": "^4.0.2",
-    "eslint": "^9.28.0",
-    "eslint-config-prettier": "^9.1.0",
     "execa": "^9.6.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.4.2",
-    "vitest": "^1.4.0"
+    "typescript": "latest",
+    "vitest": "^3.0.7",
+    "@repo/typescript-config": "workspace:*",
+    "@repo/vitest-config": "workspace:*",
+    "@vitest/coverage-istanbul": "^3.0.7"
   },
   "engines": {
-    "node": ">=16.0.0"
-  },
-  "packageManager": "pnpm@10.9.0"
+    "node": ">=18.0.0"
+  }
 }

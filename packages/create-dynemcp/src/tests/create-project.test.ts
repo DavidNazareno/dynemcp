@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getAvailableTemplates, createProject } from '../helpers/create-project'
+import {
+  getAvailableTemplates,
+  createProject,
+} from '../helpers/create-project.ts'
 import fs from 'fs-extra'
 import type path from 'path'
 

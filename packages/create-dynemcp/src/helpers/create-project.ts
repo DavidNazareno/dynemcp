@@ -3,7 +3,7 @@ import path from 'path'
 import chalk from 'chalk'
 import { execSync as _execSync } from 'child_process'
 import { fileURLToPath } from 'url'
-import { PackageManager as _PackageManager } from './package-manager.js'
+import { PackageManager as _PackageManager } from './package-manager.ts'
 
 const _filename = fileURLToPath(import.meta.url)
 const _dirname = path.dirname(_filename)

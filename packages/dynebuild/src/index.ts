@@ -3,13 +3,13 @@
  */
 
 // Export builder functions
-export * from './builder/index'
+export * from './builder/index.ts'
 
 // Export bundler functions
-export * from './bundler/index'
+export * from './bundler/index.ts'
 
 // Export config utilities
-export * from './config/index'
+export * from './config/index.ts'
 
 // Export cli utilities
-export * from './bin/index'
+export * from './bin/index.ts'

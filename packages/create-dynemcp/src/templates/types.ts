@@ -1,4 +1,4 @@
-import type { PackageManager } from '../helpers/package-manager'
+import type { PackageManager } from '../helpers/package-manager.ts'
 
 export interface GetTemplateFileArgs {
   template: string

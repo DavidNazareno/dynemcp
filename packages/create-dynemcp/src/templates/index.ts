@@ -1,5 +1,5 @@
-import { install } from '../helpers/install'
-import { copy } from '../helpers/copy'
+import { install } from '../helpers/install.ts'
+import { copy } from '../helpers/copy.ts'
 
 import fastGlob from 'fast-glob'
 import os from 'os'
@@ -8,9 +8,9 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { Sema } from 'async-sema'
 // Import package.json for version detection
-import pkg from '../../package.json'
+import pkg from '../../package.json' with { type: 'json' }
 
-import type { GetTemplateFileArgs, InstallTemplateArgs } from './types'
+import type { GetTemplateFileArgs, InstallTemplateArgs } from './types.ts'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -266,4 +266,4 @@ export const installTemplate = async ({
   await install(packageManager, isOnline)
 }
 
-export * from './types'
+export * from './types.ts'

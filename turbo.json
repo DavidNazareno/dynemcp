@@ -31,15 +31,11 @@
       "persistent": true
     },
     "test": {
-      "dependsOn": ["^build"],
-      "inputs": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "test/**/*.tsx"]
+      "dependsOn": ["transit", "@repo/vitest-config#build"],
+      "outputs": ["coverage.json"]
     },
-    "test:watch": {
-      "cache": false,
-      "persistent": true
-    },
-    "test:template": {
-      "dependsOn": ["^test:template"]
+    "transit": {
+      "dependsOn": ["^transit"]
     }
   }
 }

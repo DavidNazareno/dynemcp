@@ -4,7 +4,7 @@ import {
   getInstallCommand,
   getRunCommand,
   installDependencies,
-} from '../helpers/package-manager'
+} from '../helpers/package-manager.ts'
 import { execSync } from 'child_process'
 
 // Mock child_process and execa
