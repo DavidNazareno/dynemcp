@@ -48,9 +48,6 @@ const program = new Command('create-dynemcp')
   .parse(process.argv);
 
 /**
- * Main function to run the CLI
- */
-/**
  * Checks for available updates
  */
 async function checkForUpdates(): Promise<void> {
@@ -68,8 +65,6 @@ async function checkForUpdates(): Promise<void> {
     // Ignore error
   }
 }
-
-// Function removed as it's now inlined in the run function
 
 /**
  * Prompts the user for a project name
@@ -161,24 +156,39 @@ async function promptForProjectOptions(
 }
 
 /**
- * Validates the project configuration
+ * Validates the project configuration and returns the resolved project path
  */
-async function validateProjectConfiguration(
+async function validateAndResolveProjectPath(
   projectDirectory: string,
   options: CommandOptions,
   availableTemplates: string[],
-): Promise<string> {
+): Promise<{ projectPath: string; projectName: string }> {
+  // Normalize the project directory name
+  const projectName = projectDirectory.trim();
+
   // Validate project name
-  const { valid: validName, problems } = validateProjectName(projectDirectory);
+  const { valid: validName, problems } = validateProjectName(projectName);
   if (!validName) {
     console.error(chalk.red(`Invalid project name: ${problems?.join(', ')}`));
     process.exit(1);
   }
 
-  // Create full project path
-  const projectPath = path.resolve(process.cwd(), projectDirectory);
+  // Get the actual current working directory where the command is executed
+  const currentDir = process.cwd();
 
-  // Validate project path
+  // Handle both relative and absolute paths
+  let projectPath: string;
+  if (path.isAbsolute(projectName)) {
+    projectPath = projectName;
+  } else {
+    projectPath = path.join(currentDir, projectName);
+  }
+
+  // Log where we're creating the project
+  console.log(chalk.gray(`Current directory: ${currentDir}`));
+  console.log(chalk.gray(`Creating project at: ${projectPath}`));
+
+  // Validate project path (check if directory exists, etc.)
   const { valid: validPath, message } = validateProjectPath(projectPath);
   if (!validPath) {
     console.error(chalk.red(message));
@@ -196,7 +206,7 @@ async function validateProjectConfiguration(
     process.exit(1);
   }
 
-  return projectPath;
+  return { projectPath, projectName: path.basename(projectPath) };
 }
 
 /**
@@ -204,44 +214,127 @@ async function validateProjectConfiguration(
  */
 async function setupProject(
   projectPath: string,
+  projectName: string,
   template: string,
   options: CommandOptions,
   packageManager: PackageManager,
   spinner: ReturnType<typeof ora>,
 ): Promise<void> {
+  // Ensure the project directory doesn't exist or is empty
+  const fs = await import('fs/promises');
+
+  try {
+    const stats = await fs.stat(projectPath);
+    if (stats.isDirectory()) {
+      const files = await fs.readdir(projectPath);
+      if (files.length > 0) {
+        throw new Error(`Directory ${projectPath} already exists and is not empty`);
+      }
+    }
+  } catch (error: any) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+    // Directory doesn't exist, which is fine
+  }
+
   // Create project using template generator
   spinner.start('Creating project...');
-  await installTemplate({
-    appName: path.basename(projectPath),
-    root: projectPath,
-    packageManager,
-    template,
-    mode: options.typescript !== false ? 'ts' : 'js',
-    tailwind: false, // Default to false, can be made configurable if needed
-    eslint: options.eslint !== false, // Default to true
-    srcDir: true, // Always use src directory for better organization
-    importAlias: '@/*', // Default import alias
-    skipInstall: options.skipInstall || false,
-  });
-  spinner.succeed('Project created');
 
-  // Skip dependency installation if requested
+  try {
+    // Make sure we're passing the correct parameters
+    await installTemplate({
+      appName: projectName,
+      root: projectPath,
+      packageManager,
+      template,
+      mode: options.typescript !== false ? 'ts' : 'js',
+      tailwind: false,
+      eslint: options.eslint !== false,
+      srcDir: false, // Changed to false to avoid src/src issue
+      importAlias: '@/*',
+      skipInstall: options.skipInstall || false,
+    });
+    spinner.succeed('Project created');
+  } catch (error) {
+    spinner.fail('Failed to create project');
+    console.error(
+      chalk.red(
+        `Template installation error: ${error instanceof Error ? error.message : String(error)}`,
+      ),
+    );
+    throw error;
+  }
+
+  // Skip dependency installation if requested or if template already installed them
   if (!options.skipInstall) {
     spinner.start(`Installing dependencies with ${packageManager}...`);
-    await installDependencies(projectPath, packageManager);
-    spinner.succeed('Dependencies installed');
+    try {
+      await installDependencies(projectPath, packageManager);
+      spinner.succeed('Dependencies installed');
+    } catch (error) {
+      spinner.fail('Failed to install dependencies');
+      console.error(
+        chalk.red(
+          `Dependency installation error: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        ),
+      );
+      throw error;
+    }
   }
 
   // Initialize git if requested
   if (options.git !== false) {
-    // Default to true
     spinner.start('Initializing git repository...');
-    const { success } = await initGitRepo(projectPath);
+    const { success, error: gitError } = await initGitRepo(projectPath);
     if (success) {
       spinner.succeed('Git repository initialized');
     } else {
-      spinner.fail('Failed to initialize git repository');
+      spinner.warn(`Failed to initialize git repository: ${gitError || 'Unknown error'}`);
     }
+  }
+}
+
+/**
+ * Initialize git repository
+ */
+async function initGitRepo(projectPath: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { execa } = await import('execa');
+
+    // Check if git is available
+    try {
+      await execa('git', ['--version']);
+    } catch {
+      return { success: false, error: 'Git is not installed or not available in PATH' };
+    }
+
+    // Initialize git repository
+    await execa('git', ['init'], { cwd: projectPath });
+    await execa('git', ['add', '.'], { cwd: projectPath });
+
+    // Try to commit, but don't fail if git config is not set
+    try {
+      await execa('git', ['commit', '-m', 'Initial commit from create-dynemcp'], {
+        cwd: projectPath,
+      });
+    } catch (commitError) {
+      // If commit fails (usually due to missing git config), just init the repo
+      return {
+        success: true,
+        error:
+          'Git repository initialized but initial commit failed. You may need to configure git user.name and user.email',
+      };
+    }
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 }
 
@@ -249,15 +342,13 @@ async function setupProject(
  * Displays success message and next steps
  */
 function displaySuccessMessage(
-  projectDirectory: string,
+  projectName: string,
   projectPath: string,
   packageManager: PackageManager,
 ): void {
   console.log();
   console.log(
-    `${chalk.green('Success!')} Created ${chalk.cyan(projectDirectory)} at ${chalk.cyan(
-      projectPath,
-    )}`,
+    `${chalk.green('Success!')} Created ${chalk.cyan(projectName)} at ${chalk.cyan(projectPath)}`,
   );
   console.log();
 
@@ -278,12 +369,27 @@ function displaySuccessMessage(
   console.log();
   console.log('We suggest that you begin by typing:');
   console.log();
-  console.log(`  ${chalk.cyan('cd')} ${projectDirectory}`);
+  console.log(`  ${chalk.cyan('cd')} ${projectName}`);
   console.log(`  ${chalk.cyan(runCmd('dev'))}`);
   console.log();
   console.log('Happy hacking!');
 }
 
+/**
+ * Determines the package manager to use
+ */
+function determinePackageManager(options: CommandOptions): PackageManager {
+  if (options.usePnpm) {
+    return 'pnpm';
+  }
+
+  // Default to pnpm as specified in the original code
+  return 'pnpm';
+}
+
+/**
+ * Main function to run the CLI
+ */
 async function run(): Promise<void> {
   const options = program.opts();
   const { args } = program;
@@ -314,18 +420,24 @@ async function run(): Promise<void> {
   }
 
   try {
-    // Determine package manager - always use pnpm as per user rules
-    const packageManager = 'pnpm' as PackageManager;
+    // Determine package manager
+    const packageManager = determinePackageManager(options);
 
+    // Get available templates
     const availableTemplates = await getAvailableTemplates();
     const preferences = (conf.get('preferences') ?? {}) as Record<string, boolean | string>;
 
     // Get project directory from user if not provided
     if (!projectDirectory) {
-      projectDirectory = await promptForProjectName();
+      if (options.yes) {
+        projectDirectory = 'my-mcp-project';
+      } else {
+        projectDirectory = await promptForProjectName();
+      }
     }
 
-    if (!projectDirectory) {
+    // Ensure we have a valid project directory
+    if (!projectDirectory || projectDirectory.trim() === '') {
       console.log(
         '\nPlease specify the project directory:\n' +
           `  ${chalk.cyan('create-dynemcp')} ${chalk.green('<project-directory>')}\n` +
@@ -333,23 +445,31 @@ async function run(): Promise<void> {
           `  ${chalk.cyan('create-dynemcp')} ${chalk.green('my-mcp-app')}\n\n` +
           `Run ${chalk.cyan('create-dynemcp --help')} to see all options.`,
       );
-      projectDirectory = 'my-mcp-project';
+      process.exit(1);
     }
 
     // Skip prompts if --yes flag is provided
     if (!options.yes) {
       await promptForProjectOptions(options, preferences, availableTemplates, args);
+    } else {
+      // Set defaults when using --yes flag
+      options.template = options.template ?? 'default';
+      options.typescript = options.typescript ?? true;
+      options.eslint = options.eslint ?? true;
+      options.git = options.git ?? true;
     }
 
-    // Ensure we have a project directory
-    projectDirectory ??= 'my-mcp-project';
-
-    // Validate project configuration
-    const projectPath = await validateProjectConfiguration(
+    // Validate project configuration and get resolved paths
+    const { projectPath, projectName } = await validateAndResolveProjectPath(
       projectDirectory,
       options,
       availableTemplates,
     );
+
+    // Debug information
+    console.log(chalk.gray(`Project directory input: "${projectDirectory}"`));
+    console.log(chalk.gray(`Resolved project name: "${projectName}"`));
+    console.log(chalk.gray(`Final project path: "${projectPath}"`));
 
     // Save preferences for next time
     conf.set('preferences', preferences);
@@ -357,10 +477,10 @@ async function run(): Promise<void> {
     const template = options.template ?? 'default';
 
     // Create and set up the project
-    await setupProject(projectPath, template, options, packageManager, spinner);
+    await setupProject(projectPath, projectName, template, options, packageManager, spinner);
 
     // Display success message and next steps
-    displaySuccessMessage(projectDirectory, projectPath, packageManager);
+    displaySuccessMessage(projectName, projectPath, packageManager);
   } catch (error) {
     spinner.fail('Failed to create project');
     console.error(chalk.red(`Error: ${error instanceof Error ? error.message : String(error)}`));
@@ -368,27 +488,7 @@ async function run(): Promise<void> {
   }
 }
 
-// Inicializar repositorio git
-async function initGitRepo(projectPath: string): Promise<{ success: boolean }> {
-  try {
-    const { execa } = await import('execa');
-    await execa('git', ['init'], { cwd: projectPath });
-    await execa('git', ['add', '.'], { cwd: projectPath });
-    await execa('git', ['commit', '-m', 'Initial commit from create-dynemcp'], {
-      cwd: projectPath,
-    });
-    return { success: true };
-  } catch (error) {
-    console.error(
-      `Failed to initialize git repository: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
-    );
-    return { success: false };
-  }
-}
-
-// Ejecutar la función principal
+// Run the main function
 run().catch((error) => {
   console.error(
     chalk.red(`Unexpected error: ${error instanceof Error ? error.message : String(error)}`),
