@@ -1,9 +1,9 @@
-import { DyneMCPPrompt } from '@dynemcp/server-dynemcp';
+import { DyneMCPPrompt } from '@dynemcp/server-dynemcp'
 
 export class ExamplePrompt extends DyneMCPPrompt {
-  id = 'example';
-  name = 'Example System Prompt';
-  description = 'An example system prompt for the MCP server';
+  id = 'example'
+  name = 'Example System Prompt'
+  description = 'An example system prompt for the MCP server'
 
   content = `You are a helpful AI assistant with access to various tools and resources.
 
@@ -31,7 +31,7 @@ You can ask me to:
 - Access documentation: "Show me the documentation"
 - Perform calculations: "Calculate 2 + 2" (if calculator tool is available)
 
-I'm here to help you with any tasks you need!`;
+I'm here to help you with any tasks you need!`
 }
 
-export default new ExamplePrompt();
+export default new ExamplePrompt()

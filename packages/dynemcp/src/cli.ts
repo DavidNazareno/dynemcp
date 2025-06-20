@@ -5,4 +5,4 @@
  * This file is the binary entry point for the dynemcp command
  */
 
-import './lib/cli/index.js';
+import './lib/cli/index.js'

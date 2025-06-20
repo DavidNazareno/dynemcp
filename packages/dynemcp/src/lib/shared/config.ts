@@ -2,7 +2,7 @@
  * Shared configuration utilities
  */
 
-import { z } from 'zod';
+import { z } from 'zod'
 
 // Base configuration schema
 export const BaseConfigSchema = z.object({
@@ -11,36 +11,36 @@ export const BaseConfigSchema = z.object({
     version: z.string(),
   }),
   description: z.string().optional(),
-});
+})
 
-export type BaseConfig = z.infer<typeof BaseConfigSchema>;
+export type BaseConfig = z.infer<typeof BaseConfigSchema>
 
 /**
  * Load base configuration
  */
 export function loadBaseConfig(configPath = 'dynemcp.config.json'): BaseConfig {
   try {
-    const fs = require('fs');
-    const path = require('path');
+    const fs = require('fs')
+    const path = require('path')
 
     const absolutePath = path.isAbsolute(configPath)
       ? configPath
-      : path.join(process.cwd(), configPath);
+      : path.join(process.cwd(), configPath)
 
     if (!fs.existsSync(absolutePath)) {
-      throw new Error(`Configuration file not found: ${absolutePath}`);
+      throw new Error(`Configuration file not found: ${absolutePath}`)
     }
 
-    const configContent = fs.readFileSync(absolutePath, 'utf-8');
-    const config: unknown = JSON.parse(configContent);
+    const configContent = fs.readFileSync(absolutePath, 'utf-8')
+    const config: unknown = JSON.parse(configContent)
 
-    return BaseConfigSchema.parse(config);
+    return BaseConfigSchema.parse(config)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('Invalid configuration:', error.errors);
+      console.error('Invalid configuration:', error.errors)
     } else {
-      console.error('Failed to load configuration:', error);
+      console.error('Failed to load configuration:', error)
     }
-    process.exit(1);
+    process.exit(1)
   }
 }

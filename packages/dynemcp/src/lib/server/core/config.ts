@@ -8,20 +8,20 @@ import {
   loadConfigFromEnv,
   createDefaultConfig,
   mergeConfigs,
-} from '../helpers/config-loader.js';
-import type { DyneMCPConfig } from './interfaces.js';
+} from '../helpers/config-loader.js'
+import type { DyneMCPConfig } from './interfaces.js'
 
-export type { DyneMCPConfig } from './interfaces.js';
+export type { DyneMCPConfig } from './interfaces.js'
 
 export function loadConfig(configPath?: string): DyneMCPConfig {
-  const defaultConfig = createDefaultConfig();
+  const defaultConfig = createDefaultConfig()
 
   // Load from config file if provided
-  const fileConfig = configPath ? loadConfigFromFile(configPath) : {};
+  const fileConfig = configPath ? loadConfigFromFile(configPath) : {}
 
   // Load from environment variables if enabled
-  const envConfig = defaultConfig.config?.env ? loadConfigFromEnv() : {};
+  const envConfig = defaultConfig.config?.env ? loadConfigFromEnv() : {}
 
   // Merge all configurations
-  return mergeConfigs(defaultConfig, fileConfig, envConfig);
+  return mergeConfigs(defaultConfig, fileConfig, envConfig)
 }

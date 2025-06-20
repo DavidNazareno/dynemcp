@@ -1,41 +1,50 @@
-import * as fs from 'fs';
-import { ConfigSchema } from '../schemas/config.js';
-import type { DyneMCPConfig } from '../core/interfaces.js';
+import * as fs from 'fs'
+import { ConfigSchema } from '../schemas/config.js'
+import type { DyneMCPConfig } from '../core/interfaces.js'
 
 export function loadConfigFromFile(configPath: string): Partial<DyneMCPConfig> {
   if (!fs.existsSync(configPath)) {
-    return {};
+    return {}
   }
 
   try {
-    const configFile = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    return configFile;
+    const configFile = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+    return configFile
   } catch (error) {
-    console.warn(`Failed to load config from ${configPath}:`, error);
-    return {};
+    console.warn(`Failed to load config from ${configPath}:`, error)
+    return {}
   }
 }
 
 export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
-  const config: Partial<DyneMCPConfig> = {};
+  const config: Partial<DyneMCPConfig> = {}
 
   // Server configuration
   if (process.env.DYNEMCP_SERVER_NAME) {
-    config.server = { name: process.env.DYNEMCP_SERVER_NAME, version: '1.0.0' };
+    config.server = { name: process.env.DYNEMCP_SERVER_NAME, version: '1.0.0' }
   }
   if (process.env.DYNEMCP_SERVER_VERSION) {
-    config.server = { name: 'dynemcp-server', version: process.env.DYNEMCP_SERVER_VERSION };
+    config.server = {
+      name: 'dynemcp-server',
+      version: process.env.DYNEMCP_SERVER_VERSION,
+    }
   }
 
   // Component directories
   if (process.env.DYNEMCP_TOOLS_DIR) {
-    config.tools = { enabled: true, directory: process.env.DYNEMCP_TOOLS_DIR };
+    config.tools = { enabled: true, directory: process.env.DYNEMCP_TOOLS_DIR }
   }
   if (process.env.DYNEMCP_RESOURCES_DIR) {
-    config.resources = { enabled: true, directory: process.env.DYNEMCP_RESOURCES_DIR };
+    config.resources = {
+      enabled: true,
+      directory: process.env.DYNEMCP_RESOURCES_DIR,
+    }
   }
   if (process.env.DYNEMCP_PROMPTS_DIR) {
-    config.prompts = { enabled: true, directory: process.env.DYNEMCP_PROMPTS_DIR };
+    config.prompts = {
+      enabled: true,
+      directory: process.env.DYNEMCP_PROMPTS_DIR,
+    }
   }
 
   // Component patterns
@@ -44,21 +53,21 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
       enabled: true,
       directory: 'src/tools',
       pattern: process.env.DYNEMCP_TOOLS_PATTERN,
-    };
+    }
   }
   if (process.env.DYNEMCP_RESOURCES_PATTERN) {
     config.resources = {
       enabled: true,
       directory: 'src/resources',
       pattern: process.env.DYNEMCP_RESOURCES_PATTERN,
-    };
+    }
   }
   if (process.env.DYNEMCP_PROMPTS_PATTERN) {
     config.prompts = {
       enabled: true,
       directory: 'src/prompts',
       pattern: process.env.DYNEMCP_PROMPTS_PATTERN,
-    };
+    }
   }
 
   // Component enabled flags
@@ -66,19 +75,19 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
     config.tools = {
       enabled: process.env.DYNEMCP_TOOLS_ENABLED === 'true',
       directory: 'src/tools',
-    };
+    }
   }
   if (process.env.DYNEMCP_RESOURCES_ENABLED !== undefined) {
     config.resources = {
       enabled: process.env.DYNEMCP_RESOURCES_ENABLED === 'true',
       directory: 'src/resources',
-    };
+    }
   }
   if (process.env.DYNEMCP_PROMPTS_ENABLED !== undefined) {
     config.prompts = {
       enabled: process.env.DYNEMCP_PROMPTS_ENABLED === 'true',
       directory: 'src/prompts',
-    };
+    }
   }
 
   // Logging configuration
@@ -89,7 +98,7 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
       format: 'text',
       timestamp: true,
       colors: true,
-    };
+    }
   }
   if (process.env.DYNEMCP_LOGGING_LEVEL) {
     config.logging = {
@@ -98,7 +107,7 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
       format: 'text',
       timestamp: true,
       colors: true,
-    };
+    }
   }
   if (process.env.DYNEMCP_LOGGING_FORMAT) {
     config.logging = {
@@ -107,7 +116,7 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
       format: process.env.DYNEMCP_LOGGING_FORMAT as any,
       timestamp: true,
       colors: true,
-    };
+    }
   }
 
   // Debug configuration
@@ -117,7 +126,7 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
       verbose: false,
       showComponentDetails: false,
       showTransportDetails: false,
-    };
+    }
   }
   if (process.env.DYNEMCP_DEBUG_VERBOSE !== undefined) {
     config.debug = {
@@ -125,17 +134,19 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
       verbose: process.env.DYNEMCP_DEBUG_VERBOSE === 'true',
       showComponentDetails: false,
       showTransportDetails: false,
-    };
+    }
   }
 
   // Performance configuration
   if (process.env.DYNEMCP_PERFORMANCE_MAX_CONCURRENT_REQUESTS) {
     config.performance = {
-      maxConcurrentRequests: parseInt(process.env.DYNEMCP_PERFORMANCE_MAX_CONCURRENT_REQUESTS),
+      maxConcurrentRequests: parseInt(
+        process.env.DYNEMCP_PERFORMANCE_MAX_CONCURRENT_REQUESTS
+      ),
       requestTimeout: 30000,
       memoryLimit: '512mb',
       enableMetrics: false,
-    };
+    }
   }
   if (process.env.DYNEMCP_PERFORMANCE_REQUEST_TIMEOUT) {
     config.performance = {
@@ -143,7 +154,7 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
       requestTimeout: parseInt(process.env.DYNEMCP_PERFORMANCE_REQUEST_TIMEOUT),
       memoryLimit: '512mb',
       enableMetrics: false,
-    };
+    }
   }
   if (process.env.DYNEMCP_PERFORMANCE_MEMORY_LIMIT) {
     config.performance = {
@@ -151,17 +162,18 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
       requestTimeout: 30000,
       memoryLimit: process.env.DYNEMCP_PERFORMANCE_MEMORY_LIMIT,
       enableMetrics: false,
-    };
+    }
   }
 
   // Security configuration
   if (process.env.DYNEMCP_SECURITY_ENABLE_VALIDATION !== undefined) {
     config.security = {
-      enableValidation: process.env.DYNEMCP_SECURITY_ENABLE_VALIDATION === 'true',
+      enableValidation:
+        process.env.DYNEMCP_SECURITY_ENABLE_VALIDATION === 'true',
       strictMode: false,
       allowedOrigins: ['*'],
       rateLimit: { enabled: false, maxRequests: 100, windowMs: 900000 },
-    };
+    }
   }
   if (process.env.DYNEMCP_SECURITY_STRICT_MODE !== undefined) {
     config.security = {
@@ -169,7 +181,7 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
       strictMode: process.env.DYNEMCP_SECURITY_STRICT_MODE === 'true',
       allowedOrigins: ['*'],
       rateLimit: { enabled: false, maxRequests: 100, windowMs: 900000 },
-    };
+    }
   }
   if (process.env.DYNEMCP_SECURITY_ALLOWED_ORIGINS) {
     config.security = {
@@ -177,39 +189,47 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
       strictMode: false,
       allowedOrigins: process.env.DYNEMCP_SECURITY_ALLOWED_ORIGINS.split(','),
       rateLimit: { enabled: false, maxRequests: 100, windowMs: 900000 },
-    };
+    }
   }
 
   // Transport configuration
   if (process.env.DYNEMCP_TRANSPORT_TYPE) {
-    const transportType = process.env.DYNEMCP_TRANSPORT_TYPE as 'stdio' | 'sse' | 'http-stream';
+    const transportType = process.env.DYNEMCP_TRANSPORT_TYPE as
+      | 'stdio'
+      | 'sse'
+      | 'http-stream'
 
     if (transportType === 'stdio') {
-      config.transport = { type: 'stdio' };
+      config.transport = { type: 'stdio' }
     } else if (transportType === 'sse') {
       config.transport = {
         type: 'sse',
         options: {
           port: parseInt(process.env.DYNEMCP_SSE_PORT || '8080'),
           endpoint: process.env.DYNEMCP_SSE_ENDPOINT || '/sse',
-          messageEndpoint: process.env.DYNEMCP_SSE_MESSAGE_ENDPOINT || '/messages',
+          messageEndpoint:
+            process.env.DYNEMCP_SSE_MESSAGE_ENDPOINT || '/messages',
         },
-      };
+      }
     } else if (transportType === 'http-stream') {
       config.transport = {
         type: 'http-stream',
         options: {
           port: parseInt(process.env.DYNEMCP_HTTP_PORT || '8080'),
           endpoint: process.env.DYNEMCP_HTTP_ENDPOINT || '/mcp',
-          responseMode: (process.env.DYNEMCP_HTTP_RESPONSE_MODE as 'batch' | 'stream') || 'batch',
-          batchTimeout: parseInt(process.env.DYNEMCP_HTTP_BATCH_TIMEOUT || '30000'),
+          responseMode:
+            (process.env.DYNEMCP_HTTP_RESPONSE_MODE as 'batch' | 'stream') ||
+            'batch',
+          batchTimeout: parseInt(
+            process.env.DYNEMCP_HTTP_BATCH_TIMEOUT || '30000'
+          ),
           maxMessageSize: process.env.DYNEMCP_HTTP_MAX_MESSAGE_SIZE || '4mb',
         },
-      };
+      }
     }
   }
 
-  return config;
+  return config
 }
 
 export function createDefaultConfig(): DyneMCPConfig {
@@ -266,29 +286,45 @@ export function createDefaultConfig(): DyneMCPConfig {
     config: {
       env: true,
     },
-  };
+  }
 }
 
 export function mergeConfigs(
   defaultConfig: DyneMCPConfig,
   fileConfig: Partial<DyneMCPConfig>,
-  envConfig: Partial<DyneMCPConfig>,
+  envConfig: Partial<DyneMCPConfig>
 ): DyneMCPConfig {
-  const merged = { ...defaultConfig, ...fileConfig, ...envConfig };
+  const merged = { ...defaultConfig, ...fileConfig, ...envConfig }
 
   // Build server property explicitly
   const server = {
-    name: String(envConfig.server?.name || fileConfig.server?.name || defaultConfig.server.name),
-    version: String(
-      envConfig.server?.version || fileConfig.server?.version || defaultConfig.server.version,
+    name: String(
+      envConfig.server?.name ||
+        fileConfig.server?.name ||
+        defaultConfig.server.name
     ),
-  };
-
-  // Remove any possibly optional server property from merged
-  const { server: _omit, ...rest } = merged;
+    version: String(
+      envConfig.server?.version ||
+        fileConfig.server?.version ||
+        defaultConfig.server.version
+    ),
+  }
 
   // Build the final config object
-  const finalConfig: DyneMCPConfig = Object.assign({}, rest, { server });
+  const finalConfig: DyneMCPConfig = Object.assign({}, merged, { server })
 
-  return ConfigSchema.parse(finalConfig);
+  return ConfigSchema.parse(finalConfig)
+}
+
+function deepMerge(target: any, source: any) {
+  for (const key in source) {
+    if (typeof source[key] === 'object' && source[key] !== null) {
+      if (typeof target[key] !== 'object' || target[key] === null) {
+        target[key] = {}
+      }
+      deepMerge(target[key], source[key])
+    } else {
+      target[key] = source[key]
+    }
+  }
 }

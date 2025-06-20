@@ -2,9 +2,9 @@
  * Configuration utilities for DyneMCP projects
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { z } from 'zod';
+import * as fs from 'fs'
+import * as path from 'path'
+import { z } from 'zod'
 
 // Define the schema for dynemcp.config.json
 const DyneMCPConfigSchema = z.object({
@@ -97,9 +97,9 @@ const DyneMCPConfigSchema = z.object({
       watch: z.boolean().default(false),
     })
     .optional(),
-});
+})
 
-export type DyneMCPConfig = z.infer<typeof DyneMCPConfigSchema>;
+export type DyneMCPConfig = z.infer<typeof DyneMCPConfigSchema>
 
 /**
  * Build configuration schema
@@ -120,9 +120,9 @@ const BuildConfigSchema = z.object({
   splitting: z.boolean(),
   metafile: z.boolean(),
   watch: z.boolean(),
-});
+})
 
-export type BuildConfig = z.infer<typeof BuildConfigSchema>;
+export type BuildConfig = z.infer<typeof BuildConfigSchema>
 
 /**
  * Load the DyneMCP configuration file
@@ -130,24 +130,24 @@ export type BuildConfig = z.infer<typeof BuildConfigSchema>;
 export function loadConfig(configPath = 'dynemcp.config.json'): DyneMCPConfig {
   const absolutePath = path.isAbsolute(configPath)
     ? configPath
-    : path.join(process.cwd(), configPath);
+    : path.join(process.cwd(), configPath)
 
   try {
     if (!fs.existsSync(absolutePath)) {
-      throw new Error(`Configuration file not found: ${absolutePath}`);
+      throw new Error(`Configuration file not found: ${absolutePath}`)
     }
 
-    const configContent = fs.readFileSync(absolutePath, 'utf-8');
-    const config: unknown = JSON.parse(configContent);
+    const configContent = fs.readFileSync(absolutePath, 'utf-8')
+    const config: unknown = JSON.parse(configContent)
 
-    return DyneMCPConfigSchema.parse(config);
+    return DyneMCPConfigSchema.parse(config)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('Invalid configuration:', error.errors);
+      console.error('Invalid configuration:', error.errors)
     } else {
-      console.error('Failed to load configuration:', error);
+      console.error('Failed to load configuration:', error)
     }
-    process.exit(1);
+    process.exit(1)
   }
 }
 
@@ -171,22 +171,25 @@ export function getBuildConfig(config: DyneMCPConfig): BuildConfig {
     splitting: false,
     metafile: false,
     watch: false,
-  };
+  }
 
   if (!config.build) {
-    return defaultBuildConfig;
+    return defaultBuildConfig
   }
 
   return {
     ...defaultBuildConfig,
     ...config.build,
-  };
+  }
 }
 
 /**
  * Create a default DyneMCP configuration
  */
-export function createDefaultConfig(name: string, version = '1.0.0'): DyneMCPConfig {
+export function createDefaultConfig(
+  name: string,
+  version = '1.0.0'
+): DyneMCPConfig {
   return {
     server: {
       name,
@@ -260,7 +263,7 @@ export function createDefaultConfig(name: string, version = '1.0.0'): DyneMCPCon
       metafile: false,
       watch: false,
     },
-  };
+  }
 }
 
 /**
@@ -268,14 +271,14 @@ export function createDefaultConfig(name: string, version = '1.0.0'): DyneMCPCon
  */
 export function validateBuildConfig(config: BuildConfig): void {
   try {
-    BuildConfigSchema.parse(config);
+    BuildConfigSchema.parse(config)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('Invalid build configuration:', error.errors);
+      console.error('Invalid build configuration:', error.errors)
     } else {
-      console.error('Failed to validate build configuration:', error);
+      console.error('Failed to validate build configuration:', error)
     }
-    process.exit(1);
+    process.exit(1)
   }
 }
 
@@ -284,4 +287,4 @@ export default {
   getBuildConfig,
   createDefaultConfig,
   validateBuildConfig,
-};
+}

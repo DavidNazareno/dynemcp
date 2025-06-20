@@ -1,9 +1,9 @@
-import { DyneMCPPrompt } from '@dynemcp/server-dynemcp';
+import { DyneMCPPrompt } from '@dynemcp/server-dynemcp'
 
 export class CalculatorPrompt extends DyneMCPPrompt {
-  id = 'calculator';
-  name = 'Calculator System Prompt';
-  description = 'System prompt for the calculator MCP server';
+  id = 'calculator'
+  name = 'Calculator System Prompt'
+  description = 'System prompt for the calculator MCP server'
 
   content = `You are a mathematical assistant with access to powerful calculation tools and resources.
 
@@ -61,7 +61,7 @@ If a calculation fails, explain the issue clearly:
 - "Cannot calculate square root of negative number in real numbers"
 - "Invalid input for logarithm function"
 
-I'm here to help with all your mathematical calculations!`;
+I'm here to help with all your mathematical calculations!`
 }
 
-export default new CalculatorPrompt(); 
+export default new CalculatorPrompt()

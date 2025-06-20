@@ -4,21 +4,21 @@
  * DyneBuild CLI
  * Advanced command line interface for building DyneMCP projects
  */
-import chalk from 'chalk';
-import path from 'path';
-import fs from 'fs-extra';
-import { build, watch, buildCli, clean, analyze } from '../build-dynemcp.js';
+import chalk from 'chalk'
+import path from 'path'
+import fs from 'fs-extra'
+import { build, watch, buildCli, clean, analyze } from '../build-dynemcp.js'
 
 interface CliOptions {
-  config?: string;
-  clean?: boolean;
-  analyze?: boolean;
-  manifest?: boolean;
-  html?: boolean;
-  watch?: boolean;
-  cli?: boolean;
-  help?: boolean;
-  version?: boolean;
+  config?: string
+  clean?: boolean
+  analyze?: boolean
+  manifest?: boolean
+  html?: boolean
+  watch?: boolean
+  cli?: boolean
+  help?: boolean
+  version?: boolean
 }
 
 function showHelp(): void {
@@ -57,22 +57,22 @@ ${chalk.bold('Examples:')}
 ${chalk.bold('Configuration:')}
   The builder reads from dynemcp.config.json in your project root.
   You can customize build settings in the "build" section of your config.
-`);
+`)
 }
 
 function showVersion(): void {
   const packageJson = JSON.parse(
-    fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf-8'),
-  );
-  console.log(`DyneBuild CLI v${packageJson.version}`);
+    fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf-8')
+  )
+  console.log(`DyneBuild CLI v${packageJson.version}`)
 }
 
 function parseArgs(args: string[]): { command: string; options: CliOptions } {
-  const options: CliOptions = {};
-  let command = 'build';
+  const options: CliOptions = {}
+  let command = 'build'
 
   for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
+    const arg = args[i]
 
     switch (arg) {
       case 'build':
@@ -80,171 +80,182 @@ function parseArgs(args: string[]): { command: string; options: CliOptions } {
       case 'cli':
       case 'clean':
       case 'analyze':
-        command = arg;
-        break;
+        command = arg
+        break
       case '-c':
       case '--config':
-        options.config = args[++i];
-        break;
+        options.config = args[++i]
+        break
       case '--clean':
-        options.clean = true;
-        break;
+        options.clean = true
+        break
       case '--analyze':
-        options.analyze = true;
-        break;
+        options.analyze = true
+        break
       case '--manifest':
-        options.manifest = true;
-        break;
+        options.manifest = true
+        break
       case '--html':
-        options.html = true;
-        break;
+        options.html = true
+        break
       case '--watch':
-        options.watch = true;
-        break;
+        options.watch = true
+        break
       case '--cli':
-        options.cli = true;
-        break;
+        options.cli = true
+        break
       case '-h':
       case '--help':
-        options.help = true;
-        break;
+        options.help = true
+        break
       case '-v':
       case '--version':
-        options.version = true;
-        break;
+        options.version = true
+        break
       default:
         if (arg.startsWith('-')) {
-          console.warn(chalk.yellow(`⚠️  Unknown option: ${arg}`));
+          console.warn(chalk.yellow(`⚠️  Unknown option: ${arg}`))
         }
     }
   }
 
-  return { command, options };
+  return { command, options }
 }
 
 async function run(): Promise<void> {
   try {
-    const args = process.argv.slice(2);
-    const { command, options } = parseArgs(args);
+    const args = process.argv.slice(2)
+    const { command, options } = parseArgs(args)
 
     // Show help or version
     if (options.help) {
-      showHelp();
-      return;
+      showHelp()
+      return
     }
 
     if (options.version) {
-      showVersion();
-      return;
+      showVersion()
+      return
     }
 
     // Get the current working directory
-    const cwd = process.cwd();
-    console.log(chalk.blue(`📁 Working directory: ${cwd}`));
+    const cwd = process.cwd()
+    console.log(chalk.blue(`📁 Working directory: ${cwd}`))
 
     // Check if we're in a DyneMCP project
-    const configPath = options.config || 'dynemcp.config.json';
+    const configPath = options.config || 'dynemcp.config.json'
     const absoluteConfigPath = path.isAbsolute(configPath)
       ? configPath
-      : path.join(cwd, configPath);
+      : path.join(cwd, configPath)
 
     if (!fs.existsSync(absoluteConfigPath)) {
-      console.error(chalk.red(`❌ Configuration file not found: ${absoluteConfigPath}`));
+      console.error(
+        chalk.red(`❌ Configuration file not found: ${absoluteConfigPath}`)
+      )
       console.log(
         chalk.yellow(
-          '💡 Make sure you are in a DyneMCP project directory or specify a config file with --config',
-        ),
-      );
-      process.exit(1);
+          '💡 Make sure you are in a DyneMCP project directory or specify a config file with --config'
+        )
+      )
+      process.exit(1)
     }
 
-    console.log(chalk.blue(`📋 Using config: ${absoluteConfigPath}`));
+    console.log(chalk.blue(`📋 Using config: ${absoluteConfigPath}`))
 
     // Execute command
     switch (command) {
-      case 'build':
-        console.log(chalk.green('🔨 Building DyneMCP project...'));
+      case 'build': {
+        console.log(chalk.green('🔨 Building DyneMCP project...'))
         const result = await build({
           configPath: absoluteConfigPath,
           clean: options.clean,
           analyze: options.analyze,
           manifest: options.manifest,
           html: options.html,
-        });
+        })
 
         if (result.success) {
-          console.log(chalk.green('✅ Build completed successfully!'));
+          console.log(chalk.green('✅ Build completed successfully!'))
         } else {
-          console.error(chalk.red('❌ Build failed!'));
-          process.exit(1);
+          console.error(chalk.red('❌ Build failed!'))
+          process.exit(1)
         }
-        break;
-
-      case 'watch':
-        console.log(chalk.green('👀 Starting watch mode...'));
+        break
+      }
+      case 'watch': {
+        console.log(chalk.green('👀 Starting watch mode...'))
         const ctx = await watch({
           configPath: absoluteConfigPath,
           clean: options.clean,
-        });
+        })
 
         // Keep the process running
         process.on('SIGINT', async () => {
-          console.log(chalk.yellow('\n🛑 Stopping watch mode...'));
-          await ctx.dispose();
-          process.exit(0);
-        });
-        break;
-
-      case 'cli':
-        console.log(chalk.green('🔧 Building CLI tool...'));
+          console.log(chalk.yellow('\n🛑 Stopping watch mode...'))
+          await ctx.dispose()
+          process.exit(0)
+        })
+        break
+      }
+      case 'cli': {
+        console.log(chalk.green('🔧 Building CLI tool...'))
         const cliResult = await buildCli({
           configPath: absoluteConfigPath,
           clean: options.clean,
           analyze: options.analyze,
-        });
+        })
 
         if (cliResult.success) {
-          console.log(chalk.green('✅ CLI build completed successfully!'));
+          console.log(chalk.green('✅ CLI build completed successfully!'))
         } else {
-          console.error(chalk.red('❌ CLI build failed!'));
-          process.exit(1);
+          console.error(chalk.red('❌ CLI build failed!'))
+          process.exit(1)
         }
-        break;
-
-      case 'clean':
-        console.log(chalk.green('🧹 Cleaning build directory...'));
-        await clean({ configPath: absoluteConfigPath });
-        console.log(chalk.green('✅ Clean completed!'));
-        break;
-
-      case 'analyze':
-        console.log(chalk.green('📊 Analyzing dependencies...'));
-        await analyze({ configPath: absoluteConfigPath });
-        break;
-
+        break
+      }
+      case 'clean': {
+        console.log(chalk.green('🧹 Cleaning build directory...'))
+        await clean({ configPath: absoluteConfigPath })
+        console.log(chalk.green('✅ Clean completed!'))
+        break
+      }
+      case 'analyze': {
+        console.log(chalk.green('📊 Analyzing dependencies...'))
+        await analyze({ configPath: absoluteConfigPath })
+        break
+      }
       default:
-        console.error(chalk.red(`❌ Unknown command: ${command}`));
-        showHelp();
-        process.exit(1);
+        console.error(chalk.red(`❌ Unknown command: ${command}`))
+        showHelp()
+        process.exit(1)
     }
   } catch (error) {
     console.error(
-      chalk.red(`❌ Unexpected error: ${error instanceof Error ? error.message : String(error)}`),
-    );
-    process.exit(1);
+      chalk.red(
+        `❌ Unexpected error: ${error instanceof Error ? error.message : String(error)}`
+      )
+    )
+    process.exit(1)
   }
 }
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error(chalk.red('❌ Unhandled Rejection at:'), promise, chalk.red('reason:'), reason);
-  process.exit(1);
-});
+  console.error(
+    chalk.red('❌ Unhandled Rejection at:'),
+    promise,
+    chalk.red('reason:'),
+    reason
+  )
+  process.exit(1)
+})
 
 // Execute the CLI
 run().catch((error) => {
   console.error(
-    chalk.red(`❌ CLI failed: ${error instanceof Error ? error.message : String(error)}`),
-  );
-  process.exit(1);
-});
+    chalk.red(
+      `❌ CLI failed: ${error instanceof Error ? error.message : String(error)}`
+    )
+  )
+  process.exit(1)
+})

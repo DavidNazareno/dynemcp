@@ -1,12 +1,12 @@
-import fs from 'fs-extra';
-import { installTemplate } from './template-generator.js';
-import type { PackageManager } from '../helpers/package-manager.js';
+import fs from 'fs-extra'
+import { installTemplate } from './template-generator.js'
+import type { PackageManager } from '../helpers/package-manager.js'
 
 /**
  * Returns a list of available templates in the templates directory
  */
 export async function getAvailableTemplates(): Promise<string[]> {
-  return ['default', 'calculator'];
+  return ['default', 'calculator']
 }
 
 /**
@@ -15,10 +15,10 @@ export async function getAvailableTemplates(): Promise<string[]> {
 export async function createProject(
   projectPath: string,
   projectName: string,
-  template: string,
+  template: string
 ): Promise<void> {
   // Create project directory
-  await fs.mkdir(projectPath, { recursive: true });
+  await fs.mkdir(projectPath, { recursive: true })
 
   // Use the existing installTemplate function
   await installTemplate({
@@ -32,5 +32,5 @@ export async function createProject(
     srcDir: true,
     importAlias: '@/*',
     skipInstall: false,
-  });
+  })
 }

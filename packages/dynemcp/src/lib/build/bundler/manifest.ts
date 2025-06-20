@@ -2,40 +2,43 @@
  * Manifest generator for DyneMCP projects
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import type { Metafile } from 'esbuild';
+import * as fs from 'fs'
+import * as path from 'path'
+import type { Metafile } from 'esbuild'
 
 export interface BuildManifest {
-  version: string;
-  timestamp: string;
-  entryPoints: string[];
+  version: string
+  timestamp: string
+  entryPoints: string[]
   outputs: Record<
     string,
     {
-      size: number;
-      imports: string[];
-      exports: string[];
+      size: number
+      imports: string[]
+      exports: string[]
     }
-  >;
+  >
   dependencies: Record<
     string,
     {
-      version: string;
-      size: number;
+      version: string
+      size: number
     }
-  >;
+  >
   stats: {
-    totalSize: number;
-    totalModules: number;
-    totalChunks: number;
-  };
+    totalSize: number
+    totalModules: number
+    totalChunks: number
+  }
 }
 
 /**
  * Generate build manifest from esbuild metafile
  */
-export async function generateManifest(metafile: Metafile, outDir: string): Promise<void> {
+export async function generateManifest(
+  metafile: Metafile,
+  outDir: string
+): Promise<void> {
   try {
     const manifest: BuildManifest = {
       version: '1.0.0',
@@ -48,23 +51,23 @@ export async function generateManifest(metafile: Metafile, outDir: string): Prom
         totalModules: 0,
         totalChunks: 0,
       },
-    };
+    }
 
     // Process inputs (source files)
     for (const [filePath, info] of Object.entries(metafile.inputs)) {
       if (filePath.includes('node_modules/')) {
-        const packageName = filePath.split('/')[1];
+        const packageName = filePath.split('/')[1]
         if (!manifest.dependencies[packageName]) {
           manifest.dependencies[packageName] = {
             version: 'unknown',
             size: 0,
-          };
+          }
         }
-        manifest.dependencies[packageName].size += info.bytes;
+        manifest.dependencies[packageName].size += info.bytes
       }
 
-      manifest.stats.totalModules++;
-      manifest.stats.totalSize += info.bytes;
+      manifest.stats.totalModules++
+      manifest.stats.totalSize += info.bytes
     }
 
     // Process outputs (bundled files)
@@ -73,29 +76,32 @@ export async function generateManifest(metafile: Metafile, outDir: string): Prom
         size: info.bytes,
         imports: info.imports?.map((imp) => imp.path) || [],
         exports: info.exports || [],
-      };
-      manifest.stats.totalChunks++;
+      }
+      manifest.stats.totalChunks++
     }
 
     // Extract entry points
     manifest.entryPoints = Object.keys(metafile.inputs).filter(
-      (path) => !path.includes('node_modules/') && path.endsWith('.ts'),
-    );
+      (path) => !path.includes('node_modules/') && path.endsWith('.ts')
+    )
 
     // Write manifest file
-    const manifestPath = path.join(outDir, 'build-manifest.json');
-    await fs.promises.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+    const manifestPath = path.join(outDir, 'build-manifest.json')
+    await fs.promises.writeFile(manifestPath, JSON.stringify(manifest, null, 2))
 
-    console.log(`📋 Build manifest generated: ${manifestPath}`);
+    console.log(`📋 Build manifest generated: ${manifestPath}`)
   } catch (error) {
-    console.warn('⚠️  Could not generate build manifest:', error);
+    console.warn('⚠️  Could not generate build manifest:', error)
   }
 }
 
 /**
  * Generate HTML report from build manifest
  */
-export async function generateHTMLReport(manifest: BuildManifest, outDir: string): Promise<void> {
+export async function generateHTMLReport(
+  manifest: BuildManifest,
+  outDir: string
+): Promise<void> {
   try {
     const html = `
 <!DOCTYPE html>
@@ -161,7 +167,7 @@ export async function generateHTMLReport(manifest: BuildManifest, outDir: string
                             <span>${file}</span>
                             <span class="file-size">${(info.size / 1024).toFixed(1)}KB</span>
                         </div>
-                    `,
+                    `
                       )
                       .join('')}
                 </div>
@@ -177,7 +183,7 @@ export async function generateHTMLReport(manifest: BuildManifest, outDir: string
                             <div class="dependency-name">${name}</div>
                             <div class="dependency-size">${(info.size / 1024).toFixed(1)}KB</div>
                         </div>
-                    `,
+                    `
                       )
                       .join('')}
                 </div>
@@ -185,18 +191,18 @@ export async function generateHTMLReport(manifest: BuildManifest, outDir: string
         </div>
     </div>
 </body>
-</html>`;
+</html>`
 
-    const reportPath = path.join(outDir, 'build-report.html');
-    await fs.promises.writeFile(reportPath, html);
+    const reportPath = path.join(outDir, 'build-report.html')
+    await fs.promises.writeFile(reportPath, html)
 
-    console.log(`📊 HTML report generated: ${reportPath}`);
+    console.log(`📊 HTML report generated: ${reportPath}`)
   } catch (error) {
-    console.warn('⚠️  Could not generate HTML report:', error);
+    console.warn('⚠️  Could not generate HTML report:', error)
   }
 }
 
 export default {
   generateManifest,
   generateHTMLReport,
-};
+}

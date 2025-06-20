@@ -3,9 +3,13 @@
  * Based on esbuild with optimizations for MCP servers
  */
 
-import { type BuildContext } from 'esbuild';
-import type { BuildConfig } from './config/index.js';
-import { loadConfig, getBuildConfig, validateBuildConfig } from './config/index.js';
+import { type BuildContext } from 'esbuild'
+import type { BuildConfig } from './config/index.js'
+import {
+  loadConfig,
+  getBuildConfig,
+  validateBuildConfig,
+} from './config/index.js'
 import {
   bundle,
   bundleWatch,
@@ -13,135 +17,142 @@ import {
   cleanBuildDir,
   type BundleResult,
   type BundleOptions,
-} from './bundler/index.js';
-import { analyzeDependencies, generateDependencyReport } from './bundler/analyzer.js';
-import { generateBundleStats } from './bundler/optimizer.js';
-import { generateHTMLReport } from './bundler/manifest.js';
+} from './bundler/index.js'
+import {
+  analyzeDependencies,
+  generateDependencyReport,
+} from './bundler/analyzer.js'
+import { generateBundleStats } from './bundler/optimizer.js'
+import { generateHTMLReport } from './bundler/manifest.js'
 
 export interface DyneMCPBuildOptions {
-  configPath?: string;
-  clean?: boolean;
-  analyze?: boolean;
-  manifest?: boolean;
-  html?: boolean;
-  watch?: boolean;
-  cli?: boolean;
+  configPath?: string
+  clean?: boolean
+  analyze?: boolean
+  manifest?: boolean
+  html?: boolean
+  watch?: boolean
+  cli?: boolean
   // Optional build options that can override config
-  entryPoint?: string;
-  outDir?: string;
-  outFile?: string;
-  format?: 'esm' | 'cjs' | 'iife';
-  minify?: boolean;
-  sourcemap?: boolean;
-  bundle?: boolean;
-  external?: string[];
-  define?: Record<string, string>;
-  platform?: 'node' | 'browser';
-  target?: string;
-  treeShaking?: boolean;
-  splitting?: boolean;
-  metafile?: boolean;
+  entryPoint?: string
+  outDir?: string
+  outFile?: string
+  format?: 'esm' | 'cjs' | 'iife'
+  minify?: boolean
+  sourcemap?: boolean
+  bundle?: boolean
+  external?: string[]
+  define?: Record<string, string>
+  platform?: 'node' | 'browser'
+  target?: string
+  treeShaking?: boolean
+  splitting?: boolean
+  metafile?: boolean
 }
 
 export interface BuildResult extends BundleResult {
-  config: BuildConfig;
-  analysis?: any;
+  config: BuildConfig
+  analysis?: any
 }
 
 /**
  * Build a DyneMCP project with advanced features
  */
-export async function build(options: DyneMCPBuildOptions = {}): Promise<BuildResult> {
-  const startTime = Date.now();
+export async function build(
+  options: DyneMCPBuildOptions = {}
+): Promise<BuildResult> {
+  const startTime = Date.now()
 
   try {
-    console.log('🚀 Starting DyneMCP build process...');
+    console.log('🚀 Starting DyneMCP build process...')
 
     // Load configuration
-    const config = loadConfig(options.configPath);
-    const buildConfig = getBuildConfig(config);
+    const config = loadConfig(options.configPath)
+    const buildConfig = getBuildConfig(config)
 
     // Merge options with config
     const finalOptions: BundleOptions = {
       ...buildConfig,
       ...options,
       watch: options.watch || false,
-    };
+    }
 
     // Validate configuration
-    validateBuildConfig(finalOptions);
+    validateBuildConfig(finalOptions)
 
     // Clean build directory if requested
     if (options.clean) {
-      await cleanBuildDir(finalOptions.outDir);
+      await cleanBuildDir(finalOptions.outDir)
     }
 
     // Create output directory
-    const fs = await import('fs-extra');
-    await fs.ensureDir(finalOptions.outDir);
+    const fs = await import('fs-extra')
+    await fs.ensureDir(finalOptions.outDir)
 
     // Build the project
-    const bundleResult = await bundle(finalOptions);
+    const bundleResult = await bundle(finalOptions)
 
     // Generate additional outputs
     const result: BuildResult = {
       ...bundleResult,
       config: buildConfig,
-    };
+    }
 
     // Analyze dependencies if requested
     if (options.analyze && bundleResult.success) {
-      console.log('📊 Analyzing dependencies...');
-      const analysis = await analyzeDependencies(finalOptions.entryPoint);
-      result.analysis = analysis;
+      console.log('📊 Analyzing dependencies...')
+      const analysis = await analyzeDependencies(finalOptions.entryPoint)
+      result.analysis = analysis
 
-      const report = generateDependencyReport(analysis);
-      console.log(report);
+      const report = generateDependencyReport(analysis)
+      console.log(report)
 
       // Save analysis report
-      const reportPath = `${finalOptions.outDir}/dependency-analysis.txt`;
-      await fs.writeFile(reportPath, report);
-      console.log(`📋 Dependency analysis saved: ${reportPath}`);
+      const reportPath = `${finalOptions.outDir}/dependency-analysis.txt`
+      await fs.writeFile(reportPath, report)
+      console.log(`📋 Dependency analysis saved: ${reportPath}`)
     }
 
     // Generate bundle stats
     if (bundleResult.success && bundleResult.outputFiles?.[0]) {
-      const bundleStats = generateBundleStats(bundleResult.outputFiles[0]);
+      const bundleStats = generateBundleStats(bundleResult.outputFiles[0])
       result.stats = {
         ...result.stats,
         outputSize: bundleStats.size,
-      };
+      }
 
-      console.log(`📈 Bundle stats: ${bundleStats.sizeKB}KB, ${bundleStats.lines} lines`);
+      console.log(
+        `📈 Bundle stats: ${bundleStats.sizeKB}KB, ${bundleStats.lines} lines`
+      )
     }
 
     // Generate HTML report if requested
     if (options.html && bundleResult.metafile) {
-      await generateHTMLReport(bundleResult.metafile, finalOptions.outDir);
+      await generateHTMLReport(bundleResult.metafile, finalOptions.outDir)
     }
 
-    const endTime = Date.now();
-    const duration = endTime - startTime;
+    const endTime = Date.now()
+    const duration = endTime - startTime
 
     if (bundleResult.success) {
-      console.log(`✅ Build completed successfully in ${duration}ms`);
-      console.log(`📁 Output directory: ${finalOptions.outDir}`);
+      console.log(`✅ Build completed successfully in ${duration}ms`)
+      console.log(`📁 Output directory: ${finalOptions.outDir}`)
 
       if (bundleResult.outputFiles) {
         bundleResult.outputFiles.forEach((file) => {
-          console.log(`📄 Generated: ${file}`);
-        });
+          console.log(`📄 Generated: ${file}`)
+        })
       }
     } else {
-      console.error(`❌ Build failed after ${duration}ms`);
+      console.error(`❌ Build failed after ${duration}ms`)
     }
 
-    return result;
+    return result
   } catch (error) {
-    const endTime = Date.now();
-    const duration = endTime - startTime;
+    const endTime = Date.now()
+    const duration = endTime - startTime
 
-    console.error(`❌ Build failed after ${duration}ms:`, error);
+    console.error(`❌ Build failed after ${duration}ms:`, error)
 
     return {
       success: false,
@@ -155,20 +166,22 @@ export async function build(options: DyneMCPBuildOptions = {}): Promise<BuildRes
         dependencies: 0,
       },
       config: {} as BuildConfig,
-    };
+    }
   }
 }
 
 /**
  * Build a DyneMCP project in watch mode
  */
-export async function watch(options: DyneMCPBuildOptions = {}): Promise<BuildContext> {
+export async function watch(
+  options: DyneMCPBuildOptions = {}
+): Promise<BuildContext> {
   try {
-    console.log('👀 Starting DyneMCP build in watch mode...');
+    console.log('👀 Starting DyneMCP build in watch mode...')
 
     // Load configuration
-    const config = loadConfig(options.configPath);
-    const buildConfig = getBuildConfig(config);
+    const config = loadConfig(options.configPath)
+    const buildConfig = getBuildConfig(config)
 
     // Merge options with config
     const finalOptions: BundleOptions = {
@@ -176,38 +189,40 @@ export async function watch(options: DyneMCPBuildOptions = {}): Promise<BuildCon
       ...options,
       watch: true,
       sourcemap: true, // Always enable sourcemap in watch mode
-    };
+    }
 
     // Validate configuration
-    validateBuildConfig(finalOptions);
+    validateBuildConfig(finalOptions)
 
     // Create output directory
-    const fs = await import('fs-extra');
-    await fs.ensureDir(finalOptions.outDir);
+    const fs = await import('fs-extra')
+    await fs.ensureDir(finalOptions.outDir)
 
     // Start watch mode
-    const ctx = await bundleWatch(finalOptions);
+    const ctx = await bundleWatch(finalOptions)
 
-    console.log('👀 Watching for changes...');
-    console.log(`📁 Output: ${finalOptions.outDir}/${finalOptions.outFile}`);
+    console.log('👀 Watching for changes...')
+    console.log(`📁 Output: ${finalOptions.outDir}/${finalOptions.outFile}`)
 
-    return ctx;
+    return ctx
   } catch (error) {
-    console.error('❌ Watch build failed:', error);
-    throw error;
+    console.error('❌ Watch build failed:', error)
+    throw error
   }
 }
 
 /**
  * Build a DyneMCP CLI tool
  */
-export async function buildCli(options: DyneMCPBuildOptions = {}): Promise<BuildResult> {
+export async function buildCli(
+  options: DyneMCPBuildOptions = {}
+): Promise<BuildResult> {
   try {
-    console.log('🔧 Building DyneMCP CLI tool...');
+    console.log('🔧 Building DyneMCP CLI tool...')
 
     // Load configuration
-    const config = loadConfig(options.configPath);
-    const buildConfig = getBuildConfig(config);
+    const config = loadConfig(options.configPath)
+    const buildConfig = getBuildConfig(config)
 
     // Merge options with config
     const finalOptions: BundleOptions = {
@@ -215,43 +230,43 @@ export async function buildCli(options: DyneMCPBuildOptions = {}): Promise<Build
       ...options,
       cli: true,
       watch: options.watch || false,
-    };
+    }
 
     // Validate configuration
-    validateBuildConfig(finalOptions);
+    validateBuildConfig(finalOptions)
 
     // Clean build directory if requested
     if (options.clean) {
-      await cleanBuildDir(finalOptions.outDir);
+      await cleanBuildDir(finalOptions.outDir)
     }
 
     // Create output directory
-    const fs = await import('fs-extra');
-    await fs.ensureDir(finalOptions.outDir);
+    const fs = await import('fs-extra')
+    await fs.ensureDir(finalOptions.outDir)
 
     // Build CLI
-    const bundleResult = await bundleCli(finalOptions);
+    const bundleResult = await bundleCli(finalOptions)
 
     const result: BuildResult = {
       ...bundleResult,
       config: buildConfig,
-    };
+    }
 
     if (bundleResult.success) {
-      console.log('✅ CLI build completed successfully');
+      console.log('✅ CLI build completed successfully')
       console.log(
         `🔧 CLI executable: ${finalOptions.outDir}/${finalOptions.outFile.replace(
           '.js',
-          '-cli.js',
-        )}`,
-      );
+          '-cli.js'
+        )}`
+      )
     } else {
-      console.error('❌ CLI build failed');
+      console.error('❌ CLI build failed')
     }
 
-    return result;
+    return result
   } catch (error) {
-    console.error('❌ CLI build failed:', error);
+    console.error('❌ CLI build failed:', error)
 
     return {
       success: false,
@@ -265,27 +280,29 @@ export async function buildCli(options: DyneMCPBuildOptions = {}): Promise<Build
         dependencies: 0,
       },
       config: {} as BuildConfig,
-    };
+    }
   }
 }
 
 /**
  * Clean build directory
  */
-export async function clean(options: { outDir?: string; configPath?: string } = {}): Promise<void> {
+export async function clean(
+  options: { outDir?: string; configPath?: string } = {}
+): Promise<void> {
   try {
-    let outDir = options.outDir || './dist';
+    let outDir = options.outDir || './dist'
 
     if (!options.outDir && options.configPath) {
-      const config = loadConfig(options.configPath);
-      const buildConfig = getBuildConfig(config);
-      outDir = buildConfig.outDir;
+      const config = loadConfig(options.configPath)
+      const buildConfig = getBuildConfig(config)
+      outDir = buildConfig.outDir
     }
 
-    await cleanBuildDir(outDir);
+    await cleanBuildDir(outDir)
   } catch (error) {
-    console.error('❌ Clean failed:', error);
-    throw error;
+    console.error('❌ Clean failed:', error)
+    throw error
   }
 }
 
@@ -293,26 +310,26 @@ export async function clean(options: { outDir?: string; configPath?: string } = 
  * Analyze project dependencies
  */
 export async function analyze(
-  options: { entryPoint?: string; configPath?: string } = {},
+  options: { entryPoint?: string; configPath?: string } = {}
 ): Promise<any> {
   try {
-    let entryPoint = options.entryPoint || './src/index.ts';
+    let entryPoint = options.entryPoint || './src/index.ts'
 
     if (!options.entryPoint && options.configPath) {
-      const config = loadConfig(options.configPath);
-      const buildConfig = getBuildConfig(config);
-      entryPoint = buildConfig.entryPoint;
+      const config = loadConfig(options.configPath)
+      const buildConfig = getBuildConfig(config)
+      entryPoint = buildConfig.entryPoint
     }
 
-    console.log('📊 Analyzing project dependencies...');
-    const analysis = await analyzeDependencies(entryPoint);
-    const report = generateDependencyReport(analysis);
+    console.log('📊 Analyzing project dependencies...')
+    const analysis = await analyzeDependencies(entryPoint)
+    const report = generateDependencyReport(analysis)
 
-    console.log(report);
-    return analysis;
+    console.log(report)
+    return analysis
   } catch (error) {
-    console.error('❌ Analysis failed:', error);
-    throw error;
+    console.error('❌ Analysis failed:', error)
+    throw error
   }
 }
 
@@ -322,4 +339,4 @@ export default {
   buildCli,
   clean,
   analyze,
-};
+}

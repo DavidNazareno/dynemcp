@@ -1,9 +1,9 @@
-import { DyneMCPResource } from '@dynemcp/server-dynemcp';
+import { DyneMCPResource } from '@dynemcp/server-dynemcp'
 
 export class MathReferenceResource extends DyneMCPResource {
-  uri = 'https://math-reference.com';
-  name = 'Mathematics Reference';
-  description = 'Reference guide for mathematical operations and formulas';
+  uri = 'https://math-reference.com'
+  name = 'Mathematics Reference'
+  description = 'Reference guide for mathematical operations and formulas'
 
   async getContent(): Promise<string> {
     return `# Mathematics Reference Guide
@@ -68,8 +68,8 @@ When performing calculations, be aware of:
 ## Precision
 
 For most practical purposes, 6-8 decimal places of precision are sufficient. For scientific calculations, consider using higher precision libraries.
-`;
+`
   }
 }
 
-export default new MathReferenceResource(); 
+export default new MathReferenceResource()
