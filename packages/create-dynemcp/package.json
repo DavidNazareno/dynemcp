@@ -38,7 +38,6 @@
     "fs-extra": "^11.3.0",
     "inquirer": "^9.2.16",
     "ora": "^8.0.1",
-    "validate-npm-package-name": "^5.0.0",
     "execa": "^9.6.0",
     "tslib": "^2.3.0"
   },

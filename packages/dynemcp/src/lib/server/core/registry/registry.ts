@@ -1,11 +1,7 @@
 import { ComponentStorage, type RegistryStats } from './registry-storage.js';
 import { loadAllComponents, type LoadAllOptions } from './registry-loader.js';
 import { validateAllTools } from '../validation.js';
-import type {
-  ToolDefinition,
-  ResourceDefinition,
-  PromptDefinition,
-} from '../interfaces.js';
+import type { ToolDefinition, ResourceDefinition, PromptDefinition } from '../interfaces.js';
 
 export class Registry {
   private storage = new ComponentStorage();

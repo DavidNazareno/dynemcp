@@ -60,13 +60,13 @@ export async function loadComponentsFromDirectory<T>(
 
 async function findFilesRecursively(dir: string, pattern: string): Promise<string[]> {
   const files: string[] = [];
-  
+
   async function scanDirectory(currentDir: string) {
     const entries = await fs.promises.readdir(currentDir, { withFileTypes: true });
-    
+
     for (const entry of entries) {
       const fullPath = path.join(currentDir, entry.name);
-      
+
       if (entry.isDirectory()) {
         await scanDirectory(fullPath);
       } else if (entry.isFile()) {
@@ -77,7 +77,7 @@ async function findFilesRecursively(dir: string, pattern: string): Promise<strin
       }
     }
   }
-  
+
   await scanDirectory(dir);
   return files;
 }

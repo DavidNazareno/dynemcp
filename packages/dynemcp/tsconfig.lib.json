@@ -19,5 +19,11 @@
     "resolveJsonModule": true
   },
   "include": ["src/lib/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts","packages/create-dynemcp/src/templates/**/*"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "packages/create-dynemcp/src/templates/**/*"
+  ]
 }

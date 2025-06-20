@@ -279,7 +279,9 @@ export function mergeConfigs(
   // Build server property explicitly
   const server = {
     name: String(envConfig.server?.name || fileConfig.server?.name || defaultConfig.server.name),
-    version: String(envConfig.server?.version || fileConfig.server?.version || defaultConfig.server.version),
+    version: String(
+      envConfig.server?.version || fileConfig.server?.version || defaultConfig.server.version,
+    ),
   };
 
   // Remove any possibly optional server property from merged
