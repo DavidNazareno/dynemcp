@@ -2,6 +2,7 @@
 
 import path from 'path';
 import chalk from 'chalk';
+import os from 'os';
 import { Command } from 'commander';
 import Conf from 'conf';
 import inquirer from 'inquirer';
@@ -34,11 +35,7 @@ const program = new Command('create-dynemcp')
   .usage('[directory] [options]')
   .helpOption('-h, --help', 'Display this help message.')
   .option('--template <name>', 'The template to use (default, minimal, full)')
-  .option('--ts, --typescript', 'Initialize as a TypeScript project (default)')
-  .option('--eslint', 'Include ESLint configuration (default)')
-  .option('--no-eslint', 'Skip ESLint configuration')
-  .option('--use-npm', 'Explicitly tell the CLI to bootstrap the application using npm')
-  .option('--use-pnpm', 'Explicitly tell the CLI to bootstrap the application using pnpm (default)')
+
   .option('--git', 'Initialize a git repository (default)')
   .option('--no-git', 'Skip git repository initialization')
   .option('--skip-install', 'Skip installing dependencies')
@@ -95,8 +92,6 @@ async function promptForProjectOptions(
   args: string[],
 ): Promise<void> {
   const defaults = {
-    typescript: true,
-    eslint: true,
     template: 'default',
     git: true,
   };
@@ -109,7 +104,7 @@ async function promptForProjectOptions(
     const { template } = await inquirer.prompt({
       type: 'list',
       name: 'template',
-      message: 'Select a template:',
+      message: '🧩 Select a project template:',
       choices: availableTemplates,
       default: getPrefOrDefault('template'),
     });
@@ -117,37 +112,12 @@ async function promptForProjectOptions(
     preferences.template = template;
   }
 
-  // Prompt for TypeScript
-  if (!options.typescript && !options.javascript) {
-    const { typescript } = await inquirer.prompt({
-      type: 'confirm',
-      name: 'typescript',
-      message: `Would you like to use ${chalk.blue('TypeScript')}?`,
-      default: getPrefOrDefault('typescript'),
-    });
-    options.typescript = typescript;
-    options.javascript = !typescript;
-    preferences.typescript = typescript;
-  }
-
-  // Prompt for ESLint
-  if (!options.eslint && !args.includes('--no-eslint')) {
-    const { eslint } = await inquirer.prompt({
-      type: 'confirm',
-      name: 'eslint',
-      message: `Would you like to use ${chalk.blue('ESLint')}?`,
-      default: getPrefOrDefault('eslint'),
-    });
-    options.eslint = eslint;
-    preferences.eslint = eslint;
-  }
-
   // Prompt for Git
-  if (!options.git && !args.includes('--no-git')) {
+  if (options.git === undefined && !args.includes('--no-git')) {
     const { git } = await inquirer.prompt({
       type: 'confirm',
       name: 'git',
-      message: 'Initialize a git repository?',
+      message: '🔧 Initialize a git repository?',
       default: getPrefOrDefault('git'),
     });
     options.git = git;
@@ -173,20 +143,37 @@ async function validateAndResolveProjectPath(
     process.exit(1);
   }
 
-  // Get the actual current working directory where the command is executed
-  const currentDir = process.cwd();
-
-  // Handle both relative and absolute paths
+  // Usa INIT_CWD si existe (como Next.js, Astro, etc.), si no, process.cwd()
+  const currentDir = process.env.INIT_CWD || process.cwd();
   let projectPath: string;
-  if (path.isAbsolute(projectName)) {
-    projectPath = projectName;
+  if (path.isAbsolute(projectDirectory)) {
+    projectPath = path.normalize(projectDirectory);
   } else {
-    projectPath = path.join(currentDir, projectName);
+    projectPath = path.resolve(currentDir, projectDirectory);
   }
 
-  // Log where we're creating the project
-  console.log(chalk.gray(`Current directory: ${currentDir}`));
-  console.log(chalk.gray(`Creating project at: ${projectPath}`));
+  // Evitar paths en home si no es intencional
+  const userHome = os.homedir();
+  const rawCwd = process.cwd();
+  const initCwd = process.env.INIT_CWD;
+  if (
+    projectPath.startsWith(userHome) &&
+    !currentDir.startsWith(userHome) &&
+    !projectDirectory.startsWith(userHome)
+  ) {
+    console.error(
+      chalk.bgRed.white.bold('¡Error de path!'),
+      `\nEl path resuelto apunta a tu home (${userHome}) desde un cwd fuera de home. Esto es un bug.\n` +
+        `currentDir usado: ${currentDir}\nINIT_CWD: ${initCwd}\nprocess.cwd(): ${rawCwd}\nprojectDirectory: ${projectDirectory}\nprojectPath: ${projectPath}`,
+    );
+    process.exit(1);
+  }
+
+  // Log explícito de depuración
+  console.log(chalk.gray(`Current directory (INIT_CWD): ${initCwd || '[undefined]'}`));
+  console.log(chalk.gray(`Current directory (process.cwd()): ${rawCwd}`));
+  console.log(chalk.gray(`Project directory argument: ${projectDirectory}`));
+  console.log(chalk.gray(`Final resolved project path: ${projectPath}`));
 
   // Validate project path (check if directory exists, etc.)
   const { valid: validPath, message } = validateProjectPath(projectPath);
@@ -346,44 +333,33 @@ function displaySuccessMessage(
   projectPath: string,
   packageManager: PackageManager,
 ): void {
+  const runCmd = getRunCommand(packageManager);
   console.log();
   console.log(
-    `${chalk.green('Success!')} Created ${chalk.cyan(projectName)} at ${chalk.cyan(projectPath)}`,
+    `🎉 ${chalk.green('Project ready!')} Your DyneMCP project ${chalk.cyan(
+      projectName,
+    )} was created at ${chalk.cyan(projectPath)}`,
   );
   console.log();
-
-  // Get the run command function for the selected package manager
-  const runCmd = getRunCommand(packageManager);
-
-  // Display next steps
-  console.log('Inside that directory, you can run several commands:');
+  console.log('✨ Next steps:');
   console.log();
-  console.log(`  ${chalk.cyan(runCmd('dev'))}`);
-  console.log('    Starts the development server.');
+  console.log(`   ${chalk.cyan('cd')} ${projectName}`);
+  console.log(`   ${chalk.cyan(runCmd('install'))}   # Install dependencies`);
+  console.log(`   ${chalk.cyan(runCmd('dev'))}       # Start the dev server 🚀`);
   console.log();
-  console.log(`  ${chalk.cyan(runCmd('build'))}`);
-  console.log('    Builds the app for production.');
+  console.log('📚 Useful commands:');
+  console.log(`   ${chalk.cyan(runCmd('build'))}     # Build for production`);
+  console.log(`   ${chalk.cyan(runCmd('start'))}     # Run production server`);
   console.log();
-  console.log(`  ${chalk.cyan(runCmd('start'))}`);
-  console.log('    Runs the built app in production mode.');
-  console.log();
-  console.log('We suggest that you begin by typing:');
-  console.log();
-  console.log(`  ${chalk.cyan('cd')} ${projectName}`);
-  console.log(`  ${chalk.cyan(runCmd('dev'))}`);
-  console.log();
-  console.log('Happy hacking!');
+  console.log('📝 All code is in TypeScript and includes ESLint by default.');
+  console.log('⭐️ Enjoy building with DyneMCP!');
 }
 
 /**
  * Determines the package manager to use
  */
-function determinePackageManager(options: CommandOptions): PackageManager {
-  if (options.usePnpm) {
-    return 'pnpm';
-  }
-
-  // Default to pnpm as specified in the original code
+function determinePackageManager(_options: CommandOptions): PackageManager {
+  // Siempre usar pnpm
   return 'pnpm';
 }
 
@@ -454,8 +430,6 @@ async function run(): Promise<void> {
     } else {
       // Set defaults when using --yes flag
       options.template = options.template ?? 'default';
-      options.typescript = options.typescript ?? true;
-      options.eslint = options.eslint ?? true;
       options.git = options.git ?? true;
     }
 
@@ -466,10 +440,11 @@ async function run(): Promise<void> {
       availableTemplates,
     );
 
-    // Debug information
-    console.log(chalk.gray(`Project directory input: "${projectDirectory}"`));
-    console.log(chalk.gray(`Resolved project name: "${projectName}"`));
-    console.log(chalk.gray(`Final project path: "${projectPath}"`));
+    // Debug information amigable
+    console.log(`\n🚀 ${chalk.cyan('Starting DyneMCP project creation!')}`);
+    console.log(chalk.gray(`   📂 Project directory: "${projectDirectory}"`));
+    console.log(chalk.gray(`   📦 Project name: "${projectName}"`));
+    console.log(chalk.gray(`   📁 Final path: "${projectPath}"`));
 
     // Save preferences for next time
     conf.set('preferences', preferences);

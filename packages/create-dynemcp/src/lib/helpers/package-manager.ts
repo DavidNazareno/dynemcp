@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 
-export type PackageManager = 'pnpm';
+export type PackageManager = 'pnpm'; // Solo se permite pnpm
 
 /**
  * Returns the package manager used in the project based on user preference
@@ -14,11 +14,6 @@ export function getPkgManager(): PackageManager {
   } catch (_e) {
     return 'pnpm';
   }
-}
-
-// Legacy function, kept for backward compatibility
-export function detectPackageManager(): PackageManager {
-  return getPkgManager();
 }
 
 export function getInstallCommand(packageManager: PackageManager): string {

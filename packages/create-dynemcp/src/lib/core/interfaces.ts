@@ -27,7 +27,6 @@ export interface CommandOptions {
   skipInstall?: boolean;
   yes?: boolean;
   resetPreferences?: boolean;
-  usePnpm?: boolean;
 }
 
 // Type assertion for updateCheck
