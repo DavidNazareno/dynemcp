@@ -21,6 +21,7 @@
   "dependencies": {
     "tslib": "^2.3.0",
     "zod": "^3.22.4",
-    "@modelcontextprotocol/sdk": "^1.12.1"
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "glob": "^10.3.10"
   }
 }

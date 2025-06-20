@@ -1,6 +1,7 @@
-import fs from 'fs-extra';
+import fs from 'fs/promises';
 import path from 'path';
-import { getTemplatesDir } from '../helpers/paths.js';
+import { installTemplate } from './template-generator.js';
+import type { PackageManager } from '../helpers/package-manager.js';
 
 // Get the templates directory path
 const templatesDir = getTemplatesDir();
@@ -16,57 +17,33 @@ interface CreateProjectOptions {
  * Returns a list of available templates in the templates directory
  */
 export async function getAvailableTemplates(): Promise<string[]> {
-  try {
-    const templates = await fs.readdir(templatesDir);
-    return templates.filter((template) =>
-      fs.statSync(path.join(templatesDir, template)).isDirectory(),
-    );
-  } catch (error) {
-    console.error('Error reading templates directory:', error);
-    return ['default']; // Fallback to default template
-  }
+  return ['default', 'calculator'];
 }
 
 /**
  * Creates a new project using the specified template and options
  */
-export async function createProject(options: CreateProjectOptions): Promise<void> {
-  const { projectPath, template, typescript, eslint } = options;
-  const projectName = path.basename(projectPath);
+export async function createProject(
+  projectPath: string,
+  projectName: string,
+  template: string,
+): Promise<void> {
+  // Create project directory
+  await fs.mkdir(projectPath, { recursive: true });
 
-  // Ensure the project directory exists
-  await fs.ensureDir(projectPath);
-
-  // Copy template files
-  const templatePath = path.join(templatesDir, template);
-
-  try {
-    // Copy template files with filtering
-    await fs.copy(templatePath, projectPath, {
-      filter: (src) => {
-        // Skip typescript files if not using typescript
-        if (!typescript && src.endsWith('.ts') && !src.endsWith('.d.ts')) {
-          return false;
-        }
-
-        // Skip eslint files if not using eslint
-        if (!eslint && (src.includes('.eslint') || src.endsWith('eslintrc.js'))) {
-          return false;
-        }
-
-        return true;
-      },
-    });
-
-    // Update package.json with project name
-    await updateProjectConfig(projectPath, projectName);
-
-    // Create .gitignore file
-    await createGitIgnore(projectPath);
-  } catch (error) {
-    console.error('Error creating project:', error);
-    throw error;
-  }
+  // Use the existing installTemplate function
+  await installTemplate({
+    appName: projectName,
+    root: projectPath,
+    packageManager: 'npm' as PackageManager,
+    template,
+    mode: 'ts',
+    tailwind: false,
+    eslint: true,
+    srcDir: true,
+    importAlias: '@/*',
+    skipInstall: false,
+  });
 }
 
 /**

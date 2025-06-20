@@ -2,21 +2,51 @@ import validateNpmPackageName from 'validate-npm-package-name';
 import fs from 'fs-extra';
 import chalk from 'chalk';
 
-export function validateProjectName(name: string): {
+export interface ValidationResult {
   valid: boolean;
   problems?: string[];
-} {
-  const validation = validateNpmPackageName(name);
+}
 
-  if (validation.validForNewPackages) {
-    return { valid: true };
+export function validateProjectName(name: string): ValidationResult {
+  const problems: string[] = [];
+
+  if (!name || name.trim().length === 0) {
+    problems.push('Project name cannot be empty');
   }
 
-  const problems = [...(validation.errors ?? []), ...(validation.warnings ?? [])];
+  if (name.length > 214) {
+    problems.push('Project name cannot be longer than 214 characters');
+  }
+
+  // Check for invalid characters
+  const invalidChars = /[<>:"/\\|?*\x00-\x1f]/;
+  if (invalidChars.test(name)) {
+    problems.push('Project name contains invalid characters');
+  }
+
+  // Check for reserved names
+  const reservedNames = [
+    'node_modules',
+    'package.json',
+    'package-lock.json',
+    'yarn.lock',
+    'pnpm-lock.yaml',
+    '.git',
+    '.gitignore',
+    '.env',
+    '.env.local',
+    '.env.development',
+    '.env.test',
+    '.env.production',
+  ];
+
+  if (reservedNames.includes(name.toLowerCase())) {
+    problems.push(`Project name cannot be "${name}" (reserved name)`);
+  }
 
   return {
-    valid: false,
-    problems,
+    valid: problems.length === 0,
+    problems: problems.length > 0 ? problems : undefined,
   };
 }
 

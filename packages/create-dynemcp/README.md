@@ -1,11 +1,41 @@
-# create-dynemcp
+# @dynemcp/create-dynemcp
 
-This library was generated with [Nx](https://nx.dev).
+A CLI tool to create new DyneMCP projects with predefined templates.
 
-## Building
+## Installation
 
-Run `nx build create-dynemcp` to build the library.
+```bash
+npm install -g @dynemcp/create-dynemcp
+```
 
-## Running unit tests
+## Usage
 
-Run `nx test create-dynemcp` to execute the unit tests via [Vitest](https://vitest.dev/).
+```bash
+# Create a new project
+create-dynemcp my-mcp-project
+
+# Create with specific template
+create-dynemcp my-calculator --template calculator
+
+# Skip prompts
+create-dynemcp my-project --yes
+
+# Skip dependency installation
+create-dynemcp my-project --skip-install
+```
+
+## Templates
+
+### Default Template
+A minimal setup with example tools, resources, and prompts.
+
+### Calculator Template
+A comprehensive calculator with mathematical tools and reference resources.
+
+## Options
+
+- `--template <name>`: Choose template (default, calculator)
+- `--skip-install`: Skip installing dependencies
+- `--yes`: Skip all prompts and use defaults
+- `--help`: Show help information
+- `--version`: Show version information

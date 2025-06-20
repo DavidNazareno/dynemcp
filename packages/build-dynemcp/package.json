@@ -7,10 +7,16 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "dynebuild": "./dist/bin/index.js"
+    "dynebuild": "./dist/lib/bin/index.js"
   },
   "scripts": {
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "build": "tsc && vite build",
+    "dev": "vite build --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
   },
   "nx": {
     "targets": {
@@ -38,6 +44,26 @@
     "chalk": "^5.3.0"
   },
   "devDependencies": {
-    "@types/fs-extra": "^11.0.4"
-  }
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.2",
+    "vite": "^5.4.0",
+    "vitest": "^1.4.0",
+    "eslint": "^9.28.0",
+    "@typescript-eslint/eslint-plugin": "^8.33.1",
+    "@typescript-eslint/parser": "^8.33.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "build",
+    "bundler",
+    "esbuild",
+    "typescript",
+    "server"
+  ],
+  "description": "Advanced build system for DyneMCP projects with optimizations for MCP servers"
 }

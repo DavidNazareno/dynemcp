@@ -1,81 +1,41 @@
-import { loadConfig } from './lib/core/config.js';
-import {
-  createSystemPrompt,
-  createChatPrompt,
-  createTemplatePrompt,
-  registerPrompt,
-  getAllPrompts,
-  getPrompt,
-  clearPrompts,
-  applyPromptParameters,
-} from './lib/prompt/registry.js';
-import {
-  createFileResource,
-  createDynamicResource,
-  registerResource,
-  getAllResources,
-  getResource,
-  clearResources,
-} from './lib/resources/registry.js';
-import { DyneMCP } from './lib/server-dynemcp.js';
-import {
-  createTool,
-  tool,
-  registerTool,
-  getAllTools,
-  getTool,
-  clearTools,
-} from './lib/tools/registry.js';
-import { SERVER_VERSION } from './lib/core/constants.js';
+// Main server classes and functions
+export { DyneMCP, createMCPServer } from './lib/core/server/server-dynemcp.js';
 
-// Export namespaces for better organization
-export const tools = {
-  createTool,
-  tool,
-  registerTool,
-  getAllTools,
-  getTool,
-  clearTools,
-};
+// Configuration and registry
+export { loadConfig } from './lib/core/config.js';
+export { registry } from './lib/core/registry/registry.js';
 
-export const resources = {
-  createFileResource,
-  createDynamicResource,
-  registerResource,
-  getAllResources,
-  getResource,
-  clearResources,
-};
+// Base classes for inheritance
+export { DyneMCPTool, DyneMCPResource, DyneMCPPrompt } from './lib/core/base.js';
 
-export const prompt = {
-  createSystemPrompt,
-  createChatPrompt,
-  createTemplatePrompt,
-  registerPrompt,
-  getAllPrompts,
-  getPrompt,
-  clearPrompts,
-  applyPromptParameters,
-};
+// Type utilities
+export type { ToolInput, InferSchema } from './lib/core/base.js';
 
-// Export the type definitions for external use
+// Validation utilities
+export { validateToolSchema, validateAllTools, defineSchema } from './lib/core/validation.js';
+
+// Transport utilities
+export { createTransport } from './lib/transport/index.js';
+
+// Helper functions for creating components
+export * as helpers from './lib/helpers/index.js';
+
+// Schemas
+export * as schemas from './lib/schemas/index.js';
+
+// Types
 export type {
-  ResourceDefinition,
   ToolDefinition,
+  ResourceDefinition,
   PromptDefinition,
+  DyneMCPConfig,
+  AutoloadConfig,
+  LoggingConfig,
+  DebugConfig,
+  PerformanceConfig,
+  SecurityConfig,
+  TransportConfig,
+  StdioTransportConfig,
+  SSETransportConfig,
+  HTTPStreamTransportConfig,
 } from './lib/core/interfaces.js';
-
-export { loadConfig };
-
-export function createMCPServer(name: string, version?: string) {
-  return new DyneMCP(name, version || SERVER_VERSION);
-}
-
-export default {
-  createMCPServer,
-  loadConfig,
-  tools,
-  resources,
-  prompt,
-  DyneMCP,
-};

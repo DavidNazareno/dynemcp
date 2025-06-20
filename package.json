@@ -31,6 +31,7 @@
     "@nx/eslint": "21.2.0",
     "@nx/eslint-plugin": "21.2.0",
     "@nx/js": "21.2.0",
+    "@nx/next": "21.2.0",
     "@nx/vite": "21.2.0",
     "@nx/web": "21.2.0",
     "@swc-node/register": "~1.9.1",
@@ -54,5 +55,10 @@
     "typescript": "~5.8.2",
     "vite": "^6.0.0",
     "vitest": "^3.0.0"
+  },
+  "dependencies": {
+    "next": "~15.2.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   }
 }

@@ -1,6 +1,6 @@
-import { execSync } from 'child_process';
+import { execa } from 'execa';
 
-export type PackageManager = 'pnpm'; // Solo se permite pnpm
+export type PackageManager = 'npm' | 'yarn' | 'pnpm';
 
 /**
  * Returns the package manager used in the project based on user preference
@@ -9,7 +9,7 @@ export type PackageManager = 'pnpm'; // Solo se permite pnpm
 export function getPkgManager(): PackageManager {
   // User rule: prefer pnpm
   try {
-    execSync('pnpm --version', { stdio: 'ignore' });
+    execa('pnpm', ['--version'], { stdio: 'ignore' });
     return 'pnpm';
   } catch (_e) {
     return 'pnpm';
@@ -36,18 +36,10 @@ export function getRunCommand(packageManager: PackageManager): (script: string) 
   };
 }
 
-export async function installDependencies(
-  projectPath: string,
-  packageManager: PackageManager,
-): Promise<void> {
+export async function installDependencies(projectPath: string): Promise<void> {
   try {
-    const { execa } = await import('execa');
-    await execa(packageManager, ['install'], {
-      cwd: projectPath,
-      stdio: 'inherit',
-    });
+    await execa('npm', ['install'], { cwd: projectPath, stdio: 'inherit' });
   } catch (error) {
-    console.error(`Failed to install dependencies with ${packageManager}.`);
-    throw error;
+    throw new Error(`Failed to install dependencies: ${error instanceof Error ? error.message : error}`);
   }
 }

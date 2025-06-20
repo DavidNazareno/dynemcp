@@ -1,89 +1,143 @@
-# Dynemcp
+# DyneMCP
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+🚀 **Advanced Model Context Protocol (MCP) framework** for building powerful AI server applications.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+DyneMCP is a comprehensive framework that provides everything you need to create, build, and deploy MCP servers with ease. It includes a powerful server runtime, CLI tools for project creation, and an advanced build system optimized for MCP applications.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## 🎯 Features
 
-## Finish your CI setup
+- **🚀 Server Runtime** - High-performance MCP server with advanced features
+- **🛠️ Project Generator** - Create new MCP projects with templates
+- **⚡ Build System** - Advanced bundling and optimization for MCP servers
+- **📦 Component System** - Tools, Resources, and Prompts management
+- **🔧 Configuration** - Flexible configuration system
+- **📊 Monitoring** - Built-in logging and metrics
+- **🛡️ Security** - Security features and validation
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/YVtFFVePSC)
+## 📦 Packages
 
-## Generate a library
+### @dynemcp/server-dynemcp
+The core MCP server runtime with advanced features.
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+### @dynemcp/create-dynemcp
+CLI tool for creating new MCP projects.
+
+### @dynemcp/build-dynemcp
+Advanced build system for MCP projects.
+
+## 🚀 Quick Start
+
+### 1. Create a new MCP project
+
+```bash
+npx @dynemcp/create-dynemcp my-mcp-server
+cd my-mcp-server
 ```
 
-## Run tasks
+### 2. Build and run
 
-To build the library use:
+```bash
+# Build the project
+npm run build
 
-```sh
-npx nx build pkg1
+# Start the server
+npm start
+
+# Development mode
+npm run dev
 ```
 
-To run any task with Nx use:
-
-```sh
-npx nx <target> <project-name>
-```
-
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
+## 📋 Project Structure
 
 ```
-npx nx release
+my-mcp-server/
+├── src/
+│   ├── index.ts              # Server entry point
+│   ├── tools/                # MCP Tools
+│   ├── resources/            # MCP Resources
+│   └── prompts/              # MCP Prompts
+├── dynemcp.config.json       # Configuration
+├── package.json
+└── dist/                     # Build output
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+## ⚙️ Configuration
 
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Configure your MCP server in `dynemcp.config.json`:
 
-## Keep TypeScript project references up to date
-
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
-
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
+```json
+{
+  "server": {
+    "name": "my-mcp-server",
+    "version": "1.0.0"
+  },
+  "tools": {
+    "enabled": true,
+    "directory": "./src/tools"
+  },
+  "resources": {
+    "enabled": true,
+    "directory": "./src/resources"
+  },
+  "prompts": {
+    "enabled": true,
+    "directory": "./src/prompts"
+  },
+  "transport": {
+    "type": "stdio"
+  },
+  "build": {
+    "entryPoint": "./src/index.ts",
+    "outDir": "./dist",
+    "minify": true
+  }
+}
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+## 🛠️ Development
 
-```sh
-npx nx sync:check
+### Prerequisites
+
+- Node.js 16+
+- pnpm (recommended)
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/dynemcp.git
+cd dynemcp
+
+# Install dependencies
+pnpm install
+
+# Build all packages
+pnpm build
+
+# Run tests
+pnpm test
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+## 📚 Documentation
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [Server Documentation](./packages/server-dynemcp/README.md)
+- [Create Tool Documentation](./packages/create-dynemcp/README.md)
+- [Build System Documentation](./packages/build-dynemcp/README.md)
 
-## Install Nx Console
+## 🤝 Contributing
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 📄 License
 
-## Useful links
+MIT License - see [LICENSE](LICENSE) file for details.
 
-Learn more:
+## 🔗 Links
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [Model Context Protocol](https://modelcontextprotocol.io/)
+- [MCP Inspector](https://github.com/modelcontextprotocol/inspector)
+- [MCP SDK](https://github.com/modelcontextprotocol/sdk)

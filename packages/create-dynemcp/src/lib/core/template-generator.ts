@@ -153,8 +153,14 @@ export const installTemplate = async ({
     private: true,
     scripts: {
       dev: 'cross-env NODE_ENV=development npx @modelcontextprotocol/inspector serve src/index.ts',
-      build: 'build-dynemcp',
+      build: 'dynebuild',
+      'build:watch': 'dynebuild watch',
+      'build:analyze': 'dynebuild --analyze',
+      'build:clean': 'dynebuild --clean',
+      'build:html': 'dynebuild --html',
       start: 'node dist/server.js',
+      clean: 'dynebuild clean',
+      analyze: 'dynebuild analyze',
       format: 'prettier --write .',
       lint: eslint ? 'eslint . --ext .js,.jsx,.ts,.tsx' : undefined,
       'eslint:fix': eslint ? 'eslint . --ext .js,.jsx,.ts,.tsx --fix' : undefined,
@@ -165,7 +171,6 @@ export const installTemplate = async ({
     dependencies: {
       '@modelcontextprotocol/sdk': '^1.12.1',
       '@dynemcp/server-dynemcp': `^${version}`,
-      '@dynemcp/build-dynemcp': `^${version}`,
       zod: '^3.22.4',
     },
     devDependencies: {},
@@ -241,7 +246,7 @@ export const installTemplate = async ({
     JSON.stringify(packageJson, null, 2) + os.EOL,
   );
 
-  // Update dynemcp.config.json with project name if it exists
+  // Update dynemcp.config.json with project name and build configuration
   await updateProjectConfig(root, appName);
 
   if (skipInstall) return;
@@ -267,12 +272,40 @@ export const installTemplate = async ({
  * Updates project configuration files with the project name
  */
 async function updateProjectConfig(projectPath: string, projectName: string): Promise<void> {
-  // Update dynemcp.config.json with project name if it exists
+  // Update dynemcp.config.json with project name and build configuration
   const configPath = path.join(projectPath, 'dynemcp.config.json');
   try {
     const configContent = await fs.readFile(configPath, 'utf8');
-    const config: { name: string } = JSON.parse(configContent);
-    config.name = projectName;
+    const config: { server?: { name?: string }; build?: any } = JSON.parse(configContent);
+    
+    // Update server name
+    if (config.server) {
+      config.server.name = projectName;
+    } else {
+      config.server = { name: projectName };
+    }
+
+    // Add build configuration if not present
+    if (!config.build) {
+      config.build = {
+        entryPoint: './src/index.ts',
+        outDir: './dist',
+        outFile: 'server.js',
+        format: 'esm',
+        minify: true,
+        sourcemap: false,
+        bundle: true,
+        external: [],
+        define: {},
+        platform: 'node',
+        target: 'node16',
+        treeShaking: true,
+        splitting: false,
+        metafile: false,
+        watch: false,
+      };
+    }
+
     await fs.writeFile(configPath, JSON.stringify(config, null, 2) + os.EOL);
   } catch (error) {
     // File doesn't exist or can't be read, ignore
