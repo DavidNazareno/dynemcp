@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/build-dynemcp",
-  "version": "0.0.7-canary.20250620T09495",
+  "version": "0.0.8-canary.20250620T13153",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
@@ -8,6 +8,18 @@
   "types": "./dist/index.d.ts",
   "bin": {
     "dynebuild": "./dist/bin/index.js"
+  },
+  "scripts": {
+    "clean": "rm -rf dist"
+  },
+  "nx": {
+    "targets": {
+      "postbuild": {
+        "command": "chmod +x packages/build-dynemcp/dist/lib/bin/index.js",
+        "cwd": "packages/build-dynemcp/dist/lib/bin/index.js",
+        "parallel": false
+      }
+    }
   },
   "exports": {
     "./package.json": "./package.json",

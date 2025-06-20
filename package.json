@@ -1,9 +1,11 @@
 {
   "name": "@dynemcp/source",
-  "version": "0.0.7-canary.20250620T09495",
+  "version": "0.0.8-canary.20250620T13153",
   "license": "MIT",
   "scripts": {
     "build": "nx run-many --target=build --all",
+    "clean": "nx run-many --target=clean --all",
+    "postbuild": "nx run-many --target=postbuild --all",
     "lint": "nx run-many --target=lint --all",
     "lint:fix": "nx run-many --target=lint --all --fix",
     "typecheck": "nx run-many --target=typecheck --all",

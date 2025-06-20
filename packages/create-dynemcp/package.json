@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/create-dynemcp",
-  "version": "0.0.7-canary.20250620T09495",
+  "version": "0.0.8-canary.20250620T13153",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
@@ -10,8 +10,16 @@
     "create-dynemcp": "./dist/index.js"
   },
   "scripts": {
-    "postbuild": "chmod +x ./dist/index.js && pnpm run copy-templates",
-    "copy-templates": "cp -r ./src/templates ./dist/"
+    "clean": "rm -rf dist"
+  },
+  "nx": {
+    "targets": {
+      "postbuild": {
+        "command": "cp -r packages/create-dynemcp/src/templates packages/create-dynemcp/dist/ && chmod +x packages/create-dynemcp/dist/index.js",
+        "cwd": "packages/create-dynemcp/dist/lib/index.js",
+        "parallel": false
+      }
+    }
   },
   "exports": {
     "./package.json": "./package.json",
@@ -23,7 +31,6 @@
     }
   },
   "dependencies": {
-    "tslib": "^2.3.0",
     "async-sema": "^3.1.1",
     "chalk": "^5.3.0",
     "commander": "^12.0.0",
@@ -34,7 +41,8 @@
     "ora": "^8.0.1",
     "update-check": "^1.5.4",
     "validate-npm-package-name": "^5.0.0",
-    "execa": "^9.6.0"
+    "execa": "^9.6.0",
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

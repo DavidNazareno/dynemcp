@@ -1,7 +1,10 @@
 {
   "name": "@dynemcp/server-dynemcp",
-  "version": "0.0.7-canary.20250620T09495",
+  "version": "0.0.8-canary.20250620T13153",
   "private": false,
+  "scripts": {
+    "clean": "rm -rf dist"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
