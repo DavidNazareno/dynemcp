@@ -9,7 +9,8 @@ import ora from 'ora';
 import updateCheck from 'update-check';
 
 // Import core functionality
-import { createProject, getAvailableTemplates } from './core/create-project.js';
+import { getAvailableTemplates } from './core/create-project.js';
+import { installTemplate } from './core/template-generator.js';
 
 // Import helpers
 import { validateProjectName, validateProjectPath, validateTemplate } from './helpers/validate.js';
@@ -208,13 +209,19 @@ async function setupProject(
   packageManager: PackageManager,
   spinner: ReturnType<typeof ora>,
 ): Promise<void> {
-  // Create project
+  // Create project using template generator
   spinner.start('Creating project...');
-  await createProject({
-    projectPath,
+  await installTemplate({
+    appName: path.basename(projectPath),
+    root: projectPath,
+    packageManager,
     template,
-    typescript: options.typescript !== false, // Default to true
+    mode: options.typescript !== false ? 'ts' : 'js',
+    tailwind: false, // Default to false, can be made configurable if needed
     eslint: options.eslint !== false, // Default to true
+    srcDir: true, // Always use src directory for better organization
+    importAlias: '@/*', // Default import alias
+    skipInstall: options.skipInstall || false,
   });
   spinner.succeed('Project created');
 
