@@ -1,4 +1,3 @@
-import validateNpmPackageName from 'validate-npm-package-name';
 import fs from 'fs-extra';
 import chalk from 'chalk';
 

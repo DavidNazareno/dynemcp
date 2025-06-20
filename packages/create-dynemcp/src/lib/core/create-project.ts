@@ -1,17 +1,6 @@
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'fs-extra';
 import { installTemplate } from './template-generator.js';
 import type { PackageManager } from '../helpers/package-manager.js';
-
-// Get the templates directory path
-const templatesDir = getTemplatesDir();
-
-interface CreateProjectOptions {
-  projectPath: string;
-  template: string;
-  typescript: boolean;
-  eslint: boolean;
-}
 
 /**
  * Returns a list of available templates in the templates directory
@@ -44,32 +33,4 @@ export async function createProject(
     importAlias: '@/*',
     skipInstall: false,
   });
-}
-
-/**
- * Updates project configuration files with the project name
- */
-async function updateProjectConfig(projectPath: string, projectName: string): Promise<void> {
-  // Update package.json with project name
-  const packageJsonPath = path.join(projectPath, 'package.json');
-  if (await fs.pathExists(packageJsonPath)) {
-    const packageJson = await fs.readJson(packageJsonPath);
-    packageJson.name = projectName;
-    await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
-  }
-
-  // Update dynemcp.config.json with project name
-  const configPath = path.join(projectPath, 'dynemcp.config.json');
-  if (await fs.pathExists(configPath)) {
-    const config = await fs.readJson(configPath);
-    config.name = projectName;
-    await fs.writeJson(configPath, config, { spaces: 2 });
-  }
-}
-
-/**
- * Creates a .gitignore file in the project directory
- */
-async function createGitIgnore(projectPath: string): Promise<void> {
-  await fs.writeFile(path.join(projectPath, '.gitignore'), 'node_modules\ndist\n.env\n.DS_Store\n');
 }

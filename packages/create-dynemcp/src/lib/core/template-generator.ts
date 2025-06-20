@@ -152,15 +152,11 @@ export const installTemplate = async ({
     version: '0.1.0',
     private: true,
     scripts: {
-      dev: 'cross-env NODE_ENV=development npx @modelcontextprotocol/inspector serve src/index.ts',
-      build: 'dynebuild',
-      'build:watch': 'dynebuild watch',
-      'build:analyze': 'dynebuild --analyze',
-      'build:clean': 'dynebuild --clean',
-      'build:html': 'dynebuild --html',
-      start: 'node dist/server.js',
-      clean: 'dynebuild clean',
-      analyze: 'dynebuild analyze',
+      dev: 'dynemcp dev',
+      build: 'dynemcp build',
+      start: 'dynemcp start',
+      clean: 'dynemcp clean',
+      analyze: 'dynemcp analyze',
       format: 'prettier --write .',
       lint: eslint ? 'eslint . --ext .js,.jsx,.ts,.tsx' : undefined,
       'eslint:fix': eslint ? 'eslint . --ext .js,.jsx,.ts,.tsx --fix' : undefined,
@@ -170,7 +166,7 @@ export const installTemplate = async ({
      */
     dependencies: {
       '@modelcontextprotocol/sdk': '^1.12.1',
-      '@dynemcp/server-dynemcp': `^${version}`,
+      '@dynemcp/dynemcp': `^${version}`,
       zod: '^3.22.4',
     },
     devDependencies: {},
@@ -218,7 +214,6 @@ export const installTemplate = async ({
   // Add common dev dependencies
   packageJson.devDependencies = {
     ...packageJson.devDependencies,
-    '@dynemcp/build-dynemcp': `^${version}`,
     'cross-env': '^7.0.3',
     esbuild: '^0.20.2',
     vitest: '^1.4.0',
@@ -277,7 +272,7 @@ async function updateProjectConfig(projectPath: string, projectName: string): Pr
   try {
     const configContent = await fs.readFile(configPath, 'utf8');
     const config: { server?: { name?: string }; build?: any } = JSON.parse(configContent);
-    
+
     // Update server name
     if (config.server) {
       config.server.name = projectName;

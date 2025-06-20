@@ -4,9 +4,6 @@
   "include": [],
   "references": [
     {
-      "path": "../server-dynemcp"
-    },
-    {
       "path": "./tsconfig.lib.json"
     },
     {

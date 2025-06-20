@@ -7,10 +7,8 @@
       "path": "./packages/create-dynemcp"
     },
     {
-      "path": "./packages/build-dynemcp"
+      "path": "./packages/dynemcp"
     },
-    {
-      "path": "./packages/server-dynemcp"
-    }
+   
   ]
 }
