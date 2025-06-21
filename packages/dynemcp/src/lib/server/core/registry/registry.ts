@@ -24,7 +24,7 @@ export class Registry {
 
     log.info('🔄 Loading components...')
 
-    const result = await loadAllComponents(options)
+    const result = await loadAllComponents(options, log)
 
     // Add components to storage
     this.storage.addTools(result.tools)

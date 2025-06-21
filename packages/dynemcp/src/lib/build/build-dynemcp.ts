@@ -50,6 +50,7 @@ export interface DyneMCPBuildOptions {
   splitting?: boolean
   metafile?: boolean
   logger?: Logger
+  onFirstBuildSuccess?: () => void
 }
 
 export interface BuildResult extends BundleResult {
@@ -79,10 +80,6 @@ export async function build(
     }
 
     validateBuildConfig(finalOptions)
-
-    if (options.clean) {
-      await cleanBuildDir(finalOptions.outDir)
-    }
 
     const fs = await import('fs-extra')
     await fs.ensureDir(finalOptions.outDir)
@@ -179,7 +176,11 @@ export async function watch(
     }
     finalOptions.sourcemap = true
 
-    const ctx = await bundleWatch({ ...finalOptions, logger })
+    const ctx = await bundleWatch({
+      ...finalOptions,
+      logger,
+      onFirstBuildSuccess: options.onFirstBuildSuccess,
+    })
 
     logger.success('👀 Watching for changes...')
     logger.info(`📁 Output: ${finalOptions.outDir}/${finalOptions.outFile}`)
@@ -218,11 +219,6 @@ export async function buildCli(
 
     // Validate configuration
     validateBuildConfig(finalOptions)
-
-    // Clean build directory if requested
-    if (options.clean) {
-      await cleanBuildDir(finalOptions.outDir)
-    }
 
     // Create output directory
     const fs = await import('fs-extra')

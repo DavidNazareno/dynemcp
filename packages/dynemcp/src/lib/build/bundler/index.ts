@@ -37,6 +37,7 @@ export interface BundleOptions extends BuildConfig {
   manifest?: boolean
   cli?: boolean
   logger?: Logger
+  onFirstBuildSuccess?: () => void
 }
 
 /**
@@ -196,6 +197,7 @@ export async function bundleWatch(
       {
         name: 'dynemcp-watch-reporter',
         setup(build) {
+          let isFirstBuild = true
           build.onEnd((result) => {
             if (result.errors.length > 0) {
               logger.error('❌ Watch build failed:')
@@ -209,6 +211,10 @@ export async function bundleWatch(
                 result.warnings.forEach((warning) => {
                   logger.warn(`  ${warning.text}`)
                 })
+              }
+              if (isFirstBuild) {
+                isFirstBuild = false
+                options.onFirstBuildSuccess?.()
               }
             }
           })

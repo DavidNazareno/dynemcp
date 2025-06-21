@@ -1,13 +1,12 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { ConsoleLogger, type Logger } from '../../../cli/index.js'
-import { DyneMCPConfig } from '../config.js'
+import { DyneMCPConfig, loadConfig } from '../config.js'
 import {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
   ServerConfig,
 } from '../interfaces.js'
-import { loadConfig } from '../config.js'
 import { registry } from '../registry/registry.js'
 import { createTransport } from '../../transport/index.js'
 import {
@@ -16,6 +15,15 @@ import {
   registerResources,
   registerPrompts,
 } from './server-initializer.js'
+
+export type DyneMCPConstructorOptions = {
+  name?: string
+  version?: string
+  logger?: Logger
+} & (
+  | { configPath?: string; config?: never }
+  | { configPath?: never; config: DyneMCPConfig }
+)
 
 export class DyneMCP {
   private server: McpServer
@@ -26,18 +34,18 @@ export class DyneMCP {
 
   public readonly registry = registry
 
-  constructor(
-    name?: string,
-    configPath?: string,
-    version?: string,
-    logger?: Logger
-  ) {
-    this.config = loadConfig(configPath)
-    this.logger = logger ?? new ConsoleLogger()
+  constructor(options: DyneMCPConstructorOptions = {}) {
+    if (options.config) {
+      this.config = options.config
+    } else {
+      this.config = loadConfig(options.configPath)
+    }
+
+    this.logger = options.logger ?? new ConsoleLogger()
 
     // Override config with constructor parameters
-    if (name) this.config.server.name = name
-    if (version) this.config.server.version = version
+    if (options.name) this.config.server.name = options.name
+    if (options.version) this.config.server.version = options.version
 
     this.server = createMCPServerInstance({
       ...(this.config.server as ServerConfig),
@@ -152,10 +160,7 @@ export class DyneMCP {
  * Create a new DyneMCP server instance
  */
 export function createMCPServer(
-  name?: string,
-  configPath?: string,
-  version?: string,
-  logger?: Logger
+  options: DyneMCPConstructorOptions = {}
 ): DyneMCP {
-  return new DyneMCP(name, configPath, version, logger)
+  return new DyneMCP(options)
 }

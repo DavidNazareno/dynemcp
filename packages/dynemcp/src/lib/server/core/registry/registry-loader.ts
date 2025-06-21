@@ -10,6 +10,7 @@ import type {
   PromptDefinition,
   AutoloadConfig,
 } from '../interfaces.js'
+import { type Logger } from '../../../cli/index.js'
 
 export interface LoadAllOptions {
   tools: AutoloadConfig
@@ -25,28 +26,32 @@ export interface LoadAllResult {
 }
 
 export async function loadAllComponents(
-  options: LoadAllOptions
+  options: LoadAllOptions,
+  logger?: Logger
 ): Promise<LoadAllResult> {
   const errors: string[] = []
 
   // Load tools
   const toolsResult = await loadComponentsFromDirectory(
     options.tools,
-    validateTool
+    validateTool,
+    logger
   )
   errors.push(...toolsResult.errors)
 
   // Load resources
   const resourcesResult = await loadComponentsFromDirectory(
     options.resources,
-    validateResource
+    validateResource,
+    logger
   )
   errors.push(...resourcesResult.errors)
 
   // Load prompts
   const promptsResult = await loadComponentsFromDirectory(
     options.prompts,
-    validatePrompt
+    validatePrompt,
+    logger
   )
   errors.push(...promptsResult.errors)
 

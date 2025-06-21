@@ -175,7 +175,8 @@ export const installTemplate = async ({
     version: '0.1.0',
     private: true,
     scripts: {
-      dev: 'dynemcp dev',
+      dev: 'cross-env DYNEMCP_LOG_STDERR=true dynemcp dev',
+      'dev:inspector': 'npx -y @modelcontextprotocol/inspector dynemcp dev',
       build: 'dynemcp build',
       start: 'dynemcp start',
       clean: 'dynemcp clean',

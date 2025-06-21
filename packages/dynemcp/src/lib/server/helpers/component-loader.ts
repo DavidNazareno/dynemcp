@@ -7,6 +7,7 @@ import type {
   ResourceDefinition,
   PromptDefinition,
 } from '../core/interfaces.js'
+import { type Logger } from '../../cli/index.js'
 
 export interface LoadOptions {
   enabled: boolean
@@ -21,7 +22,8 @@ export interface LoadResult<T> {
 
 export async function loadComponentsFromDirectory<T>(
   options: LoadOptions,
-  validator: (component: any) => component is T
+  validator: (component: any) => component is T,
+  logger?: Logger
 ): Promise<LoadResult<T>> {
   const { enabled, directory } = options
 
@@ -35,7 +37,7 @@ export async function loadComponentsFromDirectory<T>(
   try {
     // Check if directory exists
     if (!fs.existsSync(directory)) {
-      console.warn(
+      logger?.warn(
         `Directory ${directory} does not exist, skipping component loading`
       )
       return { components: [], errors: [] }
@@ -54,13 +56,13 @@ export async function loadComponentsFromDirectory<T>(
       } catch (error) {
         const errorMsg = `Failed to load component from ${file}: ${error}`
         errors.push(errorMsg)
-        console.warn(errorMsg)
+        logger?.warn(errorMsg)
       }
     }
   } catch (error) {
     const errorMsg = `Failed to scan directory ${directory}: ${error}`
     errors.push(errorMsg)
-    console.warn(errorMsg)
+    logger?.warn(errorMsg)
   }
 
   return { components, errors }

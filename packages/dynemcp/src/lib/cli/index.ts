@@ -10,12 +10,12 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import chalk from 'chalk'
 import { build, watch, clean, analyze } from '../build/build-dynemcp.js'
-import { createMCPServer } from '../server/core/server/server-dynemcp.js'
+import {
+  createMCPServer,
+  DyneMCP,
+} from '../server/core/server/server-dynemcp.js'
 import { loadConfig } from '../server/core/config.js'
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { spawn } from 'child_process'
+import { type BuildContext } from 'esbuild'
 
 // Logger interface and implementations
 export interface Logger {
@@ -44,7 +44,7 @@ export class ConsoleLogger implements Logger {
     console.log(chalk.green(message))
   }
   debug(message: string) {
-    console.debug(chalk.gray(message))
+    console.error(chalk.gray(message))
   }
 }
 
@@ -69,78 +69,76 @@ export class StderrLogger implements Logger {
   }
 }
 
-function findTsx(): string | null {
-  // Find the tsx executable relative to our own package location
-  const __dirname = path.dirname(fileURLToPath(import.meta.url))
-  // from /dist/lib/cli -> ../../.. -> package root
-  const packageRoot = path.resolve(__dirname, '..', '..', '..')
-  const tsxPath = path.resolve(packageRoot, 'node_modules', '.bin', 'tsx')
-  if (fs.existsSync(tsxPath)) {
-    return tsxPath
-  }
-  return null
-}
-
-async function dev(argv: {
-  internalRun?: boolean
-  clean?: boolean
-  config?: string
-}) {
-  const logger = argv.internalRun ? new StderrLogger() : new ConsoleLogger()
-
-  if (!argv.internalRun) {
-    logger.info('🕵️  Launching DyneMCP server with Inspector...')
-
-    const tsxPath = findTsx()
-    if (!tsxPath) {
-      logger.error(
-        '❌ Could not find `tsx`. Please install it with `pnpm install tsx`.'
-      )
-      process.exit(1)
-    }
-    const scriptPath = process.argv[1] // This is the path to our CLI script
-    const serverArgs = process.argv.slice(2)
-    // Ensure --internal-run is only added once.
-    if (!serverArgs.includes('--internal-run')) {
-      serverArgs.push('--internal-run')
-    }
-
-    const inspectorCmd = 'npx'
-    const inspectorArgs = [
-      '-y',
-      '@modelcontextprotocol/inspector',
-      tsxPath,
-      scriptPath,
-      ...serverArgs,
-    ]
-
-    const child = spawn(inspectorCmd, inspectorArgs, { stdio: 'inherit' })
-    child.on('close', (code) => {
-      if (code !== 0) {
-        logger.error(`Inspector exited with code ${code}`)
-      }
-      process.exit(code ?? 0)
-    })
-    return
-  }
+async function dev(argv: { config?: string }) {
+  const logger =
+    process.env.DYNEMCP_LOG_STDERR === 'true'
+      ? new StderrLogger()
+      : new ConsoleLogger()
   try {
-    logger.success('🚀 Starting DyneMCP development server (internal)...')
+    logger.success('🚀 Starting DyneMCP development server...')
 
-    const ctx = await watch({
+    const config = loadConfig(argv.config)
+
+    // --- Fix for dev mode ---
+    // 1. Create a deep copy to avoid modifying the original object
+    const devConfig = JSON.parse(JSON.stringify(config))
+
+    // 2. Force transport to stdio if not specified, fixing the transport issue
+    if (!devConfig.transport) {
+      devConfig.transport = { type: 'stdio' }
+    }
+    // Set default to stdio for inspector
+    devConfig.transport.type = devConfig.transport.type || 'stdio'
+
+    // 3. Rewrite component paths to point to the build output directory
+    const outDir = (config as any).build?.outDir ?? 'dist'
+    const srcDir =
+      (config as any).build?.srcDir ??
+      (config.tools?.directory?.startsWith('src') ||
+      config.resources?.directory?.startsWith('src') ||
+      config.prompts?.directory?.startsWith('src')
+        ? 'src'
+        : '.')
+
+    if (devConfig.tools?.directory) {
+      devConfig.tools.directory = devConfig.tools.directory.replace(
+        srcDir,
+        outDir
+      )
+    }
+    if (devConfig.resources?.directory) {
+      devConfig.resources.directory = devConfig.resources.directory.replace(
+        srcDir,
+        outDir
+      )
+    }
+    if (devConfig.prompts?.directory) {
+      devConfig.prompts.directory = devConfig.prompts.directory.replace(
+        srcDir,
+        outDir
+      )
+    }
+    // --- End fix ---
+
+    let server: DyneMCP | null = null
+    let ctx: BuildContext | null = null
+
+    const startServer = async () => {
+      if (server) return // Prevent starting multiple servers
+      server = createMCPServer({ config: devConfig, logger })
+      await server.start()
+    }
+
+    ctx = await watch({
       configPath: argv.config,
-      clean: argv.clean,
       logger: logger,
+      onFirstBuildSuccess: startServer,
     })
-
-    const server = createMCPServer(undefined, argv.config, undefined, logger)
-    await server.start()
-
-    logger.info('📁 Watching for changes...')
 
     process.on('SIGINT', async () => {
       logger.warn('\n🛑 Shutting down development server...')
-      await server.stop()
-      await ctx.dispose()
+      if (server) await server.stop()
+      if (ctx) await ctx.dispose()
       process.exit(0)
     })
   } catch (error) {
@@ -159,20 +157,11 @@ const cli = yargs(hideBin(process.argv))
     'dev',
     'Starts the DyneMCP server in development mode',
     (yargs) => {
-      return yargs
-        .option('internal-run', {
-          type: 'boolean',
-          hidden: true,
-        })
-        .option('clean', {
-          type: 'boolean',
-          describe: 'Clean before building',
-        })
-        .option('config', {
-          alias: 'c',
-          type: 'string',
-          describe: 'Path to dynemcp.config.json',
-        })
+      return yargs.option('config', {
+        alias: 'c',
+        type: 'string',
+        describe: 'Path to dynemcp.config.json',
+      })
     },
     async (argv) => {
       await dev(argv)
@@ -219,11 +208,11 @@ const cli = yargs(hideBin(process.argv))
     async (argv) => {
       console.log(chalk.green('🚀 Starting DyneMCP production server...'))
       const config = loadConfig(argv.config)
-      const server = createMCPServer(
-        config.server.name,
-        argv.config,
-        config.server.version
-      )
+      const server = createMCPServer({
+        name: config.server.name,
+        configPath: argv.config,
+        version: config.server.version,
+      })
       await server.start()
     }
   )
