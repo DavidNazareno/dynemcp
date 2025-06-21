@@ -114,7 +114,7 @@ export async function build(
         outputSize: bundleStats.size,
       }
       logger.info(
-        `📈 Bundle stats: ${bundleStats.sizeKB}KB, ${bundleStats.lines} lines`,
+        `📈 Bundle stats: ${bundleStats.sizeKB}KB, ${bundleStats.lines} lines`
       )
     }
 
@@ -129,7 +129,7 @@ export async function build(
       logger.success(`✅ Build completed successfully in ${duration}ms`)
       logger.info(`📁 Output directory: ${finalOptions.outDir}`)
       if (bundleResult.outputFiles) {
-        bundleResult.outputFiles.forEach(file => {
+        bundleResult.outputFiles.forEach((file) => {
           logger.info(`📄 Generated: ${file}`)
         })
       }
