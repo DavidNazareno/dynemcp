@@ -149,6 +149,67 @@ my-mcp-project/
 └── dist/                     # Build output
 ```
 
+## Defining Components
+
+The core of a DyneMCP server is its components: Tools, Resources, and Prompts. The framework provides two flexible ways to define them, catering to different programming styles. The component loader will automatically detect the format you use.
+
+### 1. Declarative Method (Plain Objects)
+
+This is the most straightforward approach. You define a component as a plain JavaScript/TypeScript object that conforms to its corresponding `Definition` interface (`ToolDefinition`, `ResourceDefinition`, `PromptDefinition`).
+
+**Example: `src/tools/greeter.ts`**
+```typescript
+import { z } from 'zod'
+import { ToolDefinition } from '@dynemcp/dynemcp'
+
+const GreeterSchema = z.object({
+  name: z.string().describe('The name to greet'),
+})
+
+const greeterTool: ToolDefinition = {
+  name: 'greeter',
+  description: 'A simple tool that greets the user',
+  schema: GreeterSchema,
+  handler: async ({ name }: z.infer<typeof GreeterSchema>) => {
+    return { message: `Hello, ${name}!` }
+  },
+}
+
+export default greeterTool
+```
+
+### 2. Class-based Method (OOP)
+
+For those who prefer an Object-Oriented approach, you can extend the base classes provided by the framework (`DyneMCPTool`, `DyneMCPResource`, `DyneMCPPrompt`). This provides a clear structure and can encapsulate more complex logic cleanly.
+
+**Example: `src/tools/greeter.ts`**
+```typescript
+import { z } from 'zod'
+import { DyneMCPTool } from '@dynemcp/dynemcp'
+
+const GreeterSchema = z.object({
+  name: z.string().describe('The name to greet'),
+})
+
+export class GreeterTool extends DyneMCPTool {
+  // Note: 'name' is a getter to override the base class accessor
+  get name() {
+    return 'greeter'
+  }
+  
+  readonly description = 'A simple tool that greets the user'
+  readonly schema = GreeterSchema
+
+  async execute(
+    input: z.infer<typeof GreeterSchema>
+  ): Promise<{ message: string }> {
+    return { message: `Hello, ${input.name}!` }
+  }
+}
+
+export default new GreeterTool()
+```
+
 ## Package.json Scripts
 
 Add these scripts to your `package.json`:

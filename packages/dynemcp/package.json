@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/dynemcp",
-  "version": "0.0.11-canary.20250620T20453",
+  "version": "0.0.12-canary.20250621T15552",
   "description": "Complete MCP framework with server runtime and build system",
   "private": false,
   "type": "module",
@@ -51,13 +51,14 @@
     "express": "^5.1.0",
     "fs-extra": "^11.2.0",
     "tslib": "^2.3.0",
-    "zod": "^3.22.4"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^20.11.30"
+    "@types/node": "^20.11.30",
+    "tsx": "^4.16.2"
   },
   "keywords": [
     "mcp",

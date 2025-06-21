@@ -1,5 +1,10 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import {
+  DyneMCPTool,
+  DyneMCPResource,
+  DyneMCPPrompt,
+} from '../core/base.js'
 import type {
   ToolDefinition,
   ResourceDefinition,
@@ -95,31 +100,34 @@ async function loadComponentFromFile<T>(
   validator: (component: any) => component is T
 ): Promise<T | null> {
   try {
-    // Dynamic import
-    const module = await import(filePath)
+    // Dynamic import works with relative paths for tsx
+    const relativePath = path.relative(process.cwd(), filePath)
+    const module = await import(path.toNamespacedPath(relativePath))
+    const exported = module.default
 
-    // Check for default export
-    if (module.default) {
-      const component = module.default
-      if (validator(component)) {
-        return component
-      }
+    if (!exported) {
+      return null
     }
 
-    // Check for named exports
-    for (const [, exportValue] of Object.entries(module)) {
-      if (validator(exportValue)) {
-        return exportValue
-      }
-    }
-
-    // Check for array exports
-    if (Array.isArray(module.default)) {
-      for (const item of module.default) {
-        if (validator(item)) {
-          return item
+    // Handle class-based components
+    if (typeof exported === 'function') {
+      // Check if it's one of our base classes
+      if (
+        exported.prototype instanceof DyneMCPTool ||
+        exported.prototype instanceof DyneMCPResource ||
+        exported.prototype instanceof DyneMCPPrompt
+      ) {
+        const instance = new exported()
+        const definition = instance.toDefinition()
+        if (validator(definition)) {
+          return definition as T
         }
       }
+    }
+
+    // Handle object-based components
+    if (typeof exported === 'object' && validator(exported)) {
+      return exported
     }
 
     return null

@@ -4,9 +4,10 @@
     "version": "1.0.0"
   },
   "transport": {
-    "type": "http-stream",
+    "type": "http",
     "options": {
-      "port": 3000
+      "port": 3000,
+      "host": "localhost"
     }
   },
   "tools": {

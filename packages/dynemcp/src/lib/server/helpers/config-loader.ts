@@ -253,7 +253,14 @@ export function createDefaultConfig(): DyneMCPConfig {
       directory: 'src/prompts',
       pattern: '**/*.{ts,js}',
     },
-    transport: { type: 'stdio' },
+    transport: {
+      type: 'http-stream',
+      options: {
+        port: 8080,
+        endpoint: '/mcp',
+        responseMode: 'batch',
+      },
+    },
     logging: {
       enabled: true,
       level: 'info',

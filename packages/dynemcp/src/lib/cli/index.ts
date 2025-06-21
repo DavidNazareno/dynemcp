@@ -9,6 +9,10 @@
 import chalk from 'chalk'
 import { build, watch, clean, analyze } from '../build/build-dynemcp.js'
 import { createMCPServer } from '../server/core/server/server-dynemcp.js'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { spawn } from 'child_process'
 
 interface CliOptions {
   config?: string
@@ -66,7 +70,10 @@ ${chalk.bold('Configuration:')}
 }
 
 function showVersion(): void {
-  const packageJson = require('../../package.json')
+  // Construct path to package.json robustly using import.meta.url
+  const __dirname = path.dirname(fileURLToPath(import.meta.url))
+  const packageJsonPath = path.join(__dirname, '..', '..', '..', 'package.json')
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
   console.log(`DyneMCP Framework v${packageJson.version}`)
 }
 
@@ -146,7 +153,21 @@ async function dev(options: CliOptions): Promise<void> {
 
     console.log(chalk.green('✅ Development server started successfully!'))
     console.log(chalk.blue('📁 Watching for changes...'))
-    console.log(chalk.blue('🌐 Server running on stdio transport'))
+
+    const transportConfig = server.getConfig().transport
+    if (
+      transportConfig?.type === 'http-stream' &&
+      transportConfig.options?.port
+    ) {
+      const port = transportConfig.options.port
+      console.log(chalk.blue(`🌐 Server running at http://localhost:${port}`))
+    } else {
+      console.log(
+        chalk.blue(
+          `🌐 Server running on ${transportConfig?.type || 'stdio'} transport`
+        )
+      )
+    }
 
     // Handle graceful shutdown
     process.on('SIGINT', async () => {
@@ -190,6 +211,23 @@ async function start(): Promise<void> {
 async function run(): Promise<void> {
   try {
     const args = process.argv.slice(2)
+
+    // Check if we are running in a tsx context
+    if (!process.env.TSX_BIN) {
+      const tsxPath = path.resolve(process.cwd(), 'node_modules', '.bin', 'tsx')
+      if (fs.existsSync(tsxPath)) {
+        const child = spawn(tsxPath, [process.argv[1], ...args], {
+          stdio: 'inherit',
+        })
+
+        child.on('close', (code) => {
+          process.exit(code ?? 0)
+        })
+
+        return
+      }
+    }
+
     const { command, options } = parseArgs(args)
 
     // Show help or version

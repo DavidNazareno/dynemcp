@@ -1,16 +1,11 @@
-import { createMCPServer } from '@dynemcp/server-dynemcp'
+import { createMCPServer } from '@dynemcp/dynemcp'
 
 // Create MCP server instance
 const server = createMCPServer()
 
 async function main() {
-  try {
-    console.log('🚀 Starting Calculator MCP server...')
-    await server.start()
-  } catch (error) {
-    console.error('❌ Failed to start server:', error)
-    process.exit(1)
-  }
+  await server.init()
+  await server.start()
 }
 
 // Handle graceful shutdown
@@ -27,7 +22,4 @@ process.on('SIGTERM', async () => {
 })
 
 // Start the server
-main().catch((error) => {
-  console.error('❌ Unexpected error:', error)
-  process.exit(1)
-})
+main().catch(console.error)

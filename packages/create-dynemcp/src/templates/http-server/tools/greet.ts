@@ -1,11 +1,17 @@
 import { z } from 'zod'
+import { ToolDefinition } from '@dynemcp/dynemcp'
 
-export const name = 'greet'
-export const description = 'Greets a person by name.'
-export const schema = z.object({
+const GreetSchema = z.object({
   name: z.string().describe('The name of the person to greet.'),
 })
 
-export async function handler({ name }: z.infer<typeof schema>) {
-  return `Hello, ${name}!`
+const greetTool: ToolDefinition = {
+  name: 'greet',
+  description: 'Greets a person by name.',
+  schema: GreetSchema,
+  handler: async ({ name }: z.infer<typeof GreetSchema>) => {
+    return `Hello, ${name}!`
+  },
 }
+
+export default greetTool

@@ -132,6 +132,11 @@ export const installTemplate = async ({
     await fs.mkdir(path.join(root, 'src'), { recursive: true })
     await Promise.all(
       SRC_DIR_NAMES.map(async (dir) => {
+        // Skip moving the 'src' directory itself
+        if (dir === 'src') {
+          return
+        }
+
         const sourcePath = path.join(root, dir)
         const targetPath = path.join(root, 'src', dir)
 
@@ -313,7 +318,7 @@ async function updateProjectConfig(
     if (existsSync(configPath)) {
       const config = JSON.parse(await fs.readFile(configPath, 'utf8'))
       config.name = projectName
-      config.server = { name: projectName }
+      config.server = { ...config.server, name: projectName }
       config.build = {
         entryPoint: './src/index.ts',
         outDir: './dist',

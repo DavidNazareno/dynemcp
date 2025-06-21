@@ -1,13 +1,19 @@
 import { z } from 'zod'
+import { ToolDefinition } from '@dynemcp/dynemcp'
 
-export const name = 'get-agent-status'
-export const description = 'Checks the current status of the secure agent.'
-export const schema = z.object({})
+const GetAgentStatusSchema = z.object({})
 
-export async function handler() {
-  return {
-    status: 'ok',
-    message: 'All systems are operational.',
-    timestamp: new Date().toISOString(),
-  }
+const getAgentStatusTool: ToolDefinition = {
+  name: 'get-agent-status',
+  description: 'Checks the current status of the secure agent.',
+  schema: GetAgentStatusSchema,
+  handler: async () => {
+    return {
+      status: 'ok',
+      message: 'All systems are operational.',
+      timestamp: new Date().toISOString(),
+    }
+  },
 }
+
+export default getAgentStatusTool

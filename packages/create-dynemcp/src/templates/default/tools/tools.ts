@@ -1,4 +1,5 @@
-import { DyneMCPTool, z } from '@dynemcp/server-dynemcp'
+import { DyneMCPTool } from '@dynemcp/dynemcp'
+import { z } from 'zod'
 
 // Define your tools here
 // Example:
@@ -17,21 +18,22 @@ import { DyneMCPTool, z } from '@dynemcp/server-dynemcp'
 //   }
 // }
 
-const ExampleToolSchema = z.object({
-  message: z.string().describe('The message to echo'),
+const GreeterSchema = z.object({
+  name: z.string().describe('The name to greet'),
 })
 
-export class ExampleTool extends DyneMCPTool<typeof ExampleToolSchema> {
-  name = 'echo'
-  description = 'Echo a message back to the user'
-  schema = ExampleToolSchema
+export class GreeterTool extends DyneMCPTool {
+  get name() {
+    return 'greeter'
+  }
+  readonly description = 'A simple tool that greets the user'
+  readonly schema = GreeterSchema
 
-  async execute({ message }: z.infer<typeof ExampleToolSchema>) {
-    return {
-      result: `Echo: ${message}`,
-      timestamp: new Date().toISOString(),
-    }
+  async execute(
+    input: z.infer<typeof GreeterSchema>
+  ): Promise<{ message: string }> {
+    return { message: `Hello, ${input.name}!` }
   }
 }
 
-export default new ExampleTool()
+export default new GreeterTool()

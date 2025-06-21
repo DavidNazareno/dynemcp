@@ -37,6 +37,13 @@ export class DyneMCP {
   }
 
   /**
+   * Get the current server configuration
+   */
+  getConfig(): DyneMCPConfig {
+    return this.config
+  }
+
+  /**
    * Initialize the server and load all components
    */
   async init(): Promise<void> {

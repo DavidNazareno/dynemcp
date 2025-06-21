@@ -1,7 +1,10 @@
-export const name = 'Server Information'
-export const uri = 'resource:server-info'
-export const description = 'Provides static information about this server.'
+import { ResourceDefinition } from '@dynemcp/dynemcp'
 
-export function content() {
-  return 'This is a sample HTTP server running on the dynemcp framework.'
+const serverInfoResource: ResourceDefinition = {
+  name: 'Server Information',
+  uri: 'resource:server-info',
+  description: 'Provides static information about this server.',
+  content: 'This is a sample HTTP server running on the dynemcp framework.',
 }
+
+export default serverInfoResource
