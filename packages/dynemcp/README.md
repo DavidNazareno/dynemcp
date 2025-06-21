@@ -158,6 +158,7 @@ The core of a DyneMCP server is its components: Tools, Resources, and Prompts. T
 This is the most straightforward approach. You define a component as a plain JavaScript/TypeScript object that conforms to its corresponding `Definition` interface (`ToolDefinition`, `ResourceDefinition`, `PromptDefinition`).
 
 **Example: `src/tools/greeter.ts`**
+
 ```typescript
 import { z } from 'zod'
 import { ToolDefinition } from '@dynemcp/dynemcp'
@@ -183,6 +184,7 @@ export default greeterTool
 For those who prefer an Object-Oriented approach, you can extend the base classes provided by the framework (`DyneMCPTool`, `DyneMCPResource`, `DyneMCPPrompt`). This provides a clear structure and can encapsulate more complex logic cleanly.
 
 **Example: `src/tools/greeter.ts`**
+
 ```typescript
 import { z } from 'zod'
 import { DyneMCPTool } from '@dynemcp/dynemcp'
@@ -196,7 +198,7 @@ export class GreeterTool extends DyneMCPTool {
   get name() {
     return 'greeter'
   }
-  
+
   readonly description = 'A simple tool that greets the user'
   readonly schema = GreeterSchema
 
@@ -232,19 +234,19 @@ Add these scripts to your `package.json`:
 ## Programmatic Usage
 
 ```typescript
-import { createServer, build, dev, start } from '@dynemcp/dynemcp';
+import { createServer, build, dev, start } from '@dynemcp/dynemcp'
 
 // Create server
-const server = createServer();
+const server = createServer()
 
 // Build project
-await build({ clean: true, analyze: true });
+await build({ clean: true, analyze: true })
 
 // Start development
-await dev({ watch: true });
+await dev({ watch: true })
 
 // Start production
-await start({ port: 3000 });
+await start({ port: 3000 })
 ```
 
 ## API Reference
@@ -252,22 +254,22 @@ await start({ port: 3000 });
 ### Server API
 
 ```typescript
-import { createServer, createMCPServer } from '@dynemcp/dynemcp';
+import { createServer, createMCPServer } from '@dynemcp/dynemcp'
 
 // Create server instance
-const server = createServer();
+const server = createServer()
 
 // Start server
-await server.start();
+await server.start()
 
 // Stop server
-await server.stop();
+await server.stop()
 ```
 
 ### Build API
 
 ```typescript
-import { build, watch, analyze, clean } from '@dynemcp/dynemcp';
+import { build, watch, analyze, clean } from '@dynemcp/dynemcp'
 
 // Build project
 const result = await build({
@@ -275,16 +277,16 @@ const result = await build({
   analyze: true,
   manifest: true,
   html: true,
-});
+})
 
 // Watch mode
-const ctx = await watch();
+const ctx = await watch()
 
 // Analyze dependencies
-const analysis = await analyze();
+const analysis = await analyze()
 
 // Clean build
-await clean();
+await clean()
 ```
 
 ## Examples
@@ -293,27 +295,27 @@ await clean();
 
 ```typescript
 // src/index.ts
-import { createServer } from '@dynemcp/dynemcp';
+import { createServer } from '@dynemcp/dynemcp'
 
-const server = createServer();
+const server = createServer()
 
 async function main() {
   try {
-    await server.start();
+    await server.start()
   } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
+    console.error('Failed to start server:', error)
+    process.exit(1)
   }
 }
 
-main();
+main()
 ```
 
 ### Custom Tools
 
 ```typescript
 // src/tools/calculator.ts
-import { Tool } from '@modelcontextprotocol/sdk';
+import { Tool } from '@modelcontextprotocol/sdk'
 
 export const calculatorTool: Tool = {
   name: 'calculator',
@@ -329,11 +331,11 @@ export const calculatorTool: Tool = {
     required: ['expression'],
   },
   handler: async (args) => {
-    const { expression } = args;
-    const result = eval(expression);
-    return { result };
+    const { expression } = args
+    const result = eval(expression)
+    return { result }
   },
-};
+}
 ```
 
 ## Development

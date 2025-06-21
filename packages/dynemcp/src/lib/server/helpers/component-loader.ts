@@ -1,10 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import {
-  DyneMCPTool,
-  DyneMCPResource,
-  DyneMCPPrompt,
-} from '../core/base.js'
+import { DyneMCPTool, DyneMCPResource, DyneMCPPrompt } from '../core/base.js'
 import type {
   ToolDefinition,
   ResourceDefinition,
