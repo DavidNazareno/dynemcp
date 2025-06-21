@@ -21,9 +21,9 @@ export async function loadComponentsFromDirectory<T>(
   options: LoadOptions,
   validator: (component: any) => component is T
 ): Promise<LoadResult<T>> {
-  const { enabled, directory, pattern = '**/*.{ts,js}' } = options
+  const { enabled, directory } = options
 
-  if (!enabled) {
+  if (!enabled || !directory) {
     return { components: [], errors: [] }
   }
 

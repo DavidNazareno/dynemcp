@@ -8,6 +8,7 @@ import type {
 export interface ServerInitializationOptions {
   name: string
   version: string
+  documentationUrl?: string
 }
 
 export function createMCPServerInstance(
@@ -16,6 +17,7 @@ export function createMCPServerInstance(
   return new McpServer({
     name: options.name,
     version: options.version,
+    documentationUrl: options.documentationUrl,
   })
 }
 

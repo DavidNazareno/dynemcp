@@ -1,0 +1,14 @@
+{
+  "server": {
+    "name": "DynamicAgent",
+    "version": "1.0.0"
+  },
+  "transport": {
+    "type": "stdio"
+  },
+  "tools": {
+    "directory": "./tools"
+  },
+  "resources": {},
+  "prompts": {}
+}

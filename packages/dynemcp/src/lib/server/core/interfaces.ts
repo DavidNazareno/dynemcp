@@ -79,7 +79,7 @@ export interface SSETransportConfig {
       allowMethods?: string
       allowHeaders?: string
       exposeHeaders?: string
-      maxAge?: string
+      maxAge?: number
     }
   }
 }
@@ -106,7 +106,10 @@ export interface HTTPStreamTransportConfig {
       allowMethods?: string
       allowHeaders?: string
       exposeHeaders?: string
-      maxAge?: string
+      maxAge?: number
+    }
+    authentication?: {
+      path: string
     }
   }
 }
@@ -116,11 +119,14 @@ export type TransportConfig =
   | SSETransportConfig
   | HTTPStreamTransportConfig
 
+export interface ServerConfig {
+  name: string
+  version: string
+  documentationUrl?: string
+}
+
 export interface DyneMCPConfig {
-  server: {
-    name: string
-    version: string
-  }
+  server: ServerConfig
   tools: AutoloadConfig
   resources: AutoloadConfig
   prompts: AutoloadConfig

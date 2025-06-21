@@ -69,12 +69,24 @@ async function promptForTemplate(): Promise<string> {
     message: '🧩 Select a project template:',
     choices: [
       {
-        name: 'Default project (minimal setup with examples)',
+        name: 'Default - A minimal setup with basic examples.',
         value: 'default',
       },
       {
-        name: 'Calculator project (with mathematical tools)',
+        name: 'Calculator - An agent with mathematical tools.',
         value: 'calculator',
+      },
+      {
+        name: 'HTTP Server - A basic server using the HTTP transport.',
+        value: 'http-server',
+      },
+      {
+        name: 'Secure Agent - A production-ready agent with authentication.',
+        value: 'secure-agent',
+      },
+      {
+        name: 'Dynamic Agent - An agent that learns skills and uses sampling.',
+        value: 'dynamic-agent',
       },
     ],
     default: 'default',

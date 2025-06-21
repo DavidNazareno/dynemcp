@@ -11,6 +11,7 @@ export const AutoloadConfigSchema = z.object({
 export const ServerConfigSchema = z.object({
   name: z.string().default('dynemcp-server'),
   version: z.string().default(SERVER_VERSION),
+  documentationUrl: z.string().url().optional(),
 })
 
 export const LoggingConfigSchema = z.object({

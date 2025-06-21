@@ -1,4 +1,4 @@
-import { install } from '../helpers/install.js'
+import { installDependencies } from '../helpers/package-manager.js'
 import { copy } from '../helpers/copy.js'
 import { getTemplatesDir } from '../helpers/paths.js'
 import { getPackageVersion } from '../helpers/package-info.js'
@@ -6,6 +6,7 @@ import { getPackageVersion } from '../helpers/package-info.js'
 import fastGlob from 'fast-glob'
 import os from 'os'
 import fs from 'fs/promises'
+import { existsSync } from 'fs'
 import path from 'path'
 import { Sema } from 'async-sema'
 
@@ -191,6 +192,13 @@ export const installTemplate = async ({
     devDependencies: {},
   }
 
+  if (template === 'http-server' || template === 'secure-agent') {
+    packageJson.dependencies['express'] = '^4.19.2'
+    packageJson.dependencies['cors'] = '^2.8.5'
+    packageJson.devDependencies['@types/express'] = '^4.17.21'
+    packageJson.devDependencies['@types/cors'] = '^2.8.17'
+  }
+
   // Remove undefined values
   if (!packageJson.scripts.lint) {
     delete packageJson.scripts.lint
@@ -283,7 +291,7 @@ export const installTemplate = async ({
   if (!skipInstall) {
     console.log('\nInstalling dependencies. This may take a moment...')
     try {
-      await install(packageManager, null)
+      await installDependencies(root)
       console.log('✅ Dependencies installed successfully!')
     } catch {
       console.error(
@@ -302,7 +310,7 @@ async function updateProjectConfig(
 ): Promise<void> {
   try {
     const configPath = path.join(projectPath, 'dynemcp.config.json')
-    if (fs.existsSync(configPath)) {
+    if (existsSync(configPath)) {
       const config = JSON.parse(await fs.readFile(configPath, 'utf8'))
       config.name = projectName
       config.server = { name: projectName }

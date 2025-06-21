@@ -315,16 +315,3 @@ export function mergeConfigs(
 
   return ConfigSchema.parse(finalConfig)
 }
-
-function deepMerge(target: any, source: any) {
-  for (const key in source) {
-    if (typeof source[key] === 'object' && source[key] !== null) {
-      if (typeof target[key] !== 'object' || target[key] === null) {
-        target[key] = {}
-      }
-      deepMerge(target[key], source[key])
-    } else {
-      target[key] = source[key]
-    }
-  }
-}

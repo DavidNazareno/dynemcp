@@ -1,0 +1,21 @@
+{
+  "server": {
+    "name": "my-http-server",
+    "version": "1.0.0"
+  },
+  "transport": {
+    "type": "http-stream",
+    "options": {
+      "port": 3000
+    }
+  },
+  "tools": {
+    "directory": "./tools"
+  },
+  "resources": {
+    "directory": "./resources"
+  },
+  "prompts": {
+    "directory": "./prompt"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "server": {
+    "name": "SecureAgent",
+    "version": "1.0.0",
+    "documentationUrl": "https://example.com/docs/secure-agent"
+  },
+  "transport": {
+    "type": "http-stream",
+    "options": {
+      "port": 4000,
+      "authentication": {
+        "path": "./src/auth.ts"
+      },
+      "session": {
+        "enabled": true
+      },
+      "resumability": {
+        "enabled": true
+      }
+    }
+  },
+  "tools": { "directory": "./tools" },
+  "resources": { "directory": "./resources" },
+  "prompts": { "directory": "./prompt" }
+}

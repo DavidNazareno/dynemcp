@@ -4,6 +4,7 @@ import {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
+  ServerConfig,
 } from '../interfaces.js'
 import { loadConfig } from '../config.js'
 import { registry } from '../registry/registry.js'
@@ -21,6 +22,8 @@ export class DyneMCP {
   private isInitialized = false
   private transport?: any
 
+  public readonly registry = registry
+
   constructor(name?: string, configPath?: string, version?: string) {
     this.config = loadConfig(configPath)
 
@@ -29,8 +32,7 @@ export class DyneMCP {
     if (version) this.config.server.version = version
 
     this.server = createMCPServerInstance({
-      name: this.config.server.name,
-      version: this.config.server.version,
+      ...(this.config.server as ServerConfig),
     })
   }
 

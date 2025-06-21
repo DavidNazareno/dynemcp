@@ -11,7 +11,11 @@ export const CorsSchema = z.object({
     .string()
     .optional()
     .default('Content-Type, Authorization, x-api-key'),
-  maxAge: z.string().optional().default('86400'),
+  maxAge: z.number().optional().default(86400),
+})
+
+export const AuthMiddlewareSchema = z.object({
+  path: z.string(),
 })
 
 export const SessionSchema = z.object({
@@ -41,6 +45,7 @@ export const HTTPStreamTransportOptionsSchema = z.object({
   session: SessionSchema.optional(),
   resumability: ResumabilitySchema.optional(),
   cors: CorsSchema.optional(),
+  authentication: AuthMiddlewareSchema.optional(),
 })
 
 export const TransportSchema = z.discriminatedUnion('type', [

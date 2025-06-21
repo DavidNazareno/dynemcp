@@ -1,6 +1,11 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
+import express from 'express'
+import cors from 'cors'
 import { TransportConfig } from '../core/interfaces.js'
+import path from 'path'
+import { randomUUID } from 'crypto'
 
 export interface Transport {
   connect(server: McpServer): Promise<void>
@@ -39,50 +44,71 @@ export class SSETransport implements Transport {
     // Note: SSE transport implementation would require additional dependencies
     // For now, we'll throw an error indicating it's not yet implemented
     throw new Error(
-      'SSE transport is not yet implemented. Please use stdio transport for now.'
+      'SSE transport is deprecated and not implemented. Please use http-stream instead.'
     )
   }
 }
 
 export class HTTPStreamTransport implements Transport {
+  private app: express.Express
+  private port: number
+  private endpoint: string
+  private options: NonNullable<
+    TransportConfig & { type: 'http-stream' }
+  >['options']
+  private transport: StreamableHTTPServerTransport
+
   constructor(
-    _config: NonNullable<
+    options: NonNullable<
       TransportConfig & { type: 'http-stream' }
     >['options'] = {}
   ) {
-    // Configuration would be used in actual implementation
-    // const _config = {
-    //   port: 8080,
-    //   endpoint: '/mcp',
-    //   responseMode: 'batch',
-    //   batchTimeout: 30000,
-    //   maxMessageSize: '4mb',
-    //   session: {
-    //     enabled: true,
-    //     headerName: 'Mcp-Session-Id',
-    //     allowClientTermination: true,
-    //   },
-    //   resumability: {
-    //     enabled: false,
-    //     historyDuration: 300000,
-    //   },
-    //   cors: {
-    //     allowOrigin: '*',
-    //     allowMethods: 'GET, POST, OPTIONS',
-    //     allowHeaders: 'Content-Type, Authorization, x-api-key',
-    //     exposeHeaders: 'Content-Type, Authorization, x-api-key',
-    //     maxAge: '86400',
-    //   },
-    //   ...config,
-    // };
+    this.app = express()
+    this.app.use(express.json())
+    this.app.use(cors(options.cors))
+
+    this.port = options.port ?? 8080
+    this.endpoint = options.endpoint ?? '/mcp'
+    this.options = options
+    this.transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: randomUUID,
+    })
   }
 
-  async connect(_server: McpServer): Promise<void> {
-    // Note: HTTP Stream transport implementation would require additional dependencies
-    // For now, we'll throw an error indicating it's not yet implemented
-    throw new Error(
-      'HTTP Stream transport is not yet implemented. Please use stdio transport for now.'
-    )
+  async connect(server: McpServer): Promise<void> {
+    let authMiddleware: express.RequestHandler = (req, res, next) => next()
+
+    if (this.options?.authentication?.path) {
+      try {
+        const middlewarePath = path.resolve(this.options.authentication.path)
+        const middlewareModule = await import(middlewarePath)
+        if (typeof middlewareModule.default !== 'function') {
+          throw new Error(
+            'Authentication middleware must export a default function.'
+          )
+        }
+        authMiddleware = middlewareModule.default
+        console.log(
+          `🔒 Authentication middleware loaded from ${middlewarePath}`
+        )
+      } catch (error) {
+        console.error('Failed to load authentication middleware:', error)
+        // Terminate process if auth middleware fails to load as it's a critical component
+        process.exit(1)
+      }
+    }
+
+    await server.connect(this.transport)
+
+    this.app.all(this.endpoint, authMiddleware, async (req, res) => {
+      await this.transport.handleRequest(req, res)
+    })
+
+    this.app.listen(this.port, () => {
+      console.log(
+        `📡 Connected via HTTP Stream transport, listening on port ${this.port}`
+      )
+    })
   }
 }
 
