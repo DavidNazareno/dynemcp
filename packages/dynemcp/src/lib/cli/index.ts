@@ -132,7 +132,7 @@ async function dev(argv: {
       logger: logger,
     })
 
-    const server = createMCPServer(undefined, argv.config)
+    const server = createMCPServer(undefined, argv.config, undefined, logger)
     await server.start()
 
     logger.info('📁 Watching for changes...')

@@ -13,6 +13,7 @@ import type { BuildConfig } from '../config/index.js'
 import { analyzeDependencies } from './analyzer.js'
 import { optimizeBundle } from './optimizer.js'
 import { generateManifest } from './manifest.js'
+import { ConsoleLogger, type Logger } from '../../cli/index.js'
 
 export interface BundleResult {
   success: boolean
@@ -35,6 +36,7 @@ export interface BundleOptions extends BuildConfig {
   analyze?: boolean
   manifest?: boolean
   cli?: boolean
+  logger?: Logger
 }
 
 /**
@@ -42,6 +44,7 @@ export interface BundleOptions extends BuildConfig {
  */
 export async function bundle(options: BundleOptions): Promise<BundleResult> {
   const startTime = Date.now()
+  const logger = options.logger ?? new ConsoleLogger()
   const result: BundleResult = {
     success: false,
     stats: {
@@ -55,14 +58,14 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
   }
 
   try {
-    console.log('🔨 Starting DyneMCP build...')
+    logger.info('🔨 Starting DyneMCP build...')
 
     // Analyze dependencies
     if (options.analyze) {
-      console.log('📊 Analyzing dependencies...')
+      logger.info('📊 Analyzing dependencies...')
       const analysis = await analyzeDependencies(options.entryPoint)
       result.stats.dependencies = analysis.dependencies.length
-      console.log(`📦 Found ${analysis.dependencies.length} dependencies`)
+      logger.info(`📦 Found ${analysis.dependencies.length} dependencies`)
     }
 
     // Prepare esbuild options
@@ -107,28 +110,28 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
     // Process results
     if (buildResult.errors.length > 0) {
       result.errors = buildResult.errors.map((e) => e.text)
-      console.error('❌ Build failed with errors:')
-      buildResult.errors.forEach((error) => console.error(`  ${error.text}`))
+      logger.error('❌ Build failed with errors:')
+      buildResult.errors.forEach((error) => logger.error(`  ${error.text}`))
       return result
     }
 
     if (buildResult.warnings.length > 0) {
       result.warnings = buildResult.warnings.map((w) => w.text)
-      console.warn('⚠️  Build completed with warnings:')
+      logger.warn('⚠️  Build completed with warnings:')
       buildResult.warnings.forEach((warning) =>
-        console.warn(`  ${warning.text}`)
+        logger.warn(`  ${warning.text}`)
       )
     }
 
     // Optimize the bundle
     if (options.bundle && options.minify) {
-      console.log('⚡ Optimizing bundle...')
+      logger.info('⚡ Optimizing bundle...')
       await optimizeBundle(`${options.outDir}/${options.outFile}`)
     }
 
     // Generate manifest if requested
     if (options.manifest && buildResult.metafile) {
-      console.log('📋 Generating manifest...')
+      logger.info('📋 Generating manifest...')
       await generateManifest(buildResult.metafile, options.outDir)
     }
 
@@ -141,8 +144,10 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
     result.metafile = buildResult.metafile
     result.success = true
 
-    console.log(`✅ Build completed successfully in ${result.stats.duration}ms`)
-    console.log(`📁 Output: ${options.outDir}/${options.outFile}`)
+    logger.success(
+      `✅ Build completed successfully in ${result.stats.duration}ms`
+    )
+    logger.info(`📁 Output: ${options.outDir}/${options.outFile}`)
 
     return result
   } catch (error) {
@@ -151,7 +156,7 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
     result.stats.duration = endTime - startTime
     result.errors = [error instanceof Error ? error.message : String(error)]
 
-    console.error('❌ Build failed:', error)
+    logger.error(`❌ Build failed: ${error}`)
     return result
   }
 }
@@ -162,7 +167,8 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
 export async function bundleWatch(
   options: BundleOptions
 ): Promise<BuildContext> {
-  console.log('👀 Starting DyneMCP build in watch mode...')
+  const logger = options.logger ?? new ConsoleLogger()
+  logger.info('👀 Starting DyneMCP build in watch mode...')
 
   const buildOptions: EsbuildBuildOptions = {
     entryPoints: [options.entryPoint],
@@ -184,8 +190,31 @@ export async function bundleWatch(
     splitting: options.splitting,
     metafile: false, // Disable metafile in watch mode for performance
     write: true,
-    logLevel: 'info',
+    logLevel: 'silent',
     color: true,
+    plugins: [
+      {
+        name: 'dynemcp-watch-reporter',
+        setup(build) {
+          build.onEnd((result) => {
+            if (result.errors.length > 0) {
+              logger.error('❌ Watch build failed:')
+              result.errors.forEach((error) => {
+                logger.error(`  ${error.text}`)
+              })
+            } else {
+              logger.success('✅ Watch build succeeded.')
+              if (result.warnings.length > 0) {
+                logger.warn('⚠️  Build completed with warnings:')
+                result.warnings.forEach((warning) => {
+                  logger.warn(`  ${warning.text}`)
+                })
+              }
+            }
+          })
+        },
+      },
+    ],
   }
 
   try {
@@ -194,12 +223,12 @@ export async function bundleWatch(
     // Start watching
     await ctx.watch()
 
-    console.log('👀 Watching for changes...')
-    console.log(`📁 Output: ${options.outDir}/${options.outFile}`)
+    logger.info('👀 Watching for changes...')
+    logger.info(`📁 Output: ${options.outDir}/${options.outFile}`)
 
     return ctx
   } catch (error) {
-    console.error('❌ Watch build failed:', error)
+    logger.error(`❌ Watch build failed: ${error}`)
     throw error
   }
 }
@@ -208,6 +237,7 @@ export async function bundleWatch(
  * Bundle a DyneMCP CLI tool
  */
 export async function bundleCli(options: BundleOptions): Promise<BundleResult> {
+  const logger = options.logger ?? new ConsoleLogger()
   const cliOptions: BundleOptions = {
     ...options,
     outFile: options.outFile.replace('.js', '-cli.js'),
@@ -227,9 +257,9 @@ export async function bundleCli(options: BundleOptions): Promise<BundleResult> {
 
     try {
       fs.chmodSync(cliPath, '755')
-      console.log(`🔧 Made CLI executable: ${cliPath}`)
+      logger.info(`🔧 Made CLI executable: ${cliPath}`)
     } catch (error) {
-      console.warn('⚠️  Could not make CLI executable:', error)
+      logger.warn(`⚠️  Could not make CLI executable: ${error}`)
     }
   }
 
@@ -248,10 +278,11 @@ export async function cleanBuildDir(outDir: string): Promise<void> {
     : path.join(process.cwd(), outDir)
 
   try {
-    await fs.remove(absoluteOutDir)
-    console.log(`🧹 Cleaned build directory: ${absoluteOutDir}`)
+    if (fs.existsSync(absoluteOutDir)) {
+      await fs.rm(absoluteOutDir, { recursive: true, force: true })
+    }
   } catch (error) {
-    console.warn('⚠️  Could not clean build directory:', error)
+    console.error(`❌ Error cleaning directory ${absoluteOutDir}:`, error)
   }
 }
 

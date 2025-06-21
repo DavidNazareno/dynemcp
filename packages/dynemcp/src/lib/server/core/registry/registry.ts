@@ -6,6 +6,7 @@ import type {
   ResourceDefinition,
   PromptDefinition,
 } from '../interfaces.js'
+import { ConsoleLogger, type Logger } from '../../../cli/index.js'
 
 export class Registry {
   private storage = new ComponentStorage()
@@ -14,13 +15,14 @@ export class Registry {
   /**
    * Load all components from the specified directories
    */
-  async loadAll(options: LoadAllOptions): Promise<void> {
+  async loadAll(options: LoadAllOptions, logger?: Logger): Promise<void> {
+    const log = logger ?? new ConsoleLogger()
     if (this.isLoaded) {
-      console.warn('Registry already loaded, skipping...')
+      log.warn('Registry already loaded, skipping...')
       return
     }
 
-    console.log('🔄 Loading components...')
+    log.info('🔄 Loading components...')
 
     const result = await loadAllComponents(options)
 
@@ -33,20 +35,21 @@ export class Registry {
     try {
       validateAllTools(result.tools)
     } catch (error) {
-      console.warn(
-        '⚠️ Tool validation warnings:',
-        error instanceof Error ? error.message : error
+      log.warn(
+        `⚠️ Tool validation warnings: ${
+          error instanceof Error ? error.message : error
+        }`
       )
     }
 
     // Log results
     const stats = this.storage.getStats()
-    console.log(
+    log.success(
       `✅ Loaded ${stats.tools} tools, ${stats.resources} resources, ${stats.prompts} prompts`
     )
 
     if (result.errors.length > 0) {
-      console.warn('⚠️ Loading errors:', result.errors)
+      log.warn(`⚠️ Loading errors: ${result.errors}`)
     }
 
     this.isLoaded = true

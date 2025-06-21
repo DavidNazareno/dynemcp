@@ -8,6 +8,9 @@
     },
     {
       "path": "./packages/dynemcp"
+    },
+    {
+      "path": "./examples/my-test-app"
     }
   ]
 }

@@ -6,6 +6,7 @@ import cors from 'cors'
 import { TransportConfig } from '../core/interfaces.js'
 import path from 'path'
 import { randomUUID } from 'crypto'
+import { ConsoleLogger, type Logger } from '../../cli/index.js'
 
 export interface Transport {
   connect(server: McpServer): Promise<void>
@@ -13,10 +14,16 @@ export interface Transport {
 }
 
 export class StdioTransport implements Transport {
+  private logger: Logger
+
+  constructor(logger?: Logger) {
+    this.logger = logger ?? new ConsoleLogger()
+  }
+
   async connect(server: McpServer): Promise<void> {
     const transport = new StdioServerTransport()
     await server.connect(transport)
-    console.log('📡 Connected via stdio transport')
+    this.logger.info('📡 Connected via stdio transport')
   }
 }
 
@@ -57,15 +64,18 @@ export class HTTPStreamTransport implements Transport {
     TransportConfig & { type: 'http-stream' }
   >['options']
   private transport: StreamableHTTPServerTransport
+  private logger: Logger
 
   constructor(
     options: NonNullable<
       TransportConfig & { type: 'http-stream' }
-    >['options'] = {}
+    >['options'] = {},
+    logger?: Logger
   ) {
     this.app = express()
     this.app.use(express.json())
     this.app.use(cors(options.cors))
+    this.logger = logger ?? new ConsoleLogger()
 
     this.port = options.port ?? 8080
     this.endpoint = options.endpoint ?? '/mcp'
@@ -88,11 +98,11 @@ export class HTTPStreamTransport implements Transport {
           )
         }
         authMiddleware = middlewareModule.default
-        console.log(
+        this.logger.info(
           `🔒 Authentication middleware loaded from ${middlewarePath}`
         )
       } catch (error) {
-        console.error('Failed to load authentication middleware:', error)
+        this.logger.error(`Failed to load authentication middleware: ${error}`)
         // Terminate process if auth middleware fails to load as it's a critical component
         process.exit(1)
       }
@@ -105,21 +115,24 @@ export class HTTPStreamTransport implements Transport {
     })
 
     this.app.listen(this.port, () => {
-      console.log(
+      this.logger.info(
         `📡 Connected via HTTP Stream transport, listening on port ${this.port}`
       )
     })
   }
 }
 
-export function createTransport(config: TransportConfig): Transport {
+export function createTransport(
+  config: TransportConfig,
+  logger?: Logger
+): Transport {
   switch (config.type) {
     case 'stdio':
-      return new StdioTransport()
+      return new StdioTransport(logger)
     case 'sse':
       return new SSETransport(config.options)
     case 'http-stream':
-      return new HTTPStreamTransport(config.options)
+      return new HTTPStreamTransport(config.options, logger)
     default:
       throw new Error(`Unsupported transport type: ${(config as any).type}`)
   }

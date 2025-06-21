@@ -179,7 +179,7 @@ export async function watch(
     }
     finalOptions.sourcemap = true
 
-    const ctx = await bundleWatch(finalOptions)
+    const ctx = await bundleWatch({ ...finalOptions, logger })
 
     logger.success('👀 Watching for changes...')
     logger.info(`📁 Output: ${finalOptions.outDir}/${finalOptions.outFile}`)
@@ -199,8 +199,9 @@ export async function watch(
 export async function buildCli(
   options: DyneMCPBuildOptions = {}
 ): Promise<BuildResult> {
+  const logger = options.logger ?? new ConsoleLogger()
   try {
-    console.log('🔧 Building DyneMCP CLI tool...')
+    logger.info('🔧 Building DyneMCP CLI tool...')
 
     // Load configuration
     const config = loadConfig(options.configPath)
@@ -212,6 +213,7 @@ export async function buildCli(
       ...options,
       cli: true,
       watch: options.watch || false,
+      logger,
     }
 
     // Validate configuration
@@ -235,34 +237,22 @@ export async function buildCli(
     }
 
     if (bundleResult.success) {
-      console.log('✅ CLI build completed successfully')
-      console.log(
+      logger.success('✅ CLI build completed successfully')
+      logger.info(
         `🔧 CLI executable: ${finalOptions.outDir}/${finalOptions.outFile.replace(
           '.js',
           '-cli.js'
         )}`
       )
     } else {
-      console.error('❌ CLI build failed')
+      logger.error('❌ CLI build failed')
     }
 
     return result
   } catch (error) {
-    console.error('❌ CLI build failed:', error)
-
-    return {
-      success: false,
-      errors: [error instanceof Error ? error.message : String(error)],
-      stats: {
-        startTime: Date.now(),
-        endTime: Date.now(),
-        duration: 0,
-        entryPoints: [],
-        outputSize: 0,
-        dependencies: 0,
-      },
-      config: {} as BuildConfig,
-    }
+    const message = error instanceof Error ? error.message : String(error)
+    logger.error(`❌ CLI build failed: ${message}`)
+    throw error
   }
 }
 

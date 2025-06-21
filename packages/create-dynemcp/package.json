@@ -41,7 +41,8 @@
     "execa": "^9.6.0",
     "tslib": "^2.3.0",
     "@dynemcp/dynemcp": "workspace:*",
-    "zod": "3.25.67"
+    "zod": "3.25.67",
+    "express": "5.1.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

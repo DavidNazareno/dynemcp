@@ -1,4 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { ConsoleLogger, type Logger } from '../../../cli/index.js'
 import { DyneMCPConfig } from '../config.js'
 import {
   ToolDefinition,
@@ -21,11 +22,18 @@ export class DyneMCP {
   private config: DyneMCPConfig
   private isInitialized = false
   private transport?: any
+  private logger: Logger
 
   public readonly registry = registry
 
-  constructor(name?: string, configPath?: string, version?: string) {
+  constructor(
+    name?: string,
+    configPath?: string,
+    version?: string,
+    logger?: Logger
+  ) {
     this.config = loadConfig(configPath)
+    this.logger = logger ?? new ConsoleLogger()
 
     // Override config with constructor parameters
     if (name) this.config.server.name = name
@@ -49,14 +57,17 @@ export class DyneMCP {
   async init(): Promise<void> {
     if (this.isInitialized) return
 
-    console.log('🚀 Initializing DyneMCP server...')
+    this.logger.info('🚀 Initializing DyneMCP server...')
 
     // Load all components using unified registry
-    await registry.loadAll({
-      tools: this.config.tools,
-      resources: this.config.resources,
-      prompts: this.config.prompts,
-    })
+    await registry.loadAll(
+      {
+        tools: this.config.tools,
+        resources: this.config.resources,
+        prompts: this.config.prompts,
+      },
+      this.logger
+    )
 
     // Register components with MCP server
     registerTools(this.server, registry.getAllTools())
@@ -64,7 +75,7 @@ export class DyneMCP {
     registerPrompts(this.server, registry.getAllPrompts())
 
     this.isInitialized = true
-    console.log('✅ DyneMCP server initialized successfully')
+    this.logger.success('✅ DyneMCP server initialized successfully')
   }
 
   /**
@@ -75,18 +86,18 @@ export class DyneMCP {
 
     // Create and connect transport
     const transportConfig = this.config.transport || { type: 'stdio' }
-    this.transport = createTransport(transportConfig)
+    this.transport = createTransport(transportConfig, this.logger)
     await this.transport.connect(this.server)
 
-    console.log(
+    this.logger.success(
       `🎯 MCP server "${this.config.server.name}" started successfully`
     )
-    console.log(`📡 Transport: ${transportConfig.type}`)
+    this.logger.info(`📡 Transport: ${transportConfig.type}`)
 
     if (transportConfig.type !== 'stdio') {
       const options = (transportConfig as any).options
       if (options?.port) {
-        console.log(`🌐 Server listening on port ${options.port}`)
+        this.logger.info(`🌐 Server listening on port ${options.port}`)
       }
     }
   }
@@ -98,7 +109,7 @@ export class DyneMCP {
     if (this.transport?.disconnect) {
       await this.transport.disconnect()
     }
-    console.log('🛑 MCP server stopped')
+    this.logger.info('🛑 MCP server stopped')
   }
 
   /**
@@ -143,7 +154,8 @@ export class DyneMCP {
 export function createMCPServer(
   name?: string,
   configPath?: string,
-  version?: string
+  version?: string,
+  logger?: Logger
 ): DyneMCP {
-  return new DyneMCP(name, configPath, version)
+  return new DyneMCP(name, configPath, version, logger)
 }
