@@ -4,11 +4,11 @@
  */
 
 import { type BuildContext } from 'esbuild'
-import type { BuildConfig } from './config/index.js'
 import {
   loadConfig,
   getBuildConfig,
   validateBuildConfig,
+  type BuildConfig,
 } from './config/index.js'
 import {
   bundle,
@@ -24,6 +24,7 @@ import {
 } from './bundler/analyzer.js'
 import { generateBundleStats } from './bundler/optimizer.js'
 import { generateHTMLReport } from './bundler/manifest.js'
+import { ConsoleLogger, type Logger } from '../cli/index.js'
 
 export interface DyneMCPBuildOptions {
   configPath?: string
@@ -48,6 +49,7 @@ export interface DyneMCPBuildOptions {
   treeShaking?: boolean
   splitting?: boolean
   metafile?: boolean
+  logger?: Logger
 }
 
 export interface BuildResult extends BundleResult {
@@ -61,72 +63,61 @@ export interface BuildResult extends BundleResult {
 export async function build(
   options: DyneMCPBuildOptions = {}
 ): Promise<BuildResult> {
+  const logger = options.logger ?? new ConsoleLogger()
   const startTime = Date.now()
 
   try {
-    console.log('🚀 Starting DyneMCP build process...')
+    logger.info('🚀 Starting DyneMCP build process...')
 
-    // Load configuration
-    const config = loadConfig(options.configPath)
+    const config = await loadConfig(options.configPath)
     const buildConfig = getBuildConfig(config)
 
-    // Merge options with config
     const finalOptions: BundleOptions = {
       ...buildConfig,
       ...options,
       watch: options.watch || false,
     }
 
-    // Validate configuration
     validateBuildConfig(finalOptions)
 
-    // Clean build directory if requested
     if (options.clean) {
       await cleanBuildDir(finalOptions.outDir)
     }
 
-    // Create output directory
     const fs = await import('fs-extra')
     await fs.ensureDir(finalOptions.outDir)
 
-    // Build the project
     const bundleResult = await bundle(finalOptions)
 
-    // Generate additional outputs
     const result: BuildResult = {
       ...bundleResult,
       config: buildConfig,
     }
 
-    // Analyze dependencies if requested
     if (options.analyze && bundleResult.success) {
-      console.log('📊 Analyzing dependencies...')
+      logger.info('📊 Analyzing dependencies...')
       const analysis = await analyzeDependencies(finalOptions.entryPoint)
       result.analysis = analysis
 
       const report = generateDependencyReport(analysis)
-      console.log(report)
+      logger.info(report)
 
-      // Save analysis report
       const reportPath = `${finalOptions.outDir}/dependency-analysis.txt`
       await fs.writeFile(reportPath, report)
-      console.log(`📋 Dependency analysis saved: ${reportPath}`)
+      logger.info(`📋 Dependency analysis saved: ${reportPath}`)
     }
 
-    // Generate bundle stats
     if (bundleResult.success && bundleResult.outputFiles?.[0]) {
       const bundleStats = generateBundleStats(bundleResult.outputFiles[0])
       result.stats = {
         ...result.stats,
         outputSize: bundleStats.size,
       }
-
-      console.log(
-        `📈 Bundle stats: ${bundleStats.sizeKB}KB, ${bundleStats.lines} lines`
+      logger.info(
+        `📈 Bundle stats: ${bundleStats.sizeKB}KB, ${bundleStats.lines} lines`,
       )
     }
 
-    // Generate HTML report if requested
     if (options.html && bundleResult.metafile) {
       await generateHTMLReport(bundleResult.metafile, finalOptions.outDir)
     }
@@ -135,28 +126,27 @@ export async function build(
     const duration = endTime - startTime
 
     if (bundleResult.success) {
-      console.log(`✅ Build completed successfully in ${duration}ms`)
-      console.log(`📁 Output directory: ${finalOptions.outDir}`)
-
+      logger.success(`✅ Build completed successfully in ${duration}ms`)
+      logger.info(`📁 Output directory: ${finalOptions.outDir}`)
       if (bundleResult.outputFiles) {
-        bundleResult.outputFiles.forEach((file) => {
-          console.log(`📄 Generated: ${file}`)
+        bundleResult.outputFiles.forEach(file => {
+          logger.info(`📄 Generated: ${file}`)
         })
       }
     } else {
-      console.error(`❌ Build failed after ${duration}ms`)
+      logger.error(`❌ Build failed after ${duration}ms`)
     }
 
     return result
   } catch (error) {
+    const logger = options.logger ?? new ConsoleLogger()
     const endTime = Date.now()
     const duration = endTime - startTime
-
-    console.error(`❌ Build failed after ${duration}ms:`, error)
-
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    logger.error(`❌ Build failed after ${duration}ms: ${errorMessage}`)
     return {
       success: false,
-      errors: [error instanceof Error ? error.message : String(error)],
+      errors: [errorMessage],
       stats: {
         startTime,
         endTime,
@@ -176,37 +166,29 @@ export async function build(
 export async function watch(
   options: DyneMCPBuildOptions = {}
 ): Promise<BuildContext> {
-  try {
-    console.log('👀 Starting DyneMCP build in watch mode...')
+  const logger = options.logger ?? new ConsoleLogger()
+  logger.info('👀 Starting watch mode...')
 
-    // Load configuration
-    const config = loadConfig(options.configPath)
+  try {
+    const config = await loadConfig(options.configPath)
     const buildConfig = getBuildConfig(config)
 
-    // Merge options with config
-    const finalOptions: BundleOptions = {
+    const finalOptions: BuildConfig = {
       ...buildConfig,
       ...options,
-      watch: true,
-      sourcemap: true, // Always enable sourcemap in watch mode
     }
+    finalOptions.sourcemap = true
 
-    // Validate configuration
-    validateBuildConfig(finalOptions)
-
-    // Create output directory
-    const fs = await import('fs-extra')
-    await fs.ensureDir(finalOptions.outDir)
-
-    // Start watch mode
     const ctx = await bundleWatch(finalOptions)
 
-    console.log('👀 Watching for changes...')
-    console.log(`📁 Output: ${finalOptions.outDir}/${finalOptions.outFile}`)
+    logger.success('👀 Watching for changes...')
+    logger.info(`📁 Output: ${finalOptions.outDir}/${finalOptions.outFile}`)
 
     return ctx
   } catch (error) {
-    console.error('❌ Watch build failed:', error)
+    const logger = options.logger ?? new ConsoleLogger()
+    const message = error instanceof Error ? error.message : String(error)
+    logger.error(`❌ Watch build failed: ${message}`)
     throw error
   }
 }

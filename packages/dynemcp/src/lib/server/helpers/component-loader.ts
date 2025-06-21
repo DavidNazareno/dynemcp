@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import { pathToFileURL } from 'url'
 import { DyneMCPTool, DyneMCPResource, DyneMCPPrompt } from '../core/base.js'
 import type {
   ToolDefinition,
@@ -96,9 +97,9 @@ async function loadComponentFromFile<T>(
   validator: (component: any) => component is T
 ): Promise<T | null> {
   try {
-    // Dynamic import works with relative paths for tsx
-    const relativePath = path.relative(process.cwd(), filePath)
-    const module = await import(path.toNamespacedPath(relativePath))
+    // Convert the absolute file path to a file URL for robust dynamic importing.
+    const absolutePath = path.resolve(process.cwd(), filePath)
+    const module = await import(pathToFileURL(absolutePath).href)
     const exported = module.default
 
     if (!exported) {

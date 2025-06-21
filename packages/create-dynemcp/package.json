@@ -40,9 +40,8 @@
     "ora": "^8.0.1",
     "execa": "^9.6.0",
     "tslib": "^2.3.0",
-    "@dynemcp/dynemcp": "0.0.12-canary.20250621T15552",
-    "zod": "3.25.67",
-    "express": "5.1.0"
+    "@dynemcp/dynemcp": "workspace:*",
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

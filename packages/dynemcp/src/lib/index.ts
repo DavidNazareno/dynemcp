@@ -27,4 +27,4 @@ export * from './shared/index.js'
 
 // Main framework exports
 export { createMCPServer } from './server/core/server/server-dynemcp.js'
-export { dev, start } from './cli/index.js'
+export { dev } from './cli/index.js'
