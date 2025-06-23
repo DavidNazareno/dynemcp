@@ -8,11 +8,26 @@ import chalk from 'chalk'
  * Log utility functions
  */
 export const log = {
-  info: (message: string) => console.log(chalk.blue(`ℹ️  ${message}`)),
-  success: (message: string) => console.log(chalk.green(`✅ ${message}`)),
-  warning: (message: string) => console.log(chalk.yellow(`⚠️  ${message}`)),
-  error: (message: string) => console.error(chalk.red(`❌ ${message}`)),
-  debug: (message: string) => console.log(chalk.gray(`🔍 ${message}`)),
+  info: (message: string) => {
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT)
+      console.log(chalk.blue(`ℹ️  ${message}`))
+  },
+  success: (message: string) => {
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT)
+      console.log(chalk.green(`✅ ${message}`))
+  },
+  warning: (message: string) => {
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT)
+      console.log(chalk.yellow(`⚠️  ${message}`))
+  },
+  error: (message: string) => {
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT)
+      console.error(chalk.red(`❌ ${message}`))
+  },
+  debug: (message: string) => {
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT)
+      console.log(chalk.gray(`🔍 ${message}`))
+  },
 }
 
 /**

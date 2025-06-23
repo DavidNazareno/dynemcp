@@ -39,13 +39,14 @@ export async function optimizeBundle(filePath: string): Promise<void> {
     const savings = originalSize - optimizedSize
     const savingsPercent = ((savings / originalSize) * 100).toFixed(2)
 
-    console.log(
-      `⚡ Bundle optimized: ${(originalSize / 1024).toFixed(2)}KB → ${(
-        optimizedSize / 1024
-      ).toFixed(2)}KB (${savingsPercent}% reduction)`
-    )
+    if (shouldLog())
+      console.log(
+        `⚡ Bundle optimized: ${(originalSize / 1024).toFixed(2)}KB → ${(
+          optimizedSize / 1024
+        ).toFixed(2)}KB (${savingsPercent}% reduction)`
+      )
   } catch (error) {
-    console.warn('⚠️  Could not optimize bundle:', error)
+    if (shouldLog()) console.warn('⚠️  Could not optimize bundle:', error)
   }
 }
 
@@ -123,7 +124,7 @@ export function generateBundleStats(filePath: string): {
       characters: content.length,
     }
   } catch (error) {
-    console.warn('⚠️  Could not generate bundle stats:', error)
+    if (shouldLog()) console.warn('⚠️  Could not generate bundle stats:', error)
     return {
       size: 0,
       sizeKB: '0',
@@ -132,6 +133,10 @@ export function generateBundleStats(filePath: string): {
       characters: 0,
     }
   }
+}
+
+function shouldLog() {
+  return !process.env.DYNE_MCP_STDIO_LOG_SILENT
 }
 
 export default {

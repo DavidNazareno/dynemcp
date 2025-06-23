@@ -44,12 +44,23 @@ export class DyneMCP {
   }
 
   /**
+   * Helper for debug logging to STDERR if DYNE_MCP_DEBUG_STDERR=1
+   */
+  private debugLog(msg: string) {
+    if (process.env.DYNE_MCP_DEBUG_STDERR === '1') {
+      console.error(msg)
+    }
+  }
+
+  /**
    * Initialize the server and load all components
    */
   async init(): Promise<void> {
     if (this.isInitialized) return
 
-    console.log('🚀 Initializing DyneMCP server...')
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+      console.log('🚀 Initializing DyneMCP server...')
+    }
 
     // Load all components using unified registry
     await registry.loadAll({
@@ -58,13 +69,39 @@ export class DyneMCP {
       prompts: this.config.prompts,
     })
 
+    // LOG: Mostrar cuántos y cuáles tools/resources/prompts se han cargado
+    const tools = registry.getAllTools()
+    const resources = registry.getAllResources()
+    const prompts = registry.getAllPrompts()
+    // Siempre mostrar por STDERR si debug, y por STDOUT si no está silenciado
+    const logMsg = (msg: string) => {
+      this.debugLog(msg)
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+        console.log(msg)
+      }
+    }
+    logMsg(`Loaded tools: ${tools.length}`)
+    if (tools.length > 0) {
+      tools.forEach((t) => logMsg(`  - Tool: ${t.name}`))
+    }
+    logMsg(`Loaded resources: ${resources.length}`)
+    if (resources.length > 0) {
+      resources.forEach((r) => logMsg(`  - Resource: ${r.name}`))
+    }
+    logMsg(`Loaded prompts: ${prompts.length}`)
+    if (prompts.length > 0) {
+      prompts.forEach((p) => logMsg(`  - Prompt: ${p.name || p.id}`))
+    }
+
     // Register components with MCP server
-    registerTools(this.server, registry.getAllTools())
-    registerResources(this.server, registry.getAllResources())
-    registerPrompts(this.server, registry.getAllPrompts())
+    registerTools(this.server, tools)
+    registerResources(this.server, resources)
+    registerPrompts(this.server, prompts)
 
     this.isInitialized = true
-    console.log('✅ DyneMCP server initialized successfully')
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+      console.log('✅ DyneMCP server initialized successfully')
+    }
   }
 
   /**
@@ -78,15 +115,17 @@ export class DyneMCP {
     this.transport = createTransport(transportConfig)
     await this.transport.connect(this.server)
 
-    console.log(
-      `🎯 MCP server "${this.config.server.name}" started successfully`
-    )
-    console.log(`📡 Transport: ${transportConfig.type}`)
-
+    // Solo mostrar logs si el transporte NO es stdio
     if (transportConfig.type !== 'stdio') {
-      const options = (transportConfig as any).options
-      if (options?.port) {
-        console.log(`🌐 Server listening on port ${options.port}`)
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+        console.log(
+          `🎯 MCP server "${this.config.server.name}" started successfully`
+        )
+        console.log(`📡 Transport: ${transportConfig.type}`)
+        const options = (transportConfig as any).options
+        if (options?.port) {
+          console.log(`🌐 Server listening on port ${options.port}`)
+        }
       }
     }
   }
@@ -98,7 +137,12 @@ export class DyneMCP {
     if (this.transport?.disconnect) {
       await this.transport.disconnect()
     }
-    console.log('🛑 MCP server stopped')
+    // Solo mostrar log si el transporte NO es stdio
+    if (this.config.transport?.type !== 'stdio') {
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+        console.log('🛑 MCP server stopped')
+      }
+    }
   }
 
   /**

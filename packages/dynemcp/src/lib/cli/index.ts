@@ -6,16 +6,12 @@
  * Usage: dynemcp <command> [options]
  */
 
-import yargs from 'yargs'
+import yargs, { Argv } from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import chalk from 'chalk'
 import { build, watch, clean, analyze } from '../build/build-dynemcp.js'
 import { createMCPServer } from '../server/core/server/server-dynemcp.js'
 import { loadConfig } from '../server/core/config.js'
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import { spawn } from 'child_process'
 
 // Logger interface and implementations
 export interface Logger {
@@ -69,62 +65,37 @@ export class StderrLogger implements Logger {
   }
 }
 
-function findTsx(): string | null {
-  // Find the tsx executable relative to our own package location
-  const __dirname = path.dirname(fileURLToPath(import.meta.url))
-  // from /dist/lib/cli -> ../../.. -> package root
-  const packageRoot = path.resolve(__dirname, '..', '..', '..')
-  const tsxPath = path.resolve(packageRoot, 'node_modules', '.bin', 'tsx')
-  if (fs.existsSync(tsxPath)) {
-    return tsxPath
-  }
-  return null
-}
-
 async function dev(argv: {
   internalRun?: boolean
   clean?: boolean
   config?: string
+  transport?: string
 }) {
-  const logger = argv.internalRun ? new StderrLogger() : new ConsoleLogger()
-
-  if (!argv.internalRun) {
-    logger.info('🕵️  Launching DyneMCP server with Inspector...')
-
-    const tsxPath = findTsx()
-    if (!tsxPath) {
-      logger.error(
-        '❌ Could not find `tsx`. Please install it with `pnpm install tsx`.'
-      )
-      process.exit(1)
-    }
-    const scriptPath = process.argv[1] // This is the path to our CLI script
-    const serverArgs = process.argv.slice(2)
-    // Ensure --internal-run is only added once.
-    if (!serverArgs.includes('--internal-run')) {
-      serverArgs.push('--internal-run')
-    }
-
-    const inspectorCmd = 'npx'
-    const inspectorArgs = [
-      '-y',
-      '@modelcontextprotocol/inspector',
-      tsxPath,
-      scriptPath,
-      ...serverArgs,
-    ]
-
-    const child = spawn(inspectorCmd, inspectorArgs, { stdio: 'inherit' })
-    child.on('close', (code) => {
-      if (code !== 0) {
-        logger.error(`Inspector exited with code ${code}`)
-      }
-      process.exit(code ?? 0)
-    })
-    return
+  // Leer config para determinar el tipo de transporte
+  const configPath = argv.config
+  const transportType = argv.transport
+  let configTransport: string | undefined
+  if (configPath) {
+    try {
+      const config = await import(configPath)
+      configTransport = config?.default?.transport?.type
+    } catch {}
   }
+  // Prioridad: CLI > config > stdio
+  const effectiveTransport = transportType || configTransport || 'stdio'
+  if (effectiveTransport === 'stdio') {
+    process.env.DYNE_MCP_STDIO_LOG_SILENT = '1'
+  }
+  const logger =
+    argv.internalRun || effectiveTransport === 'stdio'
+      ? new StderrLogger()
+      : new ConsoleLogger()
+
+  // Eliminar el bloque que lanza el Inspector automáticamente
+  // Solo iniciar el servidor y el watcher
   try {
-    logger.success('🚀 Starting DyneMCP development server (internal)...')
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT)
+      logger.success('🚀 Starting DyneMCP development server (internal)...')
 
     const ctx = await watch({
       configPath: argv.config,
@@ -135,18 +106,21 @@ async function dev(argv: {
     const server = createMCPServer(undefined, argv.config)
     await server.start()
 
-    logger.info('📁 Watching for changes...')
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT)
+      logger.info('📁 Watching for changes...')
 
     process.on('SIGINT', async () => {
-      logger.warn('\n🛑 Shutting down development server...')
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT)
+        logger.warn('\n🛑 Shutting down development server...')
       await server.stop()
       await ctx.dispose()
       process.exit(0)
     })
   } catch (error) {
-    logger.error('❌ Failed to start development server.')
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT)
+      logger.error('❌ Failed to start development server.')
     if (error instanceof Error) {
-      logger.error(error.message)
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) logger.error(error.message)
     }
     process.exit(1)
   }
@@ -158,7 +132,7 @@ const cli = yargs(hideBin(process.argv))
   .command(
     'dev',
     'Starts the DyneMCP server in development mode',
-    (yargs) => {
+    (yargs: Argv) => {
       return yargs
         .option('internal-run', {
           type: 'boolean',
@@ -173,15 +147,19 @@ const cli = yargs(hideBin(process.argv))
           type: 'string',
           describe: 'Path to dynemcp.config.json',
         })
+        .option('transport', {
+          type: 'string',
+          describe: 'Transport type',
+        })
     },
-    async (argv) => {
+    async (argv: any) => {
       await dev(argv)
     }
   )
   .command(
     'build',
     'Build the project for production',
-    (yargs) => {
+    (yargs: Argv) => {
       return yargs
         .option('clean', {
           type: 'boolean',
@@ -197,7 +175,7 @@ const cli = yargs(hideBin(process.argv))
           describe: 'Path to dynemcp.config.json',
         })
     },
-    async (argv) => {
+    async (argv: any) => {
       console.log(chalk.green('🔨 Building DyneMCP project...'))
       await build({
         configPath: argv.config,
@@ -209,14 +187,14 @@ const cli = yargs(hideBin(process.argv))
   .command(
     'start',
     'Start the server in production mode',
-    (yargs) => {
+    (yargs: Argv) => {
       return yargs.option('config', {
         alias: 'c',
         type: 'string',
         describe: 'Path to dynemcp.config.json',
       })
     },
-    async (argv) => {
+    async (argv: any) => {
       console.log(chalk.green('🚀 Starting DyneMCP production server...'))
       const config = loadConfig(argv.config)
       const server = createMCPServer(
@@ -230,14 +208,14 @@ const cli = yargs(hideBin(process.argv))
   .command(
     'clean',
     'Clean build directory',
-    (yargs) => {
+    (yargs: Argv) => {
       return yargs.option('config', {
         alias: 'c',
         type: 'string',
         describe: 'Path to dynemcp.config.json',
       })
     },
-    async (argv) => {
+    async (argv: any) => {
       console.log(chalk.green('🧹 Cleaning build directory...'))
       await clean({ configPath: argv.config })
     }
@@ -245,14 +223,14 @@ const cli = yargs(hideBin(process.argv))
   .command(
     'analyze',
     'Analyze dependencies',
-    (yargs) => {
+    (yargs: Argv) => {
       return yargs.option('config', {
         alias: 'c',
         type: 'string',
         describe: 'Path to dynemcp.config.json',
       })
     },
-    async (argv) => {
+    async (argv: any) => {
       console.log(chalk.green('📊 Analyzing dependencies...'))
       await analyze({ configPath: argv.config })
     }

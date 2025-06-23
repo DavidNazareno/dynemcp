@@ -35,9 +35,11 @@ export async function loadComponentsFromDirectory<T>(
   try {
     // Check if directory exists
     if (!fs.existsSync(directory)) {
-      console.warn(
-        `Directory ${directory} does not exist, skipping component loading`
-      )
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+        console.warn(
+          `Directory ${directory} does not exist, skipping component loading`
+        )
+      }
       return { components: [], errors: [] }
     }
 
@@ -54,13 +56,17 @@ export async function loadComponentsFromDirectory<T>(
       } catch (error) {
         const errorMsg = `Failed to load component from ${file}: ${error}`
         errors.push(errorMsg)
-        console.warn(errorMsg)
+        if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+          console.warn(errorMsg)
+        }
       }
     }
   } catch (error) {
     const errorMsg = `Failed to scan directory ${directory}: ${error}`
     errors.push(errorMsg)
-    console.warn(errorMsg)
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+      console.warn(errorMsg)
+    }
   }
 
   return { components, errors }
@@ -119,6 +125,18 @@ async function loadComponentFromFile<T>(
         if (validator(definition)) {
           return definition as T
         }
+      }
+    }
+
+    // Handle instance-based components (already instantiated)
+    if (
+      exported instanceof DyneMCPTool ||
+      exported instanceof DyneMCPResource ||
+      exported instanceof DyneMCPPrompt
+    ) {
+      const definition = exported.toDefinition()
+      if (validator(definition)) {
+        return definition as T
       }
     }
 

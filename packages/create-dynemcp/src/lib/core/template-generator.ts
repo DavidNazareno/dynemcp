@@ -185,6 +185,7 @@ export const installTemplate = async ({
       'eslint:fix': eslint
         ? 'eslint . --ext .js,.jsx,.ts,.tsx --fix'
         : undefined,
+      'dev:inspector': 'pnpx @modelcontextprotocol/inspector dynemcp dev',
     },
     /**
      * Default dependencies.
@@ -304,6 +305,14 @@ export const installTemplate = async ({
       )
     }
   }
+
+  // Al final del proceso de generación, después de escribir el README.md (si existe), agregar una nota:
+  // (esto se puede hacer justo después de la generación del README o en el mismo paso si ya se genera)
+  //
+  // Nota para el usuario:
+  // "Para debuggear tu servidor con el Inspector MCP, ejecuta:
+  // pnpm run dev:inspector
+  // Esto abrirá la UI del Inspector y lanzará tu servidor correctamente. No uses la opción --config del Inspector salvo que estés usando un archivo de configuración para el Inspector. Los argumentos después de 'node ./dist/server.js' se pasan a tu servidor."
 }
 
 /**

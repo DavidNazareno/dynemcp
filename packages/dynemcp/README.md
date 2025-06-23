@@ -377,3 +377,26 @@ pnpm test:watch
 ## License
 
 MIT License - see LICENSE file for details.
+
+## 📦 Configuración automática
+
+DyneMCP busca automáticamente el archivo `dynemcp.config.json` en el directorio actual cuando se inicializa el servidor. No necesitas pasar la ruta manualmente en la mayoría de los casos:
+
+```js
+import { createMCPServer } from '@dynemcp/dynemcp'
+const server = createMCPServer() // Usará dynemcp.config.json del cwd
+```
+
+Si el archivo no existe, el servidor lanzará un error claro y no arrancará:
+
+```
+No se encontró el archivo de configuración dynemcp.config.json en el directorio actual. Por favor, asegúrate de que el archivo existe o pasa la ruta explícitamente a createMCPServer.
+```
+
+Si necesitas usar un archivo de configuración en otra ruta:
+
+```js
+const server = createMCPServer(undefined, '/ruta/a/otro-config.json')
+```
+
+Esto asegura que la configuración siempre sea explícita y predecible para todos los desarrolladores.

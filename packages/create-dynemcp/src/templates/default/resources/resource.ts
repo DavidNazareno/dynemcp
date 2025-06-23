@@ -1,4 +1,4 @@
-import { DyneMCPResource } from '@dynemcp/dynemcp'
+import type { ResourceDefinition } from '@dynemcp/dynemcp'
 
 // Define your resources here
 // Example:
@@ -10,15 +10,12 @@ import { DyneMCPResource } from '@dynemcp/dynemcp'
 //   }
 // }
 
-export class ExampleResource extends DyneMCPResource {
-  readonly name = 'example_resource'
-  readonly uri = 'dynemcp://resource/example'
-  readonly description = 'An example resource file.'
-  readonly contentType = 'text/plain'
-
-  getContent(): string {
-    return 'This is the content of the example resource.'
-  }
+const exampleResource: ResourceDefinition = {
+  name: 'example_resource',
+  uri: 'dynemcp://resource/example',
+  description: 'An example resource file.',
+  contentType: 'text/plain',
+  content: async () => 'This is the content of the example resource.',
 }
 
-export default new ExampleResource()
+export default exampleResource

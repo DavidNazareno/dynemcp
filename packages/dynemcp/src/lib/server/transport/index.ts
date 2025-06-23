@@ -16,31 +16,16 @@ export class StdioTransport implements Transport {
   async connect(server: McpServer): Promise<void> {
     const transport = new StdioServerTransport()
     await server.connect(transport)
-    console.log('📡 Connected via stdio transport')
+    // No logs en modo stdio para evitar contaminar la salida
   }
 }
 
 export class SSETransport implements Transport {
-  constructor(
-    _config: NonNullable<TransportConfig & { type: 'sse' }>['options'] = {}
-  ) {
+  constructor() {
     // Configuration would be used in actual implementation
-    // const _config = {
-    //   port: 8080,
-    //   endpoint: '/sse',
-    //   messageEndpoint: '/messages',
-    //   cors: {
-    //     allowOrigin: '*',
-    //     allowMethods: 'GET, POST, OPTIONS',
-    //     allowHeaders: 'Content-Type, Authorization, x-api-key',
-    //     exposeHeaders: 'Content-Type, Authorization, x-api-key',
-    //     maxAge: '86400',
-    //   },
-    //   ...config,
-    // };
   }
 
-  async connect(_server: McpServer): Promise<void> {
+  async connect(): Promise<void> {
     // Note: SSE transport implementation would require additional dependencies
     // For now, we'll throw an error indicating it's not yet implemented
     throw new Error(
@@ -117,7 +102,7 @@ export function createTransport(config: TransportConfig): Transport {
     case 'stdio':
       return new StdioTransport()
     case 'sse':
-      return new SSETransport(config.options)
+      return new SSETransport()
     case 'http-stream':
       return new HTTPStreamTransport(config.options)
     default:
