@@ -17,12 +17,15 @@ DyneMCP is a comprehensive framework that provides everything you need to create
 ## 📦 Packages
 
 ### @dynemcp/server-dynemcp
+
 The core MCP server runtime with advanced features.
 
 ### @dynemcp/create-dynemcp
+
 CLI tool for creating new MCP projects.
 
 ### @dynemcp/build-dynemcp
+
 Advanced build system for MCP projects.
 
 ## 🚀 Quick Start
@@ -84,7 +87,7 @@ Configure your MCP server in `dynemcp.config.json`:
     "directory": "./src/prompts"
   },
   "transport": {
-    "type": "stdio"
+    "type": "stdio" //
   },
   "build": {
     "entryPoint": "./src/index.ts",

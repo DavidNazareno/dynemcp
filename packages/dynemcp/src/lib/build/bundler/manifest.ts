@@ -89,9 +89,10 @@ export async function generateManifest(
     const manifestPath = path.join(outDir, 'build-manifest.json')
     await fs.promises.writeFile(manifestPath, JSON.stringify(manifest, null, 2))
 
-    console.log(`📋 Build manifest generated: ${manifestPath}`)
+    if (shouldLog()) console.log(`📋 Build manifest generated: ${manifestPath}`)
   } catch (error) {
-    console.warn('⚠️  Could not generate build manifest:', error)
+    if (shouldLog())
+      console.warn('⚠️  Could not generate build manifest:', error)
   }
 }
 
@@ -196,10 +197,14 @@ export async function generateHTMLReport(
     const reportPath = path.join(outDir, 'build-report.html')
     await fs.promises.writeFile(reportPath, html)
 
-    console.log(`📊 HTML report generated: ${reportPath}`)
+    if (shouldLog()) console.log(`📊 HTML report generated: ${reportPath}`)
   } catch (error) {
-    console.warn('⚠️  Could not generate HTML report:', error)
+    if (shouldLog()) console.warn('⚠️  Could not generate HTML report:', error)
   }
+}
+
+function shouldLog() {
+  return !process.env.DYNE_MCP_STDIO_LOG_SILENT
 }
 
 export default {

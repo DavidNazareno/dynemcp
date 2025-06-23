@@ -57,6 +57,10 @@ export interface BuildResult extends BundleResult {
   analysis?: any
 }
 
+function shouldLog() {
+  return !process.env.DYNE_MCP_STDIO_LOG_SILENT
+}
+
 /**
  * Build a DyneMCP project with advanced features
  */
@@ -67,7 +71,7 @@ export async function build(
   const startTime = Date.now()
 
   try {
-    logger.info('🚀 Starting DyneMCP build process...')
+    if (shouldLog()) logger.info('🚀 Starting DyneMCP build process...')
 
     const config = await loadConfig(options.configPath)
     const buildConfig = getBuildConfig(config)
@@ -95,16 +99,17 @@ export async function build(
     }
 
     if (options.analyze && bundleResult.success) {
-      logger.info('📊 Analyzing dependencies...')
+      if (shouldLog()) logger.info('📊 Analyzing dependencies...')
       const analysis = await analyzeDependencies(finalOptions.entryPoint)
       result.analysis = analysis
 
       const report = generateDependencyReport(analysis)
-      logger.info(report)
+      if (shouldLog()) logger.info(report)
 
       const reportPath = `${finalOptions.outDir}/dependency-analysis.txt`
       await fs.writeFile(reportPath, report)
-      logger.info(`📋 Dependency analysis saved: ${reportPath}`)
+      if (shouldLog())
+        logger.info(`📋 Dependency analysis saved: ${reportPath}`)
     }
 
     if (bundleResult.success && bundleResult.outputFiles?.[0]) {
@@ -113,9 +118,10 @@ export async function build(
         ...result.stats,
         outputSize: bundleStats.size,
       }
-      logger.info(
-        `📈 Bundle stats: ${bundleStats.sizeKB}KB, ${bundleStats.lines} lines`
-      )
+      if (shouldLog())
+        logger.info(
+          `📈 Bundle stats: ${bundleStats.sizeKB}KB, ${bundleStats.lines} lines`
+        )
     }
 
     if (options.html && bundleResult.metafile) {
@@ -126,15 +132,17 @@ export async function build(
     const duration = endTime - startTime
 
     if (bundleResult.success) {
-      logger.success(`✅ Build completed successfully in ${duration}ms`)
-      logger.info(`📁 Output directory: ${finalOptions.outDir}`)
+      if (shouldLog())
+        logger.success(`✅ Build completed successfully in ${duration}ms`)
+      if (shouldLog())
+        logger.info(`📁 Output directory: ${finalOptions.outDir}`)
       if (bundleResult.outputFiles) {
         bundleResult.outputFiles.forEach((file) => {
-          logger.info(`📄 Generated: ${file}`)
+          if (shouldLog()) logger.info(`📄 Generated: ${file}`)
         })
       }
     } else {
-      logger.error(`❌ Build failed after ${duration}ms`)
+      if (shouldLog()) logger.error(`❌ Build failed after ${duration}ms`)
     }
 
     return result
@@ -143,7 +151,8 @@ export async function build(
     const endTime = Date.now()
     const duration = endTime - startTime
     const errorMessage = error instanceof Error ? error.message : String(error)
-    logger.error(`❌ Build failed after ${duration}ms: ${errorMessage}`)
+    if (shouldLog())
+      logger.error(`❌ Build failed after ${duration}ms: ${errorMessage}`)
     return {
       success: false,
       errors: [errorMessage],
@@ -167,7 +176,7 @@ export async function watch(
   options: DyneMCPBuildOptions = {}
 ): Promise<BuildContext> {
   const logger = options.logger ?? new ConsoleLogger()
-  logger.info('👀 Starting watch mode...')
+  if (shouldLog()) logger.info('👀 Starting watch mode...')
 
   try {
     const config = await loadConfig(options.configPath)
@@ -181,14 +190,15 @@ export async function watch(
 
     const ctx = await bundleWatch(finalOptions)
 
-    logger.success('👀 Watching for changes...')
-    logger.info(`📁 Output: ${finalOptions.outDir}/${finalOptions.outFile}`)
+    if (shouldLog()) logger.success('👀 Watching for changes...')
+    if (shouldLog())
+      logger.info(`📁 Output: ${finalOptions.outDir}/${finalOptions.outFile}`)
 
     return ctx
   } catch (error) {
     const logger = options.logger ?? new ConsoleLogger()
     const message = error instanceof Error ? error.message : String(error)
-    logger.error(`❌ Watch build failed: ${message}`)
+    if (shouldLog()) logger.error(`❌ Watch build failed: ${message}`)
     throw error
   }
 }
@@ -200,7 +210,7 @@ export async function buildCli(
   options: DyneMCPBuildOptions = {}
 ): Promise<BuildResult> {
   try {
-    console.log('🔧 Building DyneMCP CLI tool...')
+    if (shouldLog()) console.log('🔧 Building DyneMCP CLI tool...')
 
     // Load configuration
     const config = loadConfig(options.configPath)
@@ -235,20 +245,21 @@ export async function buildCli(
     }
 
     if (bundleResult.success) {
-      console.log('✅ CLI build completed successfully')
-      console.log(
-        `🔧 CLI executable: ${finalOptions.outDir}/${finalOptions.outFile.replace(
-          '.js',
-          '-cli.js'
-        )}`
-      )
+      if (shouldLog()) console.log('✅ CLI build completed successfully')
+      if (shouldLog())
+        console.log(
+          `🔧 CLI executable: ${finalOptions.outDir}/${finalOptions.outFile.replace(
+            '.js',
+            '-cli.js'
+          )}`
+        )
     } else {
-      console.error('❌ CLI build failed')
+      if (shouldLog()) console.error('❌ CLI build failed')
     }
 
     return result
   } catch (error) {
-    console.error('❌ CLI build failed:', error)
+    if (shouldLog()) console.error('❌ CLI build failed:', error)
 
     return {
       success: false,
@@ -283,7 +294,7 @@ export async function clean(
 
     await cleanBuildDir(outDir)
   } catch (error) {
-    console.error('❌ Clean failed:', error)
+    if (shouldLog()) console.error('❌ Clean failed:', error)
     throw error
   }
 }
@@ -303,14 +314,14 @@ export async function analyze(
       entryPoint = buildConfig.entryPoint
     }
 
-    console.log('📊 Analyzing project dependencies...')
+    if (shouldLog()) console.log('📊 Analyzing project dependencies...')
     const analysis = await analyzeDependencies(entryPoint)
     const report = generateDependencyReport(analysis)
 
-    console.log(report)
+    if (shouldLog()) console.log(report)
     return analysis
   } catch (error) {
-    console.error('❌ Analysis failed:', error)
+    if (shouldLog()) console.error('❌ Analysis failed:', error)
     throw error
   }
 }

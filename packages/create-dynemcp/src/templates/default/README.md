@@ -77,3 +77,65 @@ node dist/server.js
 - Add prompts in `prompt/prompt.ts`
 
 For more information, refer to the DyneMCP documentation.
+
+## Definición de Tools, Resources y Prompts
+
+Puedes definir tus tools, resources y prompts de varias formas. La forma recomendada es exportar un objeto tipado explícitamente:
+
+### Tool como objeto (recomendado)
+
+```ts
+import { z } from 'zod'
+import type { ToolDefinition } from '@dynemcp/dynemcp'
+
+const GreeterSchema = z.object({
+  name: z.string().describe('The name to greet'),
+})
+
+const greeterTool: ToolDefinition = {
+  name: 'greeter',
+  description: 'A simple tool that greets the user',
+  schema: GreeterSchema,
+  handler: async ({ name }: { name: string }) => {
+    return { message: `Hello, ${name}!` }
+  },
+}
+
+export default greeterTool
+```
+
+### Tool como clase (opcional)
+
+```ts
+import { DyneMCPTool } from '@dynemcp/dynemcp'
+import { z } from 'zod'
+
+const GreeterSchema = z.object({
+  name: z.string().describe('The name to greet'),
+})
+
+export class GreeterTool extends DyneMCPTool {
+  override get name() {
+    return 'greeter'
+  }
+  override readonly description = 'A simple tool that greets the user'
+  override readonly schema = GreeterSchema
+  override async execute(input: { name: string }) {
+    return { message: `Hello, ${input.name}!` }
+  }
+}
+
+export default GreeterTool
+```
+
+### Tool como instancia de clase (opcional)
+
+```ts
+export default new GreeterTool()
+```
+
+### Resources y Prompts
+
+Puedes usar el mismo patrón para resources y prompts, exportando objetos o clases que extiendan DyneMCPResource o DyneMCPPrompt.
+
+**Recomendación:** Usa el patrón de objeto tipado (por ejemplo, `ResourceDefinition`, `PromptDefinition`) para mayor claridad y compatibilidad.

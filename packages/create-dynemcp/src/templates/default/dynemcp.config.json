@@ -53,22 +53,5 @@
   },
   "config": {
     "env": true
-  },
-  "build": {
-    "entryPoint": "./src/index.ts",
-    "outDir": "./dist",
-    "outFile": "server.js",
-    "format": "esm",
-    "minify": true,
-    "sourcemap": false,
-    "bundle": true,
-    "external": [],
-    "define": {},
-    "platform": "node",
-    "target": "node16",
-    "treeShaking": true,
-    "splitting": false,
-    "metafile": false,
-    "watch": false
   }
 }

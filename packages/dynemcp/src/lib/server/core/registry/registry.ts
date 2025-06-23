@@ -16,11 +16,15 @@ export class Registry {
    */
   async loadAll(options: LoadAllOptions): Promise<void> {
     if (this.isLoaded) {
-      console.warn('Registry already loaded, skipping...')
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+        console.warn('Registry already loaded, skipping...')
+      }
       return
     }
 
-    console.log('🔄 Loading components...')
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+      console.log('🔄 Loading components...')
+    }
 
     const result = await loadAllComponents(options)
 
@@ -33,19 +37,23 @@ export class Registry {
     try {
       validateAllTools(result.tools)
     } catch (error) {
-      console.warn(
-        '⚠️ Tool validation warnings:',
-        error instanceof Error ? error.message : error
-      )
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+        console.warn(
+          '⚠️ Tool validation warnings:',
+          error instanceof Error ? error.message : error
+        )
+      }
     }
 
     // Log results
     const stats = this.storage.getStats()
-    console.log(
-      `✅ Loaded ${stats.tools} tools, ${stats.resources} resources, ${stats.prompts} prompts`
-    )
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+      console.log(
+        `✅ Loaded ${stats.tools} tools, ${stats.resources} resources, ${stats.prompts} prompts`
+      )
+    }
 
-    if (result.errors.length > 0) {
+    if (result.errors.length > 0 && !process.env.DYNE_MCP_STDIO_LOG_SILENT) {
       console.warn('⚠️ Loading errors:', result.errors)
     }
 

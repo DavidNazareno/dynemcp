@@ -175,7 +175,8 @@ export const installTemplate = async ({
     version: '0.1.0',
     private: true,
     scripts: {
-      dev: 'dynemcp dev',
+      dev: 'concurrently --names "BUILD,SERVER" --prefix-colors "cyan,green" "dynemcp dev --transport=console" "nodemon --watch dist --exec \\"cross-env DYNE_MCP_DEBUG_STDERR=1 node dist/server.js\\""',
+      'dev:simple': 'dynemcp dev',
       build: 'dynemcp build',
       start: 'dynemcp start',
       clean: 'dynemcp clean',
@@ -185,6 +186,7 @@ export const installTemplate = async ({
       'eslint:fix': eslint
         ? 'eslint . --ext .js,.jsx,.ts,.tsx --fix'
         : undefined,
+      'dev:inspector': 'pnpx @modelcontextprotocol/inspector dynemcp dev',
     },
     /**
      * Default dependencies.
@@ -249,6 +251,8 @@ export const installTemplate = async ({
     'cross-env': '^7.0.3',
     esbuild: '^0.20.2',
     vitest: '^1.4.0',
+    concurrently: '^8.2.2',
+    nodemon: '^3.0.2',
   }
 
   // Add Node.js engine requirement
@@ -304,6 +308,14 @@ export const installTemplate = async ({
       )
     }
   }
+
+  // Al final del proceso de generación, después de escribir el README.md (si existe), agregar una nota:
+  // (esto se puede hacer justo después de la generación del README o en el mismo paso si ya se genera)
+  //
+  // Nota para el usuario:
+  // "Para debuggear tu servidor con el Inspector MCP, ejecuta:
+  // pnpm run dev:inspector
+  // Esto abrirá la UI del Inspector y lanzará tu servidor correctamente. No uses la opción --config del Inspector salvo que estés usando un archivo de configuración para el Inspector. Los argumentos después de 'node ./dist/server.js' se pasan a tu servidor."
 }
 
 /**
@@ -319,23 +331,6 @@ async function updateProjectConfig(
       const config = JSON.parse(await fs.readFile(configPath, 'utf8'))
       config.name = projectName
       config.server = { ...config.server, name: projectName }
-      config.build = {
-        entryPoint: './src/index.ts',
-        outDir: './dist',
-        outFile: 'server.js',
-        format: 'esm',
-        minify: true,
-        sourcemap: false,
-        bundle: true,
-        external: [],
-        define: {},
-        platform: 'node',
-        target: 'node16',
-        treeShaking: true,
-        splitting: false,
-        metafile: false,
-        watch: false,
-      }
       await fs.writeFile(configPath, JSON.stringify(config, null, 2))
     }
   } catch {

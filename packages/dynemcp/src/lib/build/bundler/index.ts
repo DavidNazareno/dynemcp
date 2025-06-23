@@ -37,6 +37,10 @@ export interface BundleOptions extends BuildConfig {
   cli?: boolean
 }
 
+function shouldLog() {
+  return !process.env.DYNE_MCP_STDIO_LOG_SILENT
+}
+
 /**
  * Bundle a DyneMCP project for production
  */
@@ -55,14 +59,15 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
   }
 
   try {
-    console.log('🔨 Starting DyneMCP build...')
+    if (shouldLog()) console.log('🔨 Starting DyneMCP build...')
 
     // Analyze dependencies
     if (options.analyze) {
-      console.log('📊 Analyzing dependencies...')
+      if (shouldLog()) console.log('📊 Analyzing dependencies...')
       const analysis = await analyzeDependencies(options.entryPoint)
       result.stats.dependencies = analysis.dependencies.length
-      console.log(`📦 Found ${analysis.dependencies.length} dependencies`)
+      if (shouldLog())
+        console.log(`📦 Found ${analysis.dependencies.length} dependencies`)
     }
 
     // Prepare esbuild options
@@ -107,28 +112,30 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
     // Process results
     if (buildResult.errors.length > 0) {
       result.errors = buildResult.errors.map((e) => e.text)
-      console.error('❌ Build failed with errors:')
-      buildResult.errors.forEach((error) => console.error(`  ${error.text}`))
+      if (shouldLog()) console.error('❌ Build failed with errors:')
+      buildResult.errors.forEach((error) => {
+        if (shouldLog()) console.error(`  ${error.text}`)
+      })
       return result
     }
 
     if (buildResult.warnings.length > 0) {
       result.warnings = buildResult.warnings.map((w) => w.text)
-      console.warn('⚠️  Build completed with warnings:')
-      buildResult.warnings.forEach((warning) =>
-        console.warn(`  ${warning.text}`)
-      )
+      if (shouldLog()) console.warn('⚠️  Build completed with warnings:')
+      buildResult.warnings.forEach((warning) => {
+        if (shouldLog()) console.warn(`  ${warning.text}`)
+      })
     }
 
     // Optimize the bundle
     if (options.bundle && options.minify) {
-      console.log('⚡ Optimizing bundle...')
+      if (shouldLog()) console.log('⚡ Optimizing bundle...')
       await optimizeBundle(`${options.outDir}/${options.outFile}`)
     }
 
     // Generate manifest if requested
     if (options.manifest && buildResult.metafile) {
-      console.log('📋 Generating manifest...')
+      if (shouldLog()) console.log('📋 Generating manifest...')
       await generateManifest(buildResult.metafile, options.outDir)
     }
 
@@ -141,8 +148,12 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
     result.metafile = buildResult.metafile
     result.success = true
 
-    console.log(`✅ Build completed successfully in ${result.stats.duration}ms`)
-    console.log(`📁 Output: ${options.outDir}/${options.outFile}`)
+    if (shouldLog())
+      console.log(
+        `✅ Build completed successfully in ${result.stats.duration}ms`
+      )
+    if (shouldLog())
+      console.log(`📁 Output: ${options.outDir}/${options.outFile}`)
 
     return result
   } catch (error) {
@@ -151,7 +162,7 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
     result.stats.duration = endTime - startTime
     result.errors = [error instanceof Error ? error.message : String(error)]
 
-    console.error('❌ Build failed:', error)
+    if (shouldLog()) console.error('❌ Build failed:', error)
     return result
   }
 }
@@ -162,7 +173,7 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
 export async function bundleWatch(
   options: BundleOptions
 ): Promise<BuildContext> {
-  console.log('👀 Starting DyneMCP build in watch mode...')
+  if (shouldLog()) console.log('👀 Starting DyneMCP build in watch mode...')
 
   const buildOptions: EsbuildBuildOptions = {
     entryPoints: [options.entryPoint],
@@ -194,12 +205,13 @@ export async function bundleWatch(
     // Start watching
     await ctx.watch()
 
-    console.log('👀 Watching for changes...')
-    console.log(`📁 Output: ${options.outDir}/${options.outFile}`)
+    if (shouldLog()) console.log('👀 Watching for changes...')
+    if (shouldLog())
+      console.log(`📁 Output: ${options.outDir}/${options.outFile}`)
 
     return ctx
   } catch (error) {
-    console.error('❌ Watch build failed:', error)
+    if (shouldLog()) console.error('❌ Watch build failed:', error)
     throw error
   }
 }
@@ -227,9 +239,9 @@ export async function bundleCli(options: BundleOptions): Promise<BundleResult> {
 
     try {
       fs.chmodSync(cliPath, '755')
-      console.log(`🔧 Made CLI executable: ${cliPath}`)
+      if (shouldLog()) console.log(`🔧 Made CLI executable: ${cliPath}`)
     } catch (error) {
-      console.warn('⚠️  Could not make CLI executable:', error)
+      if (shouldLog()) console.warn('⚠️  Could not make CLI executable:', error)
     }
   }
 
@@ -249,9 +261,10 @@ export async function cleanBuildDir(outDir: string): Promise<void> {
 
   try {
     await fs.remove(absoluteOutDir)
-    console.log(`🧹 Cleaned build directory: ${absoluteOutDir}`)
+    if (shouldLog())
+      console.log(`🧹 Cleaned build directory: ${absoluteOutDir}`)
   } catch (error) {
-    console.warn('⚠️  Could not clean build directory:', error)
+    if (shouldLog()) console.warn('⚠️  Could not clean build directory:', error)
   }
 }
 
