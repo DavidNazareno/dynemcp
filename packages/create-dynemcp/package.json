@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/create-dynemcp",
-  "version": "0.0.12-canary.20250621T15552",
+  "version": "0.0.13-canary.20250623T16153",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
@@ -40,7 +40,7 @@
     "ora": "^8.0.1",
     "execa": "^9.6.0",
     "tslib": "^2.3.0",
-    "@dynemcp/dynemcp": "workspace:*",
+    "@dynemcp/dynemcp": "0.0.13-canary.20250623T16153",
     "zod": "3.25.67",
     "express": "5.1.0"
   },

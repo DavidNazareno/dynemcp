@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import * as os from 'os'
 import { pathToFileURL } from 'url'
 import { transform } from 'esbuild'
 import { DyneMCPTool, DyneMCPResource, DyneMCPPrompt } from '../core/base.js'
@@ -87,7 +88,7 @@ async function findFilesRecursively(dir: string): Promise<string[]> {
       if (entry.isDirectory()) {
         await scanDirectory(fullPath)
       } else if (entry.isFile()) {
-        // Simple pattern matching for .ts and .js files
+        // Pattern matching for .ts and .js files (but not .temp.js since they're not in source)
         if (entry.name.endsWith('.ts') || entry.name.endsWith('.js')) {
           files.push(fullPath)
         }
@@ -96,24 +97,7 @@ async function findFilesRecursively(dir: string): Promise<string[]> {
   }
 
   await scanDirectory(dir)
-
-  // Filter duplicates: prefer .temp.js over .ts if both exist
-  const fileMap = new Map<string, string>()
-
-  for (const file of files) {
-    const baseName = file.replace(/\.(temp\.js|ts|js)$/, '')
-    const extension = file.match(/\.(temp\.js|ts|js)$/)?.[1]
-
-    if (extension === 'temp.js') {
-      // Always prefer .temp.js files
-      fileMap.set(baseName, file)
-    } else if (!fileMap.has(baseName)) {
-      // Only add .ts or .js if no .temp.js exists
-      fileMap.set(baseName, file)
-    }
-  }
-
-  return Array.from(fileMap.values())
+  return files
 }
 
 // Cache for transformed files
@@ -130,8 +114,17 @@ async function loadComponentFromFile<T>(
 
     // Handle TypeScript files by transforming them with esbuild
     if (absolutePath.endsWith('.ts')) {
-      // Create a temporary .js file next to the .ts file to preserve import context
-      const jsPath = absolutePath.replace('.ts', '.temp.js')
+      // Create a temporary .js file in the OS temp directory to avoid contaminating source
+      const tempDir = path.join(os.tmpdir(), 'dynemcp-components')
+      await fs.promises.mkdir(tempDir, { recursive: true })
+
+      // Create a unique filename based on the source file path
+      const relativePath = path.relative(process.cwd(), absolutePath)
+      const tempFileName = relativePath
+        .replace(/[/\\]/g, '_')
+        .replace('.ts', '.js')
+      const jsPath = path.join(tempDir, tempFileName)
+
       const cacheKey = absolutePath
 
       // Check if we need to recompile (based on file modification time)
@@ -157,8 +150,37 @@ async function loadComponentFromFile<T>(
           platform: 'node',
         })
 
-        // Write the compiled JavaScript next to the TypeScript file
-        await fs.promises.writeFile(jsPath, result.code)
+        // Modify the compiled code to use proper module resolution from project directory
+        const projectDir = process.cwd()
+        const modifiedCode = `
+// Set up module resolution from project directory
+const originalRequire = require;
+const Module = require('module');
+const path = require('path');
+
+// Create a custom require function that resolves from project directory
+const projectRequire = Module.createRequire(path.join('${projectDir}', 'package.json'));
+
+// Override require to use project directory resolution for external modules
+require = function(id) {
+  try {
+    // Try project directory first for external modules
+    if (!id.startsWith('.') && !path.isAbsolute(id)) {
+      return projectRequire(id);
+    }
+    // Use original require for relative paths
+    return originalRequire(id);
+  } catch (error) {
+    // Fallback to original require
+    return originalRequire(id);
+  }
+};
+
+${result.code}
+`
+
+        // Write the compiled JavaScript to temp directory
+        await fs.promises.writeFile(jsPath, modifiedCode)
         transformCache.set(cacheKey, jsPath)
       }
 
