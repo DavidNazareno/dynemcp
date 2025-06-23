@@ -7,7 +7,7 @@ A minimal MCP (Model Context Protocol) server template that provides basic examp
 This template provides a basic foundation for MCP development with:
 
 - **Basic Tool**: Simple text manipulation tool for demonstrations
-- **Sample Resource**: Static content resource example  
+- **Sample Resource**: Static content resource example
 - **Simple Prompt**: AI assistance prompt template
 - **Standard Configuration**: Ready-to-use `dynemcp.config.json`
 - **TypeScript Setup**: Modern TS configuration with type safety
@@ -34,16 +34,19 @@ your-project/
 ## 🔧 Quick Start
 
 1. **Navigate to your project directory**:
+
    ```bash
    cd your-project
    ```
 
 2. **Install dependencies** (if not already done):
+
    ```bash
    npm install
    ```
 
 3. **Start development server**:
+
    ```bash
    npm run dev
    ```
@@ -68,15 +71,16 @@ const echoTool: ToolDefinition = {
   name: 'echo',
   description: 'Echo back the input text',
   schema: z.object({
-    text: z.string().describe('Text to echo back')
+    text: z.string().describe('Text to echo back'),
   }),
   handler: async ({ text }) => {
     return { result: `Echo: ${text}` }
-  }
+  },
 }
 ```
 
 **Use cases**:
+
 - Learning tool implementation patterns
 - Testing MCP client connections
 - Template for custom tools
@@ -93,11 +97,12 @@ const welcomeResource: ResourceDefinition = {
   name: 'Welcome Information',
   description: 'Basic welcome information for new users',
   content: 'Welcome to your new DyneMCP server!',
-  contentType: 'text/plain'
+  contentType: 'text/plain',
 }
 ```
 
 **Use cases**:
+
 - Providing static documentation
 - Configuration information
 - Help text and guides
@@ -114,11 +119,12 @@ const assistantPrompt: PromptDefinition = {
   name: 'AI Assistant',
   description: 'General purpose AI assistant prompt',
   content: `You are a helpful AI assistant. Please provide clear, 
-accurate, and helpful responses to user questions.`
+accurate, and helpful responses to user questions.`,
 }
 ```
 
 **Use cases**:
+
 - General AI assistance
 - Template for specialized prompts
 - Learning prompt structure
@@ -155,6 +161,7 @@ The `dynemcp.config.json` file is configured for basic usage:
 ```
 
 ### Key Features:
+
 - **stdio transport**: Standard input/output communication
 - **Auto-loading**: Automatically discovers components
 - **TypeScript support**: Works with .ts and .js files
@@ -195,12 +202,12 @@ const myTool: ToolDefinition = {
   description: 'Description of what this tool does',
   schema: z.object({
     // Define your input schema here
-    input: z.string().describe('Input parameter')
+    input: z.string().describe('Input parameter'),
   }),
   handler: async ({ input }) => {
     // Implement your tool logic here
     return { result: `Processed: ${input}` }
-  }
+  },
 }
 
 export default myTool
@@ -219,7 +226,7 @@ const myResource: ResourceDefinition = {
   name: 'My Resource',
   description: 'Description of this resource',
   content: 'Resource content here',
-  contentType: 'text/plain'
+  contentType: 'text/plain',
 }
 
 export default myResource
@@ -237,7 +244,7 @@ const myPrompt: PromptDefinition = {
   id: 'my-prompt',
   name: 'My Prompt',
   description: 'Description of this prompt',
-  content: 'Your prompt content here'
+  content: 'Your prompt content here',
 }
 
 export default myPrompt

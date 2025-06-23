@@ -73,21 +73,26 @@ import { z } from 'zod'
 const CalculatorSchema = z.object({
   a: z.number(),
   b: z.number(),
-  operation: z.enum(['add', 'subtract', 'multiply', 'divide'])
+  operation: z.enum(['add', 'subtract', 'multiply', 'divide']),
 })
 
 export class CalculatorTool extends DyneMCPTool {
-  get name() { return 'calculator' }
+  get name() {
+    return 'calculator'
+  }
   readonly description = 'Basic calculator tool'
   readonly schema = CalculatorSchema
 
   async execute(input: z.infer<typeof CalculatorSchema>) {
     const { a, b, operation } = input
     switch (operation) {
-      case 'add': return { result: a + b }
-      case 'subtract': return { result: a - b }
-      case 'multiply': return { result: a * b }
-      case 'divide': 
+      case 'add':
+        return { result: a + b }
+      case 'subtract':
+        return { result: a - b }
+      case 'multiply':
+        return { result: a * b }
+      case 'divide':
         if (b === 0) throw new Error('Division by zero')
         return { result: a / b }
     }
@@ -107,11 +112,11 @@ const greetTool: ToolDefinition = {
   name: 'greet',
   description: 'Greets someone',
   schema: z.object({
-    name: z.string().describe('Name to greet')
+    name: z.string().describe('Name to greet'),
   }),
   handler: async ({ name }) => {
     return `Hello, ${name}!`
-  }
+  },
 }
 
 export default greetTool
@@ -126,13 +131,13 @@ import { ResourceDefinition } from '@dynemcp/dynemcp'
 
 const docsResource: ResourceDefinition = {
   uri: 'docs://api',
-  name: 'API Documentation', 
+  name: 'API Documentation',
   description: 'Complete API documentation',
   content: async () => {
     // Dynamic content loading
     return await loadApiDocs()
   },
-  contentType: 'text/markdown'
+  contentType: 'text/markdown',
 }
 
 export default docsResource
@@ -146,11 +151,15 @@ import { ResourceDefinition } from '@dynemcp/dynemcp'
 const configResource: ResourceDefinition = {
   uri: 'config://server',
   name: 'Server Configuration',
-  content: JSON.stringify({
-    version: '1.0.0',
-    features: ['tools', 'resources', 'prompts']
-  }, null, 2),
-  contentType: 'application/json'
+  content: JSON.stringify(
+    {
+      version: '1.0.0',
+      features: ['tools', 'resources', 'prompts'],
+    },
+    null,
+    2
+  ),
+  contentType: 'application/json',
 }
 
 export default configResource
@@ -174,7 +183,7 @@ Focus on:
 - Security considerations
 - Best practices
 
-Please provide constructive feedback.`
+Please provide constructive feedback.`,
 }
 
 export default codeReviewPrompt
@@ -213,7 +222,7 @@ const config: BuildConfig = {
   output: './dist',
   target: 'node18',
   minify: true,
-  sourcemap: true
+  sourcemap: true,
 }
 
 // Single build
@@ -369,21 +378,21 @@ server.registry.registerTool({
   name: 'dynamic-tool',
   description: 'A dynamically registered tool',
   schema: z.object({}),
-  handler: async () => 'Dynamic response'
+  handler: async () => 'Dynamic response',
 })
 
 // Register resources
 server.registry.registerResource({
   uri: 'dynamic://resource',
   name: 'Dynamic Resource',
-  content: 'Dynamic content'
+  content: 'Dynamic content',
 })
 
 // Register prompts
 server.registry.registerPrompt({
   id: 'dynamic-prompt',
   name: 'Dynamic Prompt',
-  content: 'Dynamic prompt content'
+  content: 'Dynamic prompt content',
 })
 ```
 
@@ -402,16 +411,16 @@ const sampleTool: ToolDefinition = {
   description: 'Samples a model for completion',
   schema: z.object({
     prompt: z.string(),
-    maxTokens: z.number().optional()
+    maxTokens: z.number().optional(),
   }),
   handler: async ({ prompt, maxTokens = 100 }) => {
     // Use built-in sampling capabilities
     const response = await server.sampleModel({
       messages: [{ role: 'user', content: prompt }],
-      maxTokens
+      maxTokens,
     })
     return response.content
-  }
+  },
 }
 ```
 
@@ -424,16 +433,16 @@ const sampleTool: ToolDefinition = {
 import { Request, Response, NextFunction } from 'express'
 
 export default function authenticate(
-  req: Request, 
-  res: Response, 
+  req: Request,
+  res: Response,
   next: NextFunction
 ) {
   const token = req.headers.authorization
-  
+
   if (!token || !isValidToken(token)) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
-  
+
   next()
 }
 ```
@@ -574,20 +583,20 @@ function createMCPServer(
 class DyneMCP {
   // Configuration
   getConfig(): DyneMCPConfig
-  
+
   // Lifecycle
   async init(): Promise<void>
   async start(): Promise<void>
   async stop(): Promise<void>
-  
+
   // Registry access
   readonly registry: Registry
-  
+
   // Component access
   get tools(): ToolDefinition[]
   get resources(): ResourceDefinition[]
   get prompts(): PromptDefinition[]
-  
+
   // Statistics
   get stats(): ServerStats
 }
@@ -614,7 +623,7 @@ describe('MCP Server', () => {
   it('should initialize correctly', async () => {
     const server = createMCPServer('test-server')
     await server.init()
-    
+
     expect(server.stats.server.name).toBe('test-server')
     expect(server.tools.length).toBeGreaterThan(0)
   })

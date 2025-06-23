@@ -17,7 +17,9 @@ DyneMCP es un monorepo que contiene un ecosistema completo para el desarrollo de
 ## 📦 Paquetes
 
 ### [@dynemcp/dynemcp](./packages/dynemcp)
+
 El framework principal incluye:
+
 - ⚡ Servidor MCP con soporte completo para tools, resources y prompts
 - 🏗️ Sistema de build optimizado con esbuild
 - 🔄 Modo desarrollo con hot reload
@@ -28,7 +30,9 @@ El framework principal incluye:
 - 🔒 Funciones de seguridad integradas
 
 ### [@dynemcp/create-dynemcp](./packages/create-dynemcp)
+
 Generador de proyectos que ofrece:
+
 - 🎯 CLI interactivo para crear nuevos proyectos
 - 📋 Múltiples plantillas especializadas
 - 📦 Configuración automática de dependencias
@@ -37,34 +41,44 @@ Generador de proyectos que ofrece:
 ## 🏗️ Plantillas Disponibles
 
 ### [Default](./packages/create-dynemcp/src/templates/default)
+
 Plantilla básica con ejemplos mínimos de tools, resources y prompts.
+
 - **Caso de uso**: Aprender los básicos de MCP, automatización simple
 - **Características**: Ejemplo básico de tool, resource y prompt
 - **Transporte**: stdio
 
 ### [Calculator](./packages/create-dynemcp/src/templates/calculator)
+
 Agente matemático con:
+
 - **Caso de uso**: Cálculos matemáticos, herramientas educativas
 - **Características**: Calculadora básica y avanzada, referencias matemáticas, prompts especializados
 - **Transporte**: stdio
 - **Herramientas**: Aritmética básica, funciones matemáticas avanzadas
 
 ### [HTTP Server](./packages/create-dynemcp/src/templates/http-server)
+
 Servidor básico usando transporte HTTP con:
+
 - **Caso de uso**: Integración web, endpoints API
 - **Características**: Configuración de servidor Express, transporte HTTP
 - **Transporte**: HTTP
 - **Herramientas**: Herramientas de saludo, información del servidor
 
 ### [Secure Agent](./packages/create-dynemcp/src/templates/secure-agent)
+
 Agente listo para producción con:
+
 - **Caso de uso**: Aplicaciones empresariales, entornos seguros
 - **Características**: Autenticación por API key, middleware de seguridad, logging de auditoría
 - **Transporte**: HTTP con autenticación
 - **Seguridad**: Rate limiting, CORS, validación de entrada
 
 ### [Dynamic Agent](./packages/create-dynemcp/src/templates/dynamic-agent)
+
 Agente avanzado que demuestra:
+
 - **Caso de uso**: Investigación en IA, sistemas adaptativos, agentes autoaprendientes
 - **Características**: Registro dinámico de herramientas, sampling de modelos, persistencia de memoria
 - **Transporte**: stdio

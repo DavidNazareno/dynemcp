@@ -39,7 +39,7 @@ The template is configured to use HTTP transport by default:
 ```json
 {
   "server": {
-    "name": "my-http-server", 
+    "name": "my-http-server",
     "version": "1.0.0"
   },
   "transport": {
@@ -84,7 +84,7 @@ const GreetSchema = z.object({
   style: z
     .enum(['casual', 'formal', 'friendly'])
     .optional()
-    .describe('Greeting style')
+    .describe('Greeting style'),
 })
 
 const greetTool: ToolDefinition = {
@@ -95,21 +95,22 @@ const greetTool: ToolDefinition = {
     const greetings = {
       casual: `Hey ${name}! 👋`,
       formal: `Good day, ${name}.`,
-      friendly: `Hello ${name}! Nice to meet you! 😊`
+      friendly: `Hello ${name}! Nice to meet you! 😊`,
     }
-    
+
     return {
       message: greetings[style],
       timestamp: new Date().toISOString(),
-      style
+      style,
     }
-  }
+  },
 }
 
 export default greetTool
 ```
 
 **Features**:
+
 - Multiple greeting styles (casual, formal, friendly)
 - Timestamp inclusion for web applications
 - Emoji support for modern web interfaces
@@ -129,41 +130,46 @@ const serverInfoResource: ResourceDefinition = {
   name: 'Server Information',
   description: 'HTTP server status and capabilities',
   content: async () => {
-    return JSON.stringify({
-      server: {
-        name: 'DyneMCP HTTP Server',
-        version: '1.0.0',
-        uptime: process.uptime(),
-        memory: process.memoryUsage(),
-        platform: process.platform
+    return JSON.stringify(
+      {
+        server: {
+          name: 'DyneMCP HTTP Server',
+          version: '1.0.0',
+          uptime: process.uptime(),
+          memory: process.memoryUsage(),
+          platform: process.platform,
+        },
+        transport: {
+          type: 'http',
+          port: 3000,
+          protocols: ['HTTP/1.1', 'HTTP/2'],
+          cors: true,
+        },
+        capabilities: {
+          tools: true,
+          resources: true,
+          prompts: true,
+          streaming: false,
+        },
+        endpoints: {
+          health: '/health',
+          tools: '/tools',
+          resources: '/resources',
+          prompts: '/prompts',
+        },
       },
-      transport: {
-        type: 'http',
-        port: 3000,
-        protocols: ['HTTP/1.1', 'HTTP/2'],
-        cors: true
-      },
-      capabilities: {
-        tools: true,
-        resources: true,
-        prompts: true,
-        streaming: false
-      },
-      endpoints: {
-        health: '/health',
-        tools: '/tools',
-        resources: '/resources',
-        prompts: '/prompts'
-      }
-    }, null, 2)
+      null,
+      2
+    )
   },
-  contentType: 'application/json'
+  contentType: 'application/json',
 }
 
 export default serverInfoResource
 ```
 
 **Information Provided**:
+
 - 🖥️ **Server Status**: Uptime, memory usage, platform
 - 🌐 **Transport Details**: Port, protocols, CORS status
 - 🔧 **Capabilities**: Available MCP features
@@ -217,7 +223,7 @@ This server works great with:
 - Webhook integrations
 - Browser-based tools
 
-Need help? Check the server-info resource for more details!`
+Need help? Check the server-info resource for more details!`,
 }
 
 export default introductionPrompt
@@ -226,28 +232,32 @@ export default introductionPrompt
 ## 🚀 Quick Start
 
 1. **Navigate to your project**:
+
    ```bash
    cd http-server-project
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Start the HTTP server**:
+
    ```bash
    npm run dev
    ```
 
 4. **Test the server**:
+
    ```bash
    # Health check
    curl http://localhost:3000/health
-   
+
    # Get server information
    curl http://localhost:3000/resources/server://info
-   
+
    # Execute greeting tool
    curl -X POST http://localhost:3000/tools/greet \
      -H "Content-Type: application/json" \
@@ -257,12 +267,15 @@ export default introductionPrompt
 ## 🌐 HTTP API Endpoints
 
 ### Health Check
+
 ```http
 GET /health
 ```
+
 Returns server health status and basic information.
 
 ### Tools Execution
+
 ```http
 POST /tools/{toolName}
 Content-Type: application/json
@@ -274,21 +287,27 @@ Content-Type: application/json
 ```
 
 ### Resources Access
+
 ```http
 GET /resources/{resourceUri}
 ```
+
 Retrieve specific resources by URI.
 
 ### Prompts Listing
+
 ```http
 GET /prompts
 ```
+
 List all available prompts.
 
 ### Prompt Access
+
 ```http
 GET /prompts/{promptId}
 ```
+
 Retrieve specific prompt content.
 
 ## 🔧 Web Integration Examples
@@ -310,12 +329,12 @@ const MCPGreeting: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          name, 
-          style: 'friendly' 
+        body: JSON.stringify({
+          name,
+          style: 'friendly'
         })
       })
-      
+
       const result = await response.json()
       setGreeting(result.message)
     } catch (error) {
@@ -345,37 +364,37 @@ export default MCPGreeting
 ```html
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>MCP Web Integration</title>
-</head>
-<body>
+  </head>
+  <body>
     <div id="app">
-        <input type="text" id="nameInput" placeholder="Enter your name">
-        <button onclick="greetUser()">Greet</button>
-        <div id="result"></div>
+      <input type="text" id="nameInput" placeholder="Enter your name" />
+      <button onclick="greetUser()">Greet</button>
+      <div id="result"></div>
     </div>
 
     <script>
-        async function greetUser() {
-            const name = document.getElementById('nameInput').value
-            
-            try {
-                const response = await fetch('http://localhost:3000/tools/greet', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ name, style: 'friendly' })
-                })
-                
-                const result = await response.json()
-                document.getElementById('result').innerHTML = result.message
-            } catch (error) {
-                console.error('Error:', error)
-            }
+      async function greetUser() {
+        const name = document.getElementById('nameInput').value
+
+        try {
+          const response = await fetch('http://localhost:3000/tools/greet', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, style: 'friendly' }),
+          })
+
+          const result = await response.json()
+          document.getElementById('result').innerHTML = result.message
+        } catch (error) {
+          console.error('Error:', error)
         }
+      }
     </script>
-</body>
+  </body>
 </html>
 ```
 
@@ -394,14 +413,16 @@ class MCPClient {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(params)
+      body: JSON.stringify(params),
     })
-    
+
     return response.json()
   }
 
   async getResource(resourceUri: string) {
-    const response = await fetch(`${this.baseUrl}/resources/${encodeURIComponent(resourceUri)}`)
+    const response = await fetch(
+      `${this.baseUrl}/resources/${encodeURIComponent(resourceUri)}`
+    )
     return response.json()
   }
 
@@ -415,9 +436,9 @@ class MCPClient {
 const client = new MCPClient()
 
 // Execute greeting tool
-const greeting = await client.executeTool('greet', { 
-  name: 'Developer', 
-  style: 'casual' 
+const greeting = await client.executeTool('greet', {
+  name: 'Developer',
+  style: 'casual',
 })
 
 console.log(greeting.message) // "Hey Developer! 👋"
@@ -482,7 +503,7 @@ const corsOptions = {
   origin: ['https://yourdomain.com', 'https://app.yourdomain.com'],
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
 }
 ```
 
@@ -493,7 +514,7 @@ const corsOptions = {
 const rateLimitOptions = {
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP'
+  message: 'Too many requests from this IP',
 }
 ```
 
@@ -505,21 +526,22 @@ const secureGreetTool: ToolDefinition = {
   name: 'secure-greet',
   description: 'Secure greeting with input validation',
   schema: z.object({
-    name: z.string()
+    name: z
+      .string()
       .min(1)
       .max(50)
       .regex(/^[a-zA-Z\s]+$/)
-      .describe('Name (letters and spaces only)')
+      .describe('Name (letters and spaces only)'),
   }),
   handler: async ({ name }) => {
     // Additional sanitization
     const sanitizedName = name.trim().replace(/\s+/g, ' ')
-    
+
     return {
       message: `Hello ${sanitizedName}!`,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     }
-  }
+  },
 }
 ```
 
@@ -536,7 +558,7 @@ app.get('/health', (req, res) => {
     uptime: process.uptime(),
     memory: process.memoryUsage(),
     version: process.env.npm_package_version,
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
   })
 })
 ```
@@ -545,13 +567,15 @@ app.get('/health', (req, res) => {
 
 ```typescript
 // Morgan logging configuration
-app.use(morgan('combined', {
-  stream: {
-    write: (message) => {
-      console.log(message.trim())
-    }
-  }
-}))
+app.use(
+  morgan('combined', {
+    stream: {
+      write: (message) => {
+        console.log(message.trim())
+      },
+    },
+  })
+)
 ```
 
 ## 🔧 Customization
@@ -565,7 +589,7 @@ import { z } from 'zod'
 
 const WebScraperSchema = z.object({
   url: z.string().url().describe('URL to scrape'),
-  selector: z.string().optional().describe('CSS selector')
+  selector: z.string().optional().describe('CSS selector'),
 })
 
 const webScraperTool: ToolDefinition = {
@@ -575,13 +599,13 @@ const webScraperTool: ToolDefinition = {
   handler: async ({ url, selector = 'title' }) => {
     // Implementation for web scraping
     // Note: Add proper error handling and respect robots.txt
-    
+
     return {
       url,
       content: 'Scraped content here',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     }
-  }
+  },
 }
 
 export default webScraperTool
@@ -620,8 +644,8 @@ const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
   context: ({ req }) => ({
-    mcpClient: createMCPContext(req)
-  })
+    mcpClient: createMCPContext(req),
+  }),
 })
 
 await apolloServer.start()
@@ -650,10 +674,8 @@ import app from '../src/index'
 
 describe('HTTP MCP Server', () => {
   test('health check', async () => {
-    const response = await request(app)
-      .get('/health')
-      .expect(200)
-      
+    const response = await request(app).get('/health').expect(200)
+
     expect(response.body.status).toBe('healthy')
   })
 
@@ -662,7 +684,7 @@ describe('HTTP MCP Server', () => {
       .post('/tools/greet')
       .send({ name: 'Test', style: 'casual' })
       .expect(200)
-      
+
     expect(response.body.message).toContain('Hey Test!')
   })
 })

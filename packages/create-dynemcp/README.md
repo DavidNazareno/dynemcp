@@ -50,6 +50,7 @@ create-dynemcp my-agent
 ```
 
 This will prompt you to:
+
 1. Choose a template
 2. Confirm project name
 3. Install dependencies
@@ -70,6 +71,7 @@ create-dynemcp my-agent --template secure-agent --yes --skip-install
 ## 🏗️ Available Templates
 
 ### Default Template
+
 **Use case**: Learning MCP basics, simple automation tasks
 
 ```bash
@@ -77,6 +79,7 @@ create-dynemcp my-project --template default
 ```
 
 **What you get**:
+
 - Basic MCP server setup with stdio transport
 - Example tool for text manipulation
 - Sample resource with static content
@@ -85,6 +88,7 @@ create-dynemcp my-project --template default
 - Build scripts and hot reload
 
 **Perfect for**:
+
 - First-time MCP developers
 - Prototyping new ideas
 - Educational purposes
@@ -92,6 +96,7 @@ create-dynemcp my-project --template default
 ---
 
 ### Calculator Template
+
 **Use case**: Mathematical computations, educational tools
 
 ```bash
@@ -99,6 +104,7 @@ create-dynemcp my-calculator --template calculator
 ```
 
 **What you get**:
+
 - Basic arithmetic operations (add, subtract, multiply, divide)
 - Advanced mathematical functions (trigonometry, logarithms)
 - Mathematical constants and formulas resource
@@ -106,6 +112,7 @@ create-dynemcp my-calculator --template calculator
 - Error handling for mathematical edge cases
 
 **Perfect for**:
+
 - Educational math tools
 - Scientific calculations
 - Engineering applications
@@ -114,6 +121,7 @@ create-dynemcp my-calculator --template calculator
 ---
 
 ### HTTP Server Template
+
 **Use case**: Web integration, API endpoints
 
 ```bash
@@ -121,6 +129,7 @@ create-dynemcp my-server --template http-server
 ```
 
 **What you get**:
+
 - Express.js HTTP server setup
 - RESTful endpoint configuration
 - CORS middleware
@@ -129,6 +138,7 @@ create-dynemcp my-server --template http-server
 - Health check endpoints
 
 **Perfect for**:
+
 - Web application integration
 - REST API development
 - Microservices architecture
@@ -137,6 +147,7 @@ create-dynemcp my-server --template http-server
 ---
 
 ### Secure Agent Template
+
 **Use case**: Enterprise applications, production environments
 
 ```bash
@@ -144,6 +155,7 @@ create-dynemcp my-secure-agent --template secure-agent
 ```
 
 **What you get**:
+
 - API key authentication middleware
 - HTTP-Stream transport with sessions
 - Rate limiting and CORS configuration
@@ -152,6 +164,7 @@ create-dynemcp my-secure-agent --template secure-agent
 - Production-ready configuration
 
 **Perfect for**:
+
 - Enterprise applications
 - Production deployments
 - Multi-tenant systems
@@ -160,6 +173,7 @@ create-dynemcp my-secure-agent --template secure-agent
 ---
 
 ### Dynamic Agent Template
+
 **Use case**: AI research, adaptive systems
 
 ```bash
@@ -167,6 +181,7 @@ create-dynemcp my-dynamic-agent --template dynamic-agent
 ```
 
 **What you get**:
+
 - Dynamic tool registration system
 - Model sampling capabilities
 - Memory persistence and learning
@@ -174,6 +189,7 @@ create-dynemcp my-dynamic-agent --template dynamic-agent
 - Experimental AI features
 
 **Perfect for**:
+
 - AI research projects
 - Self-learning systems
 - Adaptive automation
@@ -189,13 +205,13 @@ create-dynemcp [directory] [options]
 
 ### Available Options
 
-| Option | Alias | Description | Default |
-|--------|-------|-------------|---------|
-| `--template <name>` | `-t` | Template to use | `default` |
-| `--skip-install` | | Skip dependency installation | `false` |
-| `--yes` | `-y` | Skip all prompts, use defaults | `false` |
-| `--version` | `-v` | Show version number | |
-| `--help` | `-h` | Show help message | |
+| Option              | Alias | Description                    | Default   |
+| ------------------- | ----- | ------------------------------ | --------- |
+| `--template <name>` | `-t`  | Template to use                | `default` |
+| `--skip-install`    |       | Skip dependency installation   | `false`   |
+| `--yes`             | `-y`  | Skip all prompts, use defaults | `false`   |
+| `--version`         | `-v`  | Show version number            |           |
+| `--help`            | `-h`  | Show help message              |           |
 
 ### Examples
 
@@ -247,21 +263,25 @@ Each generated project includes:
 After creating your project:
 
 1. **Navigate to the project directory**:
+
    ```bash
    cd my-project
    ```
 
 2. **Install dependencies** (if skipped):
+
    ```bash
    npm install
    ```
 
 3. **Start development server**:
+
    ```bash
    npm run dev
    ```
 
 4. **Build for production**:
+
    ```bash
    npm run build
    ```
@@ -290,7 +310,7 @@ import { z } from 'zod'
 import { ToolDefinition } from '@dynemcp/dynemcp'
 
 const MyToolSchema = z.object({
-  input: z.string().describe('Input for processing')
+  input: z.string().describe('Input for processing'),
 })
 
 const myCustomTool: ToolDefinition = {
@@ -299,7 +319,7 @@ const myCustomTool: ToolDefinition = {
   schema: MyToolSchema,
   handler: async ({ input }) => {
     return { result: `Processed: ${input}` }
-  }
+  },
 }
 
 export default myCustomTool
@@ -309,25 +329,25 @@ export default myCustomTool
 
 ### Template Comparison
 
-| Template | Transport | Authentication | Use Case | Complexity |
-|----------|-----------|----------------|----------|------------|
-| Default | stdio | None | Learning, prototyping | ⭐ |
-| Calculator | stdio | None | Math operations | ⭐⭐ |
-| HTTP Server | HTTP | None | Web integration | ⭐⭐ |
-| Secure Agent | HTTP-Stream | API Key | Production apps | ⭐⭐⭐ |
-| Dynamic Agent | stdio | None | AI research | ⭐⭐⭐⭐ |
+| Template      | Transport   | Authentication | Use Case              | Complexity |
+| ------------- | ----------- | -------------- | --------------------- | ---------- |
+| Default       | stdio       | None           | Learning, prototyping | ⭐         |
+| Calculator    | stdio       | None           | Math operations       | ⭐⭐       |
+| HTTP Server   | HTTP        | None           | Web integration       | ⭐⭐       |
+| Secure Agent  | HTTP-Stream | API Key        | Production apps       | ⭐⭐⭐     |
+| Dynamic Agent | stdio       | None           | AI research           | ⭐⭐⭐⭐   |
 
 ### Template Features Matrix
 
-| Feature | Default | Calculator | HTTP Server | Secure Agent | Dynamic Agent |
-|---------|---------|------------|-------------|--------------|---------------|
-| Basic Tools | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Math Tools | ❌ | ✅ | ❌ | ❌ | ❌ |
-| HTTP Transport | ❌ | ❌ | ✅ | ✅ | ❌ |
-| Authentication | ❌ | ❌ | ❌ | ✅ | ❌ |
-| Dynamic Registry | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Model Sampling | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Security Features | ❌ | ❌ | ⚠️ | ✅ | ❌ |
+| Feature           | Default | Calculator | HTTP Server | Secure Agent | Dynamic Agent |
+| ----------------- | ------- | ---------- | ----------- | ------------ | ------------- |
+| Basic Tools       | ✅      | ✅         | ✅          | ✅           | ✅            |
+| Math Tools        | ❌      | ✅         | ❌          | ❌           | ❌            |
+| HTTP Transport    | ❌      | ❌         | ✅          | ✅           | ❌            |
+| Authentication    | ❌      | ❌         | ❌          | ✅           | ❌            |
+| Dynamic Registry  | ❌      | ❌         | ❌          | ❌           | ✅            |
+| Model Sampling    | ❌      | ❌         | ❌          | ❌           | ✅            |
+| Security Features | ❌      | ❌         | ⚠️          | ✅           | ❌            |
 
 ## 🛠️ Development
 
@@ -391,10 +411,10 @@ function validateProjectName(name: string): {
 ```typescript
 const AVAILABLE_TEMPLATES = [
   'default',
-  'calculator', 
+  'calculator',
   'http-server',
   'secure-agent',
-  'dynamic-agent'
+  'dynamic-agent',
 ] as const
 ```
 
@@ -439,6 +459,7 @@ npm publish
 ### CI/CD Integration
 
 The package includes GitHub Actions workflows for:
+
 - Automated testing
 - Version management
 - NPM publishing
@@ -449,6 +470,7 @@ The package includes GitHub Actions workflows for:
 ### Common Issues
 
 **Error: "Invalid project name"**
+
 ```bash
 # Use kebab-case for project names
 create-dynemcp my-project-name  # ✅ Good
@@ -456,6 +478,7 @@ create-dynemcp MyProject        # ❌ Avoid
 ```
 
 **Error: "Template not found"**
+
 ```bash
 # Check available templates
 create-dynemcp --help
@@ -466,6 +489,7 @@ create-dynemcp my-project --template calc        # ❌ Won't work
 ```
 
 **Error: "Permission denied"**
+
 ```bash
 # Fix npm permissions or use npx
 npx @dynemcp/create-dynemcp my-project

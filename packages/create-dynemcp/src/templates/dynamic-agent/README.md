@@ -73,25 +73,25 @@ The agent can automatically learn new tools:
 // In src/index.ts - Example of dynamic learning
 setTimeout(() => {
   console.log('🧠 Learning "get-system-load"...')
-  
+
   server.registry.addTool({
     name: 'get-system-load',
     description: 'Gets the current system CPU load.',
     schema: z.object({}),
-    handler: async () => ({ 
+    handler: async () => ({
       load: `${(Math.random() * 100).toFixed(2)}%`,
       timestamp: new Date().toISOString(),
-      source: 'dynamic-learning'
-    })
+      source: 'dynamic-learning',
+    }),
   })
-  
+
   console.log('✨ Tool learned and available!')
-  
+
   // Persist the new tool
   persistLearnedSkill('get-system-load', {
     learned_at: new Date().toISOString(),
     usage_count: 0,
-    effectiveness: 0
+    effectiveness: 0,
   })
 }, 10000)
 ```
@@ -106,26 +106,25 @@ setInterval(async () => {
   if (server.registry.getAllTools().length === 0) {
     return // No sampling if no tools are available
   }
-  
+
   try {
     console.log('🔍 Asking model to check system status...')
-    
+
     const response = await server.sample({
       content: [
         {
           type: 'text',
           text: `Use your available tools to analyze the current system status. 
-                 Be comprehensive and provide insights about performance.`
-        }
-      ]
+                 Be comprehensive and provide insights about performance.`,
+        },
+      ],
     })
-    
-    const textResponse = response.content.find(c => c.type === 'text')?.text
+
+    const textResponse = response.content.find((c) => c.type === 'text')?.text
     console.log(`🤖 Model says: "${textResponse}"`)
-    
+
     // Analyze response and learn
     analyzeAndLearn(textResponse)
-    
   } catch (e) {
     console.error('❌ Failed to sample model:', e)
   }
@@ -142,10 +141,13 @@ Tool that manages the agent's initial memory:
 // tools/get-initial-memory.ts
 const getInitialMemoryTool: ToolDefinition = {
   name: 'get-initial-memory',
-  description: 'Retrieves the initial memory and learned capabilities of the dynamic agent',
+  description:
+    'Retrieves the initial memory and learned capabilities of the dynamic agent',
   schema: z.object({
-    category: z.enum(['core', 'learned', 'all']).default('all')
-      .describe('Category of memory to retrieve')
+    category: z
+      .enum(['core', 'learned', 'all'])
+      .default('all')
+      .describe('Category of memory to retrieve'),
   }),
   handler: async ({ category }) => {
     const memory = {
@@ -156,14 +158,14 @@ const getInitialMemoryTool: ToolDefinition = {
           'dynamic-tool-learning',
           'model-sampling',
           'self-adaptation',
-          'memory-persistence'
+          'memory-persistence',
         ],
-        initialized_at: new Date().toISOString()
+        initialized_at: new Date().toISOString(),
       },
       learned: loadLearnedSkills(),
-      interaction_history: loadInteractionHistory()
+      interaction_history: loadInteractionHistory(),
     }
-    
+
     switch (category) {
       case 'core':
         return { memory: memory.core }
@@ -172,11 +174,12 @@ const getInitialMemoryTool: ToolDefinition = {
       default:
         return { memory }
     }
-  }
+  },
 }
 ```
 
 **Usage:**
+
 ```bash
 # Get full memory
 curl -X POST http://localhost:3000/mcp \
@@ -206,36 +209,36 @@ export class SkillTemplates {
       name,
       description,
       schema: z.object({
-        options: z.object({}).optional().describe('Additional options')
+        options: z.object({}).optional().describe('Additional options'),
       }),
       handler: async ({ options = {} }) => {
         // Dynamic implementation based on tool type
         const result = await this.executeSystemCommand(name, options)
-        
+
         // Register usage for learning
         this.recordToolUsage(name, result)
-        
+
         return {
           result,
           timestamp: new Date().toISOString(),
-          learned_tool: true
+          learned_tool: true,
         }
-      }
+      },
     }
   }
-  
+
   static generateDataTool(name: string, dataSource: string) {
     return {
       name,
       description: `Accesses ${dataSource} data dynamically`,
       schema: z.object({
         query: z.string().describe('Query to execute'),
-        format: z.enum(['json', 'text', 'csv']).default('json')
+        format: z.enum(['json', 'text', 'csv']).default('json'),
       }),
       handler: async ({ query, format }) => {
         const data = await this.queryDataSource(dataSource, query)
         return this.formatData(data, format)
-      }
+      },
     }
   }
 }
@@ -249,45 +252,45 @@ export class AdaptationEngine {
   static async evaluatePerformance() {
     const tools = server.registry.getAllTools()
     const metrics = []
-    
+
     for (const tool of tools) {
       const usage = getToolUsageStats(tool.name)
       const effectiveness = calculateEffectiveness(usage)
-      
+
       metrics.push({
         tool: tool.name,
         usage_count: usage.count,
         success_rate: usage.success_rate,
-        effectiveness
+        effectiveness,
       })
     }
-    
+
     return this.generateImprovements(metrics)
   }
-  
+
   static generateImprovements(metrics: any[]) {
     const improvements = []
-    
+
     for (const metric of metrics) {
       if (metric.success_rate < 0.8) {
         improvements.push({
           type: 'refine_tool',
           tool: metric.tool,
           reason: 'Low success rate',
-          action: 'Add better error handling'
+          action: 'Add better error handling',
         })
       }
-      
+
       if (metric.usage_count === 0) {
         improvements.push({
           type: 'deprecate_tool',
           tool: metric.tool,
           reason: 'No usage',
-          action: 'Consider removal'
+          action: 'Consider removal',
         })
       }
     }
-    
+
     return improvements
   }
 }
@@ -302,18 +305,18 @@ export class AdaptationEngine {
 class MemoryManager {
   static async saveMemory(type: string, data: any) {
     const filename = `memory/${type}-memory.json`
-    const currentData = await this.loadMemory(type) || {}
-    
+    const currentData = (await this.loadMemory(type)) || {}
+
     const updatedData = {
       ...currentData,
       ...data,
-      last_updated: new Date().toISOString()
+      last_updated: new Date().toISOString(),
     }
-    
+
     await fs.writeFile(filename, JSON.stringify(updatedData, null, 2))
     console.log(`💾 Memory saved: ${type}`)
   }
-  
+
   static async loadMemory(type: string) {
     try {
       const filename = `memory/${type}-memory.json`
@@ -324,21 +327,23 @@ class MemoryManager {
       return {}
     }
   }
-  
+
   static async recordInteraction(interaction: any) {
-    const history = await this.loadMemory('interaction-history') || { interactions: [] }
-    
+    const history = (await this.loadMemory('interaction-history')) || {
+      interactions: [],
+    }
+
     history.interactions.push({
       ...interaction,
       timestamp: new Date().toISOString(),
-      id: crypto.randomUUID()
+      id: crypto.randomUUID(),
     })
-    
+
     // Keep only last 1000 interactions
     if (history.interactions.length > 1000) {
       history.interactions = history.interactions.slice(-1000)
     }
-    
+
     await this.saveMemory('interaction-history', history)
   }
 }
@@ -476,21 +481,27 @@ create-dynemcp personal-ai --template dynamic-agent
 ```
 
 **Customization:**
+
 ```typescript
 // Learning from user preferences
 class UserPreferenceLearner {
-  static async learnFromInteraction(user_input: string, response: string, feedback: number) {
-    const preferences = await MemoryManager.loadMemory('user-preferences') || {}
-    
+  static async learnFromInteraction(
+    user_input: string,
+    response: string,
+    feedback: number
+  ) {
+    const preferences =
+      (await MemoryManager.loadMemory('user-preferences')) || {}
+
     // Analyze patterns in successful interactions
     if (feedback > 0.8) {
       const patterns = this.extractPatterns(user_input, response)
       preferences.successful_patterns = [
         ...(preferences.successful_patterns || []),
-        ...patterns
+        ...patterns,
       ]
     }
-    
+
     await MemoryManager.saveMemory('user-preferences', preferences)
   }
 }
@@ -512,12 +523,12 @@ create-dynemcp adaptive-monitor --template dynamic-agent
 class ObservationLearner {
   static async learnFromLogs(logData: string[]) {
     const patterns = this.analyzeLogPatterns(logData)
-    
+
     for (const pattern of patterns) {
       if (pattern.confidence > 0.9) {
         const newTool = SkillTemplates.generateFromPattern(pattern)
         server.registry.addTool(newTool)
-        
+
         console.log(`🔍 Learned new pattern-based tool: ${newTool.name}`)
       }
     }
@@ -534,7 +545,7 @@ class APILearner {
     try {
       const schema = await this.fetchAPISchema(apiUrl)
       const tools = this.generateToolsFromSchema(schema)
-      
+
       for (const tool of tools) {
         server.registry.addTool(tool)
         console.log(`🌐 Learned API tool: ${tool.name}`)
@@ -556,6 +567,7 @@ npm run build:dynamic
 ```
 
 **Build features:**
+
 - ✅ Persistent memory included
 - ✅ Embedded learning templates
 - ✅ Active adaptation system
@@ -595,13 +607,13 @@ curl http://localhost:3000/api/effectiveness-metrics
 describe('Dynamic Learning', () => {
   it('should learn new tools automatically', async () => {
     const initialToolCount = server.registry.getAllTools().length
-    
+
     // Simulate learning condition
     await triggerLearningEvent()
-    
+
     // Wait for learning
-    await new Promise(resolve => setTimeout(resolve, 5000))
-    
+    await new Promise((resolve) => setTimeout(resolve, 5000))
+
     const finalToolCount = server.registry.getAllTools().length
     expect(finalToolCount).toBeGreaterThan(initialToolCount)
   })
@@ -615,12 +627,14 @@ describe('Dynamic Learning', () => {
 describe('Model Sampling', () => {
   it('should sample model for self-evaluation', async () => {
     const samplingResult = await server.sample({
-      content: [{
-        type: 'text',
-        text: 'Evaluate your current capabilities'
-      }]
+      content: [
+        {
+          type: 'text',
+          text: 'Evaluate your current capabilities',
+        },
+      ],
     })
-    
+
     expect(samplingResult.content).toBeDefined()
     expect(samplingResult.content.length).toBeGreaterThan(0)
   })
@@ -634,10 +648,10 @@ describe('Model Sampling', () => {
 describe('Memory Persistence', () => {
   it('should persist learned skills', async () => {
     const skill = { name: 'test-skill', learned_at: new Date().toISOString() }
-    
+
     await MemoryManager.saveMemory('learned-skills', skill)
     const loaded = await MemoryManager.loadMemory('learned-skills')
-    
+
     expect(loaded.name).toBe('test-skill')
   })
 })
@@ -660,22 +674,22 @@ class MLLearner {
       layers: [
         tf.layers.dense({ inputShape: [10], units: 64, activation: 'relu' }),
         tf.layers.dense({ units: 32, activation: 'relu' }),
-        tf.layers.dense({ units: 1, activation: 'sigmoid' })
-      ]
+        tf.layers.dense({ units: 1, activation: 'sigmoid' }),
+      ],
     })
-    
+
     model.compile({
       optimizer: 'adam',
       loss: 'binaryCrossentropy',
-      metrics: ['accuracy']
+      metrics: ['accuracy'],
     })
-    
+
     // Train model to predict tool effectiveness
-    const xs = tf.tensor2d(data.map(d => d.features))
-    const ys = tf.tensor2d(data.map(d => [d.effectiveness]))
-    
+    const xs = tf.tensor2d(data.map((d) => d.features))
+    const ys = tf.tensor2d(data.map((d) => [d.effectiveness]))
+
     await model.fit(xs, ys, { epochs: 100 })
-    
+
     return model
   }
 }
@@ -688,17 +702,16 @@ class MLLearner {
 class AgentCommunication {
   static async shareKnowledge(otherAgentUrl: string) {
     const mySkills = await MemoryManager.loadMemory('learned-skills')
-    
+
     try {
       const response = await fetch(`${otherAgentUrl}/api/knowledge-exchange`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ skills: mySkills })
+        body: JSON.stringify({ skills: mySkills }),
       })
-      
+
       const theirSkills = await response.json()
       await this.integrateExternalKnowledge(theirSkills)
-      
     } catch (error) {
       console.warn('Failed to share knowledge with other agent')
     }
@@ -714,13 +727,13 @@ class GeneticOptimizer {
   static async evolveTools() {
     const tools = server.registry.getAllTools()
     const population = this.createPopulation(tools)
-    
+
     for (let generation = 0; generation < 100; generation++) {
       const fitness = await this.evaluateFitness(population)
       const newGeneration = this.reproduce(population, fitness)
       population.splice(0, population.length, ...newGeneration)
     }
-    
+
     return this.getBestIndividuals(population)
   }
 }

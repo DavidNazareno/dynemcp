@@ -89,36 +89,36 @@ export default function apiKeyAuth(
   next: NextFunction
 ) {
   const apiKey = req.headers['x-api-key']
-  
+
   // Validate API key presence
   if (!apiKey) {
     console.warn('🛑 Unauthorized: Missing API key', {
       ip: req.ip,
       userAgent: req.get('User-Agent'),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
-    return res.status(401).json({ 
-      error: 'Unauthorized: API key required' 
+    return res.status(401).json({
+      error: 'Unauthorized: API key required',
     })
   }
-  
+
   // Validate API key
   if (apiKey !== process.env.API_KEY) {
     console.warn('🛑 Unauthorized: Invalid API key', {
       providedKey: apiKey.substring(0, 8) + '...',
       ip: req.ip,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
-    return res.status(401).json({ 
-      error: 'Unauthorized: Invalid API key' 
+    return res.status(401).json({
+      error: 'Unauthorized: Invalid API key',
     })
   }
-  
+
   console.log('✅ Client authenticated', {
     ip: req.ip,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   })
-  
+
   next()
 }
 ```
@@ -142,7 +142,7 @@ API_KEY=dev-api-key-change-in-production
 const validApiKeys = [
   process.env.API_KEY_PRIMARY,
   process.env.API_KEY_SECONDARY,
-  process.env.API_KEY_LEGACY // For transitions
+  process.env.API_KEY_LEGACY, // For transitions
 ].filter(Boolean)
 
 function isValidApiKey(key: string): boolean {
@@ -162,39 +162,43 @@ const secureStatusTool: ToolDefinition = {
   name: 'secure-status',
   description: 'Returns secure system status information',
   schema: z.object({
-    level: z.enum(['basic', 'detailed']).default('basic')
-      .describe('Level of detail in the status report')
+    level: z
+      .enum(['basic', 'detailed'])
+      .default('basic')
+      .describe('Level of detail in the status report'),
   }),
   handler: async ({ level }) => {
     const basicStatus = {
       status: 'operational',
       timestamp: new Date().toISOString(),
       version: '1.0.0',
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
     }
-    
+
     if (level === 'detailed') {
       return {
         ...basicStatus,
         uptime: process.uptime(),
         memory: {
           used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + 'MB',
-          total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + 'MB'
+          total:
+            Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + 'MB',
         },
         security: {
           authEnabled: true,
           corsEnabled: true,
-          httpsOnly: process.env.NODE_ENV === 'production'
-        }
+          httpsOnly: process.env.NODE_ENV === 'production',
+        },
       }
     }
-    
+
     return basicStatus
-  }
+  },
 }
 ```
 
 **Secure usage:**
+
 ```bash
 # Basic status
 curl -X POST http://localhost:3000/mcp \
@@ -226,13 +230,13 @@ const securityContextPrompt: PromptDefinition = {
     {
       name: 'operation',
       description: 'Type of security operation to assist with',
-      required: false
+      required: false,
     },
     {
       name: 'sensitivity',
       description: 'Data sensitivity level (public, internal, confidential)',
-      required: false
-    }
+      required: false,
+    },
   ],
   handler: async ({ operation = 'general', sensitivity = 'internal' }) => {
     // Audit log for prompt usage
@@ -240,15 +244,17 @@ const securityContextPrompt: PromptDefinition = {
       operation,
       sensitivity,
       timestamp: new Date().toISOString(),
-      source: 'security-assistant-prompt'
+      source: 'security-assistant-prompt',
     })
-    
+
     const securityInstructions = {
       public: 'Information can be shared freely.',
-      internal: 'Information for internal use only. Do not expose sensitive details.',
-      confidential: 'Highly sensitive information. Minimize disclosure and log all access.'
+      internal:
+        'Information for internal use only. Do not expose sensitive details.',
+      confidential:
+        'Highly sensitive information. Minimize disclosure and log all access.',
     }
-    
+
     return {
       messages: [
         {
@@ -264,12 +270,12 @@ const securityContextPrompt: PromptDefinition = {
                    - Follow least privilege principle
                    - Never expose API keys or sensitive configuration
                    
-                   Operation Context: ${operation}`
-          }
-        }
-      ]
+                   Operation Context: ${operation}`,
+          },
+        },
+      ],
     }
-  }
+  },
 }
 ```
 
@@ -371,14 +377,14 @@ const limiter = rateLimit({
   max: 100, // max 100 requests
   message: {
     error: 'Too many requests, please try again later.',
-    retryAfter: '15 minutes'
+    retryAfter: '15 minutes',
   },
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
     // Skip rate limiting for internal health checks
     return req.ip === '127.0.0.1' && req.path === '/health'
-  }
+  },
 })
 
 app.use('/mcp', limiter)
@@ -393,22 +399,22 @@ const validateJsonRpc = [
   body('jsonrpc').equals('2.0'),
   body('id').isNumeric(),
   body('method').isString().isLength({ min: 1, max: 100 }),
-  
+
   (req, res, next) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
       console.warn('🛑 Invalid request format', {
         errors: errors.array(),
         ip: req.ip,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
       return res.status(400).json({
         error: 'Invalid request format',
-        details: errors.array()
+        details: errors.array(),
       })
     }
     next()
-  }
+  },
 ]
 
 app.post('/mcp', validateJsonRpc, mcpHandler)
@@ -419,28 +425,33 @@ app.post('/mcp', validateJsonRpc, mcpHandler)
 ```typescript
 import helmet from 'helmet'
 
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
-    }
-  },
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true
-  }
-}))
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+  })
+)
 
 // Additional security headers
 app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY')
   res.setHeader('X-Content-Type-Options', 'nosniff')
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
-  res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=()')
+  res.setHeader(
+    'Permissions-Policy',
+    'geolocation=(), camera=(), microphone=()'
+  )
   next()
 })
 ```
@@ -455,23 +466,23 @@ class AuditLogger {
       timestamp: new Date().toISOString(),
       event,
       details,
-      severity: this.getSeverity(event)
+      severity: this.getSeverity(event),
     }
-    
+
     console.log(`🔍 AUDIT: ${event}`, logEntry)
-    
+
     // In production, write to file or logging service
     if (process.env.NODE_ENV === 'production') {
       this.writeToFile(logEntry)
     }
   }
-  
+
   private static getSeverity(event: string): string {
     if (event.includes('unauthorized') || event.includes('failed')) {
       return 'HIGH'
     }
     if (event.includes('access') || event.includes('call')) {
-      return 'MEDIUM'  
+      return 'MEDIUM'
     }
     return 'LOW'
   }
@@ -483,7 +494,7 @@ app.use((req, res, next) => {
     method: req.method,
     path: req.path,
     ip: req.ip,
-    userAgent: req.get('User-Agent')
+    userAgent: req.get('User-Agent'),
   })
   next()
 })
@@ -511,6 +522,7 @@ create-dynemcp auth-service --template secure-agent
 ```
 
 **Docker Configuration:**
+
 ```dockerfile
 FROM node:18-alpine
 WORKDIR /app
@@ -525,7 +537,7 @@ RUN npm ci --only=production
 COPY . .
 RUN npm run build
 
-# Switch to non-privileged user  
+# Switch to non-privileged user
 USER dynemcp
 
 EXPOSE 3000
@@ -540,21 +552,22 @@ create-dynemcp b2b-integration --template secure-agent
 ```
 
 **Advanced configuration:**
+
 ```typescript
 // Partner authentication
 const partnerAuth = (req, res, next) => {
   const partnerId = req.headers['x-partner-id']
   const apiKey = req.headers['x-api-key']
-  
+
   if (!isValidPartner(partnerId, apiKey)) {
     AuditLogger.log('unauthorized_partner_access', {
       partnerId,
       ip: req.ip,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
     return res.status(401).json({ error: 'Unauthorized partner' })
   }
-  
+
   req.partner = { id: partnerId }
   next()
 }
@@ -567,7 +580,7 @@ const partnerAuth = (req, res, next) => {
 ```bash
 # Generate secure keys
 API_KEY=$(openssl rand -hex 32)
-JWT_SECRET=$(openssl rand -hex 32)  
+JWT_SECRET=$(openssl rand -hex 32)
 ENCRYPTION_KEY=$(openssl rand -hex 16)
 
 # Production configuration
@@ -587,9 +600,9 @@ import fs from 'fs'
 if (process.env.NODE_ENV === 'production') {
   const options = {
     key: fs.readFileSync(process.env.SSL_KEY_PATH),
-    cert: fs.readFileSync(process.env.SSL_CERT_PATH)
+    cert: fs.readFileSync(process.env.SSL_CERT_PATH),
   }
-  
+
   https.createServer(options, app).listen(443, () => {
     console.log('🔒 HTTPS Server running on port 443')
   })
@@ -606,28 +619,28 @@ if (process.env.NODE_ENV === 'production') {
 // Security monitoring system
 class SecurityMonitor {
   static failedAttempts = new Map()
-  
+
   static recordFailedAuth(ip: string) {
     const count = this.failedAttempts.get(ip) || 0
     this.failedAttempts.set(ip, count + 1)
-    
+
     if (count + 1 >= 5) {
       this.alertSuspiciousActivity(ip)
     }
-    
+
     // Clear counters after 1 hour
     setTimeout(() => {
       this.failedAttempts.delete(ip)
     }, 3600000)
   }
-  
+
   static alertSuspiciousActivity(ip: string) {
     console.error('🚨 SECURITY ALERT: Multiple failed auth attempts', {
       ip,
       attempts: this.failedAttempts.get(ip),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     })
-    
+
     // In production: send alert to security system
     // this.sendToSecuritySystem({ type: 'BRUTE_FORCE', ip })
   }
@@ -747,11 +760,11 @@ import jwt from 'jsonwebtoken'
 
 const jwtAuth = (req, res, next) => {
   const token = req.headers.authorization?.replace('Bearer ', '')
-  
+
   if (!token) {
     return res.status(401).json({ error: 'JWT token required' })
   }
-  
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     req.user = decoded
@@ -775,9 +788,12 @@ class DataEncryption {
   static encrypt(data: string): string {
     return CryptoJS.AES.encrypt(data, process.env.ENCRYPTION_KEY).toString()
   }
-  
+
   static decrypt(encryptedData: string): string {
-    const bytes = CryptoJS.AES.decrypt(encryptedData, process.env.ENCRYPTION_KEY)
+    const bytes = CryptoJS.AES.decrypt(
+      encryptedData,
+      process.env.ENCRYPTION_KEY
+    )
     return bytes.toString(CryptoJS.enc.Utf8)
   }
 }
@@ -793,16 +809,21 @@ npm install passport passport-oauth2
 import passport from 'passport'
 import OAuth2Strategy from 'passport-oauth2'
 
-passport.use(new OAuth2Strategy({
-  authorizationURL: 'https://oauth-provider.com/oauth/authorize',
-  tokenURL: 'https://oauth-provider.com/oauth/token',
-  clientID: process.env.OAUTH_CLIENT_ID,
-  clientSecret: process.env.OAUTH_CLIENT_SECRET,
-  callbackURL: '/auth/callback'
-}, (accessToken, refreshToken, profile, done) => {
-  // Validate user and create session
-  return done(null, profile)
-}))
+passport.use(
+  new OAuth2Strategy(
+    {
+      authorizationURL: 'https://oauth-provider.com/oauth/authorize',
+      tokenURL: 'https://oauth-provider.com/oauth/token',
+      clientID: process.env.OAUTH_CLIENT_ID,
+      clientSecret: process.env.OAUTH_CLIENT_SECRET,
+      callbackURL: '/auth/callback',
+    },
+    (accessToken, refreshToken, profile, done) => {
+      // Validate user and create session
+      return done(null, profile)
+    }
+  )
+)
 ```
 
 ## 🤝 Contributing

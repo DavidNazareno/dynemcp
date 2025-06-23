@@ -60,9 +60,12 @@ export class BasicCalculatorTool extends DyneMCPTool {
   async execute(input: z.infer<typeof BasicCalculatorSchema>) {
     const { a, b, operator } = input
     switch (operator) {
-      case 'add': return { result: a + b }
-      case 'subtract': return { result: a - b }
-      case 'multiply': return { result: a * b }
+      case 'add':
+        return { result: a + b }
+      case 'subtract':
+        return { result: a - b }
+      case 'multiply':
+        return { result: a * b }
       case 'divide':
         if (b === 0) throw new Error('Cannot divide by zero')
         return { result: a / b }
@@ -72,9 +75,10 @@ export class BasicCalculatorTool extends DyneMCPTool {
 ```
 
 **Supported Operations**:
+
 - ➕ **Addition**: Sum two numbers
 - ➖ **Subtraction**: Subtract second from first number
-- ✖️ **Multiplication**: Multiply two numbers  
+- ✖️ **Multiplication**: Multiply two numbers
 - ➗ **Division**: Divide first by second number (with zero-division protection)
 
 ### Advanced Calculator (`src/tools/advanced-calculator.ts`)
@@ -84,11 +88,20 @@ Provides scientific and advanced mathematical functions:
 ```typescript
 const AdvancedCalculatorSchema = z.object({
   operation: z.enum([
-    'power', 'sqrt', 'abs', 'sin', 'cos', 'tan', 
-    'log', 'ln', 'ceil', 'floor', 'round'
+    'power',
+    'sqrt',
+    'abs',
+    'sin',
+    'cos',
+    'tan',
+    'log',
+    'ln',
+    'ceil',
+    'floor',
+    'round',
   ]),
   value: z.number().describe('The input value'),
-  exponent: z.number().optional().describe('Exponent for power operation')
+  exponent: z.number().optional().describe('Exponent for power operation'),
 })
 
 export class AdvancedCalculatorTool extends DyneMCPTool {
@@ -97,6 +110,7 @@ export class AdvancedCalculatorTool extends DyneMCPTool {
 ```
 
 **Available Functions**:
+
 - 🔢 **Power**: Raise number to a power (`value^exponent`)
 - √ **Square Root**: Calculate square root
 - 📐 **Trigonometry**: sin, cos, tan functions
@@ -133,11 +147,12 @@ const mathReference: ResourceDefinition = {
 - tan(x) = sin(x) / cos(x)
 - sin(2x) = 2sin(x)cos(x)
   `,
-  contentType: 'text/markdown'
+  contentType: 'text/markdown',
 }
 ```
 
 **Includes**:
+
 - 🔢 **Mathematical Constants**: π, e, φ, and more
 - 📐 **Geometric Formulas**: Area, volume, perimeter calculations
 - 🧮 **Algebraic Identities**: Common algebraic relationships
@@ -168,11 +183,12 @@ For calculations, use the available calculator tools:
 - basic_calculator: For arithmetic operations (+, -, ×, ÷)
 - advanced_calculator: For scientific functions (sin, cos, log, etc.)
 
-Always prioritize accuracy and clear explanations.`
+Always prioritize accuracy and clear explanations.`,
 }
 ```
 
 **Capabilities**:
+
 - 📝 **Step-by-step Solutions**: Break down complex problems
 - 🔍 **Verification**: Double-check calculations
 - 📖 **Explanations**: Educational approach to problem solving
@@ -182,16 +198,19 @@ Always prioritize accuracy and clear explanations.`
 ## 🚀 Quick Start
 
 1. **Navigate to your project**:
+
    ```bash
    cd calculator-project
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Start the development server**:
+
    ```bash
    npm run dev
    ```
@@ -218,6 +237,8 @@ Always prioritize accuracy and clear explanations.`
     "operator": "add"
   }
 }
+
+
 // Returns: { "result": 42 }
 ```
 
@@ -225,12 +246,14 @@ Always prioritize accuracy and clear explanations.`
 
 ```json
 {
-  "tool": "advanced_calculator", 
+  "tool": "advanced_calculator",
   "arguments": {
     "operation": "sin",
     "value": 1.5708
   }
 }
+
+
 // Returns: { "result": 1.0 } (sin(π/2))
 ```
 
@@ -240,6 +263,8 @@ Always prioritize accuracy and clear explanations.`
 {
   "resource": "math://reference"
 }
+
+
 // Returns the complete mathematical reference document
 ```
 
@@ -256,27 +281,30 @@ import { z } from 'zod'
 
 const StatisticsSchema = z.object({
   operation: z.enum(['mean', 'median', 'mode', 'variance']),
-  values: z.array(z.number()).describe('Array of numbers')
+  values: z.array(z.number()).describe('Array of numbers'),
 })
 
 export class StatisticsCalculatorTool extends DyneMCPTool {
-  get name() { return 'statistics_calculator' }
+  get name() {
+    return 'statistics_calculator'
+  }
   readonly description = 'Statistical calculations on arrays of numbers'
   readonly schema = StatisticsSchema
 
   async execute(input: z.infer<typeof StatisticsSchema>) {
     const { operation, values } = input
-    
+
     switch (operation) {
       case 'mean':
         return { result: values.reduce((a, b) => a + b) / values.length }
       case 'median':
         const sorted = values.sort((a, b) => a - b)
         const mid = Math.floor(sorted.length / 2)
-        return { 
-          result: sorted.length % 2 === 0 
-            ? (sorted[mid - 1] + sorted[mid]) / 2 
-            : sorted[mid] 
+        return {
+          result:
+            sorted.length % 2 === 0
+              ? (sorted[mid - 1] + sorted[mid]) / 2
+              : sorted[mid],
         }
       // Add more statistical functions...
     }
@@ -309,7 +337,7 @@ const physicsConstants: ResourceDefinition = {
 - F = ma (Newton's second law)
 - v = λf (Wave equation)
   `,
-  contentType: 'text/markdown'
+  contentType: 'text/markdown',
 }
 
 export default physicsConstants
@@ -333,7 +361,7 @@ const geometryPrompt: PromptDefinition = {
 4. **Calculate step by step** using available tools
 5. **Verify using geometric properties** (angles sum to 180°, etc.)
 
-Focus on 2D and 3D geometry, trigonometry, and coordinate geometry.`
+Focus on 2D and 3D geometry, trigonometry, and coordinate geometry.`,
 }
 
 export default geometryPrompt
@@ -383,27 +411,30 @@ const unitConverter: ToolDefinition = {
     value: z.number(),
     fromUnit: z.string(),
     toUnit: z.string(),
-    category: z.enum(['length', 'weight', 'temperature'])
+    category: z.enum(['length', 'weight', 'temperature']),
   }),
   handler: async ({ value, fromUnit, toUnit, category }) => {
     // Implement unit conversion logic
-  }
+  },
 }
 ```
 
 ## 🎯 Use Cases
 
 ### Educational Applications
+
 - **Math Tutoring**: Step-by-step problem solving
 - **Homework Help**: Guided mathematical assistance
 - **Concept Explanation**: Understanding mathematical principles
 
-### Professional Applications  
+### Professional Applications
+
 - **Engineering Calculations**: Technical mathematical computations
 - **Scientific Research**: Statistical and mathematical analysis
 - **Financial Modeling**: Mathematical modeling and calculations
 
 ### Development Applications
+
 - **Algorithm Development**: Mathematical function testing
 - **Data Analysis**: Statistical computations
 - **Simulation**: Mathematical modeling support
@@ -429,15 +460,21 @@ npm run dev
 describe('BasicCalculator', () => {
   it('should add correctly', async () => {
     const result = await basicCalculator.execute({
-      a: 10, b: 20, operator: 'add'
+      a: 10,
+      b: 20,
+      operator: 'add',
     })
     expect(result.result).toBe(30)
   })
 
   it('should handle division by zero', async () => {
-    await expect(basicCalculator.execute({
-      a: 10, b: 0, operator: 'divide'
-    })).rejects.toThrow('Cannot divide by zero')
+    await expect(
+      basicCalculator.execute({
+        a: 10,
+        b: 0,
+        operator: 'divide',
+      })
+    ).rejects.toThrow('Cannot divide by zero')
   })
 })
 ```
@@ -468,4 +505,4 @@ This template is part of the DyneMCP project and is licensed under the MIT Licen
 - [DyneMCP Framework](https://github.com/dynemcp/dynemcp)
 - [MCP Specification](https://modelcontextprotocol.io/)
 - [Mathematical Reference](https://en.wikipedia.org/wiki/List_of_mathematical_constants)
-- [Create DyneMCP CLI](https://www.npmjs.com/package/@dynemcp/create-dynemcp) 
+- [Create DyneMCP CLI](https://www.npmjs.com/package/@dynemcp/create-dynemcp)
