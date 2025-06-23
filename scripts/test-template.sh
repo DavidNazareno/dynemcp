@@ -34,7 +34,7 @@ APP_PATH="$EXAMPLES_DIR/$APP_NAME"
 
 # 1. Build the create-dynemcp package to ensure we're using the latest version
 echo "📦 Building 'create-dynemcp' package..."
-pnpm nx build create-dynemcp
+pnpm run build
 echo "✅ Build complete."
 echo "----------------------------------------"
 

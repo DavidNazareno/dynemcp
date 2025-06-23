@@ -79,12 +79,19 @@ async function dev(argv: {
     try {
       const config = await import(configPath)
       configTransport = config?.default?.transport?.type
-    } catch {}
+    } catch {
+      // Ignorar errores al cargar config para transport
+    }
   }
   // Prioridad: CLI > config > stdio
   const effectiveTransport = transportType || configTransport || 'stdio'
   if (effectiveTransport === 'stdio') {
     process.env.DYNE_MCP_STDIO_LOG_SILENT = '1'
+  }
+  // Transporte especial 'console' para logs de desarrollo (no silenciar)
+  if (effectiveTransport === 'console') {
+    // No silenciar logs, usar stderr para no interferir con otros procesos
+    process.env.DYNE_MCP_STDIO_LOG_SILENT = '0'
   }
   const logger =
     argv.internalRun || effectiveTransport === 'stdio'
@@ -242,6 +249,4 @@ const cli = yargs(hideBin(process.argv))
   .alias('v', 'version')
   .strict()
 
-cli.parse()
-
-export { dev }
+export { dev, cli }

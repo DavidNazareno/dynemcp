@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { pathToFileURL } from 'url'
+import { transform } from 'esbuild'
 import { DyneMCPTool, DyneMCPResource, DyneMCPPrompt } from '../core/base.js'
 import type {
   ToolDefinition,
@@ -95,18 +96,86 @@ async function findFilesRecursively(dir: string): Promise<string[]> {
   }
 
   await scanDirectory(dir)
-  return files
+
+  // Filter duplicates: prefer .temp.js over .ts if both exist
+  const fileMap = new Map<string, string>()
+
+  for (const file of files) {
+    const baseName = file.replace(/\.(temp\.js|ts|js)$/, '')
+    const extension = file.match(/\.(temp\.js|ts|js)$/)?.[1]
+
+    if (extension === 'temp.js') {
+      // Always prefer .temp.js files
+      fileMap.set(baseName, file)
+    } else if (!fileMap.has(baseName)) {
+      // Only add .ts or .js if no .temp.js exists
+      fileMap.set(baseName, file)
+    }
+  }
+
+  return Array.from(fileMap.values())
 }
+
+// Cache for transformed files
+const transformCache = new Map<string, string>()
 
 async function loadComponentFromFile<T>(
   filePath: string,
   validator: (component: any) => component is T
 ): Promise<T | null> {
   try {
-    // Convert the absolute file path to a file URL for robust dynamic importing.
     const absolutePath = path.resolve(process.cwd(), filePath)
-    const module = await import(pathToFileURL(absolutePath).href)
-    const exported = module.default
+
+    let moduleUrl: string
+
+    // Handle TypeScript files by transforming them with esbuild
+    if (absolutePath.endsWith('.ts')) {
+      // Create a temporary .js file next to the .ts file to preserve import context
+      const jsPath = absolutePath.replace('.ts', '.temp.js')
+      const cacheKey = absolutePath
+
+      // Check if we need to recompile (based on file modification time)
+      let needsCompile = !transformCache.has(cacheKey)
+      if (!needsCompile) {
+        try {
+          const tsStats = await fs.promises.stat(absolutePath)
+          const jsStats = await fs.promises.stat(jsPath)
+          needsCompile = tsStats.mtime > jsStats.mtime
+        } catch {
+          needsCompile = true
+        }
+      }
+
+      if (needsCompile) {
+        const tsCode = await fs.promises.readFile(absolutePath, 'utf-8')
+
+        // Transform TypeScript to JavaScript using esbuild
+        const result = await transform(tsCode, {
+          loader: 'ts',
+          format: 'cjs', // Use CommonJS to match our build format
+          target: 'node16',
+          platform: 'node',
+        })
+
+        // Write the compiled JavaScript next to the TypeScript file
+        await fs.promises.writeFile(jsPath, result.code)
+        transformCache.set(cacheKey, jsPath)
+      }
+
+      moduleUrl = pathToFileURL(jsPath).href
+    } else {
+      // For .js files, use the file URL directly
+      moduleUrl = pathToFileURL(absolutePath).href
+    }
+
+    // Use dynamic import to load the module
+    const module = await import(moduleUrl)
+    let exported = module.default
+
+    // Handle getter case where default export is wrapped
+    if (exported && typeof exported === 'object' && 'default' in exported) {
+      exported = exported.default
+    }
 
     if (!exported) {
       return null
