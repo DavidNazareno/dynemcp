@@ -1,0 +1,391 @@
+---
+title: Registry API
+description: Complete reference for the DyneMCP Registry system
+---
+
+# Registry API Reference
+
+The Registry system is the central component management system in DyneMCP. It handles the registration, discovery, and lifecycle of tools, resources, prompts, and transports.
+
+## Registry Interface
+
+```typescript
+interface Registry {
+  // Tool Management
+  registerTool(tool: Tool): void
+  getTool(name: string): Tool | undefined
+  getAllTools(): Tool[]
+
+  // Resource Management
+  registerResource(resource: Resource): void
+  getResource(uri: string): Resource | undefined
+  getAllResources(): Resource[]
+
+  // Prompt Management
+  registerPrompt(prompt: Prompt): void
+  getPrompt(id: string): Prompt | undefined
+  getAllPrompts(): Prompt[]
+
+  // Transport Management
+  registerTransport(type: string, factory: TransportFactory): void
+  getTransport(type: string): Transport | undefined
+
+  // Component Discovery
+  discover(): Promise<void>
+  reload(): Promise<void>
+}
+```
+
+## Component Discovery
+
+The registry automatically discovers components based on configuration:
+
+```json
+{
+  "tools": {
+    "enabled": true,
+    "directory": "./src/tools",
+    "pattern": "**/*.{ts,js}"
+  },
+  "resources": {
+    "enabled": true,
+    "directory": "./src/resources",
+    "pattern": "**/*.{ts,js}"
+  },
+  "prompts": {
+    "enabled": true,
+    "directory": "./src/prompts",
+    "pattern": "**/*.{ts,js}"
+  }
+}
+```
+
+### Discovery Process
+
+1. **Initialization**
+
+   ```typescript
+   const server = createMCPServer()
+   await server.registry.discover()
+   ```
+
+2. **Hot Reload**
+   ```typescript
+   // Reload all components
+   await server.registry.reload()
+   ```
+
+## Tool Registration
+
+### Class-based Tools
+
+```typescript
+import { DyneMCPTool } from '@dynemcp/dynemcp'
+
+class CalculatorTool extends DyneMCPTool {
+  // Tool implementation
+}
+
+// Register tool
+server.registry.registerTool(new CalculatorTool())
+```
+
+### Function-based Tools
+
+```typescript
+import { createTool } from '@dynemcp/dynemcp'
+
+const greetingTool = createTool({
+  name: 'greet',
+  description: 'Greets a person',
+  schema: z.object({
+    name: z.string(),
+  }),
+  execute: async ({ name }) => `Hello, ${name}!`,
+})
+
+// Register tool
+server.registry.registerTool(greetingTool)
+```
+
+## Resource Registration
+
+### Static Resources
+
+```typescript
+import { createResource } from '@dynemcp/dynemcp'
+
+const mathResource = createResource({
+  uri: 'math://formulas',
+  name: 'Math Formulas',
+  content: {
+    pi: Math.PI,
+    e: Math.E,
+  },
+})
+
+// Register resource
+server.registry.registerResource(mathResource)
+```
+
+### Dynamic Resources
+
+```typescript
+const weatherResource = createResource({
+  uri: 'weather://current',
+  name: 'Weather Data',
+  content: async () => {
+    return fetchWeatherData()
+  },
+})
+
+// Register resource
+server.registry.registerResource(weatherResource)
+```
+
+## Prompt Registration
+
+```typescript
+import { createPrompt } from '@dynemcp/dynemcp'
+
+const calculatorPrompt = createPrompt({
+  id: 'calculator',
+  name: 'Calculator Assistant',
+  content: `You are a calculator assistant...`,
+})
+
+// Register prompt
+server.registry.registerPrompt(calculatorPrompt)
+```
+
+## Transport Registration
+
+```typescript
+class CustomTransport implements Transport {
+  // Transport implementation
+}
+
+// Register transport factory
+server.registry.registerTransport(
+  'custom',
+  (options) => new CustomTransport(options)
+)
+```
+
+## Component Lifecycle
+
+### Loading
+
+```typescript
+// Load specific components
+const tool = server.registry.getTool('calculator')
+const resource = server.registry.getResource('math://formulas')
+const prompt = server.registry.getPrompt('calculator')
+
+// Load all components
+const allTools = server.registry.getAllTools()
+const allResources = server.registry.getAllResources()
+const allPrompts = server.registry.getAllPrompts()
+```
+
+### Reloading
+
+```typescript
+// Reload specific component types
+await server.registry.reload('tools')
+await server.registry.reload('resources')
+await server.registry.reload('prompts')
+
+// Reload all components
+await server.registry.reload()
+```
+
+## Event System
+
+The registry emits events for component lifecycle:
+
+```typescript
+server.registry.on('tool:registered', (tool) => {
+  console.log(`Tool registered: ${tool.name}`)
+})
+
+server.registry.on('resource:registered', (resource) => {
+  console.log(`Resource registered: ${resource.uri}`)
+})
+
+server.registry.on('prompt:registered', (prompt) => {
+  console.log(`Prompt registered: ${prompt.id}`)
+})
+
+server.registry.on('transport:registered', (type) => {
+  console.log(`Transport registered: ${type}`)
+})
+
+server.registry.on('error', (error) => {
+  console.error('Registry error:', error)
+})
+```
+
+## Advanced Features
+
+### Component Dependencies
+
+```typescript
+export class AdvancedTool extends DyneMCPTool {
+  get name() {
+    return 'advanced'
+  }
+
+  readonly dependencies = {
+    tools: ['basic'],
+    resources: ['math://formulas'],
+    prompts: ['calculator'],
+  }
+
+  async execute(params: any) {
+    // Get dependencies
+    const basicTool = this.server.registry.getTool('basic')
+
+    const mathResource =
+      await this.server.registry.getResource('math://formulas')
+
+    const calculatorPrompt = this.server.registry.getPrompt('calculator')
+
+    // Use dependencies
+    return basicTool.execute(params)
+  }
+}
+```
+
+### Component Metadata
+
+```typescript
+export class MetadataTool extends DyneMCPTool {
+  get name() {
+    return 'metadata-tool'
+  }
+
+  readonly metadata = {
+    version: '1.0.0',
+    author: 'DyneMCP Team',
+    tags: ['example', 'metadata'],
+    documentation: 'https://docs.example.com',
+  }
+}
+```
+
+### Component Validation
+
+```typescript
+export class ValidatedTool extends DyneMCPTool {
+  get name() {
+    return 'validated'
+  }
+
+  readonly schema = z.object({
+    input: z.string(),
+  })
+
+  async validate() {
+    // Custom validation logic
+    const dependencies = this.dependencies
+
+    for (const tool of dependencies.tools) {
+      if (!this.server.registry.getTool(tool)) {
+        throw new Error(`Missing tool: ${tool}`)
+      }
+    }
+  }
+}
+```
+
+## Best Practices
+
+1. **Component Organization**
+
+   - Use meaningful names/URIs
+   - Group related components
+   - Document dependencies
+
+2. **Error Handling**
+
+   - Validate components
+   - Handle missing dependencies
+   - Provide fallbacks
+
+3. **Performance**
+
+   - Cache component lookups
+   - Lazy load when possible
+   - Monitor memory usage
+
+4. **Security**
+   - Validate component sources
+   - Check component permissions
+   - Sanitize inputs/outputs
+
+## Examples
+
+### Component Factory
+
+```typescript
+class ToolFactory {
+  static create(config: ToolConfig): Tool {
+    switch (config.type) {
+      case 'calculator':
+        return new CalculatorTool()
+      case 'weather':
+        return new WeatherTool()
+      default:
+        throw new Error(`Unknown tool type: ${config.type}`)
+    }
+  }
+}
+
+// Register tools from configuration
+const toolConfigs = loadToolConfigs()
+for (const config of toolConfigs) {
+  const tool = ToolFactory.create(config)
+  server.registry.registerTool(tool)
+}
+```
+
+### Component Monitor
+
+```typescript
+class RegistryMonitor {
+  constructor(private registry: Registry) {
+    this.setupListeners()
+  }
+
+  private setupListeners() {
+    this.registry.on('tool:registered', this.onToolRegistered)
+    this.registry.on('resource:registered', this.onResourceRegistered)
+    this.registry.on('prompt:registered', this.onPromptRegistered)
+    this.registry.on('error', this.onError)
+  }
+
+  private onToolRegistered = (tool: Tool) => {
+    console.log(`Tool registered: ${tool.name}`)
+    // Monitor tool health
+  }
+
+  private onResourceRegistered = (resource: Resource) => {
+    console.log(`Resource registered: ${resource.uri}`)
+    // Monitor resource usage
+  }
+
+  private onPromptRegistered = (prompt: Prompt) => {
+    console.log(`Prompt registered: ${prompt.id}`)
+    // Monitor prompt usage
+  }
+
+  private onError = (error: Error) => {
+    console.error('Registry error:', error)
+    // Alert administrators
+  }
+}
+
+// Create monitor
+const monitor = new RegistryMonitor(server.registry)
+```

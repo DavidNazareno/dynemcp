@@ -1,0 +1,135 @@
+---
+title: Resource API
+description: Complete reference for creating and managing DyneMCP resources
+---
+
+# Resource API Reference
+
+Resources in DyneMCP provide static data that can be used by tools and prompts. They help maintain separation between logic and data.
+
+## Resource Definition
+
+```typescript
+import type { ResourceDefinition } from '@dynemcp/dynemcp'
+
+const mathResource: ResourceDefinition = {
+  uri: 'data://math',
+  name: 'Math Reference',
+  content: {
+    formulas: {
+      area: {
+        circle: 'π * r²',
+        square: 'a²',
+        rectangle: 'l * w',
+      },
+      volume: {
+        cube: 'a³',
+        sphere: '(4/3) * π * r³',
+      },
+    },
+    constants: {
+      pi: Math.PI,
+      e: Math.E,
+    },
+  },
+}
+```
+
+### Properties
+
+| Property      | Type                  | Description                   |
+| ------------- | --------------------- | ----------------------------- |
+| `uri`         | `string`              | Unique resource identifier    |
+| `name`        | `string`              | Resource name                 |
+| `content`     | `string \| object`    | Resource content             |
+
+## Resource Registration
+
+Resources can be registered in two ways:
+
+### 1. Auto-discovery
+
+Place resources in the configured directory:
+
+```
+src/
+  resources/
+    math.ts
+    reference.ts
+```
+
+```json
+{
+  "resources": {
+    "enabled": true,
+    "directory": "./src/resources",
+    "pattern": "**/*.{ts,js}"
+  }
+}
+```
+
+### 2. Manual Registration
+
+```typescript
+const server = createMCPServer()
+
+// Register a resource
+server.registry.addResource(mathResource)
+```
+
+## Resource Usage
+
+Resources can be used in tools:
+
+```typescript
+const calculatorTool: ToolDefinition = {
+  name: 'calculator',
+  description: 'Advanced calculator with formulas',
+  schema: z.object({
+    formula: z.string(),
+    values: z.record(z.number()),
+  }),
+  handler: async ({ formula, values }, { registry }) => {
+    // Get formulas from resource
+    const mathRef = await registry.getResource('data://math')
+
+    // Use formula from resource
+    return evaluateFormula(mathRef.formulas[formula], values)
+  },
+}
+```
+
+## Resource Types
+
+### 1. Text Resources
+
+```typescript
+const textResource: ResourceDefinition = {
+  uri: 'text://example',
+  name: 'Text Example',
+  content: 'This is a text resource',
+}
+```
+
+### 2. JSON Resources
+
+```typescript
+const jsonResource: ResourceDefinition = {
+  uri: 'json://config',
+  name: 'Configuration',
+  content: {
+    settings: {
+      theme: 'dark',
+      language: 'en',
+    },
+  },
+}
+```
+
+## Best Practices
+
+1. **URI Format**: Use descriptive URIs that indicate the resource type and purpose
+2. **Content Structure**: Keep resource content well-organized and typed
+3. **Naming**: Use clear, descriptive names for resources
+4. **Separation**: Keep resources separate from tool logic
+5. **Reusability**: Design resources to be reusable across multiple tools

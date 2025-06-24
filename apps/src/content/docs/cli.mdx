@@ -1,0 +1,180 @@
+---
+title: CLI Reference
+description: Command line interface reference for DyneMCP
+---
+
+DyneMCP provides two main command-line interfaces:
+
+1. `create-dynemcp` - For creating new projects
+2. `dynemcp` - For development and build commands
+
+## Create DyneMCP CLI
+
+The project creation CLI helps you scaffold new MCP servers.
+
+### Installation
+
+```bash
+# Using pnpm (recommended)
+pnpm create dynemcp@latest my-project
+
+# Or install globally
+pnpm add -g @dynemcp/create-dynemcp
+```
+
+### Command Syntax
+
+```bash
+create-dynemcp [directory] [options]
+```
+
+### Available Options
+
+| Option           | Alias | Description                    | Default   |
+| ---------------- | ----- | ------------------------------ | --------- |
+| `--template <n>` | `-t`  | Template to use               | `default` |
+| `--skip-install` |       | Skip dependency installation   | `false`   |
+| `--yes`          | `-y`  | Skip all prompts, use defaults| `false`   |
+| `--version`      | `-v`  | Show version number           |           |
+| `--help`         | `-h`  | Show help message             |           |
+
+### Examples
+
+```bash
+# Interactive mode with template selection
+pnpm create dynemcp my-project
+
+# Specific template, interactive
+pnpm create dynemcp my-calculator --template calculator
+
+# Completely non-interactive
+pnpm create dynemcp my-agent --template secure-agent --yes --skip-install
+
+# Show available options
+pnpm create dynemcp --help
+```
+
+## DyneMCP CLI
+
+The main DyneMCP CLI for development and build commands.
+
+### Installation
+
+The CLI is included when you install DyneMCP:
+
+```bash
+pnpm add -g @dynemcp/dynemcp
+```
+
+### Development Mode
+
+Start the server in development mode with hot reload:
+
+```bash
+dynemcp dev [options]
+```
+
+**Options**:
+
+- `--config, -c <path>`: Path to dynemcp.config.json
+- `--transport <type>`: Override transport type (stdio, http-stream)
+- `--port <number>`: Port for HTTP Stream transport
+- `--host <string>`: Host for HTTP Stream transport
+
+### Production Build
+
+Build the project for production:
+
+```bash
+dynemcp build [options]
+```
+
+**Options**:
+
+- `--config, -c <path>`: Path to dynemcp.config.json
+- `--minify`: Minify output (default: true)
+- `--sourcemap`: Generate sourcemaps (default: true)
+
+### Configuration
+
+The CLI reads configuration from `dynemcp.config.json` in your project root. You can override settings using command-line options.
+
+### Example Configuration
+
+```json
+{
+  "server": {
+    "name": "my-mcp-server",
+    "version": "1.0.0",
+    "documentationUrl": "https://docs.example.com"
+  },
+  "tools": {
+    "enabled": true,
+    "directory": "./src/tools",
+    "pattern": "**/*.{ts,js}"
+  },
+  "transport": {
+    "type": "stdio"
+  }
+}
+```
+
+## Environment Variables
+
+The CLI respects these environment variables:
+
+- `DYNEMCP_CONFIG`: Path to config file
+- `DYNEMCP_TRANSPORT`: Transport type
+- `DYNEMCP_PORT`: HTTP Stream transport port
+- `DYNEMCP_HOST`: HTTP Stream transport host
+
+## Exit Codes
+
+The CLI uses these exit codes:
+
+- `0`: Success
+- `1`: General error
+- `2`: Configuration error
+- `3`: Build error
+- `4`: Runtime error
+
+## Best Practices
+
+1. **Development**
+   - Use `dynemcp dev` for local development
+   - Configure transport type based on your needs
+   - Use sourcemaps for debugging
+
+2. **Production**
+   - Use `dynemcp build` with minification
+   - Set appropriate environment variables
+   - Configure logging levels
+
+3. **CI/CD**
+   - Use `--yes` flag for non-interactive mode
+   - Set explicit configuration paths
+   - Enable detailed error output
+
+## Troubleshooting
+
+Common issues and solutions:
+
+### Transport Issues
+
+```bash
+# Override transport
+dynemcp dev --transport http-stream --port 3000
+```
+
+### Configuration Problems
+
+```bash
+# Validate configuration
+dynemcp build --config ./custom-config.json
+```
+
+## Next Steps
+
+- Learn about [templates](./templates) for project creation
+- Explore the [framework](./framework) architecture
+- See [tools guide](./tools) for adding functionality

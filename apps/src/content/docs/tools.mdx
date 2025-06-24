@@ -1,0 +1,356 @@
+---
+title: Tools Guide
+description: Learn how to create and work with tools in DyneMCP
+---
+
+Tools are the core building blocks of DyneMCP servers. They provide the functionality that MCP clients can invoke. This guide covers everything you need to know about creating and using tools.
+
+## Creating Tools
+
+There are two ways to create tools in DyneMCP:
+
+### 1. Class-Based Tools
+
+Tools can be created by extending the `DyneMCPTool` base class:
+
+```typescript
+import { DyneMCPTool } from '@dynemcp/dynemcp'
+import { z } from 'zod'
+
+const CalculatorSchema = z.object({
+  a: z.number(),
+  b: z.number(),
+  operation: z.enum(['add', 'subtract', 'multiply', 'divide']),
+})
+
+export class CalculatorTool extends DyneMCPTool {
+  // Tool name is automatically derived from class name
+  // Override if needed:
+  // get name() { return 'calculator' }
+
+  // Required: Tool description
+  readonly description = 'Basic calculator tool'
+
+  // Required: Input schema using Zod
+  readonly schema = CalculatorSchema
+
+  // Required: Execute method
+  async execute(input: z.infer<typeof CalculatorSchema>) {
+    const { a, b, operation } = input
+    switch (operation) {
+      case 'add':
+        return { result: a + b }
+      case 'subtract':
+        return { result: a - b }
+      case 'multiply':
+        return { result: a * b }
+      case 'divide':
+        if (b === 0) throw new Error('Division by zero')
+        return { result: a / b }
+    }
+  }
+}
+
+// Export an instance
+export default new CalculatorTool()
+```
+
+### 2. Function-Based Tools
+
+For simpler tools, you can use the functional approach:
+
+```typescript
+import { z } from 'zod'
+import { ToolDefinition } from '@dynemcp/dynemcp'
+
+const greetTool: ToolDefinition = {
+  name: 'greet',
+  description: 'Greets someone',
+  schema: z.object({
+    name: z.string().describe('Name to greet'),
+  }),
+  handler: async ({ name }) => {
+    return `Hello, ${name}!`
+  },
+}
+
+export default greetTool
+```
+
+## Tool Components
+
+### 1. Name
+
+- Unique identifier for the tool
+- Automatically derived from class name or specified manually
+- Should be descriptive and follow naming conventions
+
+### 2. Description
+
+- Clear explanation of what the tool does
+- Used in documentation and by AI models
+- Should include key functionality and use cases
+
+### 3. Schema
+
+- Defines input parameters using Zod
+- Provides type safety and validation
+- Can include parameter descriptions
+- Supports complex nested structures
+
+### 4. Execute/Handler
+
+- Main logic implementation
+- Can be asynchronous
+- Should handle errors gracefully
+- Can return any serializable data
+
+## Tool Registration
+
+Tools are automatically discovered and registered based on your `dynemcp.config.json`:
+
+```json
+{
+  "tools": {
+    "enabled": true,
+    "directory": "./src/tools",
+    "pattern": "**/*.{ts,js}"
+  }
+}
+```
+
+You can also register tools programmatically:
+
+```typescript
+const server = createMCPServer()
+
+// Register a tool
+server.registry.addTool({
+  name: 'dynamic-tool',
+  description: 'A dynamically registered tool',
+  schema: z.object({
+    input: z.string().describe('Input to process'),
+  }),
+  handler: async ({ input }) => {
+    return { result: `Processed: ${input}` }
+  },
+})
+```
+
+Requirements for auto-registration:
+
+1. Tool must be the default export
+2. Export must be either:
+   - An instance of DyneMCPTool
+   - A ToolDefinition object
+3. File must be in the configured tools directory
+
+## Advanced Tool Features
+
+### Error Handling
+
+Tools should handle errors gracefully:
+
+```typescript
+export class RobustTool extends DyneMCPTool {
+  readonly name = 'robust-tool'
+  readonly description = 'Demonstrates error handling'
+  readonly schema = z.object({
+    input: z.string(),
+  })
+
+  async execute({ input }) {
+    try {
+      // Main logic here
+      return { result: processInput(input) }
+    } catch (error) {
+      // Log error details
+      console.error('Tool execution failed:', error)
+
+      // Return user-friendly error
+      throw new Error(
+        'Failed to process input. Please ensure it meets the requirements.'
+      )
+    }
+  }
+}
+```
+
+### Input Validation
+
+Zod schemas can include detailed validation:
+
+```typescript
+const UserSchema = z.object({
+  email: z
+    .string()
+    .email('Invalid email format')
+    .describe('User email address'),
+  age: z.number().min(13, 'Must be at least 13 years old').describe('User age'),
+  preferences: z.object({
+    theme: z.enum(['light', 'dark']).default('light'),
+    notifications: z.boolean().default(true),
+  }),
+})
+```
+
+### Async Operations
+
+Tools can perform complex async operations:
+
+```typescript
+export class DataFetchTool extends DyneMCPTool {
+  readonly name = 'fetch-data'
+  readonly description = 'Fetches and processes data'
+  readonly schema = z.object({
+    endpoint: z.string().url(),
+    filters: z.array(z.string()).optional(),
+  })
+
+  async execute({ endpoint, filters = [] }) {
+    // Fetch data
+    const response = await fetch(endpoint)
+    const data = await response.json()
+
+    // Process data
+    const filtered = filters.length
+      ? data.filter((item) => filters.includes(item.category))
+      : data
+
+    // Transform results
+    return {
+      items: filtered,
+      count: filtered.length,
+      timestamp: new Date().toISOString(),
+    }
+  }
+}
+```
+
+### Tool Dependencies
+
+Tools can depend on other tools or services:
+
+```typescript
+export class CompositeTool extends DyneMCPTool {
+  readonly name = 'composite-tool'
+  readonly description = 'Combines multiple operations'
+  readonly schema = z.object({
+    data: z.string(),
+  })
+
+  constructor(
+    private readonly processor: DataProcessor,
+    private readonly validator: DataValidator
+  ) {
+    super()
+  }
+
+  async execute({ data }) {
+    // Validate input
+    await this.validator.validate(data)
+
+    // Process data
+    const result = await this.processor.process(data)
+
+    return { result }
+  }
+}
+```
+
+## Best Practices
+
+1. **Input Validation**
+
+   - Use descriptive schema definitions
+   - Add helpful error messages
+   - Validate early in the execution
+
+2. **Error Handling**
+
+   - Catch and handle specific errors
+   - Provide user-friendly error messages
+   - Log errors for debugging
+
+3. **Performance**
+
+   - Cache expensive operations
+   - Use async operations efficiently
+   - Consider rate limiting for external APIs
+
+4. **Documentation**
+
+   - Write clear descriptions
+   - Document all parameters
+   - Include usage examples
+
+5. **Testing**
+   - Write unit tests for tools
+   - Test error cases
+   - Mock external dependencies
+
+## Example Tools
+
+### File Operations Tool
+
+```typescript
+export class FileOperationsTool extends DyneMCPTool {
+  readonly name = 'file-ops'
+  readonly description = 'File system operations'
+  readonly schema = z.object({
+    operation: z.enum(['read', 'write', 'delete']),
+    path: z.string(),
+    content: z.string().optional(),
+  })
+
+  async execute({ operation, path, content }) {
+    switch (operation) {
+      case 'read':
+        return { content: await fs.readFile(path, 'utf-8') }
+      case 'write':
+        await fs.writeFile(path, content)
+        return { success: true }
+      case 'delete':
+        await fs.unlink(path)
+        return { success: true }
+    }
+  }
+}
+```
+
+### API Integration Tool
+
+```typescript
+export class APITool extends DyneMCPTool {
+  readonly name = 'api-tool'
+  readonly description = 'External API integration'
+  readonly schema = z.object({
+    endpoint: z.string().url(),
+    method: z.enum(['GET', 'POST', 'PUT', 'DELETE']),
+    body: z.any().optional(),
+    headers: z.record(z.string()).optional(),
+  })
+
+  async execute({ endpoint, method, body, headers }) {
+    const response = await fetch(endpoint, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers,
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    })
+
+    return {
+      status: response.status,
+      data: await response.json(),
+    }
+  }
+}
+```
+
+## Next Steps
+
+- Explore [available templates](./templates) for example tools
+- Learn about [resources](./framework#resources) for static content
+- See [prompts](./framework#prompts) for AI interactions

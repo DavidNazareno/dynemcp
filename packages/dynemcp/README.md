@@ -1,102 +1,250 @@
 # @dynemcp/dynemcp
 
-🚀 **Complete MCP Framework** - Unified framework for building Model Context Protocol (MCP) servers with advanced build system and runtime.
+[![npm version](https://badge.fury.io/js/@dynemcp%2Fdynemcp.svg)](https://badge.fury.io/js/@dynemcp%2Fdynemcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Features
+> Complete MCP framework with server runtime and build system
 
-- ⚡ **Fast Development** - Hot reload and watch mode
-- 🔨 **Advanced Build System** - Optimized bundling with esbuild
-- 🚀 **Production Ready** - Optimized for production deployment
-- 📦 **Component System** - Tools, Resources, and Prompts management
-- 🔧 **Flexible Configuration** - Easy configuration via `dynemcp.config.json`
-- 📊 **Analytics** - Built-in dependency analysis and reporting
+The main DyneMCP framework provides everything you need to build, run, and deploy Model Context Protocol (MCP) servers with modern TypeScript development tools.
 
-## Quick Start
+## 🚀 Features
 
-### Installation
+- ⚡ **Full MCP server runtime**: Complete implementation of the MCP specification
+- 🏗️ **Optimized build system**: Ultra-fast builds with esbuild
+- 🔄 **Hot reload development**: Instant feedback during development
+- 📝 **Declarative configuration**: Simple JSON-based configuration
+- 🌐 **Multiple transports**: stdio, HTTP, SSE, and HTTP-Stream
+- 🔧 **Dynamic registry**: Runtime registration of tools/resources/prompts
+- 🎯 **Model sampling**: Built-in support for LLM model sampling
+- 🔒 **Security features**: Authentication, rate limiting, CORS, and more
+- 📊 **Performance monitoring**: Integrated metrics and performance tracking
+- 🐛 **Advanced debugging**: Complete logging and debugging tools
+
+## 📦 Installation
 
 ```bash
 npm install @dynemcp/dynemcp
 ```
 
-### Basic Usage
+## 🚀 Quick Start
+
+### Basic Server
+
+```typescript
+import { createMCPServer } from '@dynemcp/dynemcp'
+
+const server = createMCPServer('my-server', './dynemcp.config.json', '1.0.0')
+
+async function main() {
+  await server.init()
+  await server.start()
+}
+
+main().catch(console.error)
+```
+
+### Manual Configuration
+
+```typescript
+import { createMCPServer } from '@dynemcp/dynemcp'
+
+const server = createMCPServer()
+
+// Access configuration
+const config = server.getConfig()
+
+// Get server statistics
+console.log(server.stats)
+
+// Access registered components
+console.log(server.tools)
+console.log(server.resources)
+console.log(server.prompts)
+```
+
+## 🛠️ Tools
+
+Define tools that the MCP server can execute:
+
+```typescript
+import { DyneMCPTool } from '@dynemcp/dynemcp'
+import { z } from 'zod'
+
+const CalculatorSchema = z.object({
+  a: z.number(),
+  b: z.number(),
+  operation: z.enum(['add', 'subtract', 'multiply', 'divide']),
+})
+
+export class CalculatorTool extends DyneMCPTool {
+  get name() {
+    return 'calculator'
+  }
+  readonly description = 'Basic calculator tool'
+  readonly schema = CalculatorSchema
+
+  async execute(input: z.infer<typeof CalculatorSchema>) {
+    const { a, b, operation } = input
+    switch (operation) {
+      case 'add':
+        return { result: a + b }
+      case 'subtract':
+        return { result: a - b }
+      case 'multiply':
+        return { result: a * b }
+      case 'divide':
+        if (b === 0) throw new Error('Division by zero')
+        return { result: a / b }
+    }
+  }
+}
+
+export default new CalculatorTool()
+```
+
+### Function-based tools
+
+```typescript
+import { z } from 'zod'
+import { ToolDefinition } from '@dynemcp/dynemcp'
+
+const greetTool: ToolDefinition = {
+  name: 'greet',
+  description: 'Greets someone',
+  schema: z.object({
+    name: z.string().describe('Name to greet'),
+  }),
+  handler: async ({ name }) => {
+    return `Hello, ${name}!`
+  },
+}
+
+export default greetTool
+```
+
+## 📚 Resources
+
+Define resources that provide data to models:
+
+```typescript
+import { ResourceDefinition } from '@dynemcp/dynemcp'
+
+const docsResource: ResourceDefinition = {
+  uri: 'docs://api',
+  name: 'API Documentation',
+  description: 'Complete API documentation',
+  content: async () => {
+    // Dynamic content loading
+    return await loadApiDocs()
+  },
+  contentType: 'text/markdown',
+}
+
+export default docsResource
+```
+
+### Static resources
+
+```typescript
+import { ResourceDefinition } from '@dynemcp/dynemcp'
+
+const configResource: ResourceDefinition = {
+  uri: 'config://server',
+  name: 'Server Configuration',
+  content: JSON.stringify(
+    {
+      version: '1.0.0',
+      features: ['tools', 'resources', 'prompts'],
+    },
+    null,
+    2
+  ),
+  contentType: 'application/json',
+}
+
+export default configResource
+```
+
+## 💬 Prompts
+
+Define reusable prompts for models:
+
+```typescript
+import { PromptDefinition } from '@dynemcp/dynemcp'
+
+const codeReviewPrompt: PromptDefinition = {
+  id: 'code-review',
+  name: 'Code Review Assistant',
+  description: 'Helps review code for best practices',
+  content: `You are a senior engineer reviewing code.
+Focus on:
+- Quality and readability
+- Performance implications
+- Security considerations
+- Best practices
+
+Please provide constructive feedback.`,
+}
+
+export default codeReviewPrompt
+```
+
+## 🔧 Build System
+
+The framework includes a powerful build system to optimize your MCP servers:
+
+### Using the CLI
 
 ```bash
-# Development
+# Development with hot reload
 dynemcp dev
 
-# Build for production
+# Production build
 dynemcp build
 
-# Start production server
-dynemcp start
+# Watch mode
+dynemcp watch
 
-# Analyze dependencies
-dynemcp analyze
-
-# Clean build directory
+# Clean artifacts
 dynemcp clean
-```
 
-## Commands
-
-### `dynemcp dev`
-
-Start development server with hot reload:
-
-```bash
-dynemcp dev
-dynemcp dev --port 3001
-dynemcp dev --watch
-```
-
-### `dynemcp build`
-
-Build the project for production:
-
-```bash
-dynemcp build
-dynemcp build --clean
-dynemcp build --analyze
-dynemcp build --html
-```
-
-### `dynemcp start`
-
-Start production server:
-
-```bash
-dynemcp start
-dynemcp start --port 8080
-```
-
-### `dynemcp analyze`
-
-Analyze project dependencies:
-
-```bash
+# Analyze bundle
 dynemcp analyze
 ```
 
-### `dynemcp clean`
+### Programmatic usage
 
-Clean build directory:
+```typescript
+import { build, watch, BuildConfig } from '@dynemcp/dynemcp'
 
-```bash
-dynemcp clean
+const config: BuildConfig = {
+  input: './src/index.ts',
+  output: './dist',
+  target: 'node18',
+  minify: true,
+  sourcemap: true,
+}
+
+// Single build
+await build(config)
+
+// Watch mode
+await watch(config, (result) => {
+  console.log('Build completed:', result)
+})
 ```
 
-## Configuration
+## ⚙️ Configuration
 
-Create a `dynemcp.config.json` file in your project root:
+### dynemcp.config.json
 
 ```json
 {
   "server": {
     "name": "my-mcp-server",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "documentationUrl": "https://example.com/docs"
   },
-  "description": "A Model Context Protocol (MCP) server",
   "tools": {
     "enabled": true,
     "directory": "./src/tools",
@@ -115,288 +263,425 @@ Create a `dynemcp.config.json` file in your project root:
   "transport": {
     "type": "stdio"
   },
-  "build": {
-    "entryPoint": "./src/index.ts",
-    "outDir": "./dist",
-    "outFile": "server.js",
-    "format": "esm",
-    "minify": true,
-    "sourcemap": false,
-    "bundle": true,
-    "external": [],
-    "define": {},
-    "platform": "node",
-    "target": "node16",
-    "treeShaking": true,
-    "splitting": false,
-    "metafile": false,
-    "watch": false
-  }
-}
-```
-
-## Project Structure
-
-```
-my-mcp-project/
-├── src/
-│   ├── index.ts              # Server entry point
-│   ├── tools/                # MCP Tools
-│   ├── resources/            # MCP Resources
-│   └── prompts/              # MCP Prompts
-├── dynemcp.config.json       # Configuration
-├── package.json
-└── dist/                     # Build output
-```
-
-## Defining Components
-
-The core of a DyneMCP server is its components: Tools, Resources, and Prompts. The framework provides two flexible ways to define them, catering to different programming styles. The component loader will automatically detect the format you use.
-
-### 1. Declarative Method (Plain Objects)
-
-This is the most straightforward approach. You define a component as a plain JavaScript/TypeScript object that conforms to its corresponding `Definition` interface (`ToolDefinition`, `ResourceDefinition`, `PromptDefinition`).
-
-**Example: `src/tools/greeter.ts`**
-
-```typescript
-import { z } from 'zod'
-import { ToolDefinition } from '@dynemcp/dynemcp'
-
-const GreeterSchema = z.object({
-  name: z.string().describe('The name to greet'),
-})
-
-const greeterTool: ToolDefinition = {
-  name: 'greeter',
-  description: 'A simple tool that greets the user',
-  schema: GreeterSchema,
-  handler: async ({ name }: z.infer<typeof GreeterSchema>) => {
-    return { message: `Hello, ${name}!` }
+  "logging": {
+    "enabled": true,
+    "level": "info",
+    "format": "text",
+    "timestamp": true,
+    "colors": true
   },
-}
-
-export default greeterTool
-```
-
-### 2. Class-based Method (OOP)
-
-For those who prefer an Object-Oriented approach, you can extend the base classes provided by the framework (`DyneMCPTool`, `DyneMCPResource`, `DyneMCPPrompt`). This provides a clear structure and can encapsulate more complex logic cleanly.
-
-**Example: `src/tools/greeter.ts`**
-
-```typescript
-import { z } from 'zod'
-import { DyneMCPTool } from '@dynemcp/dynemcp'
-
-const GreeterSchema = z.object({
-  name: z.string().describe('The name to greet'),
-})
-
-export class GreeterTool extends DyneMCPTool {
-  // Note: 'name' is a getter to override the base class accessor
-  get name() {
-    return 'greeter'
-  }
-
-  readonly description = 'A simple tool that greets the user'
-  readonly schema = GreeterSchema
-
-  async execute(
-    input: z.infer<typeof GreeterSchema>
-  ): Promise<{ message: string }> {
-    return { message: `Hello, ${input.name}!` }
+  "debug": {
+    "enabled": false,
+    "verbose": false,
+    "showComponentDetails": false,
+    "showTransportDetails": false
+  },
+  "performance": {
+    "maxConcurrentRequests": 100,
+    "requestTimeout": 30000,
+    "memoryLimit": "512mb",
+    "enableMetrics": false
+  },
+  "security": {
+    "enableValidation": true,
+    "strictMode": false,
+    "allowedOrigins": ["*"],
+    "rateLimit": {
+      "enabled": false,
+      "maxRequests": 100,
+      "windowMs": 900000
+    }
   }
 }
-
-export default new GreeterTool()
 ```
 
-## Package.json Scripts
+## 🌐 Transport Types
 
-Add these scripts to your `package.json`:
+### stdio Transport (default)
 
 ```json
 {
-  "scripts": {
-    "dev": "dynemcp dev",
-    "build": "dynemcp build",
-    "start": "dynemcp start",
-    "clean": "dynemcp clean",
-    "analyze": "dynemcp analyze"
-  },
-  "dependencies": {
-    "@dynemcp/dynemcp": "^1.0.0"
+  "transport": {
+    "type": "stdio"
   }
 }
 ```
 
-## Programmatic Usage
+### HTTP Transport
 
-```typescript
-import { createServer, build, dev, start } from '@dynemcp/dynemcp'
-
-// Create server
-const server = createServer()
-
-// Build project
-await build({ clean: true, analyze: true })
-
-// Start development
-await dev({ watch: true })
-
-// Start production
-await start({ port: 3000 })
+```json
+{
+  "transport": {
+    "type": "http",
+    "options": {
+      "port": 3000,
+      "host": "localhost"
+    }
+  }
+}
 ```
 
-## API Reference
+### SSE Transport
 
-### Server API
-
-```typescript
-import { createServer, createMCPServer } from '@dynemcp/dynemcp'
-
-// Create server instance
-const server = createServer()
-
-// Start server
-await server.start()
-
-// Stop server
-await server.stop()
+```json
+{
+  "transport": {
+    "type": "sse",
+    "options": {
+      "port": 3000,
+      "endpoint": "/sse",
+      "messageEndpoint": "/message",
+      "cors": {
+        "allowOrigin": "*",
+        "allowMethods": "GET,POST",
+        "allowHeaders": "Content-Type"
+      }
+    }
+  }
+}
 ```
 
-### Build API
+### HTTP-Stream Transport
+
+```json
+{
+  "transport": {
+    "type": "http-stream",
+    "options": {
+      "port": 4000,
+      "responseMode": "stream",
+      "authentication": {
+        "path": "./src/auth.ts"
+      },
+      "session": {
+        "enabled": true
+      },
+      "resumability": {
+        "enabled": true
+      }
+    }
+  }
+}
+```
+
+## 🔧 Dynamic Registry
+
+Register components at runtime:
 
 ```typescript
-import { build, watch, analyze, clean } from '@dynemcp/dynemcp'
+import { createMCPServer } from '@dynemcp/dynemcp'
 
-// Build project
-const result = await build({
-  clean: true,
-  analyze: true,
-  manifest: true,
-  html: true,
+const server = createMCPServer()
+
+// Dynamically register tools
+server.registry.registerTool({
+  name: 'dynamic-tool',
+  description: 'A dynamically registered tool',
+  schema: z.object({}),
+  handler: async () => 'Dynamic response',
 })
 
-// Watch mode
-const ctx = await watch()
+// Register resources
+server.registry.registerResource({
+  uri: 'dynamic://resource',
+  name: 'Dynamic Resource',
+  content: 'Dynamic content',
+})
 
-// Analyze dependencies
-const analysis = await analyze()
-
-// Clean build
-await clean()
+// Register prompts
+server.registry.registerPrompt({
+  id: 'dynamic-prompt',
+  name: 'Dynamic Prompt',
+  content: 'Dynamic prompt content',
+})
 ```
 
-## Examples
+## 🎯 Model Sampling
 
-### Basic MCP Server
+Built-in support for LLM model sampling:
 
 ```typescript
-// src/index.ts
-import { createServer } from '@dynemcp/dynemcp'
+import { createMCPServer } from '@dynemcp/dynemcp'
 
-const server = createServer()
+const server = createMCPServer()
 
-async function main() {
-  try {
-    await server.start()
-  } catch (error) {
-    console.error('Failed to start server:', error)
-    process.exit(1)
+// Enable sampling in your tools
+const sampleTool: ToolDefinition = {
+  name: 'sample-model',
+  description: 'Samples a model for completion',
+  schema: z.object({
+    prompt: z.string(),
+    maxTokens: z.number().optional(),
+  }),
+  handler: async ({ prompt, maxTokens = 100 }) => {
+    // Use built-in sampling capabilities
+    const response = await server.sampleModel({
+      messages: [{ role: 'user', content: prompt }],
+      maxTokens,
+    })
+    return response.content
+  },
+}
+```
+
+## 🔒 Security Features
+
+### Authentication Middleware
+
+```typescript
+// auth.ts
+import { Request, Response, NextFunction } from 'express'
+
+export default function authenticate(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const token = req.headers.authorization
+
+  if (!token || !isValidToken(token)) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+
+  next()
+}
+```
+
+### Rate Limiting
+
+```json
+{
+  "security": {
+    "rateLimit": {
+      "enabled": true,
+      "maxRequests": 100,
+      "windowMs": 900000
+    }
   }
 }
-
-main()
 ```
 
-### Custom Tools
+### CORS Configuration
 
-```typescript
-// src/tools/calculator.ts
-import { Tool } from '@modelcontextprotocol/sdk'
-
-export const calculatorTool: Tool = {
-  name: 'calculator',
-  description: 'Perform mathematical calculations',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      expression: {
-        type: 'string',
-        description: 'Mathematical expression to evaluate',
-      },
-    },
-    required: ['expression'],
-  },
-  handler: async (args) => {
-    const { expression } = args
-    const result = eval(expression)
-    return { result }
-  },
+```json
+{
+  "transport": {
+    "type": "http-stream",
+    "options": {
+      "cors": {
+        "allowOrigin": "https://trusted-domain.com",
+        "allowMethods": "GET,POST",
+        "allowHeaders": "Content-Type,Authorization",
+        "exposeHeaders": "X-Rate-Limit-Remaining",
+        "maxAge": 86400
+      }
+    }
+  }
 }
 ```
 
-## Development
+## 📊 Performance and Monitoring
 
-### Local Development
+### Integrated Metrics
 
-```bash
-# Install dependencies
-pnpm install
+```typescript
+// Access performance metrics
+const server = createMCPServer()
+await server.init()
 
-# Build the package
-pnpm build
-
-# Run tests
-pnpm test
-
-# Watch mode
-pnpm dev
+console.log(server.stats)
+// {
+//   tools: { count: 5, loaded: 5 },
+//   resources: { count: 3, loaded: 3 },
+//   prompts: { count: 2, loaded: 2 },
+//   server: { name: 'my-server', version: '1.0.0' },
+//   transport: 'stdio'
+// }
 ```
 
-### Testing
+### Performance Configuration
 
-```bash
-# Run tests
-pnpm test
-
-# Watch tests
-pnpm test:watch
+```json
+{
+  "performance": {
+    "maxConcurrentRequests": 100,
+    "requestTimeout": 30000,
+    "memoryLimit": "512mb",
+    "enableMetrics": true
+  }
+}
 ```
 
-## Contributing
+## 🐛 Debugging
+
+### Environment Variables
+
+```bash
+# Enable debug logs on stderr
+export DYNE_MCP_DEBUG_STDERR=1
+
+# Silence stdio logs
+export DYNE_MCP_STDIO_LOG_SILENT=1
+```
+
+### Debug Configuration
+
+```json
+{
+  "debug": {
+    "enabled": true,
+    "verbose": true,
+    "showComponentDetails": true,
+    "showTransportDetails": true
+  },
+  "logging": {
+    "enabled": true,
+    "level": "debug",
+    "format": "json",
+    "timestamp": true
+  }
+}
+```
+
+## 🔧 CLI Commands
+
+```bash
+# Start development server
+dynemcp dev
+
+# Production build
+dynemcp build
+
+# Watch for changes
+dynemcp watch
+
+# Clean artifacts
+dynemcp clean
+
+# Analyze bundle size
+dynemcp analyze
+
+# Help
+dynemcp --help
+```
+
+## 📖 API Reference
+
+### createMCPServer()
+
+```typescript
+function createMCPServer(
+  name?: string,
+  configPath?: string,
+  version?: string
+): DyneMCP
+```
+
+### DyneMCP Class
+
+```typescript
+class DyneMCP {
+  // Configuration
+  getConfig(): DyneMCPConfig
+
+  // Lifecycle
+  async init(): Promise<void>
+  async start(): Promise<void>
+  async stop(): Promise<void>
+
+  // Registry access
+  readonly registry: Registry
+
+  // Component access
+  get tools(): ToolDefinition[]
+  get resources(): ResourceDefinition[]
+  get prompts(): PromptDefinition[]
+
+  // Statistics
+  get stats(): ServerStats
+}
+```
+
+### Build Functions
+
+```typescript
+// Build functions
+async function build(options: DyneMCPBuildOptions): Promise<BuildResult>
+async function watch(options: DyneMCPBuildOptions): Promise<void>
+async function buildCli(options: DyneMCPBuildOptions): Promise<BuildResult>
+async function clean(outputDir: string): Promise<void>
+async function analyze(options: DyneMCPBuildOptions): Promise<void>
+```
+
+## 🧪 Testing
+
+```typescript
+import { createMCPServer } from '@dynemcp/dynemcp'
+import { describe, it, expect } from 'vitest'
+
+describe('MCP Server', () => {
+  it('should initialize correctly', async () => {
+    const server = createMCPServer('test-server')
+    await server.init()
+
+    expect(server.stats.server.name).toBe('test-server')
+    expect(server.tools.length).toBeGreaterThan(0)
+  })
+})
+```
+
+## 🚀 Deployment
+
+### Docker
+
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+EXPOSE 3000
+CMD ["node", "dist/index.js"]
+```
+
+### Systemd Service
+
+```ini
+[Unit]
+Description=DyneMCP Server
+After=network.target
+
+[Service]
+Type=simple
+User=dynemcp
+WorkingDirectory=/opt/dynemcp
+ExecStart=/usr/bin/node dist/index.js
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+2. Create your feature branch (`git checkout -b feature/my-feature`)
+3. Commit your changes (`git commit -m 'Add feature'`)
+4. Push to the branch (`git push origin feature/my-feature`)
+5. Open a Pull Request
 
-## License
+## 📄 License
 
-MIT License - see LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
 
-## 📦 Configuración automática
+## 🔗 Links
 
-DyneMCP busca automáticamente el archivo `dynemcp.config.json` en el directorio actual cuando se inicializa el servidor. No necesitas pasar la ruta manualmente en la mayoría de los casos:
-
-```js
-import { createMCPServer } from '@dynemcp/dynemcp'
-const server = createMCPServer() // Usará dynemcp.config.json del cwd
-```
-
-Si el archivo no existe, el servidor lanzará un error claro y no arrancará:
-
-```
-No se encontró el archivo de configuración dynemcp.config.json en el directorio actual. Por favor, asegúrate de que el archivo existe o pasa la ruta explícitamente a createMCPServer.
-```
-
-Si necesitas usar un archivo de configuración en otra ruta:
-
-```js
-const server = createMCPServer(undefined, '/ruta/a/otro-config.json')
-```
-
-Esto asegura que la configuración siempre sea explícita y predecible para todos los desarrolladores.
+- [MCP Specification](https://modelcontextprotocol.io/)
+- [GitHub Repository](https://github.com/dynemcp/dynemcp)
+- [npm Package](https://www.npmjs.com/package/@dynemcp/dynemcp)
+- [Documentation](https://dynemcp.dev)

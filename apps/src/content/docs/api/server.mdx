@@ -1,0 +1,247 @@
+---
+title: Server API
+description: Complete reference for the DyneMCP Server API
+---
+
+# Server API Reference
+
+The Server API is the core of DyneMCP, providing the main interface for creating and managing MCP servers.
+
+## createMCPServer
+
+The main function to create a new MCP server instance.
+
+```typescript
+function createMCPServer(
+  name?: string,
+  configPath?: string,
+  version?: string
+): MCPServer
+```
+
+### Parameters
+
+- `name` (optional): The name of the server
+- `configPath` (optional): Path to the configuration file
+- `version` (optional): Server version
+
+### Returns
+
+Returns an instance of `MCPServer`.
+
+### Example
+
+```typescript
+import { createMCPServer } from '@dynemcp/dynemcp'
+
+const server = createMCPServer('my-server', 'dynemcp.config.json', '1.0.0')
+
+await server.start()
+```
+
+## MCPServer Class
+
+The main server class that handles all MCP operations.
+
+### Properties
+
+| Property    | Type           | Description          |
+| ----------- | -------------- | -------------------- |
+| `name`      | `string`       | Server name          |
+| `version`   | `string`       | Server version       |
+| `config`    | `ServerConfig` | Server configuration |
+| `registry`  | `Registry`     | Component registry   |
+| `transport` | `Transport`    | Transport layer      |
+
+### Methods
+
+#### start()
+
+Starts the MCP server.
+
+```typescript
+async start(): Promise<void>
+```
+
+#### stop()
+
+Stops the MCP server.
+
+```typescript
+async stop(): Promise<void>
+```
+
+#### reload()
+
+Reloads the server configuration.
+
+```typescript
+async reload(): Promise<void>
+```
+
+#### registerTool()
+
+Registers a new tool.
+
+```typescript
+registerTool(tool: Tool): void
+```
+
+#### registerResource()
+
+Registers a new resource.
+
+```typescript
+registerResource(resource: Resource): void
+```
+
+#### registerPrompt()
+
+Registers a new prompt.
+
+```typescript
+registerPrompt(prompt: Prompt): void
+```
+
+### Events
+
+The server emits various events that you can listen to:
+
+```typescript
+server.on('start', () => {
+  console.log('Server started')
+})
+
+server.on('stop', () => {
+  console.log('Server stopped')
+})
+
+server.on('error', (error) => {
+  console.error('Server error:', error)
+})
+
+server.on('request', (req) => {
+  console.log('Incoming request:', req)
+})
+
+server.on('response', (res) => {
+  console.log('Outgoing response:', res)
+})
+```
+
+## Configuration
+
+The server can be configured through `dynemcp.config.json` or programmatically:
+
+```typescript
+interface ServerConfig {
+  server: {
+    name: string
+    version: string
+    documentationUrl?: string
+  }
+  transport: TransportConfig
+  tools: ComponentConfig
+  resources: ComponentConfig
+  prompts: ComponentConfig
+  logging: LoggingConfig
+  security: SecurityConfig
+  performance: PerformanceConfig
+  debug: DebugConfig
+}
+```
+
+See the [Configuration API](/api/config) for detailed configuration options.
+
+## Error Handling
+
+The server includes built-in error handling:
+
+```typescript
+try {
+  await server.start()
+} catch (error) {
+  if (error instanceof MCPError) {
+    // Handle MCP-specific errors
+    console.error('MCP Error:', error.message)
+  } else {
+    // Handle other errors
+    console.error('Unknown error:', error)
+  }
+}
+```
+
+## Best Practices
+
+1. **Error Handling**
+
+   - Always implement error handling
+   - Use try-catch blocks around async operations
+   - Handle both MCP-specific and general errors
+
+2. **Configuration**
+
+   - Use environment variables for sensitive data
+   - Validate configuration before starting
+   - Use TypeScript for type safety
+
+3. **Lifecycle Management**
+
+   - Properly handle start/stop
+   - Clean up resources on stop
+   - Use event listeners for monitoring
+
+4. **Security**
+   - Enable input validation
+   - Configure CORS properly
+   - Use rate limiting in production
+
+## Examples
+
+### Basic Server
+
+```typescript
+import { createMCPServer } from '@dynemcp/dynemcp'
+
+const server = createMCPServer()
+await server.start()
+```
+
+### Server with Custom Configuration
+
+```typescript
+const server = createMCPServer()
+
+server.config.update({
+  transport: {
+    type: 'http',
+    options: {
+      port: 3000,
+    },
+  },
+  security: {
+    enableValidation: true,
+    strictMode: true,
+  },
+})
+
+await server.start()
+```
+
+### Server with Custom Error Handling
+
+```typescript
+const server = createMCPServer()
+
+server.on('error', (error) => {
+  console.error('Server error:', error)
+  // Custom error handling logic
+})
+
+try {
+  await server.start()
+} catch (error) {
+  console.error('Failed to start server:', error)
+  process.exit(1)
+}
+```

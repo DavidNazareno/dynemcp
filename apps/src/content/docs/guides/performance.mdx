@@ -1,0 +1,179 @@
+---
+title: Performance Guide
+description: Optimizing DyneMCP server performance and scalability
+---
+
+# Performance Guide
+
+This guide covers performance optimization techniques and best practices for DyneMCP servers.
+
+## Performance Features
+
+DyneMCP includes several basic performance features:
+
+1. Request Limiting
+2. Memory Management
+3. Request Timeout Control
+4. Basic Metrics
+
+## Configuration
+
+### Basic Performance Settings
+
+```json
+{
+  "performance": {
+    "maxConcurrentRequests": 100,
+    "requestTimeout": 30000,
+    "memoryLimit": "512mb",
+    "enableMetrics": true
+  }
+}
+```
+
+## Memory Management
+
+DyneMCP provides basic memory management through configuration:
+
+1. Memory Limit: Set a maximum memory limit for your server
+2. Concurrent Request Control: Limit the number of concurrent requests
+3. Request Timeout: Set timeouts to prevent long-running operations
+
+### Environment Variables
+
+You can configure performance settings through environment variables:
+
+```bash
+# Configure max concurrent requests
+export DYNEMCP_PERFORMANCE_MAX_CONCURRENT_REQUESTS=100
+
+# Set request timeout (in milliseconds)
+export DYNEMCP_PERFORMANCE_REQUEST_TIMEOUT=30000
+
+# Set memory limit
+export DYNEMCP_PERFORMANCE_MEMORY_LIMIT=512mb
+```
+
+## Best Practices
+
+### 1. Tool Implementation
+
+```typescript
+import { z } from 'zod'
+import type { ToolDefinition } from '@dynemcp/dynemcp'
+
+const efficientTool: ToolDefinition = {
+  name: 'efficient-tool',
+  description: 'An efficiently implemented tool',
+  schema: z.object({
+    input: z.string(),
+  }),
+  handler: async ({ input }) => {
+    // Process in chunks if dealing with large data
+    if (input.length > 1000) {
+      return processInChunks(input)
+    }
+    return processNormally(input)
+  },
+}
+```
+
+### 2. Resource Management
+
+- Keep resource files small and focused
+- Use async operations for I/O operations
+- Clean up resources when no longer needed
+- Avoid memory leaks in long-running operations
+
+### 3. Transport Selection
+
+Choose the appropriate transport for your use case:
+
+- `stdio`: Best for CLI tools and simple integrations
+- `http-stream`: Best for web applications and services that need real-time updates
+
+## Monitoring
+
+### Basic Metrics
+
+DyneMCP provides basic metrics through the server instance:
+
+```typescript
+const server = createMCPServer()
+await server.init()
+
+// Access basic stats
+console.log(server.stats)
+// {
+//   tools: { count: 5, loaded: 5 },
+//   resources: { count: 3, loaded: 3 },
+//   prompts: { count: 2, loaded: 2 },
+//   server: { name: 'my-server', version: '1.0.0' },
+//   transport: 'stdio'
+// }
+```
+
+### Debug Mode
+
+Enable debug mode for additional performance insights:
+
+```json
+{
+  "debug": {
+    "enabled": true,
+    "verbose": true,
+    "showComponentDetails": true,
+    "showTransportDetails": true
+  }
+}
+```
+
+## Performance Checklist
+
+### Development
+
+- [ ] Use appropriate schema validation
+- [ ] Implement proper error handling
+- [ ] Process large data in chunks
+- [ ] Use async operations where appropriate
+- [ ] Clean up resources properly
+
+### Production
+
+- [ ] Set appropriate memory limits
+- [ ] Configure request timeouts
+- [ ] Set concurrent request limits
+- [ ] Enable metrics in production
+- [ ] Monitor server performance
+
+## Example Configuration
+
+Here's an example of a performance-optimized DyneMCP server configuration:
+
+```json
+{
+  "server": {
+    "name": "optimized-mcp-server",
+    "version": "1.0.0"
+  },
+  "transport": {
+    "type": "http-stream",
+    "options": {
+      "port": 3000,
+      "responseMode": "stream",
+      "maxMessageSize": "1mb"
+    }
+  },
+  "performance": {
+    "maxConcurrentRequests": 100,
+    "requestTimeout": 30000,
+    "memoryLimit": "512mb",
+    "enableMetrics": true
+  },
+  "debug": {
+    "enabled": true,
+    "verbose": true,
+    "showComponentDetails": true
+  }
+}
+```

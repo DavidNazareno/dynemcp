@@ -1,0 +1,219 @@
+---
+title: Tool API
+description: Complete reference for creating and managing DyneMCP tools
+---
+
+# Tool API Reference
+
+Tools are the core building blocks of DyneMCP servers. They provide the functionality that MCP clients can invoke.
+
+## Tool Definition
+
+Tools in DyneMCP are defined using a simple object structure:
+
+```typescript
+import type { ToolDefinition } from '@dynemcp/dynemcp'
+import { z } from 'zod'
+
+const calculatorTool: ToolDefinition = {
+  name: 'calculator',
+  description: 'Performs basic math operations',
+  schema: z.object({
+    operation: z.enum(['add', 'subtract', 'multiply', 'divide']),
+    a: z.number(),
+    b: z.number(),
+  }),
+  handler: async ({ operation, a, b }) => {
+    switch (operation) {
+      case 'add':
+        return a + b
+      case 'subtract':
+        return a - b
+      case 'multiply':
+        return a * b
+      case 'divide':
+        if (b === 0) throw new Error('Division by zero')
+        return a / b
+    }
+  },
+}
+```
+
+### Required Properties
+
+| Property      | Type                    | Description                 |
+| ------------- | ----------------------- | --------------------------- |
+| `name`        | `string`                | Unique tool identifier      |
+| `description` | `string`                | Tool description            |
+| `schema`      | `z.ZodType`            | Parameter validation schema |
+| `handler`     | `(params: any) => any` | Tool implementation        |
+
+## Tool Registration
+
+Tools can be registered in two ways:
+
+### 1. Auto-discovery
+
+Place tools in the configured tools directory:
+
+```
+src/
+  tools/
+    calculator.ts
+    greeting.ts
+```
+
+```json
+{
+  "tools": {
+    "enabled": true,
+    "directory": "./src/tools",
+    "pattern": "**/*.{ts,js}"
+  }
+}
+```
+
+### 2. Manual Registration
+
+```typescript
+const server = createMCPServer()
+
+// Register a tool
+server.registry.addTool(calculatorTool)
+```
+
+## Schema Validation
+
+DyneMCP uses [Zod](https://github.com/colinhacks/zod) for parameter validation:
+
+```typescript
+import { z } from 'zod'
+
+const schema = z.object({
+  // String with min/max length
+  name: z
+    .string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(50, 'Name must be at most 50 characters'),
+
+  // Number with range
+  age: z
+    .number()
+    .int('Age must be an integer')
+    .min(0, 'Age must be positive')
+    .max(150, 'Age must be realistic'),
+
+  // Optional field
+  email: z.string().email('Invalid email format').optional(),
+
+  // Enum
+  role: z.enum(['user', 'admin']),
+
+  // Array
+  tags: z.array(z.string()),
+
+  // Nested object
+  address: z.object({
+    street: z.string(),
+    city: z.string(),
+    country: z.string(),
+  }),
+})
+```
+
+## Error Handling
+
+Tools should handle errors appropriately:
+
+```typescript
+const divisionTool: ToolDefinition = {
+  name: 'divide',
+  description: 'Divides two numbers',
+  schema: z.object({
+    dividend: z.number(),
+    divisor: z.number(),
+  }),
+  handler: async ({ dividend, divisor }) => {
+    // Input validation
+    if (divisor === 0) {
+      throw new Error('Division by zero is not allowed')
+    }
+
+    // Perform operation
+    return dividend / divisor
+  },
+}
+```
+
+## Best Practices
+
+1. **Input Validation**: Always define a schema to validate input parameters
+2. **Error Handling**: Handle edge cases and throw descriptive errors
+3. **Async Operations**: All handlers should be async functions
+4. **Type Safety**: Use TypeScript types for better development experience
+5. **Documentation**: Provide clear descriptions for tools and parameters
+
+## Examples
+
+### Async Tool
+
+```typescript
+export class WeatherTool extends DyneMCPTool {
+  get name() {
+    return 'weather'
+  }
+
+  readonly description = 'Gets weather for a location'
+
+  readonly schema = z.object({
+    city: z.string(),
+    country: z.string(),
+  })
+
+  async execute({ city, country }) {
+    try {
+      const response = await fetch(`https://api.weather.com/${city},${country}`)
+
+      if (!response.ok) {
+        throw new Error('Weather API error')
+      }
+
+      return await response.json()
+    } catch (error) {
+      throw new Error(`Weather lookup failed: ${error.message}`)
+    }
+  }
+}
+```
+
+### Stateful Tool
+
+```typescript
+export class CounterTool extends DyneMCPTool {
+  private count = 0
+
+  get name() {
+    return 'counter'
+  }
+
+  readonly description = 'Maintains a counter'
+
+  readonly schema = z.object({
+    action: z.enum(['increment', 'decrement', 'reset', 'get']),
+  })
+
+  async execute({ action }) {
+    switch (action) {
+      case 'increment':
+        return ++this.count
+      case 'decrement':
+        return --this.count
+      case 'reset':
+        this.count = 0
+        return this.count
+      case 'get':
+        return this.count
+    }
+  }
+}
+```

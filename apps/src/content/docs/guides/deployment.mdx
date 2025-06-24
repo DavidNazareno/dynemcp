@@ -1,0 +1,266 @@
+---
+title: Deployment Guide
+description: Guide for deploying DyneMCP servers to production
+---
+
+# Deployment Guide
+
+This guide covers best practices and strategies for deploying DyneMCP servers to production environments.
+
+## Deployment Options
+
+DyneMCP servers can be deployed in two main ways:
+
+1. Standalone Server
+2. Docker Container
+
+## Prerequisites
+
+Before deploying, ensure you have:
+
+1. Production-ready configuration
+2. Security measures in place
+3. Environment variables set
+4. Node.js 18+ installed
+
+## Standalone Deployment
+
+### Basic Setup
+
+```bash
+# Install dependencies
+pnpm install --prod
+
+# Set environment variables
+export NODE_ENV=production
+export DYNEMCP_TRANSPORT_TYPE=http-stream
+export DYNEMCP_HTTP_PORT=3000
+
+# Build the project
+pnpm run build
+
+# Start server
+pnpm start
+```
+
+### Process Management
+
+Using PM2:
+
+```bash
+# Install PM2
+pnpm add -g pm2
+
+# Start server
+pm2 start dist/index.js --name dynemcp
+
+# Configure auto-restart
+pm2 startup
+pm2 save
+
+# Monitor
+pm2 monit
+```
+
+## Docker Deployment
+
+### Dockerfile
+
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Install dependencies
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod
+
+# Copy source
+COPY dist/ ./dist/
+COPY dynemcp.config.json ./
+
+# Set environment
+ENV NODE_ENV=production
+ENV DYNEMCP_TRANSPORT_TYPE=http-stream
+ENV DYNEMCP_HTTP_PORT=3000
+
+# Start server
+CMD ["pnpm", "start"]
+```
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+
+services:
+  dynemcp:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - DYNEMCP_TRANSPORT_TYPE=http-stream
+      - DYNEMCP_HTTP_PORT=3000
+    volumes:
+      - ./logs:/app/logs
+    restart: always
+```
+
+## Configuration
+
+### Production Configuration
+
+```json
+{
+  "server": {
+    "name": "production-mcp-server",
+    "version": "1.0.0"
+  },
+  "transport": {
+    "type": "http-stream",
+    "options": {
+      "port": 3000,
+      "endpoint": "/mcp",
+      "responseMode": "stream",
+      "maxMessageSize": "1mb",
+      "authentication": {
+        "path": "./src/auth.ts"
+      }
+    }
+  },
+  "logging": {
+    "enabled": true,
+    "level": "info",
+    "format": "json",
+    "timestamp": true
+  },
+  "performance": {
+    "maxConcurrentRequests": 100,
+    "requestTimeout": 30000,
+    "memoryLimit": "512mb",
+    "enableMetrics": true
+  },
+  "security": {
+    "enableValidation": true,
+    "strictMode": true,
+    "allowedOrigins": ["https://yourdomain.com"],
+    "rateLimit": {
+      "enabled": true,
+      "maxRequests": 100,
+      "windowMs": 900000
+    }
+  }
+}
+```
+
+## Environment Variables
+
+DyneMCP supports configuration through environment variables:
+
+```bash
+# Server configuration
+export DYNEMCP_SERVER_NAME=production-server
+export DYNEMCP_SERVER_VERSION=1.0.0
+
+# Transport configuration
+export DYNEMCP_TRANSPORT_TYPE=http-stream
+export DYNEMCP_HTTP_PORT=3000
+export DYNEMCP_HTTP_ENDPOINT=/mcp
+export DYNEMCP_HTTP_RESPONSE_MODE=stream
+
+# Security configuration
+export DYNEMCP_SECURITY_ENABLE_VALIDATION=true
+export DYNEMCP_SECURITY_STRICT_MODE=true
+export DYNEMCP_SECURITY_ALLOWED_ORIGINS=https://yourdomain.com
+
+# Performance configuration
+export DYNEMCP_PERFORMANCE_MAX_CONCURRENT_REQUESTS=100
+export DYNEMCP_PERFORMANCE_REQUEST_TIMEOUT=30000
+export DYNEMCP_PERFORMANCE_MEMORY_LIMIT=512mb
+```
+
+## Production Checklist
+
+### Before Deployment
+
+- [ ] Run production build (`pnpm run build`)
+- [ ] Set up proper logging
+- [ ] Configure security settings
+- [ ] Set up authentication if needed
+- [ ] Configure CORS properly
+- [ ] Set appropriate rate limits
+
+### After Deployment
+
+- [ ] Verify server is running
+- [ ] Test all endpoints
+- [ ] Monitor memory usage
+- [ ] Check error logs
+- [ ] Verify security measures
+
+## Best Practices
+
+1. Always use production builds
+2. Set proper environment variables
+3. Use secure transport (http-stream)
+4. Enable strict mode in production
+5. Configure proper logging
+6. Set up monitoring
+7. Use process management (PM2)
+8. Keep dependencies updated
+
+## Example Production Setup
+
+1. Build the project:
+
+```bash
+# Build for production
+pnpm run build
+```
+
+2. Set up environment:
+
+```bash
+# Create production env file
+cat > .env.production << EOL
+NODE_ENV=production
+DYNEMCP_TRANSPORT_TYPE=http-stream
+DYNEMCP_HTTP_PORT=3000
+DYNEMCP_SECURITY_STRICT_MODE=true
+DYNEMCP_PERFORMANCE_MAX_CONCURRENT_REQUESTS=100
+EOL
+```
+
+3. Start with PM2:
+
+```bash
+# Start server with PM2
+pm2 start ecosystem.config.js --env production
+```
+
+Example `ecosystem.config.js`:
+
+```javascript
+module.exports = {
+  apps: [
+    {
+      name: 'dynemcp',
+      script: './dist/index.js',
+      env_production: {
+        NODE_ENV: 'production',
+        DYNEMCP_TRANSPORT_TYPE: 'http-stream',
+        DYNEMCP_HTTP_PORT: '3000',
+        DYNEMCP_SECURITY_STRICT_MODE: 'true',
+      },
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+    },
+  ],
+}
+```
