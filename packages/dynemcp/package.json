@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/dynemcp",
-  "version": "0.0.13-canary.20250623T16153",
+  "version": "0.0.15-canary.20250624T12095",
   "description": "Complete MCP framework with server runtime and build system",
   "private": false,
   "type": "module",

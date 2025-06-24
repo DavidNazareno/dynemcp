@@ -1,0 +1,608 @@
+# Tools Guide
+
+DyneMCP provides a powerful tools system that allows you to extend your MCP server's capabilities. Here's how to work with tools:
+
+## Tool Structure
+
+A tool in DyneMCP consists of:
+
+```typescript
+interface Tool {
+  name: string
+  description: string
+  parameters: {
+    type: 'object'
+    properties: Record<string, any>
+    required: string[]
+  }
+  handler: (params: any) => Promise<any>
+}
+```
+
+## Creating Tools
+
+Here's a basic example of creating a tool:
+
+```typescript
+import { createTool } from '@dynemcp/dynemcp'
+
+export const calculatorTool = createTool({
+  name: 'calculator',
+  description: 'Performs basic arithmetic operations',
+  parameters: {
+    type: 'object',
+    properties: {
+      operation: {
+        type: 'string',
+        enum: ['add', 'subtract', 'multiply', 'divide'],
+      },
+      a: { type: 'number' },
+      b: { type: 'number' },
+    },
+    required: ['operation', 'a', 'b'],
+  },
+  handler: async ({ operation, a, b }) => {
+    switch (operation) {
+      case 'add':
+        return a + b
+      case 'subtract':
+        return a - b
+      case 'multiply':
+        return a * b
+      case 'divide':
+        return a / b
+      default:
+        throw new Error('Invalid operation')
+    }
+  },
+})
+```
+
+## Tool Categories
+
+DyneMCP supports different types of tools:
+
+### 1. Synchronous Tools
+
+- Simple operations
+- Direct return values
+- No external dependencies
+
+### 2. Asynchronous Tools
+
+- API calls
+- Database operations
+- File system operations
+
+### 3. Streaming Tools
+
+- Real-time data processing
+- Long-running operations
+- Progress reporting
+
+## Input Validation
+
+DyneMCP uses [Zod](https://zod.dev/) for input validation and type safety:
+
+### Basic Types
+
+```typescript
+import { z } from 'zod'
+
+const schema = z.object({
+  // String with description
+  name: z.string().describe('User name'),
+
+  // Number with constraints
+  age: z.number().min(0).max(150).describe('User age'),
+
+  // Boolean
+  isActive: z.boolean().describe('Whether user is active'),
+
+  // Optional field
+  email: z.string().email().optional().describe('User email'),
+
+  // Default value
+  role: z.string().default('user').describe('User role'),
+
+  // Enum
+  status: z.enum(['active', 'inactive', 'pending']).describe('User status'),
+})
+```
+
+### Complex Types
+
+```typescript
+const complexSchema = z.object({
+  // Array of strings
+  tags: z.array(z.string()).describe('List of tags'),
+
+  // Nested object
+  metadata: z
+    .object({
+      created: z.string().datetime().describe('Creation timestamp'),
+      author: z.string().describe('Author name'),
+    })
+    .describe('File metadata'),
+
+  // Union types
+  content: z
+    .union([
+      z.string(),
+      z.object({ type: z.literal('file'), path: z.string() }),
+    ])
+    .describe('Content or file reference'),
+
+  // Conditional validation
+  settings: z
+    .object({
+      type: z.enum(['basic', 'advanced']),
+      options: z.any(),
+    })
+    .refine((data) => {
+      if (data.type === 'advanced') {
+        return typeof data.options === 'object'
+      }
+      return true
+    }, 'Advanced type requires options object'),
+})
+```
+
+## Error Handling
+
+### Basic Error Handling
+
+```typescript
+import { DyneMCPTool, MCPError } from '@dynemcp/dynemcp'
+import { z } from 'zod'
+
+export class SafeTool extends DyneMCPTool {
+  get name() {
+    return 'safe_operation'
+  }
+
+  readonly description = 'A tool with proper error handling'
+  readonly schema = z.object({
+    input: z.string().min(1).describe('Input data'),
+  })
+
+  async execute(input: z.infer<typeof this.schema>) {
+    try {
+      // Your tool logic here
+      const result = await this.performOperation(input.input)
+      return { success: true, result }
+    } catch (error) {
+      // Log the error for debugging
+      this.logger.error('Tool execution failed', { error, input })
+
+      // Return user-friendly error
+      if (error instanceof ValidationError) {
+        throw new MCPError('INVALID_INPUT', error.message)
+      }
+
+      throw new MCPError('INTERNAL_ERROR', 'Operation failed')
+    }
+  }
+
+  private async performOperation(data: string) {
+    // Implementation here
+    return data.toUpperCase()
+  }
+}
+```
+
+### Custom Error Types
+
+```typescript
+export class CustomError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string,
+    public readonly details?: any
+  ) {
+    super(message)
+    this.name = 'CustomError'
+  }
+}
+
+export class RobustTool extends DyneMCPTool {
+  async execute(input: any) {
+    try {
+      return await this.processInput(input)
+    } catch (error) {
+      if (error instanceof CustomError) {
+        throw new MCPError(error.code, error.message, error.details)
+      }
+      throw error
+    }
+  }
+}
+```
+
+## Advanced Tool Features
+
+### Tool Composition
+
+Combine multiple tools:
+
+```typescript
+import { composeTool } from '@dynemcp/dynemcp'
+
+const advancedCalculator = composeTool({
+  name: 'advancedCalculator',
+  tools: [calculatorTool, scientificTool],
+  handler: async (params) => {
+    // Custom logic to combine tools
+  },
+})
+```
+
+### Tool Middleware
+
+Add middleware for common functionality:
+
+```typescript
+import { addMiddleware } from '@dynemcp/dynemcp'
+
+const loggingMiddleware = (tool) => ({
+  ...tool,
+  handler: async (params) => {
+    console.log(`Executing ${tool.name}`)
+    const result = await tool.handler(params)
+    console.log(`Completed ${tool.name}`)
+    return result
+  },
+})
+
+const loggedCalculator = addMiddleware(calculatorTool, loggingMiddleware)
+```
+
+### Caching
+
+Implement result caching:
+
+```typescript
+export class CachedTool extends DyneMCPTool {
+  private cache = new Map<string, any>()
+
+  get name() {
+    return 'cached_operation'
+  }
+
+  readonly description = 'A tool with result caching'
+  readonly schema = z.object({
+    key: z.string().describe('Cache key'),
+  })
+
+  async execute(input: z.infer<typeof this.schema>) {
+    const cacheKey = this.generateCacheKey(input)
+
+    // Check cache first
+    if (this.cache.has(cacheKey)) {
+      this.logger.info('Cache hit', { key: cacheKey })
+      return this.cache.get(cacheKey)
+    }
+
+    // Execute and cache result
+    const result = await this.performExpensiveOperation(input)
+    this.cache.set(cacheKey, result)
+
+    return result
+  }
+
+  private generateCacheKey(input: any): string {
+    return JSON.stringify(input)
+  }
+
+  private async performExpensiveOperation(input: any) {
+    // Simulate expensive operation
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    return { processed: input.key }
+  }
+}
+```
+
+## File System Tools
+
+### Reading Files
+
+```typescript
+import { promises as fs } from 'fs'
+import { z } from 'zod'
+
+export class FileReaderTool extends DyneMCPTool {
+  get name() {
+    return 'read_file'
+  }
+
+  readonly description = 'Reads content from a file'
+  readonly schema = z.object({
+    path: z.string().describe('File path to read'),
+    encoding: z
+      .enum(['utf8', 'base64'])
+      .default('utf8')
+      .describe('File encoding'),
+  })
+
+  async execute(input: z.infer<typeof this.schema>) {
+    try {
+      const content = await fs.readFile(input.path, input.encoding)
+      const stats = await fs.stat(input.path)
+
+      return {
+        content,
+        size: stats.size,
+        modified: stats.mtime.toISOString(),
+      }
+    } catch (error) {
+      throw new MCPError(
+        'FILE_READ_ERROR',
+        `Failed to read file: ${error.message}`
+      )
+    }
+  }
+}
+```
+
+### Writing Files
+
+```typescript
+export class FileWriterTool extends DyneMCPTool {
+  get name() {
+    return 'write_file'
+  }
+
+  readonly description = 'Writes content to a file'
+  readonly schema = z.object({
+    path: z.string().describe('File path to write'),
+    content: z.string().describe('Content to write'),
+    encoding: z
+      .enum(['utf8', 'base64'])
+      .default('utf8')
+      .describe('File encoding'),
+  })
+
+  async execute(input: z.infer<typeof this.schema>) {
+    try {
+      await fs.writeFile(input.path, input.content, input.encoding)
+      const stats = await fs.stat(input.path)
+
+      return {
+        success: true,
+        size: stats.size,
+        path: input.path,
+      }
+    } catch (error) {
+      throw new MCPError(
+        'FILE_WRITE_ERROR',
+        `Failed to write file: ${error.message}`
+      )
+    }
+  }
+}
+```
+
+## HTTP Tools
+
+### Making API Calls
+
+```typescript
+import axios from 'axios'
+
+export class HTTPTool extends DyneMCPTool {
+  get name() {
+    return 'http_request'
+  }
+
+  readonly description = 'Makes HTTP requests'
+  readonly schema = z.object({
+    url: z.string().url().describe('Request URL'),
+    method: z
+      .enum(['GET', 'POST', 'PUT', 'DELETE'])
+      .default('GET')
+      .describe('HTTP method'),
+    headers: z.record(z.string()).optional().describe('Request headers'),
+    data: z.any().optional().describe('Request body'),
+  })
+
+  async execute(input: z.infer<typeof this.schema>) {
+    try {
+      const response = await axios({
+        url: input.url,
+        method: input.method,
+        headers: input.headers,
+        data: input.data,
+        timeout: 30000,
+      })
+
+      return {
+        status: response.status,
+        headers: response.headers,
+        data: response.data,
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new MCPError(
+          'HTTP_ERROR',
+          `HTTP request failed: ${error.message}`
+        )
+      }
+      throw error
+    }
+  }
+}
+```
+
+## Database Tools
+
+### SQL Query Tool
+
+```typescript
+import { Pool } from 'pg'
+
+export class SQLTool extends DyneMCPTool {
+  private pool: Pool
+
+  constructor() {
+    super()
+    this.pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    })
+  }
+
+  get name() {
+    return 'sql_query'
+  }
+
+  readonly description = 'Executes SQL queries'
+  readonly schema = z.object({
+    query: z.string().describe('SQL query to execute'),
+    params: z.array(z.any()).optional().describe('Query parameters'),
+  })
+
+  async execute(input: z.infer<typeof this.schema>) {
+    try {
+      const result = await this.pool.query(input.query, input.params)
+
+      return {
+        rows: result.rows,
+        rowCount: result.rowCount,
+        fields: result.fields?.map((f) => ({
+          name: f.name,
+          type: f.dataTypeID,
+        })),
+      }
+    } catch (error) {
+      throw new MCPError('SQL_ERROR', `SQL query failed: ${error.message}`)
+    }
+  }
+}
+```
+
+## Testing Tools
+
+### Unit Testing
+
+```typescript
+import { createTestServer } from '@dynemcp/dynemcp/testing'
+
+describe('CalculatorTool', () => {
+  let server: any
+
+  beforeEach(async () => {
+    server = createTestServer()
+    server.registerTool(new CalculatorTool())
+  })
+
+  it('should add two numbers', async () => {
+    const result = await server.callTool('calculator', {
+      operation: 'add',
+      a: 5,
+      b: 3,
+    })
+
+    expect(result).toBe(8)
+  })
+
+  it('should handle division by zero', async () => {
+    await expect(
+      server.callTool('calculator', {
+        operation: 'divide',
+        a: 5,
+        b: 0,
+      })
+    ).rejects.toThrow('Division by zero')
+  })
+})
+```
+
+### Integration Testing
+
+```typescript
+import { createTestClient } from '@dynemcp/dynemcp/testing'
+
+describe('Tool Integration', () => {
+  it('should work with real server', async () => {
+    const client = await createTestClient('./dynemcp.config.json')
+
+    const tools = await client.getTools()
+    expect(tools.map((t) => t.name)).toContain('calculator')
+
+    const result = await client.callTool('calculator', {
+      operation: 'multiply',
+      a: 4,
+      b: 6,
+    })
+
+    expect(result).toBe(24)
+  })
+})
+```
+
+## Best Practices
+
+### Design Principles
+
+1. **Single Responsibility**: Each tool should have one clear purpose
+2. **Input Validation**: Always validate and sanitize inputs
+3. **Error Handling**: Provide meaningful error messages
+4. **Documentation**: Include clear descriptions and examples
+5. **Performance**: Consider caching and optimization
+
+### Security Guidelines
+
+1. **Sanitize Inputs**: Never trust user input
+2. **Limit Access**: Implement proper authorization
+3. **Rate Limiting**: Prevent abuse
+4. **Audit Logging**: Log sensitive operations
+5. **Secret Management**: Use environment variables for secrets
+
+### Performance Tips
+
+1. **Use Caching**: Cache expensive operations
+2. **Async Operations**: Use promises and async/await
+3. **Connection Pooling**: Reuse database connections
+4. **Timeouts**: Set reasonable timeouts
+5. **Resource Cleanup**: Properly clean up resources
+
+## Tool Registry
+
+### Automatic Registration
+
+DyneMCP automatically discovers and registers tools:
+
+```typescript
+// src/tools/my-tool.ts
+export default new MyTool()
+```
+
+### Manual Registration
+
+You can also register tools manually:
+
+```typescript
+import { createMCPServer } from '@dynemcp/dynemcp'
+
+const server = createMCPServer()
+server.registerTool(new MyTool())
+```
+
+### Dynamic Registration
+
+Register tools at runtime:
+
+```typescript
+server.addTool({
+  name: 'dynamic-tool',
+  description: 'A dynamically created tool',
+  schema: z.object({}),
+  execute: async () => ({ message: 'Hello from dynamic tool!' }),
+})
+```
+
+## Next Steps
+
+- [CLI Reference](/docs/cli) - Learn command-line tools
+- [Framework Guide](/docs/framework) - Understand the architecture
+- [Templates](/docs/templates) - Explore pre-built templates
+- [Getting Started](/docs/getting-started) - Create your first project

@@ -1,0 +1,275 @@
+# CLI Reference
+
+The DyneMCP CLI provides powerful commands for creating, developing, and building MCP servers. This reference covers all available commands and options.
+
+## Installation
+
+### Global Installation
+
+```bash
+npm install -g @dynemcp/create-dynemcp
+```
+
+### Using npx (No Installation)
+
+```bash
+npx @dynemcp/create-dynemcp my-project
+```
+
+## Commands
+
+### create-dynemcp
+
+Creates a new DyneMCP project from templates.
+
+#### Basic Usage
+
+```bash
+create-dynemcp <project-name> [options]
+```
+
+#### Options
+
+| Option                   | Alias | Description                  | Default   |
+| ------------------------ | ----- | ---------------------------- | --------- |
+| `--template <n>`         | `-t`  | Template to use              | `default` |
+| `--yes`                  | `-y`  | Skip interactive prompts     | `false`   |
+| `--skip-install`         |       | Skip dependency installation | `false`   |
+| `--package-manager <pm>` |       | Package manager to use       | `npm`     |
+| `--help`                 | `-h`  | Show help                    |           |
+| `--version`              | `-v`  | Show version                 |           |
+
+#### Examples
+
+```bash
+# Interactive mode
+create-dynemcp my-agent
+
+# Use specific template
+create-dynemcp my-calc --template calculator
+
+# Non-interactive with custom package manager
+create-dynemcp my-server --yes --template http-server --package-manager pnpm
+
+# Skip dependency installation
+create-dynemcp my-project --skip-install
+```
+
+#### Available Templates
+
+| Template        | Description                         | Use Case                      |
+| --------------- | ----------------------------------- | ----------------------------- |
+| `default`       | Basic MCP server setup              | Learning, prototyping         |
+| `calculator`    | Mathematical computation tools      | Education, calculations       |
+| `http-server`   | Web-based MCP server                | API integration, web apps     |
+| `secure-agent`  | Production-ready with security      | Enterprise, production        |
+| `dynamic-agent` | Advanced with learning capabilities | AI research, adaptive systems |
+
+### dynemcp dev
+
+Starts development server with hot reload.
+
+#### Usage
+
+```bash
+dynemcp dev [options]
+```
+
+#### Options
+
+| Option               | Description               | Default               |
+| -------------------- | ------------------------- | --------------------- |
+| `--config <path>`    | Configuration file path   | `dynemcp.config.json` |
+| `--port <number>`    | Port for HTTP transport   | `3000`                |
+| `--watch <patterns>` | Additional watch patterns | `src/**/*`            |
+| `--no-reload`        | Disable hot reload        | `false`               |
+| `--verbose`          | Verbose logging           | `false`               |
+
+#### Examples
+
+```bash
+# Basic development
+dynemcp dev
+
+# Custom configuration
+dynemcp dev --config custom.config.json
+
+# Custom port
+dynemcp dev --port 8080
+
+# Watch additional files
+dynemcp dev --watch "data/**/*.json"
+
+# Disable hot reload
+dynemcp dev --no-reload
+
+# Verbose output
+dynemcp dev --verbose
+```
+
+### dynemcp build
+
+Builds the project for production.
+
+#### Usage
+
+```bash
+dynemcp build [options]
+```
+
+#### Options
+
+| Option            | Description             | Default               |
+| ----------------- | ----------------------- | --------------------- |
+| `--config <path>` | Configuration file path | `dynemcp.config.json` |
+| `--outdir <path>` | Output directory        | `dist`                |
+| `--minify`        | Minify output           | `true`                |
+| `--sourcemap`     | Generate source maps    | `false`               |
+| `--bundle`        | Bundle dependencies     | `true`                |
+| `--watch`         | Watch mode              | `false`               |
+| `--analyze`       | Analyze bundle          | `false`               |
+
+#### Examples
+
+```bash
+# Basic build
+dynemcp build
+
+# Custom output directory
+dynemcp build --outdir release
+
+# Development build with source maps
+dynemcp build --no-minify --sourcemap
+
+# Watch mode
+dynemcp build --watch
+
+# Bundle analysis
+dynemcp build --analyze
+```
+
+### dynemcp init
+
+Initializes a new DyneMCP project in existing directory.
+
+#### Usage
+
+```bash
+dynemcp init [options]
+```
+
+#### Options
+
+| Option           | Description               | Default   |
+| ---------------- | ------------------------- | --------- |
+| `--template <n>` | Template to use           | `default` |
+| `--force`        | Overwrite existing files  | `false`   |
+| `--git`          | Initialize git repository | `true`    |
+
+#### Examples
+
+```bash
+# Initialize in current directory
+dynemcp init
+
+# Use specific template
+dynemcp init --template calculator
+
+# Force overwrite
+dynemcp init --force --template secure-agent
+```
+
+### dynemcp add
+
+Adds components to existing project.
+
+#### Usage
+
+```bash
+dynemcp add <type> <name> [options]
+```
+
+#### Types
+
+- `tool` - Add a new tool
+- `resource` - Add a new resource
+- `prompt` - Add a new prompt
+
+#### Options
+
+| Option           | Description              | Default   |
+| ---------------- | ------------------------ | --------- |
+| `--template <n>` | Component template       | `default` |
+| `--force`        | Overwrite existing files | `false`   |
+
+#### Examples
+
+```bash
+# Add a new tool
+dynemcp add tool weather-tool
+
+# Add a resource with template
+dynemcp add resource api-docs --template rest-api
+
+# Add a prompt
+dynemcp add prompt code-review
+```
+
+## Global Configuration
+
+You can configure DyneMCP globally:
+
+```bash
+# Set default template
+dynemcp config set template calculator
+
+# Set default package manager
+dynemcp config set packageManager pnpm
+
+# View current configuration
+dynemcp config list
+```
+
+## Environment Variables
+
+| Variable              | Description         | Default               |
+| --------------------- | ------------------- | --------------------- |
+| `DYNEMCP_LOG_LEVEL`   | Logging level       | `info`                |
+| `DYNEMCP_CONFIG_PATH` | Default config path | `dynemcp.config.json` |
+| `DYNEMCP_CACHE_DIR`   | Cache directory     | `.dynemcp`            |
+
+## Troubleshooting
+
+### Common Issues
+
+**Error: "Command not found"**
+
+- Ensure DyneMCP is installed globally: `npm install -g @dynemcp/create-dynemcp`
+
+**Error: "Module not found"**
+
+- Run `npm install` or `pnpm install` in your project directory
+
+**Build fails with TypeScript errors**
+
+- Check your `tsconfig.json` configuration
+- Ensure all dependencies are installed
+
+**Hot reload not working**
+
+- Check if files are being watched correctly
+- Try restarting the dev server
+
+### Debug Mode
+
+Enable debug logging:
+
+```bash
+DEBUG=dynemcp:* dynemcp dev
+```
+
+### Getting Help
+
+- Use `--help` flag with any command
+- Check the [troubleshooting guide](/docs/troubleshooting)
+- Report issues on [GitHub](https://github.com/dynemcp/dynemcp/issues)

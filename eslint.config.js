@@ -16,7 +16,11 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['**/vite.config.*.timestamp*', '**/vitest.config.*.timestamp*'],
+    ignores: [
+      '**/vite.config.*.timestamp*',
+      '**/vitest.config.*.timestamp*',
+      '**/test-output',
+    ],
   },
   ...compat.extends('plugin:@nx/typescript', 'plugin:prettier/recommended'),
   ...compat.extends('plugin:@nx/javascript', 'plugin:prettier/recommended'),

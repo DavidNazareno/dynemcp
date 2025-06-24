@@ -1,0 +1,21 @@
+{
+  "name": "@dynemcp/dynedocs",
+  "version": "0.0.15-canary.20250624T12095",
+  "private": true,
+  "type": "module",
+  "nx": {
+    "name": "dynedocs"
+  },
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "~15.2.4",
+    "nextra": "^4.2.17",
+    "nextra-theme-docs": "^4.2.17",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  }
+}
