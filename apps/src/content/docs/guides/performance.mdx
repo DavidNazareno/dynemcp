@@ -1,0 +1,448 @@
+---
+title: Performance Guide
+description: Optimizing DyneMCP server performance and scalability
+---
+
+# Performance Guide
+
+This guide covers performance optimization techniques and best practices for DyneMCP servers.
+
+## Performance Features
+
+DyneMCP includes several performance-focused features:
+
+1. Request Caching
+2. Connection Pooling
+3. Resource Management
+4. Load Balancing
+5. Memory Management
+6. Performance Monitoring
+
+## Configuration
+
+### Basic Performance Settings
+
+```json
+{
+  "performance": {
+    "maxConcurrentRequests": 100,
+    "requestTimeout": 30000,
+    "memoryLimit": "512mb",
+    "enableMetrics": true,
+    "caching": {
+      "enabled": true,
+      "ttl": 3600,
+      "maxSize": 1000
+    }
+  }
+}
+```
+
+### Advanced Configuration
+
+```json
+{
+  "performance": {
+    "optimization": {
+      "minify": true,
+      "compress": true,
+      "sourceMaps": false
+    },
+    "workers": {
+      "enabled": true,
+      "maxWorkers": 4,
+      "queueSize": 100
+    },
+    "monitoring": {
+      "enabled": true,
+      "interval": 5000,
+      "metrics": ["cpu", "memory", "requests", "latency"]
+    }
+  }
+}
+```
+
+## Caching Strategies
+
+### Response Caching
+
+```typescript
+import { Cache } from '@dynemcp/dynemcp'
+
+export class CachedTool extends DyneMCPTool {
+  private cache = new Cache({
+    ttl: 3600,
+    maxSize: 1000,
+  })
+
+  async execute(params: any) {
+    const cacheKey = JSON.stringify(params)
+
+    // Check cache
+    const cached = await this.cache.get(cacheKey)
+    if (cached) {
+      return cached
+    }
+
+    // Compute result
+    const result = await expensiveOperation(params)
+
+    // Cache result
+    await this.cache.set(cacheKey, result)
+
+    return result
+  }
+}
+```
+
+### Resource Caching
+
+```typescript
+export const cachedResource = createResource({
+  uri: 'data://cached',
+  name: 'Cached Data',
+
+  // Private cache
+  #cache: null,
+  #lastUpdate: 0,
+  #ttl: 60000, // 1 minute
+
+  async content() {
+    const now = Date.now()
+
+    // Return cached data if valid
+    if (this.#cache && now - this.#lastUpdate < this.#ttl) {
+      return this.#cache
+    }
+
+    // Fetch new data
+    const data = await fetchData()
+
+    // Update cache
+    this.#cache = data
+    this.#lastUpdate = now
+
+    return data
+  },
+})
+```
+
+## Connection Pooling
+
+### Database Connections
+
+```typescript
+import { Pool } from 'pg'
+
+export class DatabaseTool extends DyneMCPTool {
+  private pool = new Pool({
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+  })
+
+  async execute(params: any) {
+    const client = await this.pool.connect()
+
+    try {
+      const result = await client.query('SELECT * FROM data WHERE id = $1', [
+        params.id,
+      ])
+      return result.rows
+    } finally {
+      client.release()
+    }
+  }
+}
+```
+
+### HTTP Connections
+
+```typescript
+import { HttpAgent } from 'http'
+
+export class HttpTool extends DyneMCPTool {
+  private agent = new HttpAgent({
+    keepAlive: true,
+    maxSockets: 100,
+    maxFreeSockets: 10,
+    timeout: 60000,
+  })
+
+  async execute(params: any) {
+    const response = await fetch(params.url, {
+      agent: this.agent,
+    })
+    return response.json()
+  }
+}
+```
+
+## Resource Management
+
+### Memory Management
+
+```typescript
+export class ResourceManager {
+  private resources = new Map()
+  private maxSize = 100
+
+  async acquire(key: string) {
+    // Check size limit
+    if (this.resources.size >= this.maxSize) {
+      // Release oldest resource
+      const oldestKey = this.resources.keys().next().value
+      await this.release(oldestKey)
+    }
+
+    // Create new resource
+    const resource = await createResource()
+    this.resources.set(key, resource)
+
+    return resource
+  }
+
+  async release(key: string) {
+    const resource = this.resources.get(key)
+    if (resource) {
+      await resource.cleanup()
+      this.resources.delete(key)
+    }
+  }
+}
+```
+
+### Worker Management
+
+```typescript
+import { Worker } from 'worker_threads'
+
+export class WorkerPool {
+  private workers: Worker[] = []
+  private queue: Task[] = []
+  private maxWorkers = 4
+
+  async execute(task: Task) {
+    // Get available worker
+    let worker = this.getIdleWorker()
+
+    if (!worker && this.workers.length < this.maxWorkers) {
+      // Create new worker
+      worker = await this.createWorker()
+    }
+
+    if (worker) {
+      // Execute task
+      return this.runTask(worker, task)
+    } else {
+      // Queue task
+      return new Promise((resolve) => {
+        this.queue.push({
+          ...task,
+          resolve,
+        })
+      })
+    }
+  }
+
+  private async createWorker() {
+    const worker = new Worker('./worker.js')
+    this.workers.push(worker)
+    return worker
+  }
+}
+```
+
+## Load Balancing
+
+### Round Robin
+
+```typescript
+export class LoadBalancer {
+  private servers: Server[] = []
+  private current = 0
+
+  async route(request: Request) {
+    // Get next server
+    const server = this.servers[this.current]
+
+    // Update counter
+    this.current = (this.current + 1) % this.servers.length
+
+    // Forward request
+    return server.handle(request)
+  }
+}
+```
+
+### Weighted Round Robin
+
+```typescript
+export class WeightedLoadBalancer {
+  private servers: WeightedServer[] = []
+  private totalWeight = 0
+  private current = 0
+
+  route(request: Request) {
+    let server: WeightedServer | null = null
+
+    // Find server based on weight
+    for (const s of this.servers) {
+      this.current += s.weight
+      if (this.current >= this.totalWeight) {
+        server = s
+        this.current = 0
+        break
+      }
+    }
+
+    return server!.handle(request)
+  }
+}
+```
+
+## Performance Monitoring
+
+### Metrics Collection
+
+```typescript
+export class PerformanceMonitor {
+  private metrics = {
+    requests: 0,
+    errors: 0,
+    latency: [] as number[],
+    memory: [] as number[],
+    cpu: [] as number[],
+  }
+
+  track(req: Request, res: Response) {
+    // Track request
+    this.metrics.requests++
+
+    // Track errors
+    if (res.status >= 400) {
+      this.metrics.errors++
+    }
+
+    // Track latency
+    this.metrics.latency.push(res.duration)
+
+    // Track resources
+    const usage = process.memoryUsage()
+    this.metrics.memory.push(usage.heapUsed)
+    this.metrics.cpu.push(process.cpuUsage().user)
+  }
+
+  getMetrics() {
+    return {
+      requests: this.metrics.requests,
+      errors: this.metrics.errors,
+      avgLatency: average(this.metrics.latency),
+      avgMemory: average(this.metrics.memory),
+      avgCpu: average(this.metrics.cpu),
+    }
+  }
+}
+```
+
+### Performance Alerts
+
+```typescript
+export class PerformanceAlerts {
+  private thresholds = {
+    latency: 1000,
+    memory: 512 * 1024 * 1024,
+    cpu: 80,
+    errorRate: 0.1,
+  }
+
+  check(metrics: Metrics) {
+    const alerts = []
+
+    // Check latency
+    if (metrics.avgLatency > this.thresholds.latency) {
+      alerts.push({
+        type: 'high_latency',
+        value: metrics.avgLatency,
+      })
+    }
+
+    // Check memory
+    if (metrics.avgMemory > this.thresholds.memory) {
+      alerts.push({
+        type: 'high_memory',
+        value: metrics.avgMemory,
+      })
+    }
+
+    // Check CPU
+    if (metrics.avgCpu > this.thresholds.cpu) {
+      alerts.push({
+        type: 'high_cpu',
+        value: metrics.avgCpu,
+      })
+    }
+
+    // Check error rate
+    const errorRate = metrics.errors / metrics.requests
+    if (errorRate > this.thresholds.errorRate) {
+      alerts.push({
+        type: 'high_error_rate',
+        value: errorRate,
+      })
+    }
+
+    return alerts
+  }
+}
+```
+
+## Best Practices
+
+### 1. Resource Optimization
+
+- Use connection pooling
+- Implement caching
+- Release resources promptly
+- Monitor resource usage
+
+### 2. Request Handling
+
+- Set appropriate timeouts
+- Implement rate limiting
+- Use worker threads
+- Handle errors gracefully
+
+### 3. Caching Strategy
+
+- Cache expensive operations
+- Use appropriate TTL values
+- Implement cache invalidation
+- Monitor cache hit rates
+
+### 4. Monitoring
+
+- Track key metrics
+- Set up alerts
+- Monitor resource usage
+- Log performance issues
+
+## Performance Checklist
+
+### Development
+
+- [ ] Enable performance metrics
+- [ ] Set up monitoring
+- [ ] Implement caching
+- [ ] Use connection pooling
+- [ ] Handle resource cleanup
+- [ ] Set appropriate timeouts
+
+### Production
+
+- [ ] Configure load balancing
+- [ ] Set up alerts
+- [ ] Monitor resource usage
+- [ ] Optimize caching
+- [ ] Handle high load
+- [ ] Regular performance audits

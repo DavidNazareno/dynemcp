@@ -1,0 +1,514 @@
+---
+title: Deployment Guide
+description: Guide for deploying DyneMCP servers to production
+---
+
+# Deployment Guide
+
+This guide covers best practices and strategies for deploying DyneMCP servers to production environments.
+
+## Deployment Options
+
+DyneMCP servers can be deployed in various ways:
+
+1. Standalone Server
+2. Docker Container
+3. Kubernetes Cluster
+4. Serverless Functions
+5. Cloud Services
+
+## Prerequisites
+
+Before deploying, ensure you have:
+
+1. Production-ready configuration
+2. Security measures in place
+3. Monitoring setup
+4. Backup strategy
+5. Rollback plan
+
+## Standalone Deployment
+
+### Basic Setup
+
+```bash
+# Install dependencies
+npm install --production
+
+# Set environment variables
+export NODE_ENV=production
+export PORT=80
+export JWT_SECRET=your-secret
+
+# Start server
+npm start
+```
+
+### Process Management
+
+Using PM2:
+
+```bash
+# Install PM2
+npm install -g pm2
+
+# Start server
+pm2 start dist/server.js --name dynemcp
+
+# Configure auto-restart
+pm2 startup
+pm2 save
+
+# Monitor
+pm2 monit
+```
+
+## Docker Deployment
+
+### Dockerfile
+
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci --production
+
+# Copy source
+COPY dist/ ./dist/
+COPY dynemcp.config.json ./
+
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=80
+
+# Start server
+CMD ["npm", "start"]
+```
+
+### Docker Compose
+
+```yaml
+version: '3.8'
+
+services:
+  dynemcp:
+    build: .
+    ports:
+      - '80:80'
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=your-secret
+    volumes:
+      - ./logs:/app/logs
+    restart: always
+```
+
+## Kubernetes Deployment
+
+### Deployment Configuration
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynemcp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dynemcp
+  template:
+    metadata:
+      labels:
+        app: dynemcp
+    spec:
+      containers:
+        - name: dynemcp
+          image: dynemcp:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: dynemcp-secrets
+                  key: jwt-secret
+          resources:
+            limits:
+              cpu: '1'
+              memory: '1Gi'
+            requests:
+              cpu: '500m'
+              memory: '512Mi'
+```
+
+### Service Configuration
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: dynemcp
+spec:
+  selector:
+    app: dynemcp
+  ports:
+    - port: 80
+      targetPort: 80
+  type: LoadBalancer
+```
+
+## Serverless Deployment
+
+### AWS Lambda
+
+```typescript
+import { createMCPServer } from '@dynemcp/dynemcp'
+import { APIGatewayProxyHandler } from 'aws-lambda'
+
+const server = createMCPServer()
+
+export const handler: APIGatewayProxyHandler = async (event) => {
+  try {
+    const result = await server.execute(
+      event.pathParameters?.tool,
+      JSON.parse(event.body || '{}')
+    )
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(result),
+    }
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: error.message }),
+    }
+  }
+}
+```
+
+### Vercel
+
+```typescript
+import { createMCPServer } from '@dynemcp/dynemcp'
+import { VercelRequest, VercelResponse } from '@vercel/node'
+
+const server = createMCPServer()
+
+export default async function (req: VercelRequest, res: VercelResponse) {
+  try {
+    const result = await server.execute(req.query.tool as string, req.body)
+    res.json(result)
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
+```
+
+## Cloud Services
+
+### Google Cloud Run
+
+```yaml
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/dynemcp', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/dynemcp']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'dynemcp'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/dynemcp'
+      - '--platform'
+      - 'managed'
+      - '--region'
+      - 'us-central1'
+      - '--allow-unauthenticated'
+```
+
+### Azure Container Apps
+
+```yaml
+resources:
+  - type: Microsoft.App/containerApps
+    name: dynemcp
+    properties:
+      configuration:
+        ingress:
+          external: true
+          targetPort: 80
+      template:
+        containers:
+          - image: dynemcp:latest
+            name: dynemcp
+            env:
+              - name: NODE_ENV
+                value: production
+```
+
+## Production Configuration
+
+### Security Settings
+
+```json
+{
+  "security": {
+    "enableValidation": true,
+    "strictMode": true,
+    "rateLimit": {
+      "enabled": true,
+      "maxRequests": 100,
+      "windowMs": 900000
+    },
+    "cors": {
+      "origin": ["https://app.example.com"],
+      "methods": ["GET", "POST"]
+    }
+  }
+}
+```
+
+### Performance Settings
+
+```json
+{
+  "performance": {
+    "maxConcurrentRequests": 100,
+    "requestTimeout": 30000,
+    "memoryLimit": "512mb",
+    "caching": {
+      "enabled": true,
+      "ttl": 3600
+    }
+  }
+}
+```
+
+## Monitoring
+
+### Health Checks
+
+```typescript
+app.get('/health', (req, res) => {
+  const health = {
+    uptime: process.uptime(),
+    timestamp: Date.now(),
+    memory: process.memoryUsage(),
+    cpu: process.cpuUsage(),
+  }
+
+  res.json(health)
+})
+```
+
+### Metrics
+
+```typescript
+import prometheus from 'prom-client'
+
+const requestCounter = new prometheus.Counter({
+  name: 'dynemcp_requests_total',
+  help: 'Total requests',
+})
+
+const latencyHistogram = new prometheus.Histogram({
+  name: 'dynemcp_request_duration_seconds',
+  help: 'Request duration',
+})
+
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', prometheus.register.contentType)
+  res.end(await prometheus.register.metrics())
+})
+```
+
+## Backup Strategy
+
+### Data Backup
+
+```typescript
+import { backup } from '@dynemcp/dynemcp'
+
+async function backupData() {
+  const data = await backup.export({
+    include: ['tools', 'resources', 'config'],
+  })
+
+  await storage.upload('backup.json', data)
+}
+
+// Schedule backup
+setInterval(backupData, 24 * 60 * 60 * 1000)
+```
+
+### Configuration Backup
+
+```typescript
+import { config } from '@dynemcp/dynemcp'
+
+async function backupConfig() {
+  const current = config.export()
+
+  await storage.upload(
+    `config-${Date.now()}.json`,
+    JSON.stringify(current, null, 2)
+  )
+}
+```
+
+## Deployment Checklist
+
+### Pre-deployment
+
+- [ ] Run tests
+- [ ] Build production assets
+- [ ] Update configuration
+- [ ] Check dependencies
+- [ ] Review security
+
+### Deployment
+
+- [ ] Backup data
+- [ ] Deploy code
+- [ ] Update DNS
+- [ ] Start services
+- [ ] Verify health
+
+### Post-deployment
+
+- [ ] Monitor metrics
+- [ ] Check logs
+- [ ] Test functionality
+- [ ] Document changes
+- [ ] Update status
+
+## Best Practices
+
+### 1. Environment Setup
+
+- Use environment variables
+- Secure secrets management
+- Configure logging
+- Set up monitoring
+
+### 2. Performance
+
+- Enable caching
+- Configure rate limiting
+- Optimize resources
+- Monitor metrics
+
+### 3. Security
+
+- Enable HTTPS
+- Configure authentication
+- Set up firewalls
+- Regular updates
+
+### 4. Maintenance
+
+- Regular backups
+- Monitor resources
+- Update dependencies
+- Review logs
+
+## Troubleshooting
+
+### Common Issues
+
+1. Memory Leaks
+
+```typescript
+// Monitor memory usage
+setInterval(() => {
+  const usage = process.memoryUsage()
+  if (usage.heapUsed > threshold) {
+    notifyAdmin('High memory usage')
+  }
+}, 5000)
+```
+
+2. Connection Issues
+
+```typescript
+server.on('error', (error) => {
+  if (error.code === 'ECONNREFUSED') {
+    reconnect()
+  }
+})
+```
+
+3. Performance Issues
+
+```typescript
+const slowQueries = new Map()
+
+server.on('request', (req, res) => {
+  const start = Date.now()
+
+  res.on('finish', () => {
+    const duration = Date.now() - start
+    if (duration > 1000) {
+      slowQueries.set(req.id, {
+        duration,
+        path: req.path,
+        params: req.params,
+      })
+    }
+  })
+})
+```
+
+### Recovery Steps
+
+1. Service Recovery
+
+```bash
+# Check logs
+tail -f /var/log/dynemcp.log
+
+# Restart service
+pm2 restart dynemcp
+
+# Check status
+pm2 status
+```
+
+2. Data Recovery
+
+```typescript
+async function recover() {
+  // Load backup
+  const backup = await storage.download('backup.json')
+
+  // Restore data
+  await server.import(backup)
+
+  // Verify
+  await server.verify()
+}
+```
+
+3. Configuration Recovery
+
+```typescript
+async function recoverConfig() {
+  // Get last good config
+  const config = await storage.download('config-latest.json')
+
+  // Apply config
+  await server.config.update(JSON.parse(config))
+
+  // Restart server
+  await server.restart()
+}
+```

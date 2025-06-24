@@ -1,0 +1,506 @@
+---
+title: Testing Guide
+description: Comprehensive guide for testing DyneMCP servers and tools
+---
+
+# Testing Guide
+
+This guide covers testing strategies and best practices for DyneMCP servers, tools, and components.
+
+## Testing Features
+
+DyneMCP includes built-in testing utilities:
+
+1. Tool Testing
+2. Server Testing
+3. Transport Testing
+4. Integration Testing
+5. Performance Testing
+6. Security Testing
+
+## Test Configuration
+
+### Jest Configuration
+
+```javascript
+// jest.config.js
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
+}
+```
+
+### Test Environment Setup
+
+```typescript
+// src/test/setup.ts
+import { TestServer } from '@dynemcp/dynemcp/testing'
+
+beforeAll(async () => {
+  // Start test server
+  await TestServer.start()
+})
+
+afterAll(async () => {
+  // Stop test server
+  await TestServer.stop()
+})
+
+beforeEach(async () => {
+  // Reset test state
+  await TestServer.reset()
+})
+```
+
+## Tool Testing
+
+### Basic Tool Test
+
+```typescript
+import { TestServer, createTestTool } from '@dynemcp/dynemcp/testing'
+
+describe('CalculatorTool', () => {
+  let tool: CalculatorTool
+
+  beforeEach(() => {
+    tool = createTestTool(CalculatorTool)
+  })
+
+  test('adds two numbers', async () => {
+    const result = await tool.execute({
+      operation: 'add',
+      a: 2,
+      b: 3,
+    })
+
+    expect(result).toBe(5)
+  })
+
+  test('validates input', async () => {
+    await expect(
+      tool.execute({
+        operation: 'add',
+        a: 'invalid',
+        b: 3,
+      })
+    ).rejects.toThrow('Invalid input')
+  })
+})
+```
+
+### Mocking Dependencies
+
+```typescript
+import { mockResource, mockTool } from '@dynemcp/dynemcp/testing'
+
+describe('AdvancedTool', () => {
+  beforeEach(() => {
+    // Mock dependent tool
+    mockTool('basic', {
+      execute: jest.fn().mockResolvedValue(42),
+    })
+
+    // Mock resource
+    mockResource('data://test', {
+      content: { value: 10 },
+    })
+  })
+
+  test('uses dependencies', async () => {
+    const tool = createTestTool(AdvancedTool)
+
+    const result = await tool.execute({
+      input: 'test',
+    })
+
+    expect(result).toBe(52) // 42 + 10
+  })
+})
+```
+
+## Server Testing
+
+### Server Setup
+
+```typescript
+import { TestServer } from '@dynemcp/dynemcp/testing'
+
+describe('Server', () => {
+  let server: TestServer
+
+  beforeEach(async () => {
+    server = await TestServer.create({
+      tools: [CalculatorTool],
+      resources: [dataResource],
+      transport: 'memory',
+    })
+  })
+
+  afterEach(async () => {
+    await server.stop()
+  })
+
+  test('handles requests', async () => {
+    const response = await server.execute('calculator', {
+      operation: 'add',
+      a: 2,
+      b: 3,
+    })
+
+    expect(response).toBe(5)
+  })
+})
+```
+
+### Transport Testing
+
+```typescript
+import { TestTransport } from '@dynemcp/dynemcp/testing'
+
+describe('HTTP Transport', () => {
+  let transport: TestTransport
+
+  beforeEach(async () => {
+    transport = await TestTransport.create('http', {
+      port: 3000,
+    })
+  })
+
+  afterEach(async () => {
+    await transport.stop()
+  })
+
+  test('handles HTTP requests', async () => {
+    const response = await fetch('http://localhost:3000/tools/calculator', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        operation: 'add',
+        a: 2,
+        b: 3,
+      }),
+    })
+
+    const result = await response.json()
+    expect(result).toBe(5)
+  })
+})
+```
+
+## Integration Testing
+
+### End-to-End Tests
+
+```typescript
+import { TestServer } from '@dynemcp/dynemcp/testing'
+
+describe('Calculator Integration', () => {
+  let server: TestServer
+
+  beforeAll(async () => {
+    server = await TestServer.create({
+      configPath: './test/config.json',
+    })
+  })
+
+  afterAll(async () => {
+    await server.stop()
+  })
+
+  test('complete calculation flow', async () => {
+    // Step 1: Add numbers
+    const sum = await server.execute('calculator', {
+      operation: 'add',
+      a: 2,
+      b: 3,
+    })
+    expect(sum).toBe(5)
+
+    // Step 2: Multiply result
+    const product = await server.execute('calculator', {
+      operation: 'multiply',
+      a: sum,
+      b: 2,
+    })
+    expect(product).toBe(10)
+
+    // Step 3: Store result
+    await server.execute('storage', {
+      operation: 'set',
+      key: 'result',
+      value: product,
+    })
+
+    // Step 4: Retrieve result
+    const stored = await server.execute('storage', {
+      operation: 'get',
+      key: 'result',
+    })
+    expect(stored).toBe(10)
+  })
+})
+```
+
+### Component Integration
+
+```typescript
+import { TestServer } from '@dynemcp/dynemcp/testing'
+
+describe('Component Integration', () => {
+  test('tools and resources', async () => {
+    const server = await TestServer.create({
+      tools: [CalculatorTool, StorageTool],
+      resources: [dataResource],
+    })
+
+    // Tool uses resource
+    const result = await server.execute('calculator', {
+      operation: 'processData',
+    })
+
+    expect(result).toMatchObject({
+      processed: true,
+      data: expect.any(Object),
+    })
+  })
+
+  test('transport and authentication', async () => {
+    const server = await TestServer.create({
+      transport: 'http',
+      security: {
+        authentication: {
+          type: 'bearer',
+          secret: 'test-secret',
+        },
+      },
+    })
+
+    // Authenticated request
+    const response = await fetch('http://localhost:3000/tools/calculator', {
+      headers: {
+        Authorization: 'Bearer test-token',
+      },
+    })
+
+    expect(response.status).toBe(200)
+  })
+})
+```
+
+## Performance Testing
+
+### Load Testing
+
+```typescript
+import { LoadTest } from '@dynemcp/dynemcp/testing'
+
+describe('Performance', () => {
+  test('handles concurrent requests', async () => {
+    const server = await TestServer.create()
+
+    const loadTest = new LoadTest({
+      server,
+      tool: 'calculator',
+      params: {
+        operation: 'add',
+        a: 2,
+        b: 3,
+      },
+      concurrency: 100,
+      duration: 10000,
+    })
+
+    const results = await loadTest.run()
+
+    expect(results.successRate).toBeGreaterThan(0.99)
+    expect(results.avgLatency).toBeLessThan(100)
+  })
+})
+```
+
+### Memory Testing
+
+```typescript
+import { MemoryTest } from '@dynemcp/dynemcp/testing'
+
+describe('Memory Usage', () => {
+  test('memory remains stable', async () => {
+    const server = await TestServer.create()
+
+    const memTest = new MemoryTest({
+      server,
+      duration: 60000,
+      operation: async () => {
+        await server.execute('calculator', {
+          operation: 'add',
+          a: 2,
+          b: 3,
+        })
+      },
+    })
+
+    const results = await memTest.run()
+
+    expect(results.leak).toBeFalsy()
+    expect(results.maxUsage).toBeLessThan(100 * 1024 * 1024)
+  })
+})
+```
+
+## Security Testing
+
+### Authentication Tests
+
+```typescript
+import { SecurityTest } from '@dynemcp/dynemcp/testing'
+
+describe('Security', () => {
+  test('requires authentication', async () => {
+    const server = await TestServer.create({
+      security: {
+        authentication: {
+          type: 'bearer',
+          secret: 'test-secret',
+        },
+      },
+    })
+
+    // No token
+    const response1 = await fetch('http://localhost:3000/tools/calculator')
+    expect(response1.status).toBe(401)
+
+    // Invalid token
+    const response2 = await fetch('http://localhost:3000/tools/calculator', {
+      headers: {
+        Authorization: 'Bearer invalid',
+      },
+    })
+    expect(response2.status).toBe(401)
+
+    // Valid token
+    const response3 = await fetch('http://localhost:3000/tools/calculator', {
+      headers: {
+        Authorization: 'Bearer valid-token',
+      },
+    })
+    expect(response3.status).toBe(200)
+  })
+})
+```
+
+### Input Validation Tests
+
+```typescript
+import { ValidationTest } from '@dynemcp/dynemcp/testing'
+
+describe('Input Validation', () => {
+  test('validates tool input', async () => {
+    const server = await TestServer.create()
+
+    const validationTest = new ValidationTest({
+      server,
+      tool: 'calculator',
+      tests: [
+        {
+          input: {
+            operation: 'add',
+            a: 'invalid',
+            b: 3,
+          },
+          expectError: true,
+        },
+        {
+          input: {
+            operation: 'divide',
+            a: 10,
+            b: 0,
+          },
+          expectError: true,
+        },
+        {
+          input: {
+            operation: 'add',
+            a: 2,
+            b: 3,
+          },
+          expectSuccess: true,
+        },
+      ],
+    })
+
+    await validationTest.run()
+  })
+})
+```
+
+## Best Practices
+
+### 1. Test Organization
+
+- Group related tests
+- Use descriptive names
+- Follow AAA pattern
+- Keep tests focused
+
+### 2. Test Coverage
+
+- Test happy paths
+- Test edge cases
+- Test error handling
+- Test security features
+
+### 3. Test Maintenance
+
+- Keep tests simple
+- Avoid test duplication
+- Use test utilities
+- Regular updates
+
+### 4. Test Performance
+
+- Fast test execution
+- Parallel testing
+- Resource cleanup
+- Efficient mocking
+
+## Testing Checklist
+
+### Unit Tests
+
+- [ ] Tool functionality
+- [ ] Input validation
+- [ ] Error handling
+- [ ] Resource usage
+- [ ] Component isolation
+
+### Integration Tests
+
+- [ ] Component interaction
+- [ ] Data flow
+- [ ] Transport handling
+- [ ] Security features
+- [ ] Error propagation
+
+### Performance Tests
+
+- [ ] Load testing
+- [ ] Memory usage
+- [ ] Response times
+- [ ] Concurrency
+- [ ] Resource limits
+
+### Security Tests
+
+- [ ] Authentication
+- [ ] Authorization
+- [ ] Input validation
+- [ ] Error handling
+- [ ] Rate limiting

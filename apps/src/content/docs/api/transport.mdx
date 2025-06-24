@@ -1,0 +1,439 @@
+---
+title: Transport API
+description: Complete reference for DyneMCP transport system and protocols
+---
+
+# Transport API Reference
+
+The Transport API handles communication between MCP clients and the server. DyneMCP supports multiple transport protocols and allows custom transport implementations.
+
+## Built-in Transports
+
+DyneMCP includes several built-in transport types:
+
+1. stdio (Default)
+2. HTTP
+3. SSE (Server-Sent Events)
+4. HTTP-Stream
+
+## Transport Interface
+
+```typescript
+interface Transport {
+  readonly type: string
+  readonly options: TransportOptions
+
+  start(): Promise<void>
+  stop(): Promise<void>
+  send(message: any): Promise<void>
+  onMessage(handler: (message: any) => void): void
+}
+```
+
+### Properties
+
+| Property  | Type               | Description               |
+| --------- | ------------------ | ------------------------- |
+| `type`    | `string`           | Transport type identifier |
+| `options` | `TransportOptions` | Configuration options     |
+
+## Transport Configuration
+
+### stdio Transport
+
+```typescript
+interface StdioTransportOptions {
+  type: 'stdio'
+  // No additional options required
+}
+```
+
+Example:
+
+```json
+{
+  "transport": {
+    "type": "stdio"
+  }
+}
+```
+
+### HTTP Transport
+
+```typescript
+interface HTTPTransportOptions {
+  type: 'http'
+  options: {
+    port: number
+    host: string
+    cors?: CORSOptions
+    rateLimit?: RateLimitOptions
+    authentication?: AuthOptions
+  }
+}
+```
+
+Example:
+
+```json
+{
+  "transport": {
+    "type": "http",
+    "options": {
+      "port": 3000,
+      "host": "localhost",
+      "cors": {
+        "origin": "*",
+        "methods": ["GET", "POST"]
+      },
+      "rateLimit": {
+        "windowMs": 900000,
+        "max": 100
+      }
+    }
+  }
+}
+```
+
+### SSE Transport
+
+```typescript
+interface SSETransportOptions {
+  type: 'sse'
+  options: {
+    port: number
+    endpoint: string
+    messageEndpoint: string
+    cors?: CORSOptions
+    heartbeat?: HeartbeatOptions
+  }
+}
+```
+
+Example:
+
+```json
+{
+  "transport": {
+    "type": "sse",
+    "options": {
+      "port": 3000,
+      "endpoint": "/sse",
+      "messageEndpoint": "/message",
+      "heartbeat": {
+        "interval": 30000
+      }
+    }
+  }
+}
+```
+
+### HTTP-Stream Transport
+
+```typescript
+interface HTTPStreamTransportOptions {
+  type: 'http-stream'
+  options: {
+    port: number
+    responseMode: 'stream' | 'chunk'
+    authentication?: AuthOptions
+    session?: SessionOptions
+    resumability?: ResumabilityOptions
+  }
+}
+```
+
+Example:
+
+```json
+{
+  "transport": {
+    "type": "http-stream",
+    "options": {
+      "port": 4000,
+      "responseMode": "stream",
+      "session": {
+        "enabled": true,
+        "store": "memory"
+      }
+    }
+  }
+}
+```
+
+## Creating Custom Transports
+
+You can create custom transports by implementing the Transport interface:
+
+```typescript
+import { Transport, TransportOptions } from '@dynemcp/dynemcp'
+
+export class CustomTransport implements Transport {
+  readonly type = 'custom'
+
+  constructor(readonly options: TransportOptions) {}
+
+  async start() {
+    // Initialize transport
+  }
+
+  async stop() {
+    // Cleanup resources
+  }
+
+  async send(message: any) {
+    // Send message to client
+  }
+
+  onMessage(handler: (message: any) => void) {
+    // Set up message handler
+  }
+}
+```
+
+### Registration
+
+Register custom transports with the server:
+
+```typescript
+const server = createMCPServer()
+
+server.registry.registerTransport(
+  'custom',
+  (options) => new CustomTransport(options)
+)
+```
+
+## Security Features
+
+### CORS Configuration
+
+```typescript
+interface CORSOptions {
+  origin?: string | string[]
+  methods?: string[]
+  allowedHeaders?: string[]
+  exposedHeaders?: string[]
+  credentials?: boolean
+  maxAge?: number
+}
+```
+
+Example:
+
+```typescript
+const corsOptions: CORSOptions = {
+  origin: ['https://app1.com', 'https://app2.com'],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  maxAge: 86400,
+}
+```
+
+### Rate Limiting
+
+```typescript
+interface RateLimitOptions {
+  windowMs: number
+  max: number
+  message?: string
+  statusCode?: number
+  headers?: boolean
+}
+```
+
+Example:
+
+```typescript
+const rateLimitOptions: RateLimitOptions = {
+  windowMs: 900000, // 15 minutes
+  max: 100,
+  message: 'Too many requests',
+  statusCode: 429,
+  headers: true,
+}
+```
+
+### Authentication
+
+```typescript
+interface AuthOptions {
+  type: 'basic' | 'bearer' | 'custom'
+  validator: (credentials: any) => Promise<boolean>
+}
+```
+
+Example:
+
+```typescript
+const authOptions: AuthOptions = {
+  type: 'bearer',
+  async validator(token: string) {
+    return validateToken(token)
+  },
+}
+```
+
+## Best Practices
+
+1. **Error Handling**
+
+   - Handle connection errors
+   - Implement reconnection logic
+   - Provide meaningful error messages
+
+2. **Performance**
+
+   - Use appropriate buffer sizes
+   - Implement message queuing
+   - Handle backpressure
+
+3. **Security**
+
+   - Enable CORS when needed
+   - Implement rate limiting
+   - Use secure protocols
+
+4. **Monitoring**
+   - Log transport events
+   - Track metrics
+   - Monitor connection health
+
+## Examples
+
+### WebSocket Transport
+
+```typescript
+import WebSocket from 'ws'
+import { Transport } from '@dynemcp/dynemcp'
+
+export class WebSocketTransport implements Transport {
+  readonly type = 'websocket'
+  private server: WebSocket.Server
+  private clients: Set<WebSocket>
+
+  constructor(readonly options: WebSocketOptions) {
+    this.clients = new Set()
+  }
+
+  async start() {
+    this.server = new WebSocket.Server({
+      port: this.options.port,
+    })
+
+    this.server.on('connection', (ws) => {
+      this.clients.add(ws)
+
+      ws.on('close', () => {
+        this.clients.delete(ws)
+      })
+
+      ws.on('message', (data) => {
+        this.handleMessage(data)
+      })
+    })
+  }
+
+  async stop() {
+    for (const client of this.clients) {
+      client.close()
+    }
+    await new Promise((resolve) => {
+      this.server.close(resolve)
+    })
+  }
+
+  async send(message: any) {
+    const data = JSON.stringify(message)
+    for (const client of this.clients) {
+      client.send(data)
+    }
+  }
+
+  private messageHandler: (message: any) => void
+
+  onMessage(handler: (message: any) => void) {
+    this.messageHandler = handler
+  }
+
+  private handleMessage(data: WebSocket.Data) {
+    try {
+      const message = JSON.parse(data.toString())
+      this.messageHandler?.(message)
+    } catch (error) {
+      console.error('Invalid message:', error)
+    }
+  }
+}
+```
+
+### gRPC Transport
+
+```typescript
+import * as grpc from '@grpc/grpc-js'
+import { Transport } from '@dynemcp/dynemcp'
+
+export class GRPCTransport implements Transport {
+  readonly type = 'grpc'
+  private server: grpc.Server
+
+  constructor(readonly options: GRPCOptions) {}
+
+  async start() {
+    this.server = new grpc.Server()
+
+    // Add services
+    this.server.addService(protoDescriptor.MCP.service, {
+      execute: this.handleRequest.bind(this),
+    })
+
+    // Start server
+    await new Promise((resolve, reject) => {
+      this.server.bindAsync(
+        `${this.options.host}:${this.options.port}`,
+        grpc.ServerCredentials.createInsecure(),
+        (error, port) => {
+          if (error) {
+            reject(error)
+          } else {
+            this.server.start()
+            resolve(port)
+          }
+        }
+      )
+    })
+  }
+
+  async stop() {
+    await new Promise((resolve) => {
+      this.server.tryShutdown(resolve)
+    })
+  }
+
+  async send(message: any) {
+    // Implement streaming response
+  }
+
+  private messageHandler: (message: any) => void
+
+  onMessage(handler: (message: any) => void) {
+    this.messageHandler = handler
+  }
+
+  private handleRequest(
+    call: grpc.ServerUnaryCall<any, any>,
+    callback: grpc.sendUnaryData<any>
+  ) {
+    try {
+      this.messageHandler?.(call.request)
+      callback(null, { success: true })
+    } catch (error) {
+      callback({
+        code: grpc.status.INTERNAL,
+        message: error.message,
+      })
+    }
+  }
+}
+```

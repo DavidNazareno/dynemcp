@@ -1,0 +1,462 @@
+---
+title: Configuration API
+description: Complete reference for DyneMCP configuration options
+---
+
+# Configuration API Reference
+
+DyneMCP uses a JSON-based configuration system that can be defined in `dynemcp.config.json` or programmatically. This guide covers all available configuration options and their usage.
+
+## Configuration Schema
+
+```typescript
+interface DyneMCPConfig {
+  server: ServerConfig
+  tools: ComponentConfig
+  resources: ComponentConfig
+  prompts: ComponentConfig
+  transport: TransportConfig
+  logging: LoggingConfig
+  security: SecurityConfig
+  performance: PerformanceConfig
+  debug: DebugConfig
+}
+```
+
+## Server Configuration
+
+```typescript
+interface ServerConfig {
+  name: string
+  version: string
+  documentationUrl?: string
+  environment?: 'development' | 'production'
+  rootDir?: string
+}
+```
+
+Example:
+
+```json
+{
+  "server": {
+    "name": "my-mcp-server",
+    "version": "1.0.0",
+    "documentationUrl": "https://docs.example.com",
+    "environment": "development",
+    "rootDir": "./src"
+  }
+}
+```
+
+## Component Configuration
+
+Shared configuration for tools, resources, and prompts:
+
+```typescript
+interface ComponentConfig {
+  enabled: boolean
+  directory: string
+  pattern: string
+  watch?: boolean
+  ignore?: string[]
+  metadata?: Record<string, any>
+}
+```
+
+Example:
+
+```json
+{
+  "tools": {
+    "enabled": true,
+    "directory": "./src/tools",
+    "pattern": "**/*.{ts,js}",
+    "watch": true,
+    "ignore": ["**/*.test.ts", "**/*.spec.ts"],
+    "metadata": {
+      "author": "DyneMCP Team"
+    }
+  }
+}
+```
+
+## Transport Configuration
+
+```typescript
+interface TransportConfig {
+  type: 'stdio' | 'http' | 'sse' | 'http-stream'
+  options?: {
+    // HTTP/SSE/HTTP-Stream options
+    port?: number
+    host?: string
+    endpoint?: string
+    cors?: CORSOptions
+    rateLimit?: RateLimitOptions
+    authentication?: AuthOptions
+    session?: SessionOptions
+    resumability?: ResumabilityOptions
+  }
+}
+```
+
+Example:
+
+```json
+{
+  "transport": {
+    "type": "http",
+    "options": {
+      "port": 3000,
+      "host": "localhost",
+      "cors": {
+        "origin": "*",
+        "methods": ["GET", "POST"]
+      },
+      "rateLimit": {
+        "windowMs": 900000,
+        "max": 100
+      }
+    }
+  }
+}
+```
+
+## Logging Configuration
+
+```typescript
+interface LoggingConfig {
+  enabled: boolean
+  level: 'error' | 'warn' | 'info' | 'debug'
+  format: 'text' | 'json'
+  timestamp: boolean
+  colors: boolean
+  file?: {
+    enabled: boolean
+    path: string
+    maxSize: string
+    maxFiles: number
+  }
+}
+```
+
+Example:
+
+```json
+{
+  "logging": {
+    "enabled": true,
+    "level": "info",
+    "format": "text",
+    "timestamp": true,
+    "colors": true,
+    "file": {
+      "enabled": true,
+      "path": "./logs/server.log",
+      "maxSize": "10mb",
+      "maxFiles": 5
+    }
+  }
+}
+```
+
+## Security Configuration
+
+```typescript
+interface SecurityConfig {
+  enableValidation: boolean
+  strictMode: boolean
+  allowedOrigins: string[]
+  rateLimit: {
+    enabled: boolean
+    maxRequests: number
+    windowMs: number
+  }
+  authentication?: {
+    type: 'basic' | 'bearer' | 'custom'
+    options: Record<string, any>
+  }
+  cors?: {
+    origin: string | string[]
+    methods: string[]
+    allowedHeaders: string[]
+    exposedHeaders: string[]
+    credentials: boolean
+    maxAge: number
+  }
+}
+```
+
+Example:
+
+```json
+{
+  "security": {
+    "enableValidation": true,
+    "strictMode": true,
+    "allowedOrigins": ["https://app.example.com"],
+    "rateLimit": {
+      "enabled": true,
+      "maxRequests": 100,
+      "windowMs": 900000
+    },
+    "authentication": {
+      "type": "bearer",
+      "options": {
+        "secret": "your-secret-key"
+      }
+    },
+    "cors": {
+      "origin": ["https://app.example.com"],
+      "methods": ["GET", "POST"],
+      "allowedHeaders": ["Content-Type", "Authorization"],
+      "credentials": true,
+      "maxAge": 86400
+    }
+  }
+}
+```
+
+## Performance Configuration
+
+```typescript
+interface PerformanceConfig {
+  maxConcurrentRequests: number
+  requestTimeout: number
+  memoryLimit: string
+  enableMetrics: boolean
+  caching?: {
+    enabled: boolean
+    ttl: number
+    maxSize: number
+  }
+  optimization?: {
+    minify: boolean
+    compress: boolean
+    sourceMaps: boolean
+  }
+}
+```
+
+Example:
+
+```json
+{
+  "performance": {
+    "maxConcurrentRequests": 100,
+    "requestTimeout": 30000,
+    "memoryLimit": "512mb",
+    "enableMetrics": true,
+    "caching": {
+      "enabled": true,
+      "ttl": 3600,
+      "maxSize": 1000
+    },
+    "optimization": {
+      "minify": true,
+      "compress": true,
+      "sourceMaps": false
+    }
+  }
+}
+```
+
+## Debug Configuration
+
+```typescript
+interface DebugConfig {
+  enabled: boolean
+  verbose: boolean
+  showComponentDetails: boolean
+  showTransportDetails: boolean
+  profiling?: {
+    enabled: boolean
+    outputPath: string
+  }
+}
+```
+
+Example:
+
+```json
+{
+  "debug": {
+    "enabled": true,
+    "verbose": true,
+    "showComponentDetails": true,
+    "showTransportDetails": true,
+    "profiling": {
+      "enabled": true,
+      "outputPath": "./profiling"
+    }
+  }
+}
+```
+
+## Environment Variables
+
+Configuration can be overridden using environment variables:
+
+```bash
+# Server
+DYNEMCP_SERVER_NAME=my-server
+DYNEMCP_SERVER_VERSION=1.0.0
+
+# Transport
+DYNEMCP_TRANSPORT_TYPE=http
+DYNEMCP_TRANSPORT_PORT=3000
+
+# Security
+DYNEMCP_SECURITY_STRICT_MODE=true
+DYNEMCP_SECURITY_JWT_SECRET=your-secret
+
+# Logging
+DYNEMCP_LOGGING_LEVEL=debug
+DYNEMCP_LOGGING_FORMAT=json
+```
+
+## Configuration Methods
+
+### 1. Configuration File
+
+Create `dynemcp.config.json` in your project root:
+
+```json
+{
+  "server": {
+    "name": "my-server",
+    "version": "1.0.0"
+  },
+  "transport": {
+    "type": "http",
+    "options": {
+      "port": 3000
+    }
+  }
+}
+```
+
+### 2. Programmatic Configuration
+
+```typescript
+const server = createMCPServer()
+
+server.config.update({
+  server: {
+    name: 'my-server',
+    version: '1.0.0',
+  },
+  transport: {
+    type: 'http',
+    options: {
+      port: 3000,
+    },
+  },
+})
+```
+
+### 3. Environment Variables
+
+```typescript
+// Load from .env file
+import dotenv from 'dotenv'
+dotenv.config()
+
+const server = createMCPServer()
+```
+
+## Best Practices
+
+1. **Security**
+
+   - Never commit secrets
+   - Use environment variables
+   - Enable strict mode
+
+2. **Performance**
+
+   - Configure appropriate limits
+   - Enable caching when needed
+   - Monitor metrics
+
+3. **Development**
+
+   - Use watch mode
+   - Enable verbose logging
+   - Configure source maps
+
+4. **Production**
+   - Disable debug features
+   - Enable optimization
+   - Set appropriate timeouts
+
+## Examples
+
+### Development Configuration
+
+```json
+{
+  "server": {
+    "name": "dev-server",
+    "environment": "development"
+  },
+  "transport": {
+    "type": "http",
+    "options": {
+      "port": 3000
+    }
+  },
+  "logging": {
+    "level": "debug",
+    "format": "text",
+    "colors": true
+  },
+  "debug": {
+    "enabled": true,
+    "verbose": true
+  },
+  "security": {
+    "strictMode": false
+  }
+}
+```
+
+### Production Configuration
+
+```json
+{
+  "server": {
+    "name": "prod-server",
+    "environment": "production"
+  },
+  "transport": {
+    "type": "http",
+    "options": {
+      "port": 80
+    }
+  },
+  "logging": {
+    "level": "error",
+    "format": "json",
+    "file": {
+      "enabled": true,
+      "path": "/var/log/dynemcp.log"
+    }
+  },
+  "debug": {
+    "enabled": false
+  },
+  "security": {
+    "strictMode": true,
+    "rateLimit": {
+      "enabled": true
+    }
+  },
+  "performance": {
+    "optimization": {
+      "minify": true,
+      "compress": true
+    }
+  }
+}
+```

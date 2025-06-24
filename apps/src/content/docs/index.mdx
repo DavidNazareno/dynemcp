@@ -1,0 +1,121 @@
+---
+title: DyneMCP
+description: Complete framework for building powerful Model Context Protocol (MCP) servers with TypeScript
+template: splash
+hero:
+  tagline: Build powerful MCP servers with modern TypeScript development tools and enterprise-grade features
+  image:
+    file: ../../assets/White-Logo-DYNEMCP.svg
+    alt: DyneMCP Logo
+  actions:
+    - text: Get Started
+      link: /getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/DavidNazareno/dynemcp
+      icon: external
+      variant: secondary
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components'
+
+#### Get Started
+
+```bash
+pnpx create-dynemcp@latest my-mcp-server
+```
+
+## What is DyneMCP?
+
+**DyneMCP** is a modern, modular TypeScript framework for building production-ready Model Context Protocol (MCP) servers. It provides a complete toolchain for rapid development, robust configuration, and scalable deployment of MCP-based applications.
+
+---
+
+## Architecture Overview
+
+```
+DyneMCP Server
+├── Configuration Layer      # dynemcp.config.json
+├── Transport Layer          # stdio, HTTP, SSE
+├── Registry System          # Dynamic component registration
+├── Execution Engine         # Tool/Resource/Prompt handling
+└── Build System             # esbuild-based bundling
+```
+
+- **Declarative Configuration:** All server, transport, and build options are managed in a single JSON file.
+- **Component Registry:** Tools, resources, and prompts are auto-discovered and registered at runtime.
+- **Multiple Transports:** Support for stdio and HTTP transports with extensible architecture.
+- **Extensible:** Add custom tools, resources, prompts, and transports.
+- **Optimized Build System:** Fast builds and bundling with esbuild.
+- **Security:** Built-in validation, rate limiting, and CORS support.
+
+---
+
+## Feature Matrix
+
+| Feature             | Description                                                    |
+| ------------------- | -------------------------------------------------------------- |
+| Project Scaffolding | CLI to generate new projects with ready-to-use templates       |
+| Declarative Config  | JSON-based config for all server, build, and security settings |
+| Tools System        | Type-safe, schema-validated tools with Zod integration         |
+| Resources           | Data providers for models and tools                            |
+| Prompts             | Reusable prompt templates for model interactions               |
+| Registry System     | Dynamic discovery and registration of all components           |
+| Multiple Transports | stdio and HTTP with extensible transport system                |
+| Middleware Support  | CORS, validation, and rate limiting                            |
+| Build System        | Fast builds, bundling, and production optimization (esbuild)   |
+| Security            | Input validation, rate limiting, CORS                          |
+| Testing Utilities   | Helpers for unit and integration testing                       |
+| CLI                 | Unified CLI for dev, build, and deployment workflows           |
+| Template System     | Pre-built templates for rapid prototyping                      |
+| Extensibility       | Add custom transports, tools, resources, and prompts           |
+
+---
+
+<CardGrid stagger>
+  <Card title="Ultra-Fast Development" icon="rocket">
+    Hot reload with instant feedback using esbuild. Get from idea to running
+    server in minutes with zero friction.
+  </Card>
+
+  <Card title="Zero Configuration" icon="setting">
+    Declarative JSON configuration that works out of the box. No complex setup
+    or boilerplate required.
+  </Card>
+
+  <Card title="Multiple Transports" icon="bars">
+    Support for stdio and HTTP protocols with extensible transport system.
+  </Card>
+
+  <Card title="TypeScript First" icon="seti:typescript">
+    Built with TypeScript from the ground up. Full type safety and excellent
+    developer experience.
+  </Card>
+
+  <Card title="Ready Templates" icon="document">
+    Pre-built templates for common use cases including calculator, HTTP server,
+    and secure agent.
+  </Card>
+
+  <Card title="Developer Tools" icon="laptop">
+    Powerful CLI tools for project creation, development, and deployment
+    workflows.
+  </Card>
+</CardGrid>
+
+---
+
+## Why Choose DyneMCP?
+
+- **Complete Toolchain:** From project creation to deployment, everything is included.
+- **Production-Ready:** Security, performance, and extensibility are first-class citizens.
+- **Modern TypeScript:** Full type safety, schema validation, and developer ergonomics.
+- **Community & Support:** Open source, MIT licensed, and built for the MCP ecosystem.
+
+---
+
+<div class="hero-footer">
+  <p>Built with ❤️ for the Model Context Protocol community</p>
+  <p>Open source and free to use under MIT License</p>
+</div>

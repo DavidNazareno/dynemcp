@@ -1,0 +1,433 @@
+---
+title: Security Guide
+description: Best practices for securing your DyneMCP server
+---
+
+# Security Guide
+
+This guide covers essential security practices and features for DyneMCP servers.
+
+## Security Features
+
+DyneMCP includes several built-in security features:
+
+1. Input Validation
+2. Rate Limiting
+3. CORS Protection
+4. Authentication
+5. Transport Security
+6. Error Handling
+
+## Input Validation
+
+DyneMCP uses Zod for strict input validation:
+
+```typescript
+import { z } from 'zod'
+
+export class SecureTool extends DyneMCPTool {
+  readonly schema = z.object({
+    // Validate string length and format
+    username: z
+      .string()
+      .min(3, 'Username too short')
+      .max(50, 'Username too long')
+      .regex(/^[a-zA-Z0-9_]+$/, 'Invalid characters'),
+
+    // Validate email format
+    email: z.string().email('Invalid email format'),
+
+    // Validate number range
+    age: z
+      .number()
+      .int('Must be integer')
+      .min(0, 'Must be positive')
+      .max(150, 'Invalid age'),
+
+    // Validate array contents
+    roles: z
+      .array(z.enum(['user', 'admin']))
+      .nonempty('At least one role required'),
+
+    // Validate nested objects
+    profile: z.object({
+      name: z.string(),
+      bio: z.string().max(500),
+    }),
+  })
+}
+```
+
+## Rate Limiting
+
+Configure rate limiting to prevent abuse:
+
+```json
+{
+  "security": {
+    "rateLimit": {
+      "enabled": true,
+      "maxRequests": 100,
+      "windowMs": 900000
+    }
+  }
+}
+```
+
+## CORS Protection
+
+Control cross-origin access:
+
+```json
+{
+  "security": {
+    "cors": {
+      "origin": ["https://app1.example.com", "https://app2.example.com"],
+      "methods": ["GET", "POST"],
+      "allowedHeaders": ["Content-Type", "Authorization"],
+      "credentials": true,
+      "maxAge": 86400
+    }
+  }
+}
+```
+
+## Authentication
+
+### Bearer Token Authentication
+
+```typescript
+const authOptions = {
+  type: 'bearer',
+  validator: async (token: string) => {
+    // Validate JWT token
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET)
+      return true
+    } catch {
+      return false
+    }
+  },
+}
+```
+
+### Custom Authentication
+
+```typescript
+const authOptions = {
+  type: 'custom',
+  validator: async (credentials: any) => {
+    // Custom validation logic
+    const { apiKey } = credentials
+    return validateApiKey(apiKey)
+  },
+}
+```
+
+## Transport Security
+
+### HTTP Transport
+
+```json
+{
+  "transport": {
+    "type": "http",
+    "options": {
+      "port": 443,
+      "https": {
+        "key": "/path/to/key.pem",
+        "cert": "/path/to/cert.pem"
+      },
+      "authentication": {
+        "type": "bearer",
+        "options": {
+          "secret": "your-secret-key"
+        }
+      }
+    }
+  }
+}
+```
+
+### WebSocket Transport
+
+```typescript
+import { createServer } from 'https'
+import { WebSocketTransport } from '@dynemcp/dynemcp'
+
+const httpsServer = createServer({
+  key: readFileSync('/path/to/key.pem'),
+  cert: readFileSync('/path/to/cert.pem'),
+})
+
+const transport = new WebSocketTransport({
+  server: httpsServer,
+  authentication: authOptions,
+})
+```
+
+## Error Handling
+
+Secure error handling to prevent information leakage:
+
+```typescript
+export class SecureTool extends DyneMCPTool {
+  async execute(params: any) {
+    try {
+      // Operation that might fail
+      const result = await riskyOperation()
+      return result
+    } catch (error) {
+      // Log full error internally
+      console.error('Internal error:', error)
+
+      // Return safe error to client
+      throw new Error('Operation failed')
+    }
+  }
+}
+```
+
+## Environment Variables
+
+Store sensitive data in environment variables:
+
+```bash
+# .env
+JWT_SECRET=your-secret-key
+API_KEY=your-api-key
+DATABASE_URL=postgresql://user:pass@localhost/db
+```
+
+```typescript
+import dotenv from 'dotenv'
+dotenv.config()
+
+const config = {
+  security: {
+    authentication: {
+      secret: process.env.JWT_SECRET,
+    },
+  },
+}
+```
+
+## Security Checklist
+
+### Development
+
+- [ ] Enable strict input validation
+- [ ] Use environment variables for secrets
+- [ ] Implement proper error handling
+- [ ] Set up CORS restrictions
+- [ ] Configure rate limiting
+- [ ] Use HTTPS in development
+
+### Production
+
+- [ ] Use strong secrets
+- [ ] Enable all security features
+- [ ] Configure proper CORS
+- [ ] Set strict rate limits
+- [ ] Use HTTPS only
+- [ ] Monitor for attacks
+- [ ] Regular security updates
+- [ ] Audit dependencies
+
+## Best Practices
+
+### 1. Input Handling
+
+```typescript
+export class SecureTool extends DyneMCPTool {
+  // Strict schema
+  readonly schema = z.object({
+    input: z.string(),
+  })
+
+  async execute({ input }: any) {
+    // Sanitize input
+    const sanitized = sanitizeHtml(input)
+
+    // Validate length
+    if (sanitized.length > 1000) {
+      throw new Error('Input too long')
+    }
+
+    // Process safely
+    return processInput(sanitized)
+  }
+}
+```
+
+### 2. Authentication
+
+```typescript
+export class AuthMiddleware {
+  async handle(req: Request) {
+    // Get token
+    const token = req.headers.authorization
+
+    if (!token) {
+      throw new Error('No token provided')
+    }
+
+    try {
+      // Verify token
+      const user = await verifyToken(token)
+
+      // Check permissions
+      if (!hasPermission(user, req.action)) {
+        throw new Error('Unauthorized')
+      }
+
+      // Add user to context
+      req.user = user
+    } catch (error) {
+      throw new Error('Authentication failed')
+    }
+  }
+}
+```
+
+### 3. Rate Limiting
+
+```typescript
+export class RateLimiter {
+  private store = new Map()
+
+  async handle(req: Request) {
+    const key = req.ip
+    const now = Date.now()
+
+    // Get existing record
+    const record = this.store.get(key) || {
+      count: 0,
+      resetAt: now + 900000,
+    }
+
+    // Check limit
+    if (record.count >= 100 && now < record.resetAt) {
+      throw new Error('Rate limit exceeded')
+    }
+
+    // Update record
+    record.count++
+    this.store.set(key, record)
+  }
+}
+```
+
+### 4. Secure Configuration
+
+```typescript
+import { config } from '@dynemcp/dynemcp'
+
+// Production configuration
+const secureConfig = config.create({
+  security: {
+    // Enable all security features
+    enableValidation: true,
+    strictMode: true,
+
+    // Strict CORS
+    cors: {
+      origin: ['https://app.example.com'],
+      credentials: true,
+    },
+
+    // Rate limiting
+    rateLimit: {
+      enabled: true,
+      maxRequests: 100,
+      windowMs: 900000,
+    },
+
+    // Authentication
+    authentication: {
+      type: 'bearer',
+      options: {
+        secret: process.env.JWT_SECRET,
+      },
+    },
+  },
+
+  // Secure logging
+  logging: {
+    level: 'error',
+    format: 'json',
+    file: {
+      enabled: true,
+      path: '/var/log/dynemcp.log',
+    },
+  },
+
+  // Production performance
+  performance: {
+    maxConcurrentRequests: 100,
+    requestTimeout: 30000,
+  },
+})
+```
+
+## Security Monitoring
+
+### 1. Request Logging
+
+```typescript
+export class SecurityLogger {
+  log(req: Request, res: Response) {
+    const entry = {
+      timestamp: new Date(),
+      ip: req.ip,
+      method: req.method,
+      path: req.path,
+      user: req.user?.id,
+      status: res.status,
+      duration: res.duration,
+    }
+
+    // Log security events
+    if (res.status === 401 || res.status === 403) {
+      console.warn('Security event:', entry)
+    }
+
+    // Log all requests
+    console.log('Request:', entry)
+  }
+}
+```
+
+### 2. Attack Detection
+
+```typescript
+export class SecurityMonitor {
+  private attempts = new Map()
+
+  detect(req: Request) {
+    const key = req.ip
+    const now = Date.now()
+
+    // Get attempts
+    const record = this.attempts.get(key) || {
+      count: 0,
+      firstAttempt: now,
+    }
+
+    // Update record
+    record.count++
+    this.attempts.set(key, record)
+
+    // Check for attacks
+    if (record.count > 10 && now - record.firstAttempt < 60000) {
+      // Alert security team
+      this.alert({
+        type: 'potential_attack',
+        ip: req.ip,
+        attempts: record.count,
+        duration: now - record.firstAttempt,
+      })
+    }
+  }
+}
+```

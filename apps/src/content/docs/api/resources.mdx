@@ -1,0 +1,285 @@
+---
+title: Resource API
+description: Complete reference for creating and managing DyneMCP resources
+---
+
+# Resource API Reference
+
+Resources in DyneMCP provide static or dynamic data that can be used by tools and prompts. They help maintain separation between logic and data.
+
+## Resource Interface
+
+```typescript
+interface Resource {
+  uri: string
+  name: string
+  description?: string
+  content: string | object | (() => Promise<any>)
+  metadata?: Record<string, any>
+}
+```
+
+### Properties
+
+| Property      | Type                                       | Description                   |
+| ------------- | ------------------------------------------ | ----------------------------- |
+| `uri`         | `string`                                   | Unique resource identifier    |
+| `name`        | `string`                                   | Resource name                 |
+| `description` | `string`                                   | Optional resource description |
+| `content`     | `string \| object \| (() => Promise<any>)` | Resource content              |
+| `metadata`    | `Record<string, any>`                      | Optional metadata             |
+
+## Creating Resources
+
+### Static Resource
+
+```typescript
+import { createResource } from '@dynemcp/dynemcp'
+
+export const mathFormulas = createResource({
+  uri: 'math://formulas',
+  name: 'Math Formulas',
+  description: 'Common mathematical formulas',
+  content: {
+    area: {
+      circle: 'π * r²',
+      square: 'a²',
+      rectangle: 'l * w',
+    },
+    volume: {
+      cube: 'a³',
+      sphere: '(4/3) * π * r³',
+    },
+  },
+})
+```
+
+### Dynamic Resource
+
+```typescript
+export const weatherData = createResource({
+  uri: 'weather://current',
+  name: 'Current Weather',
+  description: 'Real-time weather data',
+  content: async () => {
+    const response = await fetch('https://api.weather.com/current')
+    return response.json()
+  },
+})
+```
+
+### File-based Resource
+
+```typescript
+import { readFileSync } from 'fs'
+import { join } from 'path'
+
+export const promptTemplate = createResource({
+  uri: 'prompts://calculator',
+  name: 'Calculator Prompt',
+  content: readFileSync(join(__dirname, 'prompts', 'calculator.txt'), 'utf-8'),
+})
+```
+
+## Resource Registration
+
+Resources can be registered in multiple ways:
+
+### 1. Auto-discovery
+
+Place resources in the configured directory:
+
+```
+src/
+  resources/
+    math-formulas.ts
+    weather-data.ts
+```
+
+```json
+{
+  "resources": {
+    "enabled": true,
+    "directory": "./src/resources",
+    "pattern": "**/*.{ts,js}"
+  }
+}
+```
+
+### 2. Manual Registration
+
+```typescript
+const server = createMCPServer()
+
+// Register a static resource
+server.registry.registerResource(mathFormulas)
+
+// Register a dynamic resource
+server.registry.registerResource(weatherData)
+```
+
+## Resource Usage
+
+Resources can be used in tools and prompts:
+
+### In Tools
+
+```typescript
+export class CalculatorTool extends DyneMCPTool {
+  get name() {
+    return 'calculator'
+  }
+
+  readonly description = 'Advanced calculator with formulas'
+
+  readonly schema = z.object({
+    formula: z.string(),
+    values: z.record(z.number()),
+  })
+
+  async execute({ formula, values }) {
+    // Get formulas from resource
+    const formulas = await this.server.registry.getResource('math://formulas')
+
+    // Use formula from resource
+    return evaluateFormula(formulas[formula], values)
+  }
+}
+```
+
+### In Prompts
+
+```typescript
+export const calculatorPrompt = createPrompt({
+  id: 'calculator-prompt',
+  name: 'Calculator Assistant',
+  async content() {
+    // Get formulas from resource
+    const formulas = await this.server.registry.getResource('math://formulas')
+
+    return `
+      You are a math assistant.
+      Available formulas:
+      ${JSON.stringify(formulas, null, 2)}
+    `
+  },
+})
+```
+
+## Resource Types
+
+### 1. Text Resources
+
+```typescript
+export const textResource = createResource({
+  uri: 'text://example',
+  name: 'Text Example',
+  content: 'This is a text resource',
+})
+```
+
+### 2. JSON Resources
+
+```typescript
+export const jsonResource = createResource({
+  uri: 'json://config',
+  name: 'Configuration',
+  content: {
+    settings: {
+      theme: 'dark',
+      language: 'en',
+    },
+  },
+})
+```
+
+### 3. Function Resources
+
+```typescript
+export const functionResource = createResource({
+  uri: 'data://dynamic',
+  name: 'Dynamic Data',
+  content: async () => {
+    // Fetch or compute data
+    return { timestamp: Date.now() }
+  },
+})
+```
+
+## Best Practices
+
+1. **Resource Organization**
+
+   - Use meaningful URIs
+   - Group related resources
+   - Keep resources focused
+
+2. **Content Management**
+
+   - Cache expensive operations
+   - Handle errors gracefully
+   - Version control data files
+
+3. **Performance**
+
+   - Use static content when possible
+   - Cache dynamic content
+   - Implement timeouts
+
+4. **Security**
+   - Validate external data
+   - Sanitize content
+   - Handle sensitive data properly
+
+## Examples
+
+### Database Resource
+
+```typescript
+export const dbResource = createResource({
+  uri: 'db://users',
+  name: 'User Database',
+  async content() {
+    try {
+      const db = await connectDB()
+      const users = await db.users.find()
+      return users
+    } catch (error) {
+      console.error('DB Error:', error)
+      return []
+    }
+  },
+})
+```
+
+### Cached Resource
+
+```typescript
+export const cachedResource = createResource({
+  uri: 'cache://data',
+  name: 'Cached Data',
+
+  // Private cache
+  #cache: null,
+  #lastUpdate: 0,
+  #ttl: 60000, // 1 minute
+
+  async content() {
+    const now = Date.now()
+
+    // Return cached data if valid
+    if (this.#cache && now - this.#lastUpdate < this.#ttl) {
+      return this.#cache
+    }
+
+    // Fetch new data
+    const data = await fetchData()
+
+    // Update cache
+    this.#cache = data
+    this.#lastUpdate = now
+
+    return data
+  },
+})
+```
