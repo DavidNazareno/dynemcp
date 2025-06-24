@@ -14,8 +14,7 @@ DyneMCP is built on several key architectural principles:
 1. Modular Design
 2. Type Safety
 3. Extensibility
-4. Security First
-5. Performance Optimization
+4. Component-Based Architecture
 
 ### High-Level Architecture
 
@@ -27,8 +26,6 @@ graph TD
     Registry --> Tools[Tools]
     Registry --> Resources[Resources]
     Registry --> Prompts[Prompts]
-    Server --> Security[Security Layer]
-    Server --> Performance[Performance Layer]
 ```
 
 ## Core Components
@@ -38,29 +35,31 @@ graph TD
 The central component that manages the MCP server lifecycle:
 
 ```typescript
-export class MCPServer {
-  private registry: Registry
-  private transport: Transport
-  private security: Security
-  private performance: Performance
+export class DyneMCP {
+  private server: McpServer
+  private config: DyneMCPConfig
+  public readonly registry = registry
 
-  constructor(options: ServerOptions) {
-    this.registry = new Registry()
-    this.transport = createTransport(options.transport)
-    this.security = new Security(options.security)
-    this.performance = new Performance(options.performance)
+  constructor(name?: string, configPath?: string, version?: string) {
+    this.config = loadConfig(configPath)
+    if (name) this.config.server.name = name
+    if (version) this.config.server.version = version
   }
 
-  async start() {
-    await this.transport.start()
-    await this.registry.initialize()
-    await this.security.initialize()
-    await this.performance.initialize()
+  async init(): Promise<void> {
+    // Load all components using unified registry
+    await registry.loadAll({
+      tools: this.config.tools,
+      resources: this.config.resources,
+      prompts: this.config.prompts,
+    })
   }
 
-  async execute(toolName: string, params: any) {
-    const tool = this.registry.getTool(toolName)
-    return tool.execute(params)
+  async start(): Promise<void> {
+    await this.init()
+    const transportConfig = this.config.transport || { type: 'stdio' }
+    this.transport = createTransport(transportConfig)
+    await this.transport.connect(this.server)
   }
 }
 ```
@@ -71,23 +70,25 @@ Manages all registered components:
 
 ```typescript
 export class Registry {
-  private tools = new Map<string, Tool>()
-  private resources = new Map<string, Resource>()
-  private prompts = new Map<string, Prompt>()
+  private storage = new ComponentStorage()
 
-  registerTool(tool: Tool) {
-    this.validateTool(tool)
-    this.tools.set(tool.name, tool)
+  async loadAll(options: LoadAllOptions): Promise<void> {
+    const result = await loadAllComponents(options)
+    this.storage.addTools(result.tools)
+    this.storage.addResources(result.resources)
+    this.storage.addPrompts(result.prompts)
   }
 
-  registerResource(resource: Resource) {
-    this.validateResource(resource)
-    this.resources.set(resource.uri, resource)
+  getAllTools(): ToolDefinition[] {
+    return this.storage.getAllTools()
   }
 
-  registerPrompt(prompt: Prompt) {
-    this.validatePrompt(prompt)
-    this.prompts.set(prompt.id, prompt)
+  getAllResources(): ResourceDefinition[] {
+    return this.storage.getAllResources()
+  }
+
+  getAllPrompts(): PromptDefinition[] {
+    return this.storage.getAllPrompts()
   }
 }
 ```
@@ -98,120 +99,13 @@ Handles communication protocols:
 
 ```typescript
 export interface Transport {
-  readonly type: string
-  readonly options: TransportOptions
-
-  start(): Promise<void>
-  stop(): Promise<void>
-  send(message: any): Promise<void>
-  onMessage(handler: MessageHandler): void
+  connect(server: McpServer): Promise<void>
+  disconnect?(): Promise<void>
 }
 
-// HTTP Transport
-export class HTTPTransport implements Transport {
-  readonly type = 'http'
-
-  constructor(options: HTTPOptions) {
-    this.server = createServer()
-    this.configure(options)
-  }
-
-  async start() {
-    await this.server.listen(this.options.port)
-  }
-
-  onMessage(handler: MessageHandler) {
-    this.server.on('request', async (req, res) => {
-      const result = await handler(req.body)
-      res.json(result)
-    })
-  }
-}
-
-// WebSocket Transport
-export class WebSocketTransport implements Transport {
-  readonly type = 'ws'
-
-  constructor(options: WSOptions) {
-    this.server = new WebSocketServer(options)
-  }
-
-  onMessage(handler: MessageHandler) {
-    this.server.on('connection', (socket) => {
-      socket.on('message', async (data) => {
-        const result = await handler(data)
-        socket.send(result)
-      })
-    })
-  }
-}
-```
-
-### 4. Security Layer
-
-Implements security features:
-
-```typescript
-export class Security {
-  private authentication: Authentication
-  private authorization: Authorization
-  private rateLimit: RateLimit
-  private cors: CORS
-
-  constructor(options: SecurityOptions) {
-    this.authentication = new Authentication(options.authentication)
-    this.authorization = new Authorization(options.authorization)
-    this.rateLimit = new RateLimit(options.rateLimit)
-    this.cors = new CORS(options.cors)
-  }
-
-  async authenticate(request: Request) {
-    const token = this.extractToken(request)
-    return this.authentication.verify(token)
-  }
-
-  async authorize(user: User, action: string) {
-    return this.authorization.check(user, action)
-  }
-
-  async checkRateLimit(key: string) {
-    return this.rateLimit.check(key)
-  }
-}
-```
-
-### 5. Performance Layer
-
-Manages performance optimizations:
-
-```typescript
-export class Performance {
-  private cache: Cache
-  private metrics: Metrics
-  private resourceManager: ResourceManager
-
-  constructor(options: PerformanceOptions) {
-    this.cache = new Cache(options.cache)
-    this.metrics = new Metrics(options.metrics)
-    this.resourceManager = new ResourceManager(options.resources)
-  }
-
-  async optimize<T>(key: string, operation: () => Promise<T>): Promise<T> {
-    // Check cache
-    const cached = await this.cache.get(key)
-    if (cached) return cached
-
-    // Execute and cache
-    const result = await operation()
-    await this.cache.set(key, result)
-
-    return result
-  }
-
-  track(metric: string, value: number) {
-    this.metrics.record(metric, value)
-  }
-}
+// Available Transport Types:
+// 1. stdio (default)
+// 2. http-stream
 ```
 
 ## Data Flow
@@ -222,16 +116,15 @@ export class Performance {
 sequenceDiagram
     participant Client
     participant Transport
-    participant Security
     participant Server
+    participant Registry
     participant Tool
     participant Resource
 
     Client->>Transport: Send Request
-    Transport->>Security: Authenticate
-    Security->>Security: Validate
-    Security->>Server: Process
-    Server->>Tool: Execute
+    Transport->>Server: Process
+    Server->>Registry: Get Tool
+    Registry->>Tool: Execute
     Tool->>Resource: Use
     Resource->>Tool: Return
     Tool->>Server: Result
@@ -239,16 +132,14 @@ sequenceDiagram
     Transport->>Client: Send
 ```
 
-### Component Interaction
+### Component Loading
 
 ```mermaid
 graph LR
-    A[Tool] --> B[Resource]
-    A --> C[Other Tool]
-    B --> D[Cache]
-    C --> D
-    A --> E[Prompt]
-    E --> B
+    Config[Config] --> Registry[Registry]
+    Registry --> Tools[Tools]
+    Registry --> Resources[Resources]
+    Registry --> Prompts[Prompts]
 ```
 
 ## Design Patterns

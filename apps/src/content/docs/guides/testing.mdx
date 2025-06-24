@@ -1,60 +1,46 @@
 ---
 title: Testing Guide
-description: Comprehensive guide for testing DyneMCP servers and tools
+description: Guide for testing DyneMCP servers and tools
 ---
 
 # Testing Guide
 
-This guide covers testing strategies and best practices for DyneMCP servers, tools, and components.
+This guide covers testing strategies and best practices for DyneMCP servers and tools.
 
-## Testing Features
+## Testing Setup
 
-DyneMCP includes built-in testing utilities:
+DyneMCP projects use Vitest for testing. Here's how to set up your testing environment:
 
-1. Tool Testing
-2. Server Testing
-3. Transport Testing
-4. Integration Testing
-5. Performance Testing
-6. Security Testing
+### Vitest Configuration
 
-## Test Configuration
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config'
 
-### Jest Configuration
-
-```javascript
-// jest.config.js
-module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>/src'],
-  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'node',
+    include: ['src/**/*.{test,spec}.{js,ts}'],
   },
-  setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
-}
+})
 ```
 
 ### Test Environment Setup
 
 ```typescript
 // src/test/setup.ts
-import { TestServer } from '@dynemcp/dynemcp/testing'
+import { vi, beforeEach, afterEach } from 'vitest'
+import { createMCPServer } from '@dynemcp/dynemcp'
 
-beforeAll(async () => {
-  // Start test server
-  await TestServer.start()
+// Mock console to avoid test output pollution
+beforeEach(() => {
+  vi.spyOn(console, 'log').mockImplementation(vi.fn())
+  vi.spyOn(console, 'error').mockImplementation(vi.fn())
 })
 
-afterAll(async () => {
-  // Stop test server
-  await TestServer.stop()
-})
-
-beforeEach(async () => {
-  // Reset test state
-  await TestServer.reset()
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 ```
 
@@ -63,17 +49,43 @@ beforeEach(async () => {
 ### Basic Tool Test
 
 ```typescript
-import { TestServer, createTestTool } from '@dynemcp/dynemcp/testing'
+import { vi, describe, it, expect } from 'vitest'
+import { createMCPServer } from '@dynemcp/dynemcp'
+import type { ToolDefinition } from '@dynemcp/dynemcp'
 
-describe('CalculatorTool', () => {
-  let tool: CalculatorTool
+describe('Calculator Tool', () => {
+  const calculatorTool: ToolDefinition = {
+    name: 'calculator',
+    description: 'Basic calculator operations',
+    schema: {
+      type: 'object',
+      properties: {
+        operation: { type: 'string', enum: ['add', 'subtract'] },
+        a: { type: 'number' },
+        b: { type: 'number' },
+      },
+      required: ['operation', 'a', 'b'],
+    },
+    handler: async ({ operation, a, b }) => {
+      switch (operation) {
+        case 'add':
+          return a + b
+        case 'subtract':
+          return a - b
+        default:
+          throw new Error('Invalid operation')
+      }
+    },
+  }
+
+  const server = createMCPServer()
 
   beforeEach(() => {
-    tool = createTestTool(CalculatorTool)
+    server.registry.addTool(calculatorTool)
   })
 
-  test('adds two numbers', async () => {
-    const result = await tool.execute({
+  it('adds two numbers', async () => {
+    const result = await server.execute('calculator', {
       operation: 'add',
       a: 2,
       b: 3,
@@ -82,78 +94,108 @@ describe('CalculatorTool', () => {
     expect(result).toBe(5)
   })
 
-  test('validates input', async () => {
+  it('validates input', async () => {
     await expect(
-      tool.execute({
+      server.execute('calculator', {
         operation: 'add',
         a: 'invalid',
         b: 3,
       })
-    ).rejects.toThrow('Invalid input')
+    ).rejects.toThrow()
   })
 })
 ```
 
-### Mocking Dependencies
+### Testing with Dependencies
 
 ```typescript
-import { mockResource, mockTool } from '@dynemcp/dynemcp/testing'
+import { vi, describe, it, expect } from 'vitest'
+import { createMCPServer } from '@dynemcp/dynemcp'
+import type { ToolDefinition, ResourceDefinition } from '@dynemcp/dynemcp'
 
-describe('AdvancedTool', () => {
+describe('Tool with Dependencies', () => {
+  const server = createMCPServer()
+
+  // Mock dependent tool
+  const mockBasicTool: ToolDefinition = {
+    name: 'basic',
+    description: 'Mock basic tool',
+    schema: {
+      type: 'object',
+      properties: {
+        input: { type: 'string' },
+      },
+    },
+    handler: vi.fn().mockResolvedValue(42),
+  }
+
+  // Mock resource
+  const mockResource: ResourceDefinition = {
+    uri: 'data://test',
+    name: 'Test Resource',
+    content: { value: 10 },
+  }
+
   beforeEach(() => {
-    // Mock dependent tool
-    mockTool('basic', {
-      execute: jest.fn().mockResolvedValue(42),
-    })
-
-    // Mock resource
-    mockResource('data://test', {
-      content: { value: 10 },
-    })
+    server.registry.addTool(mockBasicTool)
+    server.registry.addResource(mockResource)
   })
 
-  test('uses dependencies', async () => {
-    const tool = createTestTool(AdvancedTool)
-
-    const result = await tool.execute({
+  it('uses dependencies', async () => {
+    const result = await server.execute('basic', {
       input: 'test',
     })
 
-    expect(result).toBe(52) // 42 + 10
+    expect(mockBasicTool.handler).toHaveBeenCalled()
+    expect(result).toBe(42)
   })
 })
 ```
 
 ## Server Testing
 
-### Server Setup
+### Server Integration Tests
 
 ```typescript
-import { TestServer } from '@dynemcp/dynemcp/testing'
+import { vi, describe, it, expect } from 'vitest'
+import { createMCPServer } from '@dynemcp/dynemcp'
+import type { ToolDefinition } from '@dynemcp/dynemcp'
 
-describe('Server', () => {
-  let server: TestServer
+describe('Server Integration', () => {
+  const greetTool: ToolDefinition = {
+    name: 'greet',
+    description: 'Greeting tool',
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+      },
+      required: ['name'],
+    },
+    handler: async ({ name }) => `Hello, ${name}!`,
+  }
 
-  beforeEach(async () => {
-    server = await TestServer.create({
-      tools: [CalculatorTool],
-      resources: [dataResource],
-      transport: 'memory',
-    })
+  const server = createMCPServer('test-server')
+
+  beforeAll(async () => {
+    server.registry.addTool(greetTool)
+    await server.init()
   })
 
-  afterEach(async () => {
+  afterAll(async () => {
     await server.stop()
   })
 
-  test('handles requests', async () => {
-    const response = await server.execute('calculator', {
-      operation: 'add',
-      a: 2,
-      b: 3,
+  it('loads tools correctly', () => {
+    expect(server.registry.tools.length).toBe(1)
+  })
+
+  it('executes tools', async () => {
+    const result = await server.execute('greet', {
+      name: 'Test',
     })
 
-    expect(response).toBe(5)
+    expect(result).toBe('Hello, Test!')
   })
 })
 ```
@@ -161,346 +203,83 @@ describe('Server', () => {
 ### Transport Testing
 
 ```typescript
-import { TestTransport } from '@dynemcp/dynemcp/testing'
+import { vi, describe, it, expect } from 'vitest'
+import { createMCPServer } from '@dynemcp/dynemcp'
 
-describe('HTTP Transport', () => {
-  let transport: TestTransport
-
-  beforeEach(async () => {
-    transport = await TestTransport.create('http', {
-      port: 3000,
-    })
-  })
-
-  afterEach(async () => {
-    await transport.stop()
-  })
-
-  test('handles HTTP requests', async () => {
-    const response = await fetch('http://localhost:3000/tools/calculator', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+describe('HTTP Stream Transport', () => {
+  const server = createMCPServer('test-server', {
+    transport: {
+      type: 'http-stream',
+      options: {
+        port: 3000,
       },
-      body: JSON.stringify({
-        operation: 'add',
-        a: 2,
-        b: 3,
-      }),
-    })
-
-    const result = await response.json()
-    expect(result).toBe(5)
+    },
   })
-})
-```
-
-## Integration Testing
-
-### End-to-End Tests
-
-```typescript
-import { TestServer } from '@dynemcp/dynemcp/testing'
-
-describe('Calculator Integration', () => {
-  let server: TestServer
 
   beforeAll(async () => {
-    server = await TestServer.create({
-      configPath: './test/config.json',
-    })
+    await server.init()
   })
 
   afterAll(async () => {
     await server.stop()
   })
 
-  test('complete calculation flow', async () => {
-    // Step 1: Add numbers
-    const sum = await server.execute('calculator', {
-      operation: 'add',
-      a: 2,
-      b: 3,
-    })
-    expect(sum).toBe(5)
-
-    // Step 2: Multiply result
-    const product = await server.execute('calculator', {
-      operation: 'multiply',
-      a: sum,
-      b: 2,
-    })
-    expect(product).toBe(10)
-
-    // Step 3: Store result
-    await server.execute('storage', {
-      operation: 'set',
-      key: 'result',
-      value: product,
-    })
-
-    // Step 4: Retrieve result
-    const stored = await server.execute('storage', {
-      operation: 'get',
-      key: 'result',
-    })
-    expect(stored).toBe(10)
-  })
-})
-```
-
-### Component Integration
-
-```typescript
-import { TestServer } from '@dynemcp/dynemcp/testing'
-
-describe('Component Integration', () => {
-  test('tools and resources', async () => {
-    const server = await TestServer.create({
-      tools: [CalculatorTool, StorageTool],
-      resources: [dataResource],
-    })
-
-    // Tool uses resource
-    const result = await server.execute('calculator', {
-      operation: 'processData',
-    })
-
-    expect(result).toMatchObject({
-      processed: true,
-      data: expect.any(Object),
-    })
-  })
-
-  test('transport and authentication', async () => {
-    const server = await TestServer.create({
-      transport: 'http',
-      security: {
-        authentication: {
-          type: 'bearer',
-          secret: 'test-secret',
-        },
-      },
-    })
-
-    // Authenticated request
-    const response = await fetch('http://localhost:3000/tools/calculator', {
+  it('handles HTTP stream requests', async () => {
+    const response = await fetch('http://localhost:3000/mcp', {
+      method: 'POST',
       headers: {
-        Authorization: 'Bearer test-token',
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        tool: 'greet',
+        params: { name: 'Test' },
+      }),
     })
 
-    expect(response.status).toBe(200)
-  })
-})
-```
-
-## Performance Testing
-
-### Load Testing
-
-```typescript
-import { LoadTest } from '@dynemcp/dynemcp/testing'
-
-describe('Performance', () => {
-  test('handles concurrent requests', async () => {
-    const server = await TestServer.create()
-
-    const loadTest = new LoadTest({
-      server,
-      tool: 'calculator',
-      params: {
-        operation: 'add',
-        a: 2,
-        b: 3,
-      },
-      concurrency: 100,
-      duration: 10000,
-    })
-
-    const results = await loadTest.run()
-
-    expect(results.successRate).toBeGreaterThan(0.99)
-    expect(results.avgLatency).toBeLessThan(100)
-  })
-})
-```
-
-### Memory Testing
-
-```typescript
-import { MemoryTest } from '@dynemcp/dynemcp/testing'
-
-describe('Memory Usage', () => {
-  test('memory remains stable', async () => {
-    const server = await TestServer.create()
-
-    const memTest = new MemoryTest({
-      server,
-      duration: 60000,
-      operation: async () => {
-        await server.execute('calculator', {
-          operation: 'add',
-          a: 2,
-          b: 3,
-        })
-      },
-    })
-
-    const results = await memTest.run()
-
-    expect(results.leak).toBeFalsy()
-    expect(results.maxUsage).toBeLessThan(100 * 1024 * 1024)
-  })
-})
-```
-
-## Security Testing
-
-### Authentication Tests
-
-```typescript
-import { SecurityTest } from '@dynemcp/dynemcp/testing'
-
-describe('Security', () => {
-  test('requires authentication', async () => {
-    const server = await TestServer.create({
-      security: {
-        authentication: {
-          type: 'bearer',
-          secret: 'test-secret',
-        },
-      },
-    })
-
-    // No token
-    const response1 = await fetch('http://localhost:3000/tools/calculator')
-    expect(response1.status).toBe(401)
-
-    // Invalid token
-    const response2 = await fetch('http://localhost:3000/tools/calculator', {
-      headers: {
-        Authorization: 'Bearer invalid',
-      },
-    })
-    expect(response2.status).toBe(401)
-
-    // Valid token
-    const response3 = await fetch('http://localhost:3000/tools/calculator', {
-      headers: {
-        Authorization: 'Bearer valid-token',
-      },
-    })
-    expect(response3.status).toBe(200)
-  })
-})
-```
-
-### Input Validation Tests
-
-```typescript
-import { ValidationTest } from '@dynemcp/dynemcp/testing'
-
-describe('Input Validation', () => {
-  test('validates tool input', async () => {
-    const server = await TestServer.create()
-
-    const validationTest = new ValidationTest({
-      server,
-      tool: 'calculator',
-      tests: [
-        {
-          input: {
-            operation: 'add',
-            a: 'invalid',
-            b: 3,
-          },
-          expectError: true,
-        },
-        {
-          input: {
-            operation: 'divide',
-            a: 10,
-            b: 0,
-          },
-          expectError: true,
-        },
-        {
-          input: {
-            operation: 'add',
-            a: 2,
-            b: 3,
-          },
-          expectSuccess: true,
-        },
-      ],
-    })
-
-    await validationTest.run()
+    expect(response.ok).toBe(true)
+    const result = await response.json()
+    expect(result).toBeDefined()
   })
 })
 ```
 
 ## Best Practices
 
-### 1. Test Organization
+1. **Isolation**: Test each tool in isolation
+2. **Mocking**: Use Vitest's mocking capabilities
+3. **Coverage**: Aim for high test coverage
+4. **Error Cases**: Test error conditions
+5. **Integration**: Include integration tests
+6. **Configuration**: Test different configurations
 
-- Group related tests
-- Use descriptive names
-- Follow AAA pattern
-- Keep tests focused
+## Running Tests
 
-### 2. Test Coverage
+```bash
+# Run all tests
+pnpm test
 
-- Test happy paths
-- Test edge cases
-- Test error handling
-- Test security features
+# Run tests in watch mode
+pnpm test:watch
 
-### 3. Test Maintenance
+# Run tests with coverage
+pnpm test:coverage
 
-- Keep tests simple
-- Avoid test duplication
-- Use test utilities
-- Regular updates
+# Run specific test file
+pnpm test src/tools/calculator.test.ts
+```
 
-### 4. Test Performance
+## Example Test Structure
 
-- Fast test execution
-- Parallel testing
-- Resource cleanup
-- Efficient mocking
-
-## Testing Checklist
-
-### Unit Tests
-
-- [ ] Tool functionality
-- [ ] Input validation
-- [ ] Error handling
-- [ ] Resource usage
-- [ ] Component isolation
-
-### Integration Tests
-
-- [ ] Component interaction
-- [ ] Data flow
-- [ ] Transport handling
-- [ ] Security features
-- [ ] Error propagation
-
-### Performance Tests
-
-- [ ] Load testing
-- [ ] Memory usage
-- [ ] Response times
-- [ ] Concurrency
-- [ ] Resource limits
-
-### Security Tests
-
-- [ ] Authentication
-- [ ] Authorization
-- [ ] Input validation
-- [ ] Error handling
-- [ ] Rate limiting
+```
+src/
+  ├── tools/
+  │   ├── calculator.ts
+  │   └── calculator.test.ts
+  ├── resources/
+  │   ├── data.ts
+  │   └── data.test.ts
+  └── test/
+      ├── setup.ts
+      └── integration/
+          └── server.test.ts
+```

@@ -10,20 +10,20 @@ DyneMCP provides several pre-built templates to help you get started quickly. Ea
 To create a new project using a template:
 
 ```bash
-npx create-dynemcp@latest my-project --template <template-name>
+pnpm create dynemcp@latest my-project --template <template-name>
 ```
 
 Available template names: `default`, `calculator`, `http-server`, `secure-agent`, `dynamic-agent`
 
 ## Template Comparison
 
-| Template      | Transport   | Authentication | Use Case              | Complexity |
-| ------------- | ----------- | -------------- | --------------------- | ---------- |
-| Default       | stdio       | None           | Learning, prototyping | ⭐         |
-| Calculator    | stdio       | None           | Math operations       | ⭐⭐       |
-| HTTP Server   | HTTP        | None           | Web integration       | ⭐⭐       |
-| Secure Agent  | HTTP-Stream | API Key        | Production apps       | ⭐⭐⭐     |
-| Dynamic Agent | stdio       | None           | AI research           | ⭐⭐⭐⭐   |
+| Template      | Transport    | Authentication | Use Case              | Complexity |
+| ------------- | ------------ | -------------- | --------------------- | ---------- |
+| Default       | stdio        | None           | Learning, prototyping | ⭐         |
+| Calculator    | stdio        | None           | Math operations       | ⭐⭐       |
+| HTTP Server   | http-stream  | None           | Web integration       | ⭐⭐       |
+| Secure Agent  | http-stream  | API Key        | Production apps       | ⭐⭐⭐     |
+| Dynamic Agent | stdio        | None           | AI research           | ⭐⭐⭐⭐   |
 
 ## Template Features Matrix
 
@@ -213,24 +213,24 @@ After creating your project:
 2. **Install dependencies**:
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Start development server**:
 
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
 4. **Build for production**:
 
    ```bash
-   npm run build
+   pnpm build
    ```
 
 5. **Test your server**:
    ```bash
-   npm test
+   pnpm test
    ```
 
 ## Customizing Templates

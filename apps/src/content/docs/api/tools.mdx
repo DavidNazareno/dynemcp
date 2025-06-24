@@ -7,61 +7,23 @@ description: Complete reference for creating and managing DyneMCP tools
 
 Tools are the core building blocks of DyneMCP servers. They provide the functionality that MCP clients can invoke.
 
-## DyneMCPTool Class
+## Tool Definition
 
-The base class for creating tools in DyneMCP.
-
-```typescript
-abstract class DyneMCPTool {
-  abstract get name(): string
-  abstract readonly description: string
-  abstract readonly schema: z.ZodType
-  abstract execute(params: any): Promise<any>
-}
-```
-
-### Required Properties
-
-| Property      | Type        | Description                 |
-| ------------- | ----------- | --------------------------- |
-| `name`        | `string`    | Unique tool identifier      |
-| `description` | `string`    | Tool description            |
-| `schema`      | `z.ZodType` | Parameter validation schema |
-
-### Methods
-
-#### execute()
-
-The main method that implements the tool's functionality.
+Tools in DyneMCP are defined using a simple object structure:
 
 ```typescript
-abstract execute(params: any): Promise<any>
-```
-
-## Creating Tools
-
-### Class-based Approach
-
-```typescript
-import { DyneMCPTool } from '@dynemcp/dynemcp'
+import type { ToolDefinition } from '@dynemcp/dynemcp'
 import { z } from 'zod'
 
-export class CalculatorTool extends DyneMCPTool {
-  get name() {
-    return 'calculator'
-  }
-
-  readonly description = 'Performs basic math operations'
-
-  readonly schema = z.object({
+const calculatorTool: ToolDefinition = {
+  name: 'calculator',
+  description: 'Performs basic math operations',
+  schema: z.object({
     operation: z.enum(['add', 'subtract', 'multiply', 'divide']),
     a: z.number(),
     b: z.number(),
-  })
-
-  async execute(params: z.infer<typeof this.schema>) {
-    const { operation, a, b } = params
-
+  }),
+  handler: async ({ operation, a, b }) => {
     switch (operation) {
       case 'add':
         return a + b
@@ -73,31 +35,22 @@ export class CalculatorTool extends DyneMCPTool {
         if (b === 0) throw new Error('Division by zero')
         return a / b
     }
-  }
+  },
 }
 ```
 
-### Function-based Approach
+### Required Properties
 
-```typescript
-import { createTool } from '@dynemcp/dynemcp'
-import { z } from 'zod'
-
-export const greetingTool = createTool({
-  name: 'greet',
-  description: 'Greets a person',
-  schema: z.object({
-    name: z.string(),
-  }),
-  execute: async ({ name }) => {
-    return `Hello, ${name}!`
-  },
-})
-```
+| Property      | Type                    | Description                 |
+| ------------- | ----------------------- | --------------------------- |
+| `name`        | `string`                | Unique tool identifier      |
+| `description` | `string`                | Tool description            |
+| `schema`      | `z.ZodType`            | Parameter validation schema |
+| `handler`     | `(params: any) => any` | Tool implementation        |
 
 ## Tool Registration
 
-Tools can be registered in several ways:
+Tools can be registered in two ways:
 
 ### 1. Auto-discovery
 
@@ -125,11 +78,8 @@ src/
 ```typescript
 const server = createMCPServer()
 
-// Register class-based tool
-server.registry.registerTool(new CalculatorTool())
-
-// Register function-based tool
-server.registry.registerTool(greetingTool)
+// Register a tool
+server.registry.addTool(calculatorTool)
 ```
 
 ## Schema Validation
@@ -176,69 +126,32 @@ const schema = z.object({
 Tools should handle errors appropriately:
 
 ```typescript
-export class DivisionTool extends DyneMCPTool {
-  get name() {
-    return 'divide'
-  }
-
-  readonly description = 'Divides two numbers'
-
-  readonly schema = z.object({
+const divisionTool: ToolDefinition = {
+  name: 'divide',
+  description: 'Divides two numbers',
+  schema: z.object({
     dividend: z.number(),
     divisor: z.number(),
-  })
-
-  async execute({ dividend, divisor }) {
-    try {
-      // Input validation
-      if (divisor === 0) {
-        throw new Error('Division by zero is not allowed')
-      }
-
-      // Perform operation
-      const result = dividend / divisor
-
-      // Check for special cases
-      if (!Number.isFinite(result)) {
-        throw new Error('Result is not a finite number')
-      }
-
-      return result
-    } catch (error) {
-      // Log error for debugging
-      console.error('Division error:', error)
-
-      // Rethrow with user-friendly message
-      throw new Error(`Failed to perform division: ${error.message}`)
+  }),
+  handler: async ({ dividend, divisor }) => {
+    // Input validation
+    if (divisor === 0) {
+      throw new Error('Division by zero is not allowed')
     }
-  }
+
+    // Perform operation
+    return dividend / divisor
+  },
 }
 ```
 
 ## Best Practices
 
-1. **Input Validation**
-
-   - Always validate input parameters
-   - Use descriptive error messages
-   - Handle edge cases
-
-2. **Error Handling**
-
-   - Use try-catch blocks
-   - Provide meaningful error messages
-   - Log errors for debugging
-
-3. **Performance**
-
-   - Keep tools focused and simple
-   - Avoid unnecessary async operations
-   - Cache expensive computations
-
-4. **Documentation**
-   - Document tool purpose
-   - Describe parameters
-   - Provide usage examples
+1. **Input Validation**: Always define a schema to validate input parameters
+2. **Error Handling**: Handle edge cases and throw descriptive errors
+3. **Async Operations**: All handlers should be async functions
+4. **Type Safety**: Use TypeScript types for better development experience
+5. **Documentation**: Provide clear descriptions for tools and parameters
 
 ## Examples
 

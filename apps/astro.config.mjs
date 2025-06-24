@@ -5,7 +5,7 @@ import starlight from '@astrojs/starlight'
 // https://astro.build/config
 export default defineConfig({
   outDir: '../dist/apps',
-  site: 'https://dynemcp.dev',
+  site: 'https://github.com/DavidNazareno/dynemcp',
   integrations: [
     starlight({
       title: 'DyneMCP',
@@ -20,12 +20,12 @@ export default defineConfig({
         {
           icon: 'github',
           label: 'GitHub',
-          href: 'https://github.com/dynemcp/dynemcp',
+          href: 'https://github.com/DavidNazareno/dynemcp',
         },
       ],
       editLink: {
         baseUrl:
-          'https://github.com/dynemcp/dynemcp/edit/main/apps/src/content/docs/',
+          'https://github.com/DavidNazareno/dynemcp/edit/main/apps/src/content/docs/',
       },
       sidebar: [
         {

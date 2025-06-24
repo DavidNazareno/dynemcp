@@ -9,13 +9,10 @@ This guide covers best practices and strategies for deploying DyneMCP servers to
 
 ## Deployment Options
 
-DyneMCP servers can be deployed in various ways:
+DyneMCP servers can be deployed in two main ways:
 
 1. Standalone Server
 2. Docker Container
-3. Kubernetes Cluster
-4. Serverless Functions
-5. Cloud Services
 
 ## Prerequisites
 
@@ -23,9 +20,8 @@ Before deploying, ensure you have:
 
 1. Production-ready configuration
 2. Security measures in place
-3. Monitoring setup
-4. Backup strategy
-5. Rollback plan
+3. Environment variables set
+4. Node.js 18+ installed
 
 ## Standalone Deployment
 
@@ -33,15 +29,18 @@ Before deploying, ensure you have:
 
 ```bash
 # Install dependencies
-npm install --production
+pnpm install --prod
 
 # Set environment variables
 export NODE_ENV=production
-export PORT=80
-export JWT_SECRET=your-secret
+export DYNEMCP_TRANSPORT_TYPE=http-stream
+export DYNEMCP_HTTP_PORT=3000
+
+# Build the project
+pnpm run build
 
 # Start server
-npm start
+pnpm start
 ```
 
 ### Process Management
@@ -50,10 +49,10 @@ Using PM2:
 
 ```bash
 # Install PM2
-npm install -g pm2
+pnpm add -g pm2
 
 # Start server
-pm2 start dist/server.js --name dynemcp
+pm2 start dist/index.js --name dynemcp
 
 # Configure auto-restart
 pm2 startup
@@ -72,9 +71,12 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Install pnpm
+RUN npm install -g pnpm
+
 # Install dependencies
-COPY package*.json ./
-RUN npm ci --production
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod
 
 # Copy source
 COPY dist/ ./dist/
@@ -82,10 +84,11 @@ COPY dynemcp.config.json ./
 
 # Set environment
 ENV NODE_ENV=production
-ENV PORT=80
+ENV DYNEMCP_TRANSPORT_TYPE=http-stream
+ENV DYNEMCP_HTTP_PORT=3000
 
 # Start server
-CMD ["npm", "start"]
+CMD ["pnpm", "start"]
 ```
 
 ### Docker Compose
@@ -97,418 +100,167 @@ services:
   dynemcp:
     build: .
     ports:
-      - '80:80'
+      - '3000:3000'
     environment:
       - NODE_ENV=production
-      - JWT_SECRET=your-secret
+      - DYNEMCP_TRANSPORT_TYPE=http-stream
+      - DYNEMCP_HTTP_PORT=3000
     volumes:
       - ./logs:/app/logs
     restart: always
 ```
 
-## Kubernetes Deployment
+## Configuration
 
-### Deployment Configuration
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: dynemcp
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: dynemcp
-  template:
-    metadata:
-      labels:
-        app: dynemcp
-    spec:
-      containers:
-        - name: dynemcp
-          image: dynemcp:latest
-          ports:
-            - containerPort: 80
-          env:
-            - name: NODE_ENV
-              value: production
-            - name: JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: dynemcp-secrets
-                  key: jwt-secret
-          resources:
-            limits:
-              cpu: '1'
-              memory: '1Gi'
-            requests:
-              cpu: '500m'
-              memory: '512Mi'
-```
-
-### Service Configuration
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: dynemcp
-spec:
-  selector:
-    app: dynemcp
-  ports:
-    - port: 80
-      targetPort: 80
-  type: LoadBalancer
-```
-
-## Serverless Deployment
-
-### AWS Lambda
-
-```typescript
-import { createMCPServer } from '@dynemcp/dynemcp'
-import { APIGatewayProxyHandler } from 'aws-lambda'
-
-const server = createMCPServer()
-
-export const handler: APIGatewayProxyHandler = async (event) => {
-  try {
-    const result = await server.execute(
-      event.pathParameters?.tool,
-      JSON.parse(event.body || '{}')
-    )
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify(result),
-    }
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
-    }
-  }
-}
-```
-
-### Vercel
-
-```typescript
-import { createMCPServer } from '@dynemcp/dynemcp'
-import { VercelRequest, VercelResponse } from '@vercel/node'
-
-const server = createMCPServer()
-
-export default async function (req: VercelRequest, res: VercelResponse) {
-  try {
-    const result = await server.execute(req.query.tool as string, req.body)
-    res.json(result)
-  } catch (error) {
-    res.status(500).json({ error: error.message })
-  }
-}
-```
-
-## Cloud Services
-
-### Google Cloud Run
-
-```yaml
-steps:
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/dynemcp', '.']
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/dynemcp']
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'run'
-      - 'deploy'
-      - 'dynemcp'
-      - '--image'
-      - 'gcr.io/$PROJECT_ID/dynemcp'
-      - '--platform'
-      - 'managed'
-      - '--region'
-      - 'us-central1'
-      - '--allow-unauthenticated'
-```
-
-### Azure Container Apps
-
-```yaml
-resources:
-  - type: Microsoft.App/containerApps
-    name: dynemcp
-    properties:
-      configuration:
-        ingress:
-          external: true
-          targetPort: 80
-      template:
-        containers:
-          - image: dynemcp:latest
-            name: dynemcp
-            env:
-              - name: NODE_ENV
-                value: production
-```
-
-## Production Configuration
-
-### Security Settings
+### Production Configuration
 
 ```json
 {
-  "security": {
-    "enableValidation": true,
-    "strictMode": true,
-    "rateLimit": {
-      "enabled": true,
-      "maxRequests": 100,
-      "windowMs": 900000
-    },
-    "cors": {
-      "origin": ["https://app.example.com"],
-      "methods": ["GET", "POST"]
+  "server": {
+    "name": "production-mcp-server",
+    "version": "1.0.0"
+  },
+  "transport": {
+    "type": "http-stream",
+    "options": {
+      "port": 3000,
+      "endpoint": "/mcp",
+      "responseMode": "stream",
+      "maxMessageSize": "1mb",
+      "authentication": {
+        "path": "./src/auth.ts"
+      }
     }
-  }
-}
-```
-
-### Performance Settings
-
-```json
-{
+  },
+  "logging": {
+    "enabled": true,
+    "level": "info",
+    "format": "json",
+    "timestamp": true
+  },
   "performance": {
     "maxConcurrentRequests": 100,
     "requestTimeout": 30000,
     "memoryLimit": "512mb",
-    "caching": {
+    "enableMetrics": true
+  },
+  "security": {
+    "enableValidation": true,
+    "strictMode": true,
+    "allowedOrigins": ["https://yourdomain.com"],
+    "rateLimit": {
       "enabled": true,
-      "ttl": 3600
+      "maxRequests": 100,
+      "windowMs": 900000
     }
   }
 }
 ```
 
-## Monitoring
+## Environment Variables
 
-### Health Checks
+DyneMCP supports configuration through environment variables:
 
-```typescript
-app.get('/health', (req, res) => {
-  const health = {
-    uptime: process.uptime(),
-    timestamp: Date.now(),
-    memory: process.memoryUsage(),
-    cpu: process.cpuUsage(),
-  }
+```bash
+# Server configuration
+export DYNEMCP_SERVER_NAME=production-server
+export DYNEMCP_SERVER_VERSION=1.0.0
 
-  res.json(health)
-})
+# Transport configuration
+export DYNEMCP_TRANSPORT_TYPE=http-stream
+export DYNEMCP_HTTP_PORT=3000
+export DYNEMCP_HTTP_ENDPOINT=/mcp
+export DYNEMCP_HTTP_RESPONSE_MODE=stream
+
+# Security configuration
+export DYNEMCP_SECURITY_ENABLE_VALIDATION=true
+export DYNEMCP_SECURITY_STRICT_MODE=true
+export DYNEMCP_SECURITY_ALLOWED_ORIGINS=https://yourdomain.com
+
+# Performance configuration
+export DYNEMCP_PERFORMANCE_MAX_CONCURRENT_REQUESTS=100
+export DYNEMCP_PERFORMANCE_REQUEST_TIMEOUT=30000
+export DYNEMCP_PERFORMANCE_MEMORY_LIMIT=512mb
 ```
 
-### Metrics
+## Production Checklist
 
-```typescript
-import prometheus from 'prom-client'
+### Before Deployment
 
-const requestCounter = new prometheus.Counter({
-  name: 'dynemcp_requests_total',
-  help: 'Total requests',
-})
+- [ ] Run production build (`pnpm run build`)
+- [ ] Set up proper logging
+- [ ] Configure security settings
+- [ ] Set up authentication if needed
+- [ ] Configure CORS properly
+- [ ] Set appropriate rate limits
 
-const latencyHistogram = new prometheus.Histogram({
-  name: 'dynemcp_request_duration_seconds',
-  help: 'Request duration',
-})
+### After Deployment
 
-app.get('/metrics', async (req, res) => {
-  res.set('Content-Type', prometheus.register.contentType)
-  res.end(await prometheus.register.metrics())
-})
-```
-
-## Backup Strategy
-
-### Data Backup
-
-```typescript
-import { backup } from '@dynemcp/dynemcp'
-
-async function backupData() {
-  const data = await backup.export({
-    include: ['tools', 'resources', 'config'],
-  })
-
-  await storage.upload('backup.json', data)
-}
-
-// Schedule backup
-setInterval(backupData, 24 * 60 * 60 * 1000)
-```
-
-### Configuration Backup
-
-```typescript
-import { config } from '@dynemcp/dynemcp'
-
-async function backupConfig() {
-  const current = config.export()
-
-  await storage.upload(
-    `config-${Date.now()}.json`,
-    JSON.stringify(current, null, 2)
-  )
-}
-```
-
-## Deployment Checklist
-
-### Pre-deployment
-
-- [ ] Run tests
-- [ ] Build production assets
-- [ ] Update configuration
-- [ ] Check dependencies
-- [ ] Review security
-
-### Deployment
-
-- [ ] Backup data
-- [ ] Deploy code
-- [ ] Update DNS
-- [ ] Start services
-- [ ] Verify health
-
-### Post-deployment
-
-- [ ] Monitor metrics
-- [ ] Check logs
-- [ ] Test functionality
-- [ ] Document changes
-- [ ] Update status
+- [ ] Verify server is running
+- [ ] Test all endpoints
+- [ ] Monitor memory usage
+- [ ] Check error logs
+- [ ] Verify security measures
 
 ## Best Practices
 
-### 1. Environment Setup
+1. Always use production builds
+2. Set proper environment variables
+3. Use secure transport (http-stream)
+4. Enable strict mode in production
+5. Configure proper logging
+6. Set up monitoring
+7. Use process management (PM2)
+8. Keep dependencies updated
 
-- Use environment variables
-- Secure secrets management
-- Configure logging
-- Set up monitoring
+## Example Production Setup
 
-### 2. Performance
-
-- Enable caching
-- Configure rate limiting
-- Optimize resources
-- Monitor metrics
-
-### 3. Security
-
-- Enable HTTPS
-- Configure authentication
-- Set up firewalls
-- Regular updates
-
-### 4. Maintenance
-
-- Regular backups
-- Monitor resources
-- Update dependencies
-- Review logs
-
-## Troubleshooting
-
-### Common Issues
-
-1. Memory Leaks
-
-```typescript
-// Monitor memory usage
-setInterval(() => {
-  const usage = process.memoryUsage()
-  if (usage.heapUsed > threshold) {
-    notifyAdmin('High memory usage')
-  }
-}, 5000)
-```
-
-2. Connection Issues
-
-```typescript
-server.on('error', (error) => {
-  if (error.code === 'ECONNREFUSED') {
-    reconnect()
-  }
-})
-```
-
-3. Performance Issues
-
-```typescript
-const slowQueries = new Map()
-
-server.on('request', (req, res) => {
-  const start = Date.now()
-
-  res.on('finish', () => {
-    const duration = Date.now() - start
-    if (duration > 1000) {
-      slowQueries.set(req.id, {
-        duration,
-        path: req.path,
-        params: req.params,
-      })
-    }
-  })
-})
-```
-
-### Recovery Steps
-
-1. Service Recovery
+1. Build the project:
 
 ```bash
-# Check logs
-tail -f /var/log/dynemcp.log
-
-# Restart service
-pm2 restart dynemcp
-
-# Check status
-pm2 status
+# Build for production
+pnpm run build
 ```
 
-2. Data Recovery
+2. Set up environment:
 
-```typescript
-async function recover() {
-  // Load backup
-  const backup = await storage.download('backup.json')
-
-  // Restore data
-  await server.import(backup)
-
-  // Verify
-  await server.verify()
-}
+```bash
+# Create production env file
+cat > .env.production << EOL
+NODE_ENV=production
+DYNEMCP_TRANSPORT_TYPE=http-stream
+DYNEMCP_HTTP_PORT=3000
+DYNEMCP_SECURITY_STRICT_MODE=true
+DYNEMCP_PERFORMANCE_MAX_CONCURRENT_REQUESTS=100
+EOL
 ```
 
-3. Configuration Recovery
+3. Start with PM2:
 
-```typescript
-async function recoverConfig() {
-  // Get last good config
-  const config = await storage.download('config-latest.json')
+```bash
+# Start server with PM2
+pm2 start ecosystem.config.js --env production
+```
 
-  // Apply config
-  await server.config.update(JSON.parse(config))
+Example `ecosystem.config.js`:
 
-  // Restart server
-  await server.restart()
+```javascript
+module.exports = {
+  apps: [
+    {
+      name: 'dynemcp',
+      script: './dist/index.js',
+      env_production: {
+        NODE_ENV: 'production',
+        DYNEMCP_TRANSPORT_TYPE: 'http-stream',
+        DYNEMCP_HTTP_PORT: '3000',
+        DYNEMCP_SECURITY_STRICT_MODE: 'true',
+      },
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '512M',
+    },
+  ],
 }
 ```

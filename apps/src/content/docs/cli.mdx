@@ -15,11 +15,11 @@ The project creation CLI helps you scaffold new MCP servers.
 ### Installation
 
 ```bash
-# Global installation (recommended)
-npm install -g @dynemcp/create-dynemcp
+# Using pnpm (recommended)
+pnpm create dynemcp@latest my-project
 
-# Or use without installing
-npx @dynemcp/create-dynemcp my-project
+# Or install globally
+pnpm add -g @dynemcp/create-dynemcp
 ```
 
 ### Command Syntax
@@ -32,26 +32,26 @@ create-dynemcp [directory] [options]
 
 | Option           | Alias | Description                    | Default   |
 | ---------------- | ----- | ------------------------------ | --------- |
-| `--template <n>` | `-t`  | Template to use                | `default` |
+| `--template <n>` | `-t`  | Template to use               | `default` |
 | `--skip-install` |       | Skip dependency installation   | `false`   |
-| `--yes`          | `-y`  | Skip all prompts, use defaults | `false`   |
-| `--version`      | `-v`  | Show version number            |           |
-| `--help`         | `-h`  | Show help message              |           |
+| `--yes`          | `-y`  | Skip all prompts, use defaults| `false`   |
+| `--version`      | `-v`  | Show version number           |           |
+| `--help`         | `-h`  | Show help message             |           |
 
 ### Examples
 
 ```bash
 # Interactive mode with template selection
-create-dynemcp my-project
+pnpm create dynemcp my-project
 
 # Specific template, interactive
-create-dynemcp my-calculator --template calculator
+pnpm create dynemcp my-calculator --template calculator
 
 # Completely non-interactive
-create-dynemcp my-agent --template secure-agent --yes --skip-install
+pnpm create dynemcp my-agent --template secure-agent --yes --skip-install
 
 # Show available options
-create-dynemcp --help
+pnpm create dynemcp --help
 ```
 
 ## DyneMCP CLI
@@ -63,8 +63,6 @@ The main DyneMCP CLI for development and build commands.
 The CLI is included when you install DyneMCP:
 
 ```bash
-npm install -g @dynemcp/dynemcp
-# or
 pnpm add -g @dynemcp/dynemcp
 ```
 
@@ -79,11 +77,9 @@ dynemcp dev [options]
 **Options**:
 
 - `--config, -c <path>`: Path to dynemcp.config.json
-- `--clean`: Clean before building
-- `--transport <type>`: Override transport type (stdio, http)
-- `--watch`: Enable watch mode (default: true)
-- `--port <number>`: Port for HTTP transport
-- `--host <string>`: Host for HTTP transport
+- `--transport <type>`: Override transport type (stdio, http-stream)
+- `--port <number>`: Port for HTTP Stream transport
+- `--host <string>`: Host for HTTP Stream transport
 
 ### Production Build
 
@@ -96,52 +92,10 @@ dynemcp build [options]
 **Options**:
 
 - `--config, -c <path>`: Path to dynemcp.config.json
-- `--clean`: Clean before building
 - `--minify`: Minify output (default: true)
 - `--sourcemap`: Generate sourcemaps (default: true)
 
-### Watch Mode
-
-Watch files and rebuild on changes:
-
-```bash
-dynemcp watch [options]
-```
-
-**Options**:
-
-- `--config, -c <path>`: Path to dynemcp.config.json
-- `--clean`: Clean before building
-- `--transport <type>`: Override transport type
-
-### Clean
-
-Clean build artifacts:
-
-```bash
-dynemcp clean [options]
-```
-
-**Options**:
-
-- `--config, -c <path>`: Path to dynemcp.config.json
-- `--all`: Clean all caches and artifacts
-
-### Analyze
-
-Analyze the bundle size and dependencies:
-
-```bash
-dynemcp analyze [options]
-```
-
-**Options**:
-
-- `--config, -c <path>`: Path to dynemcp.config.json
-- `--json`: Output analysis as JSON
-- `--detailed`: Show detailed analysis
-
-## Configuration
+### Configuration
 
 The CLI reads configuration from `dynemcp.config.json` in your project root. You can override settings using command-line options.
 
@@ -151,7 +105,8 @@ The CLI reads configuration from `dynemcp.config.json` in your project root. You
 {
   "server": {
     "name": "my-mcp-server",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "documentationUrl": "https://docs.example.com"
   },
   "tools": {
     "enabled": true,
@@ -160,11 +115,6 @@ The CLI reads configuration from `dynemcp.config.json` in your project root. You
   },
   "transport": {
     "type": "stdio"
-  },
-  "build": {
-    "target": "node18",
-    "minify": true,
-    "sourcemap": true
   }
 }
 ```
@@ -174,11 +124,9 @@ The CLI reads configuration from `dynemcp.config.json` in your project root. You
 The CLI respects these environment variables:
 
 - `DYNEMCP_CONFIG`: Path to config file
-- `DYNEMCP_ENV`: Environment (development/production)
-- `DYNEMCP_LOG_LEVEL`: Logging level
 - `DYNEMCP_TRANSPORT`: Transport type
-- `DYNEMCP_PORT`: HTTP transport port
-- `DYNEMCP_HOST`: HTTP transport host
+- `DYNEMCP_PORT`: HTTP Stream transport port
+- `DYNEMCP_HOST`: HTTP Stream transport host
 
 ## Exit Codes
 
@@ -193,13 +141,11 @@ The CLI uses these exit codes:
 ## Best Practices
 
 1. **Development**
-
    - Use `dynemcp dev` for local development
-   - Enable watch mode for instant feedback
+   - Configure transport type based on your needs
    - Use sourcemaps for debugging
 
 2. **Production**
-
    - Use `dynemcp build` with minification
    - Set appropriate environment variables
    - Configure logging levels
@@ -213,19 +159,11 @@ The CLI uses these exit codes:
 
 Common issues and solutions:
 
-### Build Failures
-
-```bash
-# Clean and rebuild
-dynemcp clean --all
-dynemcp build --clean
-```
-
 ### Transport Issues
 
 ```bash
 # Override transport
-dynemcp dev --transport http --port 3000
+dynemcp dev --transport http-stream --port 3000
 ```
 
 ### Configuration Problems

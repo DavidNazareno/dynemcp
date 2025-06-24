@@ -119,10 +119,30 @@ Tools are automatically discovered and registered based on your `dynemcp.config.
 }
 ```
 
+You can also register tools programmatically:
+
+```typescript
+const server = createMCPServer()
+
+// Register a tool
+server.registry.addTool({
+  name: 'dynamic-tool',
+  description: 'A dynamically registered tool',
+  schema: z.object({
+    input: z.string().describe('Input to process'),
+  }),
+  handler: async ({ input }) => {
+    return { result: `Processed: ${input}` }
+  },
+})
+```
+
 Requirements for auto-registration:
 
 1. Tool must be the default export
-2. Export must be an instance, not a class
+2. Export must be either:
+   - An instance of DyneMCPTool
+   - A ToolDefinition object
 3. File must be in the configured tools directory
 
 ## Advanced Tool Features
