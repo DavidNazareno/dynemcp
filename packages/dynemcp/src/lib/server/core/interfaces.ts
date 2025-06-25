@@ -1,23 +1,39 @@
+// Import types from the official MCP SDK
+import type { Prompt, PromptMessage } from '@modelcontextprotocol/sdk/types.js'
+
+// Re-export the official SDK types that we use
+export type {
+  PromptArgument,
+  Prompt,
+  PromptMessage,
+  GetPromptRequest,
+  GetPromptResult as GetPromptResponse,
+  ListPromptsResult as ListPromptsResponse,
+} from '@modelcontextprotocol/sdk/types.js'
+
 export interface ToolDefinition {
   name: string
   description: string
-  schema: Record<string, any> // JSON Schema
-  handler: (params: any) => Promise<any> | any
+  schema: any
+  handler: (args: any) => any
 }
 
 export interface ResourceDefinition {
-  uri: string
   name: string
-  content: string | (() => string | Promise<string>)
+  uri: string
   description?: string
+  content: string | (() => string | Promise<string>)
   contentType?: string
 }
 
-export interface PromptDefinition {
-  id: string
-  name: string
-  content: string
-  description?: string
+// Extend the official types for our framework needs
+export interface PromptDefinition extends Prompt {
+  /**
+   * Function to generate messages for this prompt
+   * @param args Arguments passed to the prompt
+   * @returns Promise resolving to an array of prompt messages
+   */
+  getMessages: (args?: Record<string, string>) => Promise<PromptMessage[]>
 }
 
 export interface AutoloadConfig {

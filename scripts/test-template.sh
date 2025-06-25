@@ -14,6 +14,24 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
+# Function to display template selection menu
+select_template() {
+    echo "📋 Available templates:"
+    echo "----------------------------------------"
+    PS3="Please select a template (1-5): "
+    templates=("default" "calculator" "dynamic-agent" "http-server" "secure-agent")
+    select template in "${templates[@]}"; do
+        if [ -n "$template" ]; then
+            echo "Selected template: $template"
+            TEMPLATE_NAME=$template
+            break
+        else
+            echo "Invalid selection. Please try again."
+        fi
+    done
+    echo "----------------------------------------"
+}
+
 # --- Go to project root ---
 # This ensures the script can be run from anywhere in the project.
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -24,12 +42,17 @@ echo "🚀 Starting the template test script..."
 echo "----------------------------------------"
 
 # --- Configuration ---
-# The name of the template to test. Default is 'default'.
-# You can run this script with an argument to test another template, e.g., ./scripts/test-template.sh calculator
-TEMPLATE_NAME=${1:-default}
+# The name of the template can be provided as an argument or selected from menu
 APP_NAME="my-test-app"
 EXAMPLES_DIR="examples"
 APP_PATH="$EXAMPLES_DIR/$APP_NAME"
+
+# If no template is provided as argument, show selection menu
+if [ -z "$1" ]; then
+    select_template
+else
+    TEMPLATE_NAME=$1
+fi
 # ---
 
 # 1. Build the create-dynemcp package to ensure we're using the latest version

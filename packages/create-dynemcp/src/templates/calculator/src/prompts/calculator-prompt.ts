@@ -1,13 +1,18 @@
-import { DyneMCPPrompt } from '@dynemcp/dynemcp'
+import { DyneMCPPrompt, PromptMessage } from '@dynemcp/dynemcp'
 
 export class CalculatorPrompt extends DyneMCPPrompt {
-  readonly id = 'calculator-prompt'
-  readonly name = 'Calculator'
+  readonly name = 'calculator-prompt'
   readonly description =
     'A prompt that provides context for the calculator agent.'
+  readonly arguments = []
 
-  getContent(): string {
-    return 'You are a helpful calculator assistant. Use the available tools to answer the user request.'
+  async getMessages(): Promise<PromptMessage[]> {
+    return [
+      this.createTextMessage(
+        'user',
+        'You are a helpful calculator assistant. Use the available tools to answer the user request.'
+      ),
+    ]
   }
 }
 

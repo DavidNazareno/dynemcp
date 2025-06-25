@@ -33,7 +33,6 @@
   "dependencies": {
     "async-sema": "^3.1.1",
     "chalk": "4.1.2",
-    "commander": "^12.0.0",
     "fast-glob": "^3.3.3",
     "fs-extra": "11.2.0",
     "inquirer": "^9.2.16",
@@ -42,7 +41,7 @@
     "tslib": "^2.3.0",
     "zod": "3.25.67",
     "express": "4.21.2",
-    "@dynemcp/dynemcp": "0.0.16-canary.20250624T16495",
+    "@dynemcp/dynemcp": "workspace:*",
     "react": "19.0.0",
     "node-fetch": "2.7.0",
     "ws": "8.18.2"

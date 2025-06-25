@@ -4,6 +4,7 @@ import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
+  PromptMessage,
 } from '../core/interfaces.js'
 
 export interface FileResourceOptions {
@@ -23,7 +24,7 @@ export interface PromptOptions {
 }
 
 export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant'
+  role: 'user' | 'assistant'
   content: string
 }
 
@@ -84,46 +85,68 @@ export function createDynamicResource(
 
 // Prompt helpers
 export function createPrompt(
-  id: string,
   name: string,
   content: string,
   options: PromptOptions = {}
 ): PromptDefinition {
   return {
-    id,
     name,
-    content,
     description: options.description || name,
+    async getMessages(): Promise<PromptMessage[]> {
+      return [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: content,
+          },
+        } as PromptMessage,
+      ]
+    },
   }
 }
 
 export function createSystemPrompt(
-  id: string,
   name: string,
   content: string,
   options: PromptOptions = {}
 ): PromptDefinition {
   return {
-    id,
     name,
-    content,
     description: options.description || name,
+    async getMessages(): Promise<PromptMessage[]> {
+      return [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: content,
+          },
+        } as PromptMessage,
+      ]
+    },
   }
 }
 
 export function createChatPrompt(
-  id: string,
   name: string,
   messages: ChatMessage[],
   options: PromptOptions = {}
 ): PromptDefinition {
-  const content = messages
-    .map((message) => `${message.role}: ${message.content}`)
-    .join('\n\n')
   return {
-    id,
     name,
-    content,
     description: options.description || name,
+    async getMessages(): Promise<PromptMessage[]> {
+      return messages.map(
+        (message) =>
+          ({
+            role: message.role,
+            content: {
+              type: 'text',
+              text: message.content,
+            },
+          }) as PromptMessage
+      )
+    },
   }
 }

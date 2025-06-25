@@ -1,10 +1,19 @@
-import type { PromptDefinition } from '@dynemcp/dynemcp'
+import type { PromptDefinition, PromptMessage } from '@dynemcp/dynemcp'
 
 const systemPrompt: PromptDefinition = {
-  id: 'system-prompt',
-  name: 'System',
+  name: 'system-prompt',
   description: 'A generic system prompt.',
-  content: 'You are a helpful assistant.',
+  async getMessages(): Promise<PromptMessage[]> {
+    return [
+      {
+        role: 'user',
+        content: {
+          type: 'text',
+          text: 'You are a helpful assistant.',
+        },
+      } as PromptMessage,
+    ]
+  },
 }
 
 export default systemPrompt

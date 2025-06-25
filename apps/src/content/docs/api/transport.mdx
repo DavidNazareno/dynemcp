@@ -151,15 +151,18 @@ The following environment variables can override transport configuration:
 ## Best Practices
 
 1. **Transport Selection**
+
    - Use stdio for CLI tools and local development
    - Use HTTP Stream for web applications and distributed systems
 
 2. **Security**
+
    - Always implement authentication for HTTP Stream in production
    - Configure CORS appropriately for your use case
    - Use HTTPS in production environments
 
 3. **Error Handling**
+
    - Implement proper error handling in authentication middleware
    - Handle connection errors gracefully
    - Provide meaningful error messages to clients

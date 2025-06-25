@@ -270,8 +270,7 @@ export function validatePrompt(component: any): component is PromptDefinition {
   return (
     component &&
     typeof component === 'object' &&
-    typeof component.id === 'string' &&
     typeof component.name === 'string' &&
-    typeof component.content === 'string'
+    typeof component.getMessages === 'function'
   )
 }

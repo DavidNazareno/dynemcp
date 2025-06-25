@@ -1,8 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { z } from 'zod'
 import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
+  GetPromptResponse,
 } from '../interfaces.js'
 
 export interface ServerInitializationOptions {
@@ -40,15 +42,22 @@ export function registerResources(
         typeof resource.content === 'function'
           ? await resource.content()
           : resource.content
+
       return {
-        content: [{ type: 'text' as const, text: content }],
+        contents: [
+          {
+            uri: resource.uri,
+            text: content,
+            mimeType: resource.contentType || 'text/plain',
+          },
+        ],
       }
     }
 
-    server.tool(
-      `resource:${resource.uri}`,
-      resource.description || `Resource: ${resource.name}`,
-      {},
+    server.resource(
+      resource.name,
+      resource.uri,
+      { description: resource.description },
       handler
     )
   }
@@ -59,15 +68,43 @@ export function registerPrompts(
   prompts: PromptDefinition[]
 ): void {
   for (const prompt of prompts) {
-    server.tool(
-      `prompt:${prompt.id}`,
-      prompt.description || `Prompt: ${prompt.name}`,
-      {},
-      async () => {
-        return {
-          content: [{ type: 'text' as const, text: prompt.content }],
-        }
-      }
+    const argsSchema = prompt.arguments?.reduce(
+      (acc, arg) => ({
+        ...acc,
+        [arg.name]: arg.required ? z.string() : z.string().optional(),
+      }),
+      {} as Record<string, z.ZodString | z.ZodOptional<z.ZodString>>
     )
+
+    if (argsSchema && Object.keys(argsSchema).length > 0) {
+      server.prompt(
+        prompt.name,
+        prompt.description || `Prompt: ${prompt.name}`,
+        argsSchema,
+        async (args): Promise<GetPromptResponse> => {
+          const filteredArgs = Object.fromEntries(
+            Object.entries(args).filter(([, value]) => value !== undefined)
+          ) as Record<string, string>
+
+          const messages = await prompt.getMessages(filteredArgs)
+          return {
+            messages,
+            description: prompt.description,
+          }
+        }
+      )
+    } else {
+      server.prompt(
+        prompt.name,
+        prompt.description || `Prompt: ${prompt.name}`,
+        async (): Promise<GetPromptResponse> => {
+          const messages = await prompt.getMessages()
+          return {
+            messages,
+            description: prompt.description,
+          }
+        }
+      )
+    }
   }
 }
