@@ -28,7 +28,7 @@ export const getTemplateFile = ({
   return path.join(templatesDir, template, file)
 }
 
-export const SRC_DIR_NAMES = ['src', 'prompt', 'resources', 'tools']
+export const SRC_DIR_NAMES = ['src', 'prompts', 'resources', 'tools']
 
 /**
  * Install a DyneMCP internal template to a given `root` directory.
@@ -130,29 +130,38 @@ export const installTemplate = async ({
 
   if (srcDir) {
     await fs.mkdir(path.join(root, 'src'), { recursive: true })
-    await Promise.all(
-      SRC_DIR_NAMES.map(async (dir) => {
-        // Skip moving the 'src' directory itself
-        if (dir === 'src') {
-          return
-        }
 
-        const sourcePath = path.join(root, dir)
-        const targetPath = path.join(root, 'src', dir)
+    // Check if the template already has a src/ directory structure
+    const templateHasSrcStructure = await fs
+      .stat(path.join(root, 'src'))
+      .catch(() => false)
 
-        // Check if the source directory exists before attempting to move it
-        if (await fs.stat(sourcePath).catch(() => false)) {
-          await fs.mkdir(path.dirname(targetPath), { recursive: true })
-          await fs
-            .rename(sourcePath, targetPath)
-            .catch((err: { code?: string }) => {
-              if (err.code !== 'ENOENT') {
-                throw err
-              }
-            })
-        }
-      })
-    )
+    if (!templateHasSrcStructure) {
+      // Only reorganize directories if template doesn't already have src/ structure
+      await Promise.all(
+        SRC_DIR_NAMES.map(async (dir) => {
+          // Skip moving the 'src' directory itself
+          if (dir === 'src') {
+            return
+          }
+
+          const sourcePath = path.join(root, dir)
+          const targetPath = path.join(root, 'src', dir)
+
+          // Check if the source directory exists before attempting to move it
+          if (await fs.stat(sourcePath).catch(() => false)) {
+            await fs.mkdir(path.dirname(targetPath), { recursive: true })
+            await fs
+              .rename(sourcePath, targetPath)
+              .catch((err: { code?: string }) => {
+                if (err.code !== 'ENOENT') {
+                  throw err
+                }
+              })
+          }
+        })
+      )
+    }
   }
 
   /** Copy the version from package.json or override for tests. */

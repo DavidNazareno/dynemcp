@@ -1,7 +1,23 @@
 {
   "server": {
-    "name": "my-http-server",
+    "name": "http-server",
     "version": "1.0.0"
+  },
+  "description": "A Model Context Protocol (MCP) server",
+  "tools": {
+    "enabled": true,
+    "directory": "./src/tools",
+    "pattern": "**/*.{ts,js}"
+  },
+  "resources": {
+    "enabled": true,
+    "directory": "./src/resources",
+    "pattern": "**/*.{ts,js}"
+  },
+  "prompts": {
+    "enabled": true,
+    "directory": "./src/prompts",
+    "pattern": "**/*.{ts,js}"
   },
   "transport": {
     "type": "http",
@@ -10,13 +26,36 @@
       "host": "localhost"
     }
   },
-  "tools": {
-    "directory": "./tools"
+  "logging": {
+    "enabled": true,
+    "level": "info",
+    "format": "text",
+    "timestamp": true,
+    "colors": true
   },
-  "resources": {
-    "directory": "./resources"
+  "debug": {
+    "enabled": false,
+    "verbose": false,
+    "showComponentDetails": false,
+    "showTransportDetails": false
   },
-  "prompts": {
-    "directory": "./prompt"
+  "performance": {
+    "maxConcurrentRequests": 100,
+    "requestTimeout": 30000,
+    "memoryLimit": "512mb",
+    "enableMetrics": false
+  },
+  "security": {
+    "enableValidation": true,
+    "strictMode": false,
+    "allowedOrigins": ["*"],
+    "rateLimit": {
+      "enabled": false,
+      "maxRequests": 100,
+      "windowMs": 900000
+    }
+  },
+  "config": {
+    "env": true
   }
 }

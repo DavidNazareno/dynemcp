@@ -1,38 +1,6 @@
 import { DyneMCPTool, CallToolResult } from '@dynemcp/dynemcp'
 import { z } from 'zod'
 
-// Greeter Tool using class pattern
-const GreeterSchema = z.object({
-  name: z.string().describe('The name to greet'),
-})
-
-export class GreeterTool extends DyneMCPTool {
-  readonly name = 'greeter'
-  readonly description = 'A simple tool that greets the user'
-  readonly inputSchema = GreeterSchema.shape
-  readonly annotations = {
-    title: 'Greeter Tool',
-    readOnlyHint: true,
-    openWorldHint: false,
-  }
-
-  execute(input: z.infer<typeof GreeterSchema>): CallToolResult {
-    const { name } = input
-
-    if (!name?.trim()) {
-      return {
-        content: [{ type: 'text', text: 'Name cannot be empty' }],
-        isError: true,
-      }
-    }
-
-    return {
-      content: [{ type: 'text', text: `Hello, ${name}!` }],
-    }
-  }
-}
-
-// Math Tool using class pattern
 const MathSchema = z.object({
   operation: z
     .enum(['add', 'multiply', 'power'])
@@ -44,7 +12,7 @@ export class MathTool extends DyneMCPTool {
   readonly name = 'math'
   readonly description = 'Performs various mathematical operations'
   readonly inputSchema = MathSchema.shape
-  readonly annotations = {
+  override readonly annotations = {
     title: 'Math Tool',
     readOnlyHint: true,
     openWorldHint: false,
@@ -103,5 +71,4 @@ export class MathTool extends DyneMCPTool {
   }
 }
 
-// Export instances of the tools
-export default [new GreeterTool(), new MathTool()]
+export default new MathTool()
