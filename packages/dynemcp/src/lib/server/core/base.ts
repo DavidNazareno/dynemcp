@@ -12,6 +12,90 @@ import type {
 export type InferSchema<T> = T extends z.ZodType ? z.infer<T> : never
 
 /**
+ * Helper function to convert Zod object schema to ZodRawShape
+ */
+export function zodObjectToRawShape<T extends z.ZodObject<any>>(
+  schema: T
+): T['shape'] {
+  return schema.shape
+}
+
+/**
+ * Helper function to create a simple text response
+ */
+export function createTextResponse(text: string): CallToolResult {
+  return {
+    content: [
+      {
+        type: 'text',
+        text,
+      },
+    ],
+  }
+}
+
+/**
+ * Helper function to create an error response
+ */
+export function createErrorResponse(error: string | Error): CallToolResult {
+  return {
+    content: [
+      {
+        type: 'text',
+        text: error instanceof Error ? error.message : error,
+      },
+    ],
+    isError: true,
+  }
+}
+
+/**
+ * Helper function to wrap execution with proper error handling
+ */
+export function withErrorHandling<T extends (...args: any[]) => any>(
+  fn: T
+): (...args: Parameters<T>) => Promise<CallToolResult> {
+  return async (...args: Parameters<T>) => {
+    try {
+      const result = await fn(...args)
+      if (result && typeof result === 'object' && 'content' in result) {
+        return result as CallToolResult
+      }
+      return createTextResponse(String(result))
+    } catch (error: unknown) {
+      return createErrorResponse(error as Error)
+    }
+  }
+}
+
+/**
+ * Simplified typed tool creator function
+ */
+export function createTypedTool<T extends z.ZodObject<any>>(config: {
+  name: string
+  description: string
+  schema: T
+  annotations?: {
+    title?: string
+    readOnlyHint?: boolean
+    destructiveHint?: boolean
+    idempotentHint?: boolean
+    openWorldHint?: boolean
+  }
+  execute: (
+    input: z.infer<T>
+  ) => Promise<CallToolResult> | CallToolResult | string | any
+}): ToolDefinition {
+  return {
+    name: config.name,
+    description: config.description,
+    inputSchema: config.schema.shape,
+    annotations: config.annotations,
+    execute: withErrorHandling(config.execute),
+  }
+}
+
+/**
  * Base class for all MCP Tools
  * Provides a consistent interface and automatic type inference
  */
@@ -70,6 +154,20 @@ export abstract class DyneMCPTool {
   }
 
   /**
+   * Helper to create simple text response
+   */
+  protected text(content: string): CallToolResult {
+    return createTextResponse(content)
+  }
+
+  /**
+   * Helper to create error response
+   */
+  protected error(error: string | Error): CallToolResult {
+    return createErrorResponse(error)
+  }
+
+  /**
    * Convert the tool to ToolDefinition format that's compatible with MCP SDK
    */
   toDefinition(): ToolDefinition {
@@ -78,17 +176,7 @@ export abstract class DyneMCPTool {
       description: this.description,
       inputSchema: this.inputSchema as ZodRawShape,
       annotations: this.annotations,
-      execute: async (args: Record<string, any>) => {
-        try {
-          const result = await this.execute(args)
-          if (result && typeof result === 'object' && 'content' in result) {
-            return result as CallToolResult
-          }
-          return this.createResult([this.createTextContent(String(result))])
-        } catch (error) {
-          return this.createErrorResult(error as Error)
-        }
-      },
+      execute: withErrorHandling(this.execute.bind(this)),
     }
   }
 }

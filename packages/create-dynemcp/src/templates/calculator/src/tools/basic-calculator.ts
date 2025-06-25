@@ -1,4 +1,4 @@
-import { DyneMCPTool } from '@dynemcp/dynemcp'
+import { DyneMCPTool, CallToolResult } from '@dynemcp/dynemcp'
 import { z } from 'zod'
 
 const BasicCalculatorSchema = z.object({
@@ -12,35 +12,41 @@ const BasicCalculatorSchema = z.object({
 export class BasicCalculatorTool extends DyneMCPTool {
   readonly name = 'basic_calculator'
   readonly description = 'A simple calculator that can perform basic arithmetic'
-  readonly inputSchema = {
-    a: z.number().describe('The first number'),
-    b: z.number().describe('The second number'),
-    operator: z
-      .enum(['add', 'subtract', 'multiply', 'divide'])
-      .describe('The operation to perform'),
-  }
+  readonly inputSchema = BasicCalculatorSchema.shape
   readonly annotations = {
     title: 'Basic Calculator',
     readOnlyHint: true,
     openWorldHint: false,
   }
 
-  async execute(
-    input: z.infer<typeof BasicCalculatorSchema>
-  ): Promise<{ result: number }> {
+  execute(input: z.infer<typeof BasicCalculatorSchema>): CallToolResult {
     const { a, b, operator } = input
+
+    if (operator === 'divide' && b === 0) {
+      return {
+        content: [{ type: 'text', text: 'Cannot divide by zero' }],
+        isError: true,
+      }
+    }
+
+    let result: number
     switch (operator) {
       case 'add':
-        return { result: a + b }
+        result = a + b
+        break
       case 'subtract':
-        return { result: a - b }
+        result = a - b
+        break
       case 'multiply':
-        return { result: a * b }
+        result = a * b
+        break
       case 'divide':
-        if (b === 0) {
-          throw new Error('Cannot divide by zero')
-        }
-        return { result: a / b }
+        result = a / b
+        break
+    }
+
+    return {
+      content: [{ type: 'text', text: `${a} ${operator} ${b} = ${result}` }],
     }
   }
 }
