@@ -47,4 +47,4 @@ Remember: Accuracy and safety are paramount in mathematical operations.`
   }
 }
 
-export default new MathContextPrompt() 
+export default new MathContextPrompt()

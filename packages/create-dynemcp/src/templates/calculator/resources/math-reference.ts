@@ -90,4 +90,4 @@ Last updated: ${new Date().toISOString()}`
   }
 }
 
-export default new MathReferenceResource() 
+export default new MathReferenceResource()

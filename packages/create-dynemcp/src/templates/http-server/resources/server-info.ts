@@ -3,7 +3,8 @@ import { DyneMCPResource } from '@dynemcp/dynemcp'
 export class ServerInfoResource extends DyneMCPResource {
   readonly uri = 'resource://http-server/info'
   readonly name = 'server-info'
-  readonly description = 'Comprehensive information about this HTTP server instance'
+  readonly description =
+    'Comprehensive information about this HTTP server instance'
   readonly mimeType = 'text/plain'
 
   getContent(): string {

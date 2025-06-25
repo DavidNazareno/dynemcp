@@ -14,7 +14,8 @@ const GetInitialMemorySchema = z.object({
 
 export class GetInitialMemoryTool extends DyneMCPTool {
   readonly name = 'get-initial-memory'
-  readonly description = 'Gets initial memory contents and capabilities for the dynamic agent'
+  readonly description =
+    'Gets initial memory contents and capabilities for the dynamic agent'
   readonly inputSchema = GetInitialMemorySchema.shape
   readonly annotations = {
     title: 'Get Initial Memory',
@@ -24,7 +25,7 @@ export class GetInitialMemoryTool extends DyneMCPTool {
 
   execute(input: z.infer<typeof GetInitialMemorySchema>): CallToolResult {
     const { format = 'json', includeCapabilities = true } = input
-    
+
     const sessionStart = new Date().toISOString()
     const capabilities = [
       'dynamic-learning',
@@ -96,7 +97,9 @@ System initialized and ready for dynamic operations.`,
       case 'json':
       default:
         return {
-          content: [{ type: 'text', text: JSON.stringify(memoryData, null, 2) }],
+          content: [
+            { type: 'text', text: JSON.stringify(memoryData, null, 2) },
+          ],
         }
     }
   }

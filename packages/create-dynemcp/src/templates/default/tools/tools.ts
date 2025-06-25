@@ -94,7 +94,10 @@ export class MathTool extends DyneMCPTool {
 
     return {
       content: [
-        { type: 'text', text: `${operation}(${numbers.join(', ')}) = ${result}` },
+        {
+          type: 'text',
+          text: `${operation}(${numbers.join(', ')}) = ${result}`,
+        },
       ],
     }
   }

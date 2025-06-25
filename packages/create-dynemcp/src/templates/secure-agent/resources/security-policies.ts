@@ -134,4 +134,4 @@ These policies are reviewed and updated regularly to address emerging threats an
   }
 }
 
-export default new SecurityPoliciesResource() 
+export default new SecurityPoliciesResource()

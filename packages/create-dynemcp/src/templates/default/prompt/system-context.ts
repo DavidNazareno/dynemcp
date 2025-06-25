@@ -2,7 +2,8 @@ import { DyneMCPPrompt, PromptMessage } from '@dynemcp/dynemcp'
 
 export class SystemContextPrompt extends DyneMCPPrompt {
   readonly name = 'system-context'
-  readonly description = 'Default system context prompt for basic MCP functionality'
+  readonly description =
+    'Default system context prompt for basic MCP functionality'
   readonly arguments = []
 
   async getMessages(): Promise<PromptMessage[]> {
@@ -47,4 +48,4 @@ Remember: Your goal is to be genuinely helpful while demonstrating the capabilit
   }
 }
 
-export default new SystemContextPrompt() 
+export default new SystemContextPrompt()

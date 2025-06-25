@@ -51,4 +51,4 @@ Last updated: ${new Date().toISOString()}`
   }
 }
 
-export default new AgentCapabilitiesResource() 
+export default new AgentCapabilitiesResource()

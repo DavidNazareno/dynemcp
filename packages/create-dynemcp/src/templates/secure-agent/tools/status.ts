@@ -14,7 +14,8 @@ const StatusSchema = z.object({
 
 export class StatusTool extends DyneMCPTool {
   readonly name = 'status'
-  readonly description = 'Gets the current system status with security checks and metrics'
+  readonly description =
+    'Gets the current system status with security checks and metrics'
   readonly inputSchema = StatusSchema.shape
   readonly annotations = {
     title: 'System Status',
@@ -24,10 +25,10 @@ export class StatusTool extends DyneMCPTool {
 
   execute(input: z.infer<typeof StatusSchema>): CallToolResult {
     const { format = 'json', includeMetrics = true } = input
-    
+
     const timestamp = new Date().toISOString()
     const uptime = process.uptime()
-    
+
     const statusData = {
       status: 'secure',
       timestamp,
@@ -86,8 +87,12 @@ export class StatusTool extends DyneMCPTool {
 - Auditing: ${statusData.security.auditingEnabled ? 'ENABLED' : 'DISABLED'}
 
 ## Performance Metrics
-${includeMetrics ? `- Memory Usage: ${Math.round(statusData.metrics!.memoryUsage.heapUsed / 1024 / 1024)}MB heap
-- RSS Memory: ${Math.round(statusData.metrics!.memoryUsage.rss / 1024 / 1024)}MB` : 'Metrics disabled'}
+${
+  includeMetrics
+    ? `- Memory Usage: ${Math.round(statusData.metrics!.memoryUsage.heapUsed / 1024 / 1024)}MB heap
+- RSS Memory: ${Math.round(statusData.metrics!.memoryUsage.rss / 1024 / 1024)}MB`
+    : 'Metrics disabled'
+}
 
 ## Status
 All security systems operational. No threats detected.`,
@@ -98,7 +103,9 @@ All security systems operational. No threats detected.`,
       case 'json':
       default:
         return {
-          content: [{ type: 'text', text: JSON.stringify(statusData, null, 2) }],
+          content: [
+            { type: 'text', text: JSON.stringify(statusData, null, 2) },
+          ],
         }
     }
   }

@@ -2,7 +2,8 @@ import { DyneMCPPrompt, PromptMessage } from '@dynemcp/dynemcp'
 
 export class SecurityContextPrompt extends DyneMCPPrompt {
   readonly name = 'security-context'
-  readonly description = 'System prompt for the secure agent with security guidelines'
+  readonly description =
+    'System prompt for the secure agent with security guidelines'
   readonly arguments = []
 
   async getMessages(): Promise<PromptMessage[]> {

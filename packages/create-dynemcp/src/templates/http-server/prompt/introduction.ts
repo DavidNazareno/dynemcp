@@ -2,7 +2,8 @@ import { DyneMCPPrompt, PromptMessage } from '@dynemcp/dynemcp'
 
 export class IntroductionPrompt extends DyneMCPPrompt {
   readonly name = 'introduction'
-  readonly description = 'System prompt introducing the HTTP server capabilities'
+  readonly description =
+    'System prompt introducing the HTTP server capabilities'
   readonly arguments = []
 
   async getMessages(): Promise<PromptMessage[]> {

@@ -43,4 +43,4 @@ Remember: You are designed to evolve and improve through interaction.`
   }
 }
 
-export default new LearningContextPrompt() 
+export default new LearningContextPrompt()

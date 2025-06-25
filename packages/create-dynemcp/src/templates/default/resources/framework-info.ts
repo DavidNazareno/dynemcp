@@ -3,7 +3,8 @@ import { DyneMCPResource } from '@dynemcp/dynemcp'
 export class FrameworkInfoResource extends DyneMCPResource {
   readonly uri = 'resource://default/framework-info'
   readonly name = 'framework-info'
-  readonly description = 'Information about the DyneMCP framework and its capabilities'
+  readonly description =
+    'Information about the DyneMCP framework and its capabilities'
   readonly mimeType = 'text/markdown'
 
   getContent(): string {
@@ -100,4 +101,4 @@ Last updated: ${new Date().toISOString()}`
   }
 }
 
-export default new FrameworkInfoResource() 
+export default new FrameworkInfoResource()
