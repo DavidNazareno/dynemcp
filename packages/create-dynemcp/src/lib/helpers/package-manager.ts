@@ -1,6 +1,7 @@
 import { execa } from 'execa'
+import { PACKAGE_MANAGER, type PackageManager } from '../../config.js'
 
-export type PackageManager = 'npm' | 'yarn' | 'pnpm'
+export type { PackageManager }
 
 /**
  * Returns the package manager used in the project based on user preference
@@ -9,19 +10,19 @@ export type PackageManager = 'npm' | 'yarn' | 'pnpm'
 export function getPkgManager(): PackageManager {
   // User rule: prefer pnpm
   try {
-    execa('pnpm', ['--version'], { stdio: 'ignore' })
-    return 'pnpm'
+    execa(PACKAGE_MANAGER.PREFERRED, ['--version'], { stdio: 'ignore' })
+    return PACKAGE_MANAGER.PREFERRED
   } catch {
-    return 'pnpm'
+    return PACKAGE_MANAGER.PREFERRED
   }
 }
 
 export function getInstallCommand(packageManager: PackageManager): string {
   switch (packageManager) {
-    case 'pnpm':
-      return 'pnpm install'
+    case PACKAGE_MANAGER.PREFERRED:
+      return `${PACKAGE_MANAGER.PREFERRED} install`
     default:
-      return 'pnpm install'
+      return `${PACKAGE_MANAGER.PREFERRED} install`
   }
 }
 
@@ -30,17 +31,20 @@ export function getRunCommand(
 ): (script: string) => string {
   return (script: string): string => {
     switch (packageManager) {
-      case 'pnpm':
-        return `pnpm run ${script}`
+      case PACKAGE_MANAGER.PREFERRED:
+        return `${PACKAGE_MANAGER.PREFERRED} run ${script}`
       default:
-        return `pnpm run ${script}`
+        return `${PACKAGE_MANAGER.PREFERRED} run ${script}`
     }
   }
 }
 
 export async function installDependencies(projectPath: string): Promise<void> {
   try {
-    await execa('npm', ['install'], { cwd: projectPath, stdio: 'inherit' })
+    await execa(PACKAGE_MANAGER.ALTERNATIVES[0], ['install'], {
+      cwd: projectPath,
+      stdio: 'inherit',
+    }) // 'npm'
   } catch (error) {
     throw new Error(
       `Failed to install dependencies: ${error instanceof Error ? error.message : error}`

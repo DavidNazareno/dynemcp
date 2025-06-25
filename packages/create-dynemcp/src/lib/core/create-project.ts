@@ -1,12 +1,13 @@
 import fs from 'fs-extra'
 import { installTemplate } from './template-generator.js'
+import { PACKAGE_MANAGER, TEMPLATES } from '../../config.js'
 import type { PackageManager } from '../helpers/package-manager.js'
 
 /**
  * Returns a list of available templates in the templates directory
  */
 export async function getAvailableTemplates(): Promise<string[]> {
-  return ['default', 'calculator']
+  return [...TEMPLATES.AVAILABLE_TEMPLATES]
 }
 
 /**
@@ -24,7 +25,7 @@ export async function createProject(
   await installTemplate({
     appName: projectName,
     root: projectPath,
-    packageManager: 'npm' as PackageManager,
+    packageManager: PACKAGE_MANAGER.ALTERNATIVES[0] as PackageManager, // 'npm'
     template,
     mode: 'ts',
     tailwind: false,

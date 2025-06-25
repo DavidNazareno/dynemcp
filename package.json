@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/source",
-  "version": "0.0.16-canary.20250624T16495",
+  "version": "0.0.17-canary.20250625T20555",
   "type": "module",
   "license": "MIT",
   "scripts": {

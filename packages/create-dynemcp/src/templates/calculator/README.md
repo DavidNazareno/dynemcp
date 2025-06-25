@@ -13,6 +13,22 @@ This template provides advanced mathematical capabilities with:
 - **Stateless Operation**: Simple HTTP request/response pattern
 - **Mathematical Resources**: Constants, formulas, and documentation
 
+## 🚀 Development Modes
+
+DyneMCP provides multiple development modes to make your workflow easier:
+
+### Available Scripts
+
+- **`npm run dev`** - Start development server (uses transport from config)
+- **`npm run inspector`** - Start development server with MCP Inspector
+
+### Mode Details
+
+- **`npm run dev`**: Starts the development server using the transport configured in `dynemcp.config.json`
+- **`npm run inspector`**: Automatically launches the MCP Inspector along with your server. The Inspector intelligently handles both stdio and HTTP transports:
+  - For **stdio transport**: Inspector manages the server process directly
+  - For **HTTP transport**: Server starts first, then Inspector connects to the HTTP endpoint
+
 ## 🔌 Transport: Streamable HTTP (Basic)
 
 This template uses **Streamable HTTP transport** in basic mode, ideal for:
@@ -63,28 +79,20 @@ calculator-server/
    npm install
    ```
 
-3. **Build the project**:
+3. **Start development server**:
 
+   ```bash
+   # Start development server
+   npm run dev
+
+   # Or start with Inspector for debugging
+   npm run inspector
+   ```
+
+4. **Production build and start**:
    ```bash
    npm run build
-   ```
-
-4. **Start the HTTP server**:
-
-   ```bash
    npm start
-   ```
-
-5. **Test the API** (server runs on http://localhost:3001):
-   ```bash
-   # Test with curl
-   curl -X POST http://localhost:3001/mcp \
-     -H "Content-Type: application/json" \
-     -d '{
-       "jsonrpc": "2.0",
-       "id": 1,
-       "method": "tools/list"
-     }'
    ```
 
 ## 🛠️ Streamable HTTP Transport Configuration
@@ -150,9 +158,29 @@ log(number: number)   // Natural logarithm
 log10(number: number) // Base-10 logarithm
 ```
 
-## 🌐 API Usage Examples
+## 🌐 Testing & Debugging
 
-### List Available Tools
+### Using MCP Inspector (Recommended)
+
+The easiest way to test your calculator server is with the MCP Inspector:
+
+```bash
+# Start server with Inspector (works for any transport)
+npm run inspector
+```
+
+The Inspector provides a GUI to:
+
+- Browse available tools and resources
+- Test tool calls with a visual interface
+- View real-time MCP communication
+- Debug your server implementation
+
+### API Usage Examples (HTTP Mode)
+
+When your server is configured for HTTP transport, you can also test with curl:
+
+#### List Available Tools
 
 ```bash
 curl -X POST http://localhost:3001/mcp \
@@ -164,7 +192,7 @@ curl -X POST http://localhost:3001/mcp \
   }'
 ```
 
-### Call Calculator Tool
+#### Call Calculator Tool
 
 ```bash
 curl -X POST http://localhost:3001/mcp \
@@ -183,7 +211,7 @@ curl -X POST http://localhost:3001/mcp \
   }'
 ```
 
-### Get Mathematical Constants
+#### Get Mathematical Constants
 
 ```bash
 curl -X POST http://localhost:3001/mcp \

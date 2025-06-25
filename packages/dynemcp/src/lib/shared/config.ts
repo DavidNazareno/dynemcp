@@ -3,6 +3,7 @@
  */
 
 import { z } from 'zod'
+import { PATHS } from '../../config.js'
 
 // Base configuration schema
 export const BaseConfigSchema = z.object({
@@ -18,7 +19,9 @@ export type BaseConfig = z.infer<typeof BaseConfigSchema>
 /**
  * Load base configuration
  */
-export function loadBaseConfig(configPath = 'dynemcp.config.json'): BaseConfig {
+export function loadBaseConfig(
+  configPath: string = PATHS.DEFAULT_CONFIG
+): BaseConfig {
   try {
     const fs = require('fs')
     const path = require('path')

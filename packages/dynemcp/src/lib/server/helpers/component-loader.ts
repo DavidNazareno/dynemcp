@@ -1,14 +1,15 @@
-import * as fs from 'fs'
-import * as path from 'path'
-import * as os from 'os'
+import fs from 'fs'
+import path from 'path'
+import os from 'os'
 import { pathToFileURL } from 'url'
 import { transform } from 'esbuild'
-import { DyneMCPTool, DyneMCPResource, DyneMCPPrompt } from '../core/base.js'
+
 import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
 } from '../core/interfaces.js'
+import { DyneMCPTool, DyneMCPResource, DyneMCPPrompt } from '../core/base.js'
 
 export interface LoadOptions {
   enabled: boolean

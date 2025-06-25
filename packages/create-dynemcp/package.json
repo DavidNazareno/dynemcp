@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/create-dynemcp",
-  "version": "0.0.16-canary.20250624T16495",
+  "version": "0.0.17-canary.20250625T20555",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
@@ -10,7 +10,7 @@
     "create-dynemcp": "./dist/index.js"
   },
   "scripts": {
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist && rm -rf node_modules"
   },
   "nx": {
     "targets": {
@@ -41,7 +41,7 @@
     "tslib": "^2.3.0",
     "zod": "3.25.67",
     "express": "4.21.2",
-    "@dynemcp/dynemcp": "workspace:*"
+    "@dynemcp/dynemcp": "0.0.17-canary.20250625T20555"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

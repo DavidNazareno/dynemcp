@@ -1,6 +1,7 @@
-import * as fs from 'fs'
+import fs from 'fs'
 import { ConfigSchema } from '../schemas/config.js'
 import type { DyneMCPConfig } from '../core/interfaces.js'
+import { NETWORK, CLI, PATHS } from '../../../config.js'
 
 export function loadConfigFromFile(configPath: string): Partial<DyneMCPConfig> {
   if (!fs.existsSync(configPath)) {
@@ -199,13 +200,16 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
       | 'sse'
       | 'streamable-http'
 
-    if (transportType === 'stdio') {
-      config.transport = { type: 'stdio' }
+    if (transportType === CLI.TRANSPORT_TYPES[0]) {
+      // 'stdio'
+      config.transport = { type: CLI.TRANSPORT_TYPES[0] }
     } else if (transportType === 'sse') {
       config.transport = {
         type: 'sse',
         options: {
-          port: parseInt(process.env.DYNEMCP_SSE_PORT || '8080'),
+          port: parseInt(
+            process.env.DYNEMCP_SSE_PORT || String(NETWORK.DEFAULT_HTTP_PORT)
+          ),
           endpoint: process.env.DYNEMCP_SSE_ENDPOINT || '/sse',
           messageEndpoint:
             process.env.DYNEMCP_SSE_MESSAGE_ENDPOINT || '/messages',
@@ -220,12 +224,16 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
             : undefined,
         },
       }
-    } else if (transportType === 'streamable-http') {
+    } else if (transportType === CLI.TRANSPORT_TYPES[1]) {
+      // 'streamable-http'
       config.transport = {
-        type: 'streamable-http',
+        type: CLI.TRANSPORT_TYPES[1],
         options: {
-          port: parseInt(process.env.DYNEMCP_HTTP_PORT || '8080'),
-          endpoint: process.env.DYNEMCP_HTTP_ENDPOINT || '/mcp',
+          port: parseInt(
+            process.env.DYNEMCP_HTTP_PORT || String(NETWORK.DEFAULT_HTTP_PORT)
+          ),
+          endpoint:
+            process.env.DYNEMCP_HTTP_ENDPOINT || NETWORK.DEFAULT_MCP_ENDPOINT,
           responseMode:
             (process.env.DYNEMCP_HTTP_RESPONSE_MODE as 'batch' | 'stream') ||
             'batch',
@@ -249,24 +257,24 @@ export function createDefaultConfig(): DyneMCPConfig {
     },
     tools: {
       enabled: true,
-      directory: 'src/tools',
-      pattern: '**/*.{ts,js}',
+      directory: PATHS.TOOLS_DIR,
+      pattern: PATHS.FILE_PATTERNS.TYPESCRIPT,
     },
     resources: {
       enabled: true,
-      directory: 'src/resources',
-      pattern: '**/*.{ts,js}',
+      directory: PATHS.RESOURCES_DIR,
+      pattern: PATHS.FILE_PATTERNS.TYPESCRIPT,
     },
     prompts: {
       enabled: true,
-      directory: 'src/prompts',
-      pattern: '**/*.{ts,js}',
+      directory: PATHS.PROMPTS_DIR,
+      pattern: PATHS.FILE_PATTERNS.TYPESCRIPT,
     },
     transport: {
-      type: 'streamable-http',
+      type: CLI.TRANSPORT_TYPES[1], // 'streamable-http'
       options: {
-        port: 8080,
-        endpoint: '/mcp',
+        port: NETWORK.DEFAULT_HTTP_PORT,
+        endpoint: NETWORK.DEFAULT_MCP_ENDPOINT,
       },
     },
     logging: {
@@ -337,15 +345,15 @@ export function normalizeConfig(rawConfig: any): DyneMCPConfig {
     if (rawConfig.transport.type === 'http-stream') {
       console.warn(
         '⚠️  Transport type "http-stream" is deprecated. ' +
-          'Please update your configuration to use "streamable-http" instead.'
+          `Please update your configuration to use "${CLI.TRANSPORT_TYPES[1]}" instead.`
       )
-      rawConfig.transport.type = 'streamable-http'
+      rawConfig.transport.type = CLI.TRANSPORT_TYPES[1]
     } else if (rawConfig.transport.type === 'http') {
       console.warn(
         '⚠️  Transport type "http" is deprecated. ' +
-          'Please update your configuration to use "streamable-http" instead.'
+          `Please update your configuration to use "${CLI.TRANSPORT_TYPES[1]}" instead.`
       )
-      rawConfig.transport.type = 'streamable-http'
+      rawConfig.transport.type = CLI.TRANSPORT_TYPES[1]
     }
   }
 
@@ -359,27 +367,27 @@ export function normalizeConfig(rawConfig: any): DyneMCPConfig {
     },
     tools: {
       enabled: rawConfig.tools?.enabled ?? true,
-      directory: rawConfig.tools?.directory || './src/tools',
-      pattern: rawConfig.tools?.pattern || '**/*.{ts,js}',
+      directory: rawConfig.tools?.directory || PATHS.TOOLS_DIR,
+      pattern: rawConfig.tools?.pattern || PATHS.FILE_PATTERNS.TYPESCRIPT,
       exclude: rawConfig.tools?.exclude,
     },
     resources: {
       enabled: rawConfig.resources?.enabled ?? true,
-      directory: rawConfig.resources?.directory || './src/resources',
-      pattern: rawConfig.resources?.pattern || '**/*.{ts,js}',
+      directory: rawConfig.resources?.directory || PATHS.RESOURCES_DIR,
+      pattern: rawConfig.resources?.pattern || PATHS.FILE_PATTERNS.TYPESCRIPT,
       exclude: rawConfig.resources?.exclude,
     },
     prompts: {
       enabled: rawConfig.prompts?.enabled ?? true,
-      directory: rawConfig.prompts?.directory || './src/prompts',
-      pattern: rawConfig.prompts?.pattern || '**/*.{ts,js}',
+      directory: rawConfig.prompts?.directory || PATHS.PROMPTS_DIR,
+      pattern: rawConfig.prompts?.pattern || PATHS.FILE_PATTERNS.TYPESCRIPT,
       exclude: rawConfig.prompts?.exclude,
     },
     transport: rawConfig.transport || {
-      type: 'streamable-http',
+      type: CLI.TRANSPORT_TYPES[1], // 'streamable-http'
       options: {
-        port: 8080,
-        endpoint: '/mcp',
+        port: NETWORK.DEFAULT_HTTP_PORT,
+        endpoint: NETWORK.DEFAULT_MCP_ENDPOINT,
       },
     },
     logging: rawConfig.logging || {

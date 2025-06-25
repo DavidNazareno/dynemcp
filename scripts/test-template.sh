@@ -42,17 +42,21 @@ echo "🚀 Starting the template test script..."
 echo "----------------------------------------"
 
 # --- Configuration ---
-# The name of the template can be provided as an argument or selected from menu
-APP_NAME="my-test-mcp-server-$TEMPLATE_NAME"
-EXAMPLES_DIR="examples"
-APP_PATH="$EXAMPLES_DIR/$APP_NAME"
-
 # If no template is provided as argument, show selection menu
 if [ -z "$1" ]; then
     select_template
 else
     TEMPLATE_NAME=$1
 fi
+
+# Now that TEMPLATE_NAME is defined, we can set up the app names
+APP_NAME="my-test-mcp-server-$TEMPLATE_NAME"
+EXAMPLES_DIR="examples"
+APP_PATH="$EXAMPLES_DIR/$APP_NAME"
+
+echo "🎯 Using template: $TEMPLATE_NAME"
+echo "📂 App name will be: $APP_NAME"
+echo "----------------------------------------"
 # ---
 
 # 1. Build the create-dynemcp package to ensure we're using the latest version
@@ -98,4 +102,4 @@ echo "🚀 Starting the development server for '$APP_NAME'..."
 echo "   You can now open the MCP Inspector."
 echo "   Press Ctrl+C to stop the server and exit the script."
 echo "----------------------------------------"
-pnpm run dev 
+pnpm run inspector 

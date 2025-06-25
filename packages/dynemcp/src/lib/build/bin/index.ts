@@ -8,6 +8,7 @@ import chalk from 'chalk'
 import path from 'path'
 import fs from 'fs-extra'
 import { build, watch, buildCli, clean, analyze } from '../build-dynemcp.js'
+import { PATHS } from '../../../config.js'
 
 interface CliOptions {
   config?: string
@@ -36,7 +37,7 @@ ${chalk.bold('Commands:')}
   analyze   Analyze dependencies
 
 ${chalk.bold('Options:')}
-  -c, --config <path>    Path to dynemcp.config.json (default: ./dynemcp.config.json)
+  -c, --config <path>    Path to ${PATHS.DEFAULT_CONFIG} (default: ./${PATHS.DEFAULT_CONFIG})
   --clean                Clean build directory before building
   --analyze              Analyze dependencies and generate report
   --manifest             Generate build manifest
@@ -55,7 +56,7 @@ ${chalk.bold('Examples:')}
   dynebuild analyze            # Analyze dependencies
 
 ${chalk.bold('Configuration:')}
-  The builder reads from dynemcp.config.json in your project root.
+  The builder reads from ${PATHS.DEFAULT_CONFIG} in your project root.
   You can customize build settings in the "build" section of your config.
 `)
 }
@@ -143,7 +144,7 @@ async function run(): Promise<void> {
     console.log(chalk.blue(`📁 Working directory: ${cwd}`))
 
     // Check if we're in a DyneMCP project
-    const configPath = options.config || 'dynemcp.config.json'
+    const configPath = options.config || PATHS.DEFAULT_CONFIG
     const absoluteConfigPath = path.isAbsolute(configPath)
       ? configPath
       : path.join(cwd, configPath)

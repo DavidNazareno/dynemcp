@@ -6,6 +6,7 @@ import cors from 'cors'
 import { TransportConfig } from '../core/interfaces.js'
 import path from 'path'
 import { randomUUID } from 'crypto'
+import { NETWORK, CLI } from '../../../config.js'
 
 // JSON-RPC 2.0 message types as per MCP specification
 export interface JSONRPCRequest {
@@ -135,9 +136,9 @@ export class StreamableHTTPTransport implements LegacyTransport {
     this.app = express()
     this.setupMiddleware(options)
 
-    this.port = options.port ?? 8080
-    this.host = options.host ?? 'localhost'
-    this.endpoint = options.endpoint ?? '/mcp'
+    this.port = options.port ?? NETWORK.DEFAULT_HTTP_PORT
+    this.host = options.host ?? NETWORK.DEFAULT_HTTP_HOST
+    this.endpoint = options.endpoint ?? NETWORK.DEFAULT_MCP_ENDPOINT
     this.options = options
 
     // Initialize with secure session ID generation
@@ -336,7 +337,8 @@ export class StreamableHTTPTransport implements LegacyTransport {
           if (res.headersSent) return // Session validation failed
 
           // Process the request through StreamableHTTPServerTransport
-          await this.transport.handleRequest(req, res)
+          // IMPORTANT: Pass req.body explicitly to avoid "stream is not readable" error
+          await this.transport.handleRequest(req, res, req.body)
         } catch (error) {
           console.error('Error handling MCP request:', error)
           if (!res.headersSent) {
@@ -388,7 +390,7 @@ export class StreamableHTTPTransport implements LegacyTransport {
         res.json({
           status: 'healthy',
           timestamp: new Date().toISOString(),
-          transport: 'streamable-http',
+          transport: CLI.TRANSPORT_TYPES[1], // 'streamable-http'
           sessions: this.sessionStore.size,
           uptime: process.uptime(),
         })
@@ -443,13 +445,13 @@ export class StreamableHTTPTransport implements LegacyTransport {
  */
 export function createTransport(config: TransportConfig): LegacyTransport {
   switch (config.type) {
-    case 'stdio':
+    case CLI.TRANSPORT_TYPES[0]: // 'stdio'
       return new StdioTransport()
 
     case 'sse':
       return new SSETransport()
 
-    case 'streamable-http':
+    case CLI.TRANSPORT_TYPES[1]: // 'streamable-http'
       return new StreamableHTTPTransport(config.options)
 
     default:
@@ -486,7 +488,7 @@ export async function detectTransport(
     })
 
     if (response.ok) {
-      return 'streamable-http'
+      return CLI.TRANSPORT_TYPES[1] as 'streamable-http'
     }
   } catch (error) {
     // Try legacy SSE detection
@@ -501,7 +503,7 @@ export async function detectTransport(
       }
     } catch (sseError) {
       // Fall back to stdio if network transports fail
-      return 'stdio'
+      return CLI.TRANSPORT_TYPES[0] as 'stdio'
     }
   }
 
