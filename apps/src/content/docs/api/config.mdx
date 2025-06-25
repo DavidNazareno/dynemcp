@@ -244,15 +244,18 @@ The following environment variables can override configuration settings:
 ## Best Practices
 
 1. **Minimal Configuration**
+
    - Only specify the options you need to override
    - Default values are sensible for most use cases
 
 2. **Security**
+
    - Always enable validation in production
    - Configure CORS and rate limiting for HTTP Stream transport
    - Use authentication for production deployments
 
 3. **Performance**
+
    - Adjust maxConcurrentRequests based on your server capacity
    - Set appropriate memory limits
    - Enable metrics in production for monitoring
@@ -305,8 +308,8 @@ server.config.update({
       host: 'localhost',
       endpoint: '/mcp',
       authentication: {
-        path: './src/auth.ts'
-      }
+        path: './src/auth.ts',
+      },
     },
   },
 })

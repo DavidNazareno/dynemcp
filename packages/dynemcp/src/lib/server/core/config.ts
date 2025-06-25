@@ -9,6 +9,7 @@ import {
   mergeConfigs,
 } from '../helpers/config-loader.js'
 import type { DyneMCPConfig } from './interfaces.js'
+import { PATHS } from '../../../config.js'
 import path from 'path'
 import fs from 'fs'
 
@@ -20,12 +21,12 @@ export function loadConfig(configPath?: string): DyneMCPConfig {
   // Si no se pasa configPath, buscar dynemcp.config.json en el cwd
   let resolvedConfigPath = configPath
   if (!resolvedConfigPath) {
-    const candidate = path.resolve(process.cwd(), 'dynemcp.config.json')
+    const candidate = path.resolve(process.cwd(), PATHS.DEFAULT_CONFIG)
     if (fs.existsSync(candidate)) {
       resolvedConfigPath = candidate
     } else {
       throw new Error(
-        'No se encontró el archivo de configuración dynemcp.config.json en el directorio actual. ' +
+        `No se encontró el archivo de configuración ${PATHS.DEFAULT_CONFIG} en el directorio actual. ` +
           'Por favor, asegúrate de que el archivo existe o pasa la ruta explícitamente a createMCPServer.'
       )
     }

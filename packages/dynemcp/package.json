@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/dynemcp",
-  "version": "0.0.16-canary.20250624T16495",
+  "version": "0.0.17-canary.20250625T20555",
   "description": "Complete MCP framework with server runtime and build system",
   "private": false,
   "type": "module",
@@ -11,7 +11,7 @@
     "dynemcp": "./dist/cli.js"
   },
   "scripts": {
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist && rm -rf node_modules"
   },
   "nx": {
     "targets": {
@@ -47,19 +47,20 @@
     "@modelcontextprotocol/sdk": "^1.12.1",
     "chalk": "4.1.2",
     "cors": "^2.8.5",
-    "esbuild": "^0.20.1",
     "express": "4.21.2",
     "fs-extra": "^11.2.0",
     "tslib": "^2.3.0",
     "yargs": "17.7.2",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "esbuild": "0.20.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.11.30",
-    "tsx": "^4.16.2"
+    "tsx": "^4.16.2",
+    "@modelcontextprotocol/inspector": "^0.7.0"
   },
   "keywords": [
     "mcp",

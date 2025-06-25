@@ -81,7 +81,3 @@ The versioning tasks are integrated with NX for efficient caching and dependency
 - `publish-packages`: Depends on build and version-packages
 
 NX's powerful caching system ensures that these tasks are only run when necessary, improving the overall development experience.
-
-## Credits
-
-This versioning system is inspired by Next.js's approach to versioning and adapted for the DyneMCP monorepo.

@@ -1,14 +1,91 @@
 {
   "server": {
-    "name": "DynamicAgent",
+    "name": "dynamic-agent",
     "version": "1.0.0"
   },
-  "transport": {
-    "type": "stdio"
-  },
+  "description": "A dynamic Model Context Protocol (MCP) server with session management and resumability",
   "tools": {
-    "directory": "./tools"
+    "enabled": true,
+    "directory": "./src/tools",
+    "pattern": "**/*.{ts,js}"
   },
-  "resources": {},
-  "prompts": {}
+  "resources": {
+    "enabled": true,
+    "directory": "./src/resources",
+    "pattern": "**/*.{ts,js}"
+  },
+  "prompts": {
+    "enabled": true,
+    "directory": "./src/prompts",
+    "pattern": "**/*.{ts,js}"
+  },
+  "transport": {
+    "type": "streamable-http",
+    "options": {
+      "port": 3001,
+      "host": "localhost",
+      "endpoint": "/mcp",
+      "responseMode": "stream",
+      "session": {
+        "enabled": true,
+        "headerName": "Mcp-Session-Id",
+        "allowClientTermination": false,
+        "maxDuration": 3600000,
+        "cleanup": {
+          "enabled": true,
+          "interval": 300000
+        }
+      },
+      "resumability": {
+        "enabled": true,
+        "historyDuration": 600000,
+        "headerName": "Last-Event-ID"
+      },
+      "cors": {
+        "allowOrigin": "*",
+        "allowMethods": "GET, POST, OPTIONS",
+        "allowHeaders": "Content-Type, Authorization, Mcp-Session-Id, Last-Event-ID",
+        "exposeHeaders": "Content-Type, Mcp-Session-Id",
+        "maxAge": 86400,
+        "credentials": false
+      },
+      "healthCheck": {
+        "enabled": true,
+        "endpoint": "/health"
+      },
+      "maxMessageSize": "1mb"
+    }
+  },
+  "logging": {
+    "enabled": true,
+    "level": "debug",
+    "format": "json",
+    "timestamp": true,
+    "colors": true
+  },
+  "debug": {
+    "enabled": true,
+    "verbose": false,
+    "showComponentDetails": true,
+    "showTransportDetails": true
+  },
+  "performance": {
+    "maxConcurrentRequests": 50,
+    "requestTimeout": 45000,
+    "memoryLimit": "1gb",
+    "enableMetrics": true
+  },
+  "security": {
+    "enableValidation": true,
+    "strictMode": false,
+    "allowedOrigins": ["*"],
+    "rateLimit": {
+      "enabled": true,
+      "maxRequests": 200,
+      "windowMs": 900000
+    }
+  },
+  "config": {
+    "env": true
+  }
 }

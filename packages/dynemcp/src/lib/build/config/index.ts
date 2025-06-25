@@ -3,8 +3,9 @@
  */
 
 import * as fs from 'fs'
-import * as path from 'path'
+import path from 'path'
 import { z } from 'zod'
+import { PATHS, CLI } from '../../../config.js'
 
 // Define the schema for dynemcp.config.json
 const DyneMCPConfigSchema = z.object({
@@ -30,7 +31,9 @@ const DyneMCPConfigSchema = z.object({
   }),
   transport: z
     .object({
-      type: z.enum(['stdio', 'tcp', 'websocket']).default('stdio'),
+      type: z
+        .enum(CLI.TRANSPORT_TYPES.slice(0, 2) as ['stdio', 'streamable-http'])
+        .default(CLI.TRANSPORT_TYPES[0] as 'stdio'),
       options: z.record(z.any()).optional(),
     })
     .optional(),
@@ -127,7 +130,9 @@ export type BuildConfig = z.infer<typeof BuildConfigSchema>
 /**
  * Load the DyneMCP configuration file
  */
-export function loadConfig(configPath = 'dynemcp.config.json'): DyneMCPConfig {
+export function loadConfig(
+  configPath: string = PATHS.DEFAULT_CONFIG
+): DyneMCPConfig {
   const absolutePath = path.isAbsolute(configPath)
     ? configPath
     : path.join(process.cwd(), configPath)
@@ -157,8 +162,8 @@ export function loadConfig(configPath = 'dynemcp.config.json'): DyneMCPConfig {
 export function getBuildConfig(config: DyneMCPConfig): BuildConfig {
   const defaultBuildConfig: BuildConfig = {
     entryPoint: './src/index.ts',
-    outDir: './dist',
-    outFile: 'server.js',
+    outDir: `./${PATHS.BUILD_OUTPUT_DIR}`,
+    outFile: PATHS.BUILD_OUTPUT_FILE,
     format: 'cjs',
     minify: false,
     sourcemap: true,
@@ -198,21 +203,21 @@ export function createDefaultConfig(
     description: `A Model Context Protocol (MCP) server named ${name}`,
     tools: {
       enabled: true,
-      directory: './src/tools',
-      pattern: '**/*.{ts,js}',
+      directory: PATHS.TOOLS_DIR,
+      pattern: PATHS.FILE_PATTERNS.TYPESCRIPT,
     },
     resources: {
       enabled: true,
-      directory: './src/resources',
-      pattern: '**/*.{ts,js}',
+      directory: PATHS.RESOURCES_DIR,
+      pattern: PATHS.FILE_PATTERNS.TYPESCRIPT,
     },
     prompts: {
       enabled: true,
-      directory: './src/prompts',
-      pattern: '**/*.{ts,js}',
+      directory: PATHS.PROMPTS_DIR,
+      pattern: PATHS.FILE_PATTERNS.TYPESCRIPT,
     },
     transport: {
-      type: 'stdio',
+      type: CLI.TRANSPORT_TYPES[0], // 'stdio'
     },
     logging: {
       enabled: true,
@@ -248,8 +253,8 @@ export function createDefaultConfig(
     },
     build: {
       entryPoint: './src/index.ts',
-      outDir: './dist',
-      outFile: 'server.js',
+      outDir: `./${PATHS.BUILD_OUTPUT_DIR}`,
+      outFile: PATHS.BUILD_OUTPUT_FILE,
       format: 'cjs',
       minify: false,
       sourcemap: true,

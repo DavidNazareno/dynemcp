@@ -1,25 +1,117 @@
 {
   "server": {
-    "name": "SecureAgent",
-    "version": "1.0.0",
-    "documentationUrl": "https://example.com/docs/secure-agent"
+    "name": "secure-agent",
+    "version": "1.0.0"
+  },
+  "description": "A secure enterprise-grade MCP (Model Context Protocol) server with advanced authentication and security features",
+  "tools": {
+    "enabled": true,
+    "directory": "./src/tools",
+    "pattern": "**/*.{ts,js}"
+  },
+  "resources": {
+    "enabled": true,
+    "directory": "./src/resources",
+    "pattern": "**/*.{ts,js}"
+  },
+  "prompts": {
+    "enabled": true,
+    "directory": "./src/prompts",
+    "pattern": "**/*.{ts,js}"
   },
   "transport": {
-    "type": "http-stream",
+    "type": "streamable-http",
     "options": {
-      "port": 4000,
-      "authentication": {
-        "path": "./src/auth.ts"
-      },
+      "port": 3001,
+      "host": "localhost",
+      "endpoint": "/mcp",
+      "responseMode": "stream",
       "session": {
-        "enabled": true
+        "enabled": true,
+        "headerName": "Mcp-Session-Id",
+        "allowClientTermination": true,
+        "maxDuration": 7200000,
+        "cleanup": {
+          "enabled": true,
+          "interval": 180000
+        }
       },
       "resumability": {
-        "enabled": true
+        "enabled": true,
+        "historyDuration": 300000,
+        "headerName": "Last-Event-ID",
+        "maxEvents": 1000
+      },
+      "cors": {
+        "allowOrigin": ["https://localhost:3000", "https://trusted-client.com"],
+        "allowMethods": "GET, POST, OPTIONS, DELETE",
+        "allowHeaders": "Content-Type, Authorization, Mcp-Session-Id, Last-Event-ID, X-API-Key",
+        "exposeHeaders": "Content-Type, Mcp-Session-Id, X-RateLimit-Remaining",
+        "maxAge": 86400,
+        "credentials": true
+      },
+      "authentication": {
+        "path": "./src/auth.ts",
+        "required": true,
+        "scopes": ["read", "write", "admin"]
+      },
+      "healthCheck": {
+        "enabled": true,
+        "endpoint": "/health",
+        "auth": false
+      },
+      "maxMessageSize": "2mb",
+      "compression": {
+        "enabled": true,
+        "threshold": 512,
+        "level": 6
+      },
+      "security": {
+        "dnsRebindingProtection": true,
+        "hostnameValidation": true,
+        "rateLimiting": {
+          "enabled": true,
+          "windowMs": 60000,
+          "maxRequests": 100,
+          "skipOnSuccess": false
+        }
       }
     }
   },
-  "tools": { "directory": "./tools" },
-  "resources": { "directory": "./resources" },
-  "prompts": { "directory": "./prompt" }
+  "logging": {
+    "enabled": true,
+    "level": "info",
+    "format": "json",
+    "timestamp": true,
+    "colors": false
+  },
+  "debug": {
+    "enabled": true,
+    "verbose": false,
+    "showComponentDetails": true,
+    "showTransportDetails": true
+  },
+  "performance": {
+    "maxConcurrentRequests": 50,
+    "requestTimeout": 30000,
+    "memoryLimit": "512mb",
+    "enableMetrics": true
+  },
+  "security": {
+    "enableValidation": true,
+    "strictMode": true,
+    "allowedOrigins": ["https://localhost:3000", "https://trusted-client.com"],
+    "rateLimit": {
+      "enabled": true,
+      "maxRequests": 100,
+      "windowMs": 900000
+    },
+    "encryption": {
+      "enabled": true,
+      "algorithm": "aes-256-gcm"
+    }
+  },
+  "config": {
+    "env": true
+  }
 }

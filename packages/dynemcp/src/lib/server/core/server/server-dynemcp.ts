@@ -15,6 +15,7 @@ import {
   registerResources,
   registerPrompts,
 } from './server-initializer.js'
+import { CLI } from '../../../../config.js'
 
 export class DyneMCP {
   private server: McpServer
@@ -90,7 +91,7 @@ export class DyneMCP {
     }
     logMsg(`Loaded prompts: ${prompts.length}`)
     if (prompts.length > 0) {
-      prompts.forEach((p) => logMsg(`  - Prompt: ${p.name || p.id}`))
+      prompts.forEach((p) => logMsg(`  - Prompt: ${p.name}`))
     }
 
     // Register components with MCP server
@@ -111,12 +112,15 @@ export class DyneMCP {
     await this.init()
 
     // Create and connect transport
-    const transportConfig = this.config.transport || { type: 'stdio' }
+    const transportConfig = this.config.transport || {
+      type: CLI.TRANSPORT_TYPES[0],
+    } // 'stdio'
     this.transport = createTransport(transportConfig)
     await this.transport.connect(this.server)
 
     // Solo mostrar logs si el transporte NO es stdio
-    if (transportConfig.type !== 'stdio') {
+    if (transportConfig.type !== CLI.TRANSPORT_TYPES[0]) {
+      // not 'stdio'
       if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
         console.log(
           `🎯 MCP server "${this.config.server.name}" started successfully`
@@ -138,7 +142,8 @@ export class DyneMCP {
       await this.transport.disconnect()
     }
     // Solo mostrar log si el transporte NO es stdio
-    if (this.config.transport?.type !== 'stdio') {
+    if (this.config.transport?.type !== CLI.TRANSPORT_TYPES[0]) {
+      // not 'stdio'
       if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
         console.log('🛑 MCP server stopped')
       }
@@ -155,7 +160,7 @@ export class DyneMCP {
         name: this.config.server.name,
         version: this.config.server.version,
       },
-      transport: this.config.transport?.type || 'stdio',
+      transport: this.config.transport?.type || CLI.TRANSPORT_TYPES[0], // 'stdio'
     }
   }
 

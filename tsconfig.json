@@ -8,18 +8,6 @@
     },
     {
       "path": "./packages/dynemcp"
-    },
-    {
-      "path": "./docs"
-    },
-    {
-      "path": "./documentation-e2e"
-    },
-    {
-      "path": "./documentation"
-    },
-    {
-      "path": "./dynedocs"
     }
   ]
 }

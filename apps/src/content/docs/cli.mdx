@@ -32,11 +32,11 @@ create-dynemcp [directory] [options]
 
 | Option           | Alias | Description                    | Default   |
 | ---------------- | ----- | ------------------------------ | --------- |
-| `--template <n>` | `-t`  | Template to use               | `default` |
+| `--template <n>` | `-t`  | Template to use                | `default` |
 | `--skip-install` |       | Skip dependency installation   | `false`   |
-| `--yes`          | `-y`  | Skip all prompts, use defaults| `false`   |
-| `--version`      | `-v`  | Show version number           |           |
-| `--help`         | `-h`  | Show help message             |           |
+| `--yes`          | `-y`  | Skip all prompts, use defaults | `false`   |
+| `--version`      | `-v`  | Show version number            |           |
+| `--help`         | `-h`  | Show help message              |           |
 
 ### Examples
 
@@ -141,11 +141,13 @@ The CLI uses these exit codes:
 ## Best Practices
 
 1. **Development**
+
    - Use `dynemcp dev` for local development
    - Configure transport type based on your needs
    - Use sourcemaps for debugging
 
 2. **Production**
+
    - Use `dynemcp build` with minification
    - Set appropriate environment variables
    - Configure logging levels

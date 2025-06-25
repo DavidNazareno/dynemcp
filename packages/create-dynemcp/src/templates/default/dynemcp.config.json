@@ -3,7 +3,7 @@
     "name": "dynemcp-project",
     "version": "1.0.0"
   },
-  "description": "A Model Context Protocol (MCP) server",
+  "description": "A basic Model Context Protocol (MCP) server using stdio transport",
   "tools": {
     "enabled": true,
     "directory": "./src/tools",

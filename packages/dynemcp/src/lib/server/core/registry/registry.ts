@@ -96,10 +96,10 @@ export class Registry {
   }
 
   /**
-   * Get a specific prompt by ID
+   * Get a specific prompt by name
    */
-  getPrompt(id: string): PromptDefinition | undefined {
-    return this.storage.getPrompt(id)
+  getPrompt(name: string): PromptDefinition | undefined {
+    return this.storage.getPrompt(name)
   }
 
   /**

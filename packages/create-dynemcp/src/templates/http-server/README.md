@@ -1,240 +1,63 @@
 # HTTP Server DyneMCP Template
 
-A web-integrated MCP (Model Context Protocol) server template using HTTP transport. Perfect for web applications, REST APIs, and browser-based MCP clients.
+A full-featured MCP (Model Context Protocol) server template using **Streamable HTTP transport** with advanced features - perfect for production web services and complex integrations.
 
 ## 🚀 What's Included
 
-This template provides a complete HTTP-based MCP server foundation with:
+This template provides a comprehensive HTTP-based MCP server with:
 
-- **Express.js Server**: Modern Node.js web server with middleware support
-- **HTTP Transport**: RESTful MCP communication over HTTP
-- **CORS Configuration**: Cross-origin resource sharing setup
-- **Basic Tools**: Web-oriented tools and utilities
-- **Server Resources**: Information about server status and capabilities
-- **Introduction Prompts**: Getting started guidance for web integration
-- **Health Checks**: Built-in endpoints for monitoring
+- **Complete Streamable HTTP Implementation**: All transport features enabled
+- **Session Management**: Stateful connections with lifecycle management
+- **Resumability**: Connection recovery with event replay
+- **Health Checks**: Production-ready monitoring endpoints
+- **CORS Support**: Cross-origin resource sharing configuration
+- **Compression**: Efficient data transfer with gzip compression
+- **Advanced Logging**: JSON-structured logging for production
+- **Performance Metrics**: Built-in performance monitoring
+
+## 🔌 Transport: Streamable HTTP (Full Featured)
+
+This template uses **Streamable HTTP transport** with all features enabled, ideal for:
+
+- **Production deployments**: Enterprise-ready HTTP services
+- **Web applications**: Full browser integration support
+- **Microservices**: Service-to-service communication
+- **Load balancing**: Scalable multi-instance deployments
+- **Long-running sessions**: Stateful interactions with resumability
+
+### How it works:
+
+- HTTP requests to `/mcp` endpoint
+- Session-based connections with unique IDs
+- Event streaming with resumability support
+- Health check endpoint at `/health`
+- Automatic session cleanup and management
+- Compression for efficient data transfer
 
 ## 📁 Project Structure
 
 ```
-http-server-project/
+http-server/
 ├── src/
-│   └── index.ts              # Main HTTP server entry point
-├── tools/
-│   └── greet.ts              # Web-friendly greeting tool
-├── resources/
-│   └── server-info.ts        # Server information resource
-├── prompt/
-│   └── introduction.ts       # Introduction and usage prompt
-├── dynemcp.config.json       # HTTP transport configuration
-├── package.json              # Dependencies including Express
-├── tsconfig.json             # TypeScript configuration
+│   ├── index.ts              # Main server entry point
+│   ├── tools/                # HTTP service tools
+│   │   └── greet.ts          # HTTP greeting service
+│   ├── resources/            # Server information resources
+│   │   └── server-info.ts    # Server status and info
+│   └── prompts/              # HTTP-related prompts
+│       └── introduction.ts   # Service introduction
+├── dynemcp.config.json       # Full Streamable HTTP config
+├── package.json              # Dependencies
+├── tsconfig.json             # TypeScript config
 └── README.md                 # This file
 ```
 
-## 🌐 HTTP Transport Configuration
+## 🔧 Quick Start
 
-The template is configured to use HTTP transport by default:
-
-```json
-{
-  "server": {
-    "name": "my-http-server",
-    "version": "1.0.0"
-  },
-  "transport": {
-    "type": "http",
-    "options": {
-      "port": 3000,
-      "host": "localhost"
-    }
-  },
-  "tools": {
-    "directory": "./tools"
-  },
-  "resources": {
-    "directory": "./resources"
-  },
-  "prompts": {
-    "directory": "./prompt"
-  }
-}
-```
-
-### HTTP Transport Features
-
-- **RESTful API**: Standard HTTP methods (GET, POST, PUT, DELETE)
-- **JSON Communication**: Request/response bodies in JSON format
-- **CORS Support**: Cross-origin requests for web browsers
-- **Error Handling**: Proper HTTP status codes and error responses
-- **Health Endpoints**: Built-in monitoring and status endpoints
-
-## 🛠️ Included Tools
-
-### Greeting Tool (`tools/greet.ts`)
-
-A web-friendly greeting tool that demonstrates HTTP MCP interaction:
-
-```typescript
-import { ToolDefinition } from '@dynemcp/dynemcp'
-import { z } from 'zod'
-
-const GreetSchema = z.object({
-  name: z.string().describe('Name of the person to greet'),
-  style: z
-    .enum(['casual', 'formal', 'friendly'])
-    .optional()
-    .describe('Greeting style'),
-})
-
-const greetTool: ToolDefinition = {
-  name: 'greet',
-  description: 'Generate a personalized greeting',
-  schema: GreetSchema,
-  handler: async ({ name, style = 'friendly' }) => {
-    const greetings = {
-      casual: `Hey ${name}! 👋`,
-      formal: `Good day, ${name}.`,
-      friendly: `Hello ${name}! Nice to meet you! 😊`,
-    }
-
-    return {
-      message: greetings[style],
-      timestamp: new Date().toISOString(),
-      style,
-    }
-  },
-}
-
-export default greetTool
-```
-
-**Features**:
-
-- Multiple greeting styles (casual, formal, friendly)
-- Timestamp inclusion for web applications
-- Emoji support for modern web interfaces
-- Structured response format
-
-## 📚 Server Resources
-
-### Server Information (`resources/server-info.ts`)
-
-Provides comprehensive server status and capabilities:
-
-```typescript
-import { ResourceDefinition } from '@dynemcp/dynemcp'
-
-const serverInfoResource: ResourceDefinition = {
-  uri: 'server://info',
-  name: 'Server Information',
-  description: 'HTTP server status and capabilities',
-  content: async () => {
-    return JSON.stringify(
-      {
-        server: {
-          name: 'DyneMCP HTTP Server',
-          version: '1.0.0',
-          uptime: process.uptime(),
-          memory: process.memoryUsage(),
-          platform: process.platform,
-        },
-        transport: {
-          type: 'http',
-          port: 3000,
-          protocols: ['HTTP/1.1', 'HTTP/2'],
-          cors: true,
-        },
-        capabilities: {
-          tools: true,
-          resources: true,
-          prompts: true,
-          streaming: false,
-        },
-        endpoints: {
-          health: '/health',
-          tools: '/tools',
-          resources: '/resources',
-          prompts: '/prompts',
-        },
-      },
-      null,
-      2
-    )
-  },
-  contentType: 'application/json',
-}
-
-export default serverInfoResource
-```
-
-**Information Provided**:
-
-- 🖥️ **Server Status**: Uptime, memory usage, platform
-- 🌐 **Transport Details**: Port, protocols, CORS status
-- 🔧 **Capabilities**: Available MCP features
-- 📍 **Endpoints**: API endpoint mapping
-- 📊 **Real-time Data**: Dynamic server metrics
-
-## 💬 Introduction Prompt
-
-### Web Integration Guide (`prompt/introduction.ts`)
-
-Helpful prompt for getting started with web integration:
-
-```typescript
-import { PromptDefinition } from '@dynemcp/dynemcp'
-
-const introductionPrompt: PromptDefinition = {
-  id: 'web-introduction',
-  name: 'Web Integration Guide',
-  description: 'Getting started with HTTP MCP server',
-  content: `Welcome to your HTTP-based MCP server! 
-
-This server is perfect for web integration. Here's how to get started:
-
-## Connection
-Your server is running on HTTP at: http://localhost:3000
-
-## Available Endpoints
-- GET /health - Server health check
-- POST /tools - Execute MCP tools
-- GET /resources - Access server resources
-- GET /prompts - Available prompts
-
-## Example Usage
-\`\`\`javascript
-// Fetch server info
-const response = await fetch('http://localhost:3000/resources/server://info')
-const serverInfo = await response.json()
-
-// Execute a tool
-const greetResponse = await fetch('http://localhost:3000/tools/greet', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name: 'World', style: 'friendly' })
-})
-\`\`\`
-
-## Web Integration
-This server works great with:
-- React/Vue/Angular applications
-- REST API clients
-- Webhook integrations
-- Browser-based tools
-
-Need help? Check the server-info resource for more details!`,
-}
-
-export default introductionPrompt
-```
-
-## 🚀 Quick Start
-
-1. **Navigate to your project**:
+1. **Navigate to your project directory**:
 
    ```bash
-   cd http-server-project
+   cd http-server
    ```
 
 2. **Install dependencies**:
@@ -243,516 +66,401 @@ export default introductionPrompt
    npm install
    ```
 
-3. **Start the HTTP server**:
+3. **Build the project**:
 
    ```bash
-   npm run dev
+   npm run build
    ```
 
-4. **Test the server**:
+4. **Start the HTTP server**:
 
    ```bash
-   # Health check
+   npm start
+   ```
+
+5. **Verify server is running**:
+
+   ```bash
+   # Check health endpoint
    curl http://localhost:3000/health
 
-   # Get server information
-   curl http://localhost:3000/resources/server://info
-
-   # Execute greeting tool
-   curl -X POST http://localhost:3000/tools/greet \
+   # Test MCP endpoint
+   curl -X POST http://localhost:3000/mcp \
      -H "Content-Type: application/json" \
-     -d '{"name": "World", "style": "friendly"}'
+     -d '{
+       "jsonrpc": "2.0",
+       "id": 1,
+       "method": "initialize",
+       "params": {
+         "protocolVersion": "2024-11-05",
+         "capabilities": {},
+         "clientInfo": {"name": "test-client", "version": "1.0.0"}
+       }
+     }'
    ```
 
-## 🌐 HTTP API Endpoints
+## 🛠️ Streamable HTTP Transport Configuration
 
-### Health Check
-
-```http
-GET /health
-```
-
-Returns server health status and basic information.
-
-### Tools Execution
-
-```http
-POST /tools/{toolName}
-Content-Type: application/json
-
-{
-  "parameter1": "value1",
-  "parameter2": "value2"
-}
-```
-
-### Resources Access
-
-```http
-GET /resources/{resourceUri}
-```
-
-Retrieve specific resources by URI.
-
-### Prompts Listing
-
-```http
-GET /prompts
-```
-
-List all available prompts.
-
-### Prompt Access
-
-```http
-GET /prompts/{promptId}
-```
-
-Retrieve specific prompt content.
-
-## 🔧 Web Integration Examples
-
-### React Integration
-
-```typescript
-// React component for MCP interaction
-import React, { useState, useEffect } from 'react'
-
-const MCPGreeting: React.FC = () => {
-  const [greeting, setGreeting] = useState('')
-  const [name, setName] = useState('')
-
-  const handleGreet = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/tools/greet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          style: 'friendly'
-        })
-      })
-
-      const result = await response.json()
-      setGreeting(result.message)
-    } catch (error) {
-      console.error('Error:', error)
-    }
-  }
-
-  return (
-    <div>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Enter your name"
-      />
-      <button onClick={handleGreet}>Greet</button>
-      {greeting && <p>{greeting}</p>}
-    </div>
-  )
-}
-
-export default MCPGreeting
-```
-
-### JavaScript/Browser Integration
-
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>MCP Web Integration</title>
-  </head>
-  <body>
-    <div id="app">
-      <input type="text" id="nameInput" placeholder="Enter your name" />
-      <button onclick="greetUser()">Greet</button>
-      <div id="result"></div>
-    </div>
-
-    <script>
-      async function greetUser() {
-        const name = document.getElementById('nameInput').value
-
-        try {
-          const response = await fetch('http://localhost:3000/tools/greet', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name, style: 'friendly' }),
-          })
-
-          const result = await response.json()
-          document.getElementById('result').innerHTML = result.message
-        } catch (error) {
-          console.error('Error:', error)
-        }
-      }
-    </script>
-  </body>
-</html>
-```
-
-### Node.js Client
-
-```typescript
-// Node.js client for MCP server
-import fetch from 'node-fetch'
-
-class MCPClient {
-  constructor(private baseUrl: string = 'http://localhost:3000') {}
-
-  async executeTool(toolName: string, params: any) {
-    const response = await fetch(`${this.baseUrl}/tools/${toolName}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(params),
-    })
-
-    return response.json()
-  }
-
-  async getResource(resourceUri: string) {
-    const response = await fetch(
-      `${this.baseUrl}/resources/${encodeURIComponent(resourceUri)}`
-    )
-    return response.json()
-  }
-
-  async getHealth() {
-    const response = await fetch(`${this.baseUrl}/health`)
-    return response.json()
-  }
-}
-
-// Usage
-const client = new MCPClient()
-
-// Execute greeting tool
-const greeting = await client.executeTool('greet', {
-  name: 'Developer',
-  style: 'casual',
-})
-
-console.log(greeting.message) // "Hey Developer! 👋"
-```
-
-## ⚙️ Configuration Options
-
-### Advanced HTTP Configuration
+The `dynemcp.config.json` includes all Streamable HTTP features:
 
 ```json
 {
   "transport": {
-    "type": "http",
+    "type": "streamable-http",
     "options": {
       "port": 3000,
-      "host": "0.0.0.0",
+      "host": "localhost",
+      "endpoint": "/mcp",
+      "responseMode": "batch",
+      "session": {
+        "enabled": true,
+        "headerName": "Mcp-Session-Id",
+        "allowClientTermination": true,
+        "maxDuration": 1800000,
+        "cleanup": {
+          "enabled": true,
+          "interval": 300000
+        }
+      },
+      "resumability": {
+        "enabled": true,
+        "historyDuration": 300000,
+        "headerName": "Last-Event-ID"
+      },
       "cors": {
         "allowOrigin": "*",
-        "allowMethods": "GET,POST,PUT,DELETE",
-        "allowHeaders": "Content-Type,Authorization",
-        "exposeHeaders": "X-Total-Count",
-        "maxAge": 86400
+        "allowMethods": "GET, POST, OPTIONS, DELETE",
+        "allowHeaders": "Content-Type, Authorization, Mcp-Session-Id, Last-Event-ID",
+        "exposeHeaders": "Content-Type, Mcp-Session-Id",
+        "maxAge": 86400,
+        "credentials": false
       },
-      "middleware": {
-        "morgan": true,
-        "helmet": true,
-        "compression": true
+      "healthCheck": {
+        "enabled": true,
+        "endpoint": "/health"
       },
-      "rateLimit": {
-        "windowMs": 900000,
-        "max": 100
+      "maxMessageSize": "5mb",
+      "compression": {
+        "enabled": true,
+        "threshold": 1024
       }
     }
   }
 }
 ```
 
-### HTTPS Configuration
+### Transport Features:
 
-```json
-{
-  "transport": {
-    "type": "http",
-    "options": {
-      "port": 443,
-      "https": {
-        "key": "./certs/private-key.pem",
-        "cert": "./certs/certificate.pem"
-      }
-    }
-  }
-}
-```
+- ✅ **Session Management**: Stateful connections with cleanup
+- ✅ **Resumability**: Connection recovery with event replay
+- ✅ **Health Checks**: Monitoring and status endpoints
+- ✅ **CORS Support**: Cross-origin resource sharing
+- ✅ **Compression**: Efficient data transfer
+- ✅ **Large Messages**: Support for large payloads (5MB)
+- ✅ **Auto Cleanup**: Automatic session lifecycle management
+- ✅ **Production Ready**: Enterprise-grade reliability
 
-## 🛡️ Security Considerations
+## 🌐 HTTP Endpoints
 
-### CORS Configuration
+### MCP Protocol Endpoint
 
-```typescript
-// Custom CORS configuration
-const corsOptions = {
-  origin: ['https://yourdomain.com', 'https://app.yourdomain.com'],
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}
-```
-
-### Rate Limiting
-
-```typescript
-// Rate limiting configuration
-const rateLimitOptions = {
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP',
-}
-```
-
-### Input Validation
-
-```typescript
-// Enhanced tool with validation
-const secureGreetTool: ToolDefinition = {
-  name: 'secure-greet',
-  description: 'Secure greeting with input validation',
-  schema: z.object({
-    name: z
-      .string()
-      .min(1)
-      .max(50)
-      .regex(/^[a-zA-Z\s]+$/)
-      .describe('Name (letters and spaces only)'),
-  }),
-  handler: async ({ name }) => {
-    // Additional sanitization
-    const sanitizedName = name.trim().replace(/\s+/g, ' ')
-
-    return {
-      message: `Hello ${sanitizedName}!`,
-      timestamp: new Date().toISOString(),
-    }
-  },
-}
-```
-
-## 📊 Monitoring and Logging
+- **POST** `/mcp` - Main MCP protocol communication
+- **GET** `/mcp` - Session management and events (when session enabled)
+- **DELETE** `/mcp` - Session termination
+- **OPTIONS** `/mcp` - CORS preflight requests
 
 ### Health Check Endpoint
 
-```typescript
-// Enhanced health check
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    version: process.env.npm_package_version,
-    environment: process.env.NODE_ENV,
-  })
-})
-```
+- **GET** `/health` - Server health and status information
 
-### Request Logging
+## 🔄 Session Management
 
-```typescript
-// Morgan logging configuration
-app.use(
-  morgan('combined', {
-    stream: {
-      write: (message) => {
-        console.log(message.trim())
-      },
-    },
-  })
-)
-```
+### Creating a Session
 
-## 🔧 Customization
-
-### Adding New Web Tools
-
-```typescript
-// src/tools/web-scraper.ts
-import { ToolDefinition } from '@dynemcp/dynemcp'
-import { z } from 'zod'
-
-const WebScraperSchema = z.object({
-  url: z.string().url().describe('URL to scrape'),
-  selector: z.string().optional().describe('CSS selector'),
-})
-
-const webScraperTool: ToolDefinition = {
-  name: 'web-scraper',
-  description: 'Extract content from web pages',
-  schema: WebScraperSchema,
-  handler: async ({ url, selector = 'title' }) => {
-    // Implementation for web scraping
-    // Note: Add proper error handling and respect robots.txt
-
-    return {
-      url,
-      content: 'Scraped content here',
-      timestamp: new Date().toISOString(),
+```bash
+# Initialize with session creation
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2024-11-05",
+      "capabilities": {},
+      "clientInfo": {"name": "client", "version": "1.0.0"}
     }
+  }'
+
+# Response includes session ID in headers:
+# Mcp-Session-Id: uuid-session-id
+```
+
+### Using Session
+
+```bash
+# Subsequent requests with session ID
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -H "Mcp-Session-Id: your-session-id" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/list"
+  }'
+```
+
+### Resuming Connection
+
+```bash
+# Resume with last event ID
+curl -X GET http://localhost:3000/mcp \
+  -H "Mcp-Session-Id: your-session-id" \
+  -H "Last-Event-ID: last-received-event-id" \
+  -H "Accept: text/event-stream"
+```
+
+### Terminating Session
+
+```bash
+# Explicitly terminate session
+curl -X DELETE http://localhost:3000/mcp \
+  -H "Mcp-Session-Id: your-session-id"
+```
+
+## 📊 Health Monitoring
+
+### Health Check Response
+
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "uptime": 3600000,
+  "version": "1.0.0",
+  "sessions": {
+    "active": 5,
+    "total": 23
   },
+  "memory": {
+    "used": "45.2 MB",
+    "free": "466.8 MB"
+  }
 }
-
-export default webScraperTool
-```
-
-### Adding WebSocket Support
-
-```typescript
-// WebSocket integration
-import { WebSocketServer } from 'ws'
-
-const wss = new WebSocketServer({ port: 8080 })
-
-wss.on('connection', (ws) => {
-  ws.on('message', async (data) => {
-    try {
-      const request = JSON.parse(data.toString())
-      // Handle MCP request over WebSocket
-      const response = await handleMCPRequest(request)
-      ws.send(JSON.stringify(response))
-    } catch (error) {
-      ws.send(JSON.stringify({ error: error.message }))
-    }
-  })
-})
-```
-
-### Adding GraphQL Support
-
-```typescript
-// GraphQL integration
-import { ApolloServer } from 'apollo-server-express'
-import { typeDefs, resolvers } from './graphql-schema'
-
-const apolloServer = new ApolloServer({
-  typeDefs,
-  resolvers,
-  context: ({ req }) => ({
-    mcpClient: createMCPContext(req),
-  }),
-})
-
-await apolloServer.start()
-apolloServer.applyMiddleware({ app, path: '/graphql' })
 ```
 
 ## 🧪 Testing
 
-### API Testing with curl
+### Basic Health Check
 
 ```bash
-# Test all endpoints
 curl http://localhost:3000/health
-curl http://localhost:3000/resources/server://info
-curl -X POST http://localhost:3000/tools/greet \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Test", "style": "formal"}'
 ```
 
-### Automated Testing
+### Session Flow Testing
+
+```bash
+# 1. Initialize session
+SESSION_ID=$(curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0.0"}}}' \
+  -I | grep -i mcp-session-id | cut -d' ' -f2 | tr -d '\r\n')
+
+# 2. List tools with session
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -H "Mcp-Session-Id: $SESSION_ID" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+
+# 3. Terminate session
+curl -X DELETE http://localhost:3000/mcp \
+  -H "Mcp-Session-Id: $SESSION_ID"
+```
+
+### Browser Integration
+
+```javascript
+// Modern fetch API with session management
+class MCPClient {
+  constructor(baseUrl) {
+    this.baseUrl = baseUrl
+    this.sessionId = null
+  }
+
+  async initialize() {
+    const response = await fetch(`${this.baseUrl}/mcp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2024-11-05',
+          capabilities: {},
+          clientInfo: { name: 'web-client', version: '1.0.0' },
+        },
+      }),
+    })
+
+    this.sessionId = response.headers.get('Mcp-Session-Id')
+    return response.json()
+  }
+
+  async callTool(name, arguments) {
+    return fetch(`${this.baseUrl}/mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Mcp-Session-Id': this.sessionId,
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: Date.now(),
+        method: 'tools/call',
+        params: { name, arguments },
+      }),
+    }).then((r) => r.json())
+  }
+
+  async terminate() {
+    return fetch(`${this.baseUrl}/mcp`, {
+      method: 'DELETE',
+      headers: { 'Mcp-Session-Id': this.sessionId },
+    })
+  }
+}
+
+// Usage
+const client = new MCPClient('http://localhost:3000')
+await client.initialize()
+const result = await client.callTool('greet', { name: 'World' })
+await client.terminate()
+```
+
+## 🎯 Use Cases
+
+Perfect for:
+
+- **Web applications**: Full-featured browser integration
+- **Microservices**: Service mesh communication
+- **API gateways**: MCP protocol adaptation
+- **Enterprise integration**: Production-ready deployments
+- **Load-balanced services**: Multi-instance scalability
+- **Long-running sessions**: Stateful user interactions
+
+## 🔧 Development Commands
+
+```bash
+# Start development with watch mode
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Health check monitoring
+npm run health
+
+# Type checking
+npm run typecheck
+
+# Lint code
+npm run lint
+```
+
+## 🚀 Next Steps
+
+Want even more advanced features? Try:
+
+- **secure-agent template**: Authentication, authorization, and security
+- **dynamic-agent template**: Advanced session features and AI capabilities
+
+## 🔧 Customization
+
+### Adding Custom Headers
 
 ```typescript
-// Jest test example
-import request from 'supertest'
-import app from '../src/index'
-
-describe('HTTP MCP Server', () => {
-  test('health check', async () => {
-    const response = await request(app).get('/health').expect(200)
-
-    expect(response.body.status).toBe('healthy')
-  })
-
-  test('greet tool', async () => {
-    const response = await request(app)
-      .post('/tools/greet')
-      .send({ name: 'Test', style: 'casual' })
-      .expect(200)
-
-    expect(response.body.message).toContain('Hey Test!')
-  })
-})
+// src/middleware/custom-headers.ts
+export const customHeaders = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  res.setHeader('X-Service-Name', 'MyMCPService')
+  res.setHeader('X-Version', '1.0.0')
+  next()
+}
 ```
 
-## 🚀 Deployment
+### Custom Health Checks
 
-### Docker Deployment
+```typescript
+// src/health/custom-health.ts
+export const customHealthCheck = async () => {
+  // Add custom health logic
+  const dbStatus = await checkDatabaseConnection()
+  const cacheStatus = await checkCacheConnection()
 
-```dockerfile
-FROM node:18-alpine
-
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-
-COPY . .
-RUN npm run build
-
-EXPOSE 3000
-CMD ["npm", "start"]
-```
-
-### Production Configuration
-
-```json
-{
-  "transport": {
-    "type": "http",
-    "options": {
-      "port": 3000,
-      "host": "0.0.0.0",
-      "cors": {
-        "allowOrigin": "https://yourdomain.com"
-      },
-      "middleware": {
-        "helmet": true,
-        "compression": true
-      }
-    }
+  return {
+    database: dbStatus ? 'healthy' : 'unhealthy',
+    cache: cacheStatus ? 'healthy' : 'unhealthy',
   }
 }
 ```
 
-## 🔗 Related Templates
+### Session Event Handlers
 
-- **Default**: For basic MCP learning with stdio transport
-- **Calculator**: For mathematical operations over HTTP
-- **Secure Agent**: For production HTTP servers with authentication
-- **Dynamic Agent**: For adaptive systems with HTTP integration
+```typescript
+// src/session/handlers.ts
+export const sessionHandlers = {
+  onSessionCreate: (sessionId: string) => {
+    console.log(`Session created: ${sessionId}`)
+  },
 
-## 🤝 Contributing
+  onSessionTerminate: (sessionId: string) => {
+    console.log(`Session terminated: ${sessionId}`)
+  },
 
-Web-focused improvements are welcome!
+  onSessionExpire: (sessionId: string) => {
+    console.log(`Session expired: ${sessionId}`)
+  },
+}
+```
 
-1. Fork the repository
-2. Add new web tools or improve HTTP integration
-3. Include comprehensive tests
-4. Update documentation
-5. Submit a pull request
+## 🔍 Monitoring & Observability
 
-## 📄 License
+### Metrics Collection
 
-This template is part of the DyneMCP project and is licensed under the MIT License.
+```bash
+# Built-in metrics endpoint (if enabled)
+curl http://localhost:3000/metrics
 
-## 🔗 Links
+# Custom health checks with detailed info
+curl http://localhost:3000/health?detailed=true
+```
 
-- [DyneMCP Framework](https://github.com/dynemcp/dynemcp)
-- [MCP Specification](https://modelcontextprotocol.io/)
-- [Express.js Documentation](https://expressjs.com/)
-- [Create DyneMCP CLI](https://www.npmjs.com/package/@dynemcp/create-dynemcp)
+### Log Analysis
+
+```bash
+# Structured JSON logs for production
+tail -f server.log | jq '.timestamp, .level, .message'
+
+# Filter by session
+tail -f server.log | jq 'select(.sessionId == "specific-session-id")'
+```
+
+## 📚 Documentation
+
+- [DyneMCP Documentation](https://dynemcp.dev)
+- [Streamable HTTP Transport Guide](https://dynemcp.dev/transport/streamable-http)
+- [Session Management](https://dynemcp.dev/features/sessions)
+- [Production Deployment](https://dynemcp.dev/deployment/production)
+
+## 🤝 Support
+
+- GitHub Issues: Report bugs and feature requests
+- Documentation: Complete HTTP transport guides
+- Community: Share production deployment experiences

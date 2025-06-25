@@ -18,7 +18,7 @@ export class ComponentStorage {
 
   // Tool management
   addTool(tool: ToolDefinition): void {
-    this.tools.set(tool.name, tool)
+    this.tools.set(tool.name as string, tool)
   }
 
   getTool(name: string): ToolDefinition | undefined {
@@ -52,19 +52,19 @@ export class ComponentStorage {
 
   // Prompt management
   addPrompt(prompt: PromptDefinition): void {
-    this.prompts.set(prompt.id, prompt)
+    this.prompts.set(prompt.name, prompt)
   }
 
-  getPrompt(id: string): PromptDefinition | undefined {
-    return this.prompts.get(id)
+  getPrompt(name: string): PromptDefinition | undefined {
+    return this.prompts.get(name)
   }
 
   getAllPrompts(): PromptDefinition[] {
     return Array.from(this.prompts.values())
   }
 
-  removePrompt(id: string): boolean {
-    return this.prompts.delete(id)
+  removePrompt(name: string): boolean {
+    return this.prompts.delete(name)
   }
 
   // Bulk operations

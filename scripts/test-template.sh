@@ -14,6 +14,24 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
+# Function to display template selection menu
+select_template() {
+    echo "📋 Available templates:"
+    echo "----------------------------------------"
+    PS3="Please select a template (1-5): "
+    templates=("default" "calculator" "dynamic-agent" "http-server" "secure-agent")
+    select template in "${templates[@]}"; do
+        if [ -n "$template" ]; then
+            echo "Selected template: $template"
+            TEMPLATE_NAME=$template
+            break
+        else
+            echo "Invalid selection. Please try again."
+        fi
+    done
+    echo "----------------------------------------"
+}
+
 # --- Go to project root ---
 # This ensures the script can be run from anywhere in the project.
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -24,12 +42,21 @@ echo "🚀 Starting the template test script..."
 echo "----------------------------------------"
 
 # --- Configuration ---
-# The name of the template to test. Default is 'default'.
-# You can run this script with an argument to test another template, e.g., ./scripts/test-template.sh calculator
-TEMPLATE_NAME=${1:-default}
-APP_NAME="my-test-app"
+# If no template is provided as argument, show selection menu
+if [ -z "$1" ]; then
+    select_template
+else
+    TEMPLATE_NAME=$1
+fi
+
+# Now that TEMPLATE_NAME is defined, we can set up the app names
+APP_NAME="my-test-mcp-server-$TEMPLATE_NAME"
 EXAMPLES_DIR="examples"
 APP_PATH="$EXAMPLES_DIR/$APP_NAME"
+
+echo "🎯 Using template: $TEMPLATE_NAME"
+echo "📂 App name will be: $APP_NAME"
+echo "----------------------------------------"
 # ---
 
 # 1. Build the create-dynemcp package to ensure we're using the latest version
@@ -39,7 +66,7 @@ echo "✅ Build complete."
 echo "----------------------------------------"
 
 # 2. Navigate into the examples directory and clean up
-echo "🧹 Cleaning up previous test app at '$APP_PATH' (if it exists)..."
+echo "🧹 Cleaning up previous test server at '$APP_PATH' (if it exists)..."
 # Create the examples dir if it doesn't exist
 mkdir -p $EXAMPLES_DIR
 cd $EXAMPLES_DIR
@@ -48,10 +75,10 @@ echo "✅ Cleanup complete."
 echo "----------------------------------------"
 
 # 3. Run the create-dynemcp generator from the examples directory
-echo "🌱 Creating new test app from template '$TEMPLATE_NAME'..."
+echo "🌱 Creating new test MCP server from template '$TEMPLATE_NAME'..."
 # We need to call the generator using a relative path from the new CWD
 node ../packages/create-dynemcp/dist/index.js $APP_NAME --template $TEMPLATE_NAME --yes --skip-install
-echo "✅ App created at '$APP_NAME'."
+echo "✅ MCP server created at '$APP_NAME'."
 echo "----------------------------------------"
 
 # 4. Navigate into the new app directory and prepare it
@@ -75,4 +102,4 @@ echo "🚀 Starting the development server for '$APP_NAME'..."
 echo "   You can now open the MCP Inspector."
 echo "   Press Ctrl+C to stop the server and exit the script."
 echo "----------------------------------------"
-pnpm run dev 
+pnpm run inspector 

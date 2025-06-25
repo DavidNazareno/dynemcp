@@ -1,9 +1,12 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import { z, ZodRawShape } from 'zod'
 import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
+  PromptMessage,
+  CallToolResult,
 } from '../core/interfaces.js'
 
 export interface FileResourceOptions {
@@ -23,7 +26,7 @@ export interface PromptOptions {
 }
 
 export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant'
+  role: 'user' | 'assistant'
   content: string
 }
 
@@ -31,14 +34,47 @@ export interface ChatMessage {
 export function createTool(
   name: string,
   description: string,
-  schema: Record<string, any>,
-  handler: (params: any) => any | Promise<any>
+  inputSchema: Record<string, z.ZodTypeAny>,
+  handler: (params: any) => any | Promise<any>,
+  annotations?: {
+    title?: string
+    readOnlyHint?: boolean
+    destructiveHint?: boolean
+    idempotentHint?: boolean
+    openWorldHint?: boolean
+  }
 ): ToolDefinition {
   return {
     name,
     description,
-    schema,
-    handler,
+    inputSchema: inputSchema as ZodRawShape,
+    annotations,
+    async execute(args: Record<string, any>): Promise<CallToolResult> {
+      try {
+        const result = await handler(args)
+        if (result && typeof result === 'object' && 'content' in result) {
+          return result as CallToolResult
+        }
+        return {
+          content: [
+            {
+              type: 'text',
+              text: String(result),
+            },
+          ],
+        }
+      } catch (error) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text',
+              text: error instanceof Error ? error.message : String(error),
+            },
+          ],
+        }
+      }
+    },
   }
 }
 
@@ -84,46 +120,68 @@ export function createDynamicResource(
 
 // Prompt helpers
 export function createPrompt(
-  id: string,
   name: string,
   content: string,
   options: PromptOptions = {}
 ): PromptDefinition {
   return {
-    id,
     name,
-    content,
     description: options.description || name,
+    async getMessages(): Promise<PromptMessage[]> {
+      return [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: content,
+          },
+        } as PromptMessage,
+      ]
+    },
   }
 }
 
 export function createSystemPrompt(
-  id: string,
   name: string,
   content: string,
   options: PromptOptions = {}
 ): PromptDefinition {
   return {
-    id,
     name,
-    content,
     description: options.description || name,
+    async getMessages(): Promise<PromptMessage[]> {
+      return [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: content,
+          },
+        } as PromptMessage,
+      ]
+    },
   }
 }
 
 export function createChatPrompt(
-  id: string,
   name: string,
   messages: ChatMessage[],
   options: PromptOptions = {}
 ): PromptDefinition {
-  const content = messages
-    .map((message) => `${message.role}: ${message.content}`)
-    .join('\n\n')
   return {
-    id,
     name,
-    content,
     description: options.description || name,
+    async getMessages(): Promise<PromptMessage[]> {
+      return messages.map(
+        (message) =>
+          ({
+            role: message.role,
+            content: {
+              type: 'text',
+              text: message.content,
+            },
+          }) as PromptMessage
+      )
+    },
   }
 }

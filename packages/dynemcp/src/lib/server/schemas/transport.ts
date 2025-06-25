@@ -1,16 +1,17 @@
 import { z } from 'zod'
+import { NETWORK, CLI } from '../../../config.js'
 
 export const CorsSchema = z.object({
-  allowOrigin: z.string().optional().default('*'),
+  allowOrigin: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .default('*'),
   allowMethods: z.string().optional().default('GET, POST, OPTIONS'),
   allowHeaders: z
     .string()
     .optional()
-    .default('Content-Type, Authorization, x-api-key'),
-  exposeHeaders: z
-    .string()
-    .optional()
-    .default('Content-Type, Authorization, x-api-key'),
+    .default('Content-Type, Authorization, Mcp-Session-Id, Last-Event-ID'),
+  exposeHeaders: z.string().optional().default('Content-Type, Mcp-Session-Id'),
   maxAge: z.number().optional().default(86400),
 })
 
@@ -29,16 +30,18 @@ export const ResumabilitySchema = z.object({
   historyDuration: z.number().optional().default(300000),
 })
 
+// Keeping SSE for backward compatibility, but it's deprecated
 export const SSETransportOptionsSchema = z.object({
-  port: z.number().optional().default(8080),
+  port: z.number().optional().default(NETWORK.DEFAULT_HTTP_PORT),
   endpoint: z.string().optional().default('/sse'),
   messageEndpoint: z.string().optional().default('/messages'),
   cors: CorsSchema.optional(),
 })
 
-export const HTTPStreamTransportOptionsSchema = z.object({
-  port: z.number().optional().default(8080),
-  endpoint: z.string().optional().default('/mcp'),
+export const StreamableHTTPTransportOptionsSchema = z.object({
+  port: z.number().optional().default(NETWORK.DEFAULT_HTTP_PORT),
+  host: z.string().optional().default(NETWORK.DEFAULT_HTTP_HOST),
+  endpoint: z.string().optional().default(NETWORK.DEFAULT_MCP_ENDPOINT),
   responseMode: z.enum(['batch', 'stream']).optional().default('batch'),
   batchTimeout: z.number().optional().default(30000),
   maxMessageSize: z.string().optional().default('4mb'),
@@ -48,14 +51,14 @@ export const HTTPStreamTransportOptionsSchema = z.object({
   authentication: AuthMiddlewareSchema.optional(),
 })
 
+// Updated to use official MCP SDK transport types
 export const TransportSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('stdio') }),
+  z.object({ type: z.literal(CLI.TRANSPORT_TYPES[0]) }), // 'stdio'
   z.object({
-    type: z.literal('sse'),
-    options: SSETransportOptionsSchema.optional(),
-  }),
-  z.object({
-    type: z.literal('http-stream'),
-    options: HTTPStreamTransportOptionsSchema.optional(),
+    type: z.literal(CLI.TRANSPORT_TYPES[1]), // 'streamable-http'
+    options: StreamableHTTPTransportOptionsSchema.optional(),
   }),
 ])
+
+// Alias for backward compatibility
+export const HTTPTransportOptionsSchema = StreamableHTTPTransportOptionsSchema

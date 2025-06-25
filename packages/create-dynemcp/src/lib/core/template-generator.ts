@@ -9,6 +9,8 @@ import fs from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
 import { Sema } from 'async-sema'
+// We'll use the getPackageVersion function instead of importing package.json directly
+import { PATHS } from '../../config.js'
 
 import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces.js'
 
@@ -16,7 +18,7 @@ import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces.js'
 const templatesDir = getTemplatesDir()
 
 // Get the package version
-const pkg = { version: getPackageVersion() }
+const pkgVersion = getPackageVersion()
 
 /**
  * Get the file path for a given file in a template, e.g. "dynemcp.config.json".
@@ -28,7 +30,7 @@ export const getTemplateFile = ({
   return path.join(templatesDir, template, file)
 }
 
-export const SRC_DIR_NAMES = ['src', 'prompt', 'resources', 'tools']
+export const SRC_DIR_NAMES = [PATHS.SOURCE_DIR, 'prompts', 'resources', 'tools']
 
 /**
  * Install a DyneMCP internal template to a given `root` directory.
@@ -129,34 +131,65 @@ export const installTemplate = async ({
   }
 
   if (srcDir) {
-    await fs.mkdir(path.join(root, 'src'), { recursive: true })
-    await Promise.all(
-      SRC_DIR_NAMES.map(async (dir) => {
-        // Skip moving the 'src' directory itself
-        if (dir === 'src') {
-          return
-        }
+    await fs.mkdir(path.join(root, PATHS.SOURCE_DIR), { recursive: true })
 
-        const sourcePath = path.join(root, dir)
-        const targetPath = path.join(root, 'src', dir)
+    // Check if the template already has a src/ directory structure
+    const templateHasSrcStructure = await fs
+      .stat(path.join(root, PATHS.SOURCE_DIR))
+      .catch(() => false)
 
-        // Check if the source directory exists before attempting to move it
-        if (await fs.stat(sourcePath).catch(() => false)) {
-          await fs.mkdir(path.dirname(targetPath), { recursive: true })
-          await fs
-            .rename(sourcePath, targetPath)
-            .catch((err: { code?: string }) => {
-              if (err.code !== 'ENOENT') {
-                throw err
-              }
-            })
-        }
-      })
-    )
+    if (!templateHasSrcStructure) {
+      // Only reorganize directories if template doesn't already have src/ structure
+      await Promise.all(
+        SRC_DIR_NAMES.map(async (dir) => {
+          // Skip moving the 'src' directory itself
+          if (dir === PATHS.SOURCE_DIR) {
+            return
+          }
+
+          const sourcePath = path.join(root, dir)
+          const targetPath = path.join(root, PATHS.SOURCE_DIR, dir)
+
+          // Check if the source directory exists before attempting to move it
+          if (await fs.stat(sourcePath).catch(() => false)) {
+            await fs.mkdir(path.dirname(targetPath), { recursive: true })
+            await fs
+              .rename(sourcePath, targetPath)
+              .catch((err: { code?: string }) => {
+                if (err.code !== 'ENOENT') {
+                  throw err
+                }
+              })
+          }
+        })
+      )
+    }
   }
 
   /** Copy the version from package.json or override for tests. */
-  const version = process.env.DYNEMCP_TEST_VERSION ?? pkg.version
+  const version = process.env.DYNEMCP_TEST_VERSION ?? pkgVersion
+
+  // Generate scripts using the new simplified development modes
+  const generateScripts = () => {
+    const baseScripts = {
+      build: 'dynemcp build',
+      start: 'dynemcp start',
+      clean: 'dynemcp clean',
+      analyze: 'dynemcp analyze',
+      format: 'prettier --write .',
+      lint: eslint ? 'eslint . --ext .js,.jsx,.ts,.tsx' : undefined,
+      'eslint:fix': eslint
+        ? 'eslint . --ext .js,.jsx,.ts,.tsx --fix'
+        : undefined,
+    }
+
+    // Simple scripts that work for any transport type
+    return {
+      ...baseScripts,
+      dev: 'dynemcp dev',
+      inspector: 'dynemcp dev inspector',
+    }
+  }
 
   /** Create a package.json for the new project and write it to disk. */
   interface PackageJson {
@@ -174,20 +207,7 @@ export const installTemplate = async ({
     name: appName,
     version: '0.1.0',
     private: true,
-    scripts: {
-      dev: 'concurrently --names "BUILD,SERVER" --prefix-colors "cyan,green" "dynemcp dev --transport=console" "nodemon --watch dist --exec \\"cross-env DYNE_MCP_DEBUG_STDERR=1 node dist/server.js\\""',
-      'dev:simple': 'dynemcp dev',
-      build: 'dynemcp build',
-      start: 'dynemcp start',
-      clean: 'dynemcp clean',
-      analyze: 'dynemcp analyze',
-      format: 'prettier --write .',
-      lint: eslint ? 'eslint . --ext .js,.jsx,.ts,.tsx' : undefined,
-      'eslint:fix': eslint
-        ? 'eslint . --ext .js,.jsx,.ts,.tsx --fix'
-        : undefined,
-      'dev:inspector': 'pnpx @modelcontextprotocol/inspector dynemcp dev',
-    },
+    scripts: generateScripts(),
     /**
      * Default dependencies.
      */
@@ -196,7 +216,10 @@ export const installTemplate = async ({
       '@dynemcp/dynemcp': `^${version}`,
       zod: '^3.22.4',
     },
-    devDependencies: {},
+    devDependencies: {
+      // Basic dev dependencies - the CLI handles concurrently, nodemon, etc. internally
+      prettier: '^3.2.5',
+    },
   }
 
   if (template === 'http-server' || template === 'secure-agent') {
@@ -245,14 +268,10 @@ export const installTemplate = async ({
     }
   }
 
-  // Add common dev dependencies
+  // Add common dev dependencies (DyneMCP CLI handles build tools internally)
   packageJson.devDependencies = {
     ...packageJson.devDependencies,
-    'cross-env': '^7.0.3',
-    esbuild: '^0.20.2',
     vitest: '^1.4.0',
-    concurrently: '^8.2.2',
-    nodemon: '^3.0.2',
   }
 
   // Add Node.js engine requirement
@@ -326,7 +345,7 @@ async function updateProjectConfig(
   projectName: string
 ): Promise<void> {
   try {
-    const configPath = path.join(projectPath, 'dynemcp.config.json')
+    const configPath = path.join(projectPath, PATHS.DEFAULT_CONFIG)
     if (existsSync(configPath)) {
       const config = JSON.parse(await fs.readFile(configPath, 'utf8'))
       config.name = projectName

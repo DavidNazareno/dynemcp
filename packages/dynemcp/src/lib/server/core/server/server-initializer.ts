@@ -1,4 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { z } from 'zod'
 import type {
   ToolDefinition,
   ResourceDefinition,
@@ -25,8 +26,32 @@ export function registerTools(
   server: McpServer,
   tools: ToolDefinition[]
 ): void {
+  // Register tools using the modern MCP SDK API
   for (const tool of tools) {
-    server.tool(tool.name, tool.description, tool.schema, tool.handler)
+    server.registerTool(
+      tool.name as string,
+      {
+        title: tool.name as string,
+        description: tool.description as string | undefined,
+        inputSchema: tool.inputSchema as any,
+        annotations: tool.annotations as any,
+      },
+      async (args: Record<string, any>) => {
+        try {
+          return await tool.execute(args || {})
+        } catch (error) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: 'text' as const,
+                text: error instanceof Error ? error.message : String(error),
+              } as any,
+            ],
+          }
+        }
+      }
+    )
   }
 }
 
@@ -40,15 +65,25 @@ export function registerResources(
         typeof resource.content === 'function'
           ? await resource.content()
           : resource.content
+
       return {
-        content: [{ type: 'text' as const, text: content }],
+        contents: [
+          {
+            uri: resource.uri,
+            text: content,
+            mimeType: resource.contentType || 'text/plain',
+          },
+        ],
       }
     }
 
-    server.tool(
-      `resource:${resource.uri}`,
-      resource.description || `Resource: ${resource.name}`,
-      {},
+    server.registerResource(
+      resource.name,
+      resource.uri,
+      {
+        title: resource.name,
+        description: resource.description,
+      },
       handler
     )
   }
@@ -59,13 +94,32 @@ export function registerPrompts(
   prompts: PromptDefinition[]
 ): void {
   for (const prompt of prompts) {
-    server.tool(
-      `prompt:${prompt.id}`,
-      prompt.description || `Prompt: ${prompt.name}`,
-      {},
-      async () => {
+    // Convert prompt arguments to Zod schema
+    const argsSchema = prompt.arguments?.reduce(
+      (acc, arg) => ({
+        ...acc,
+        [arg.name]: arg.required ? z.string() : z.string().optional(),
+      }),
+      {} as Record<string, z.ZodString | z.ZodOptional<z.ZodString>>
+    )
+
+    server.registerPrompt(
+      prompt.name,
+      {
+        title: prompt.name,
+        description: prompt.description || `Prompt: ${prompt.name}`,
+        argsSchema: argsSchema,
+      },
+      async (args: { [x: string]: string | undefined }) => {
+        // Filter out undefined values to match the expected type
+        const filteredArgs = Object.fromEntries(
+          Object.entries(args).filter(([, value]) => value !== undefined)
+        ) as Record<string, string>
+
+        const messages = await prompt.getMessages(filteredArgs)
         return {
-          content: [{ type: 'text' as const, text: prompt.content }],
+          messages,
+          description: prompt.description,
         }
       }
     )

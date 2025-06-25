@@ -20,6 +20,7 @@ export default [
       '**/vite.config.*.timestamp*',
       '**/vitest.config.*.timestamp*',
       '**/test-output',
+      '**/dist',
     ],
   },
   ...compat.extends('plugin:@nx/typescript', 'plugin:prettier/recommended'),

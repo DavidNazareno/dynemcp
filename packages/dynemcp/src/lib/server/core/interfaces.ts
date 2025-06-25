@@ -1,29 +1,76 @@
-export interface ToolDefinition {
+// Import types from the official MCP SDK
+import type {
+  Prompt,
+  PromptMessage,
+  Resource,
+  Tool,
+  CallToolResult,
+} from '@modelcontextprotocol/sdk/types.js'
+import { ZodRawShape } from 'zod'
+
+// Re-export the official SDK types that we use
+export type {
+  PromptArgument,
+  Prompt,
+  PromptMessage,
+  GetPromptRequest,
+  GetPromptResult as GetPromptResponse,
+  ListPromptsResult as ListPromptsResponse,
+  Resource,
+  ResourceContents,
+  ResourceTemplate,
+  ReadResourceRequest,
+  ReadResourceResult,
+  ListResourcesResult,
+  ListResourceTemplatesResult,
+  Tool,
+  CallToolResult,
+  ListToolsResult,
+} from '@modelcontextprotocol/sdk/types.js'
+
+// DyneMCP specific tool definition that extends MCP SDK Tool interface
+export interface ToolDefinition extends Omit<Tool, 'inputSchema'> {
+  /**
+   * Tool name must be a string (enforced by framework)
+   */
   name: string
-  description: string
-  schema: Record<string, any> // JSON Schema
-  handler: (params: any) => Promise<any> | any
+  /**
+   * Input schema using ZodRawShape format for convenience,
+   * converted to JSON Schema when exposed to MCP clients
+   */
+  inputSchema?: ZodRawShape | Tool['inputSchema']
+  /**
+   * Function to execute the tool
+   * @param args The arguments passed to the tool
+   * @returns Promise resolving to tool execution result
+   */
+  execute: (args: any) => Promise<CallToolResult>
 }
 
-export interface ResourceDefinition {
-  uri: string
-  name: string
+export interface ResourceDefinition extends Resource {
+  /**
+   * Function to generate the resource content
+   * @returns Promise resolving to resource contents
+   */
   content: string | (() => string | Promise<string>)
-  description?: string
   contentType?: string
 }
 
-export interface PromptDefinition {
-  id: string
-  name: string
-  content: string
-  description?: string
+// Extend the official types for our framework needs
+export interface PromptDefinition extends Prompt {
+  /**
+   * Function to generate messages for this prompt
+   * @param args Arguments passed to the prompt
+   * @returns Promise resolving to an array of prompt messages
+   */
+  getMessages: (args?: Record<string, string>) => Promise<PromptMessage[]>
 }
 
 export interface AutoloadConfig {
   enabled: boolean
   directory: string
   pattern?: string // glob pattern for file matching
+  exclude?: string | string[] // files/patterns to exclude
 }
 
 // Logging configuration
@@ -75,7 +122,7 @@ export interface SSETransportConfig {
     endpoint?: string
     messageEndpoint?: string
     cors?: {
-      allowOrigin?: string
+      allowOrigin?: string | string[]
       allowMethods?: string
       allowHeaders?: string
       exposeHeaders?: string
@@ -84,10 +131,11 @@ export interface SSETransportConfig {
   }
 }
 
-export interface HTTPStreamTransportConfig {
-  type: 'http-stream'
+export interface StreamableHTTPTransportConfig {
+  type: 'streamable-http'
   options?: {
     port?: number
+    host?: string
     endpoint?: string
     responseMode?: 'batch' | 'stream'
     batchTimeout?: number
@@ -102,7 +150,7 @@ export interface HTTPStreamTransportConfig {
       historyDuration?: number
     }
     cors?: {
-      allowOrigin?: string
+      allowOrigin?: string | string[]
       allowMethods?: string
       allowHeaders?: string
       exposeHeaders?: string
@@ -117,12 +165,14 @@ export interface HTTPStreamTransportConfig {
 export type TransportConfig =
   | StdioTransportConfig
   | SSETransportConfig
-  | HTTPStreamTransportConfig
+  | StreamableHTTPTransportConfig
 
 export interface ServerConfig {
   name: string
   version: string
+  description?: string
   documentationUrl?: string
+  environment?: string
 }
 
 export interface DyneMCPConfig {

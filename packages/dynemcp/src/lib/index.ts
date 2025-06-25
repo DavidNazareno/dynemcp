@@ -6,6 +6,15 @@
 // Export server functionality
 export * from './server/index.js'
 
+// Export helper functions for easier tool development
+export {
+  createTypedTool,
+  createTextResponse,
+  createErrorResponse,
+  withErrorHandling,
+  zodObjectToRawShape,
+} from './server/core/base.js'
+
 // Export build functionality (excluding duplicates)
 export {
   build,

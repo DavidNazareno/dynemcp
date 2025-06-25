@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { ToolDefinition } from './interfaces.js'
 
 /**
  * Validate that all schema fields have descriptions
@@ -49,15 +50,32 @@ export function validateToolSchema(schema: z.ZodType, toolName: string): void {
 /**
  * Validate all tools in the registry
  */
-export function validateAllTools(
-  tools: Array<{ name: string; schema: any }>
-): void {
+export function validateAllTools(tools: ToolDefinition[]): void {
   const allErrors: string[] = []
 
   for (const tool of tools) {
     try {
-      if (tool.schema instanceof z.ZodType) {
-        validateToolSchema(tool.schema, tool.name)
+      // Basic validation that tool has required properties
+      if (!tool.name || typeof tool.name !== 'string') {
+        allErrors.push(`Tool is missing or has invalid name property`)
+        continue
+      }
+
+      // Validate that tool has execute function
+      if (!tool.execute || typeof tool.execute !== 'function') {
+        allErrors.push(
+          `Tool '${tool.name as string}' is missing execute function`
+        )
+        continue
+      }
+
+      // Validate inputSchema if present
+      if (tool.inputSchema) {
+        if (typeof tool.inputSchema !== 'object') {
+          allErrors.push(
+            `Tool '${tool.name as string}' has invalid inputSchema`
+          )
+        }
       }
     } catch (error) {
       allErrors.push(error instanceof Error ? error.message : String(error))

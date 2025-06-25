@@ -1,69 +1,216 @@
-import { z } from 'zod'
+import { z, ZodRawShape } from 'zod'
 import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
+  PromptArgument,
+  PromptMessage,
+  CallToolResult,
 } from './interfaces.js'
 
 // Type utilities for inference
 export type InferSchema<T> = T extends z.ZodType ? z.infer<T> : never
-export type ToolInput<T> = T extends DyneMCPTool
-  ? InferSchema<T['schema']>
-  : never
+
+/**
+ * Helper function to convert Zod object schema to ZodRawShape
+ */
+export function zodObjectToRawShape<T extends z.ZodObject<any>>(
+  schema: T
+): T['shape'] {
+  return schema.shape
+}
+
+/**
+ * Helper function to create a simple text response
+ */
+export function createTextResponse(text: string): CallToolResult {
+  return {
+    content: [
+      {
+        type: 'text',
+        text,
+      },
+    ],
+  }
+}
+
+/**
+ * Helper function to create an error response
+ */
+export function createErrorResponse(error: string | Error): CallToolResult {
+  return {
+    content: [
+      {
+        type: 'text',
+        text: error instanceof Error ? error.message : error,
+      },
+    ],
+    isError: true,
+  }
+}
+
+/**
+ * Helper function to wrap execution with proper error handling
+ */
+export function withErrorHandling<T extends (...args: any[]) => any>(
+  fn: T
+): (...args: Parameters<T>) => Promise<CallToolResult> {
+  return async (...args: Parameters<T>) => {
+    try {
+      const result = await fn(...args)
+      if (result && typeof result === 'object' && 'content' in result) {
+        return result as CallToolResult
+      }
+      return createTextResponse(String(result))
+    } catch (error: unknown) {
+      return createErrorResponse(error as Error)
+    }
+  }
+}
+
+/**
+ * Simplified typed tool creator function
+ */
+export function createTypedTool<T extends z.ZodObject<any>>(config: {
+  name: string
+  description: string
+  schema: T
+  annotations?: {
+    title?: string
+    readOnlyHint?: boolean
+    destructiveHint?: boolean
+    idempotentHint?: boolean
+    openWorldHint?: boolean
+  }
+  execute: (
+    input: z.infer<T>
+  ) => Promise<CallToolResult> | CallToolResult | string | any
+}): ToolDefinition {
+  return {
+    name: config.name,
+    description: config.description,
+    inputSchema: config.schema.shape,
+    annotations: config.annotations,
+    execute: withErrorHandling(config.execute),
+  }
+}
 
 /**
  * Base class for all MCP Tools
  * Provides a consistent interface and automatic type inference
  */
 export abstract class DyneMCPTool {
-  abstract readonly description: string
-  abstract readonly schema: z.ZodType
+  // Add index signature to match the interface
+  [key: string]: unknown
 
-  /**
-   * Get the tool name from the class name
-   */
-  get name(): string {
-    return this.constructor.name
+  abstract readonly name: string
+  abstract readonly description?: string
+  abstract readonly inputSchema: Record<string, z.ZodTypeAny>
+  readonly annotations?: {
+    title?: string
+    readOnlyHint?: boolean
+    destructiveHint?: boolean
+    idempotentHint?: boolean
+    openWorldHint?: boolean
   }
 
   /**
    * Execute the tool with properly typed input
    */
-  abstract execute(input: ToolInput<this>): Promise<any> | any
+  abstract execute(input: any): Promise<any> | any
 
   /**
-   * Convert the tool to ToolDefinition format
+   * Helper to create a successful result
+   */
+  protected createResult(content: any[]): CallToolResult {
+    return {
+      content: Array.isArray(content) ? content : [content],
+    }
+  }
+
+  /**
+   * Helper to create an error result
+   */
+  protected createErrorResult(error: string | Error): CallToolResult {
+    return {
+      isError: true,
+      content: [
+        {
+          type: 'text',
+          text: error instanceof Error ? error.message : error,
+        },
+      ],
+    }
+  }
+
+  /**
+   * Helper to create text content
+   */
+  protected createTextContent(text: string): { type: 'text'; text: string } {
+    return {
+      type: 'text',
+      text,
+    }
+  }
+
+  /**
+   * Helper to create simple text response
+   */
+  protected text(content: string): CallToolResult {
+    return createTextResponse(content)
+  }
+
+  /**
+   * Helper to create error response
+   */
+  protected error(error: string | Error): CallToolResult {
+    return createErrorResponse(error)
+  }
+
+  /**
+   * Convert the tool to ToolDefinition format that's compatible with MCP SDK
    */
   toDefinition(): ToolDefinition {
     return {
       name: this.name,
       description: this.description,
-      schema: this.schemaToJsonSchema(),
-      handler: this.execute.bind(this),
+      inputSchema: this.inputSchema as ZodRawShape,
+      annotations: this.annotations,
+      execute: withErrorHandling(this.execute.bind(this)),
     }
-  }
-
-  /**
-   * Convert Zod schema to JSON Schema
-   */
-  private schemaToJsonSchema(): Record<string, any> {
-    return zodToJsonSchema(this.schema)
   }
 }
 
 /**
  * Base class for all MCP Resources
  */
-export abstract class DyneMCPResource {
+export abstract class DyneMCPResource implements ResourceDefinition {
+  // Add index signature to match the interface
+  [key: string]: unknown
+
   abstract readonly uri: string
   abstract readonly name: string
   abstract readonly description?: string
-  abstract readonly contentType?: string
+  abstract readonly mimeType?: string
 
   /**
    * Get the resource content
    */
   abstract getContent(): string | Promise<string>
+
+  /**
+   * Required by ResourceDefinition interface
+   */
+  get content(): string | (() => string | Promise<string>) {
+    return this.getContent.bind(this)
+  }
+
+  /**
+   * Required by ResourceDefinition interface
+   */
+  get contentType(): string | undefined {
+    return this.mimeType
+  }
 
   /**
    * Convert the resource to ResourceDefinition format
@@ -74,7 +221,8 @@ export abstract class DyneMCPResource {
       name: this.name,
       content: this.getContent.bind(this),
       description: this.description,
-      contentType: this.contentType || 'application/octet-stream',
+      mimeType: this.mimeType,
+      contentType: this.mimeType || 'application/octet-stream',
     }
   }
 }
@@ -82,89 +230,80 @@ export abstract class DyneMCPResource {
 /**
  * Base class for all MCP Prompts
  */
-export abstract class DyneMCPPrompt {
-  abstract readonly id: string
+export abstract class DyneMCPPrompt implements PromptDefinition {
+  // Add index signature to match the interface
+  [key: string]: unknown
+
   abstract readonly name: string
   abstract readonly description?: string
+  abstract readonly arguments?: PromptArgument[]
 
   /**
-   * Get the prompt content
+   * Get the messages for this prompt
+   * @param args The arguments passed to the prompt
    */
-  abstract getContent(): string
+  abstract getMessages(args?: Record<string, string>): Promise<PromptMessage[]>
+
+  /**
+   * Helper to create a text message
+   */
+  protected createTextMessage(
+    role: 'user' | 'assistant',
+    text: string
+  ): PromptMessage {
+    return {
+      role,
+      content: {
+        type: 'text',
+        text,
+      },
+    } as PromptMessage
+  }
+
+  /**
+   * Helper to create a resource message
+   */
+  protected createResourceMessage(
+    role: 'user' | 'assistant',
+    uri: string,
+    text: string,
+    mimeType?: string
+  ): PromptMessage {
+    return {
+      role,
+      content: {
+        type: 'resource',
+        resource: {
+          uri,
+          text,
+          mimeType,
+        },
+      },
+    } as PromptMessage
+  }
+
+  /**
+   * Validate required arguments
+   */
+  protected validateArgs(args?: Record<string, string>): void {
+    if (!this.arguments) return
+
+    for (const arg of this.arguments) {
+      if (arg.required && (!args || !args[arg.name])) {
+        throw new Error(`Required argument '${arg.name}' is missing`)
+      }
+    }
+  }
 
   /**
    * Convert the prompt to PromptDefinition format
    */
   toDefinition(): PromptDefinition {
     return {
-      id: this.id,
       name: this.name,
-      content: this.getContent(),
       description: this.description,
+      arguments: this.arguments,
+      getMessages: this.getMessages.bind(this),
     }
-  }
-}
-
-/**
- * Helper function to convert Zod schema to JSON Schema
- */
-function zodToJsonSchema(
-  schema: z.ZodType<any, any, any>
-): Record<string, any> {
-  if (schema instanceof z.ZodString) {
-    const base: any = { type: 'string' }
-    if ((schema as any)._def.minLength !== undefined) {
-      base.minLength = (schema as any)._def.minLength
-    }
-    if ((schema as any)._def.maxLength !== undefined) {
-      base.maxLength = (schema as any)._def.maxLength
-    }
-    return base
-  } else if (schema instanceof z.ZodNumber) {
-    const base: any = { type: 'number' }
-    if ((schema as any)._def.minimum !== undefined) {
-      base.minimum = (schema as any)._def.minimum
-    }
-    if ((schema as any)._def.maximum !== undefined) {
-      base.maximum = (schema as any)._def.maximum
-    }
-    return base
-  } else if (schema instanceof z.ZodBoolean) {
-    return { type: 'boolean' }
-  } else if (schema instanceof z.ZodArray) {
-    return {
-      type: 'array',
-      items: zodToJsonSchema(schema.element),
-    }
-  } else if (schema instanceof z.ZodObject) {
-    const shape = schema._def.shape()
-    const properties: Record<string, any> = {}
-    const required: string[] = []
-
-    for (const [key, value] of Object.entries(shape)) {
-      properties[key] = zodToJsonSchema(value as z.ZodType<any, any, any>)
-      if (!(value instanceof z.ZodOptional)) {
-        required.push(key)
-      }
-      const description = (value as any)._def.description
-      if (description) {
-        properties[key].description = description
-      }
-    }
-
-    return {
-      type: 'object',
-      properties,
-      required: required.length > 0 ? required : undefined,
-    }
-  } else if (schema instanceof z.ZodEnum) {
-    return {
-      type: 'string',
-      enum: schema._def.values,
-    }
-  } else if (schema instanceof z.ZodOptional) {
-    return zodToJsonSchema(schema.unwrap())
-  } else {
-    return { type: 'object' }
   }
 }

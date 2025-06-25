@@ -1,14 +1,15 @@
-import * as fs from 'fs'
-import * as path from 'path'
-import * as os from 'os'
+import fs from 'fs'
+import path from 'path'
+import os from 'os'
 import { pathToFileURL } from 'url'
 import { transform } from 'esbuild'
-import { DyneMCPTool, DyneMCPResource, DyneMCPPrompt } from '../core/base.js'
+
 import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
 } from '../core/interfaces.js'
+import { DyneMCPTool, DyneMCPResource, DyneMCPPrompt } from '../core/base.js'
 
 export interface LoadOptions {
   enabled: boolean
@@ -247,9 +248,10 @@ export function validateTool(component: any): component is ToolDefinition {
     component &&
     typeof component === 'object' &&
     typeof component.name === 'string' &&
-    typeof component.description === 'string' &&
-    typeof component.schema === 'object' &&
-    typeof component.handler === 'function'
+    (component.description === undefined ||
+      typeof component.description === 'string') &&
+    typeof component.inputSchema === 'object' &&
+    typeof component.execute === 'function'
   )
 }
 
@@ -270,8 +272,7 @@ export function validatePrompt(component: any): component is PromptDefinition {
   return (
     component &&
     typeof component === 'object' &&
-    typeof component.id === 'string' &&
     typeof component.name === 'string' &&
-    typeof component.content === 'string'
+    typeof component.getMessages === 'function'
   )
 }
