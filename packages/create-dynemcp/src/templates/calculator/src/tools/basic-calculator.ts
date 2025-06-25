@@ -10,11 +10,20 @@ const BasicCalculatorSchema = z.object({
 })
 
 export class BasicCalculatorTool extends DyneMCPTool {
-  get name() {
-    return 'basic_calculator'
-  }
+  readonly name = 'basic_calculator'
   readonly description = 'A simple calculator that can perform basic arithmetic'
-  readonly schema = BasicCalculatorSchema
+  readonly inputSchema = {
+    a: z.number().describe('The first number'),
+    b: z.number().describe('The second number'),
+    operator: z
+      .enum(['add', 'subtract', 'multiply', 'divide'])
+      .describe('The operation to perform'),
+  }
+  readonly annotations = {
+    title: 'Basic Calculator',
+    readOnlyHint: true,
+    openWorldHint: false,
+  }
 
   async execute(
     input: z.infer<typeof BasicCalculatorSchema>

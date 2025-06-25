@@ -1,33 +1,46 @@
 import { z } from 'zod'
-import type { ToolDefinition } from '@dynemcp/dynemcp'
+import type { ToolDefinition, CallToolResult } from '@dynemcp/dynemcp'
 
 // Define your tools here
 // Example:
-// const myTool: Tool = {
+// const myTool: ToolDefinition = {
 //   name: 'myTool',
 //   description: 'A tool that does something',
-//   parameters: {
-//     type: 'object',
-//     properties: {
-//       input: { type: 'string' }
-//     },
-//     required: ['input']
+//   inputSchema: {
+//     input: z.string().describe('The input to process')
 //   },
-//   handler: async ({ input }) => {
-//     return { result: `Processed: ${input}` }
-//   }
+//   async execute({ input }): Promise<CallToolResult> {
+//     return {
+//       content: [
+//         {
+//           type: 'text',
+//           text: `Processed: ${input}`,
+//         },
+//       ],
+//     }
+//   },
 // }
-
-const GreeterSchema = z.object({
-  name: z.string().describe('The name to greet'),
-})
 
 const greeterTool: ToolDefinition = {
   name: 'greeter',
   description: 'A simple tool that greets the user',
-  schema: GreeterSchema,
-  handler: async ({ name }: { name: string }) => {
-    return { message: `Hello, ${name}!` }
+  inputSchema: {
+    name: z.string().describe('The name to greet'),
+  },
+  annotations: {
+    title: 'Greeter Tool',
+    readOnlyHint: true,
+    openWorldHint: false,
+  },
+  async execute({ name }: { name: string }): Promise<CallToolResult> {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Hello, ${name}!`,
+        },
+      ],
+    }
   },
 }
 

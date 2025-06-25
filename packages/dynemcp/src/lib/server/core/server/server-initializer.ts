@@ -4,7 +4,6 @@ import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
-  GetPromptResponse,
 } from '../interfaces.js'
 
 export interface ServerInitializationOptions {
@@ -27,8 +26,32 @@ export function registerTools(
   server: McpServer,
   tools: ToolDefinition[]
 ): void {
+  // Register tools using the modern MCP SDK API
   for (const tool of tools) {
-    server.tool(tool.name, tool.description, tool.schema, tool.handler)
+    server.registerTool(
+      tool.name,
+      {
+        title: tool.name,
+        description: tool.description,
+        inputSchema: tool.inputSchema,
+        annotations: tool.annotations,
+      },
+      async (args: Record<string, any>) => {
+        try {
+          return await tool.execute(args || {})
+        } catch (error) {
+          return {
+            isError: true,
+            content: [
+              {
+                type: 'text',
+                text: error instanceof Error ? error.message : String(error),
+              },
+            ],
+          }
+        }
+      }
+    )
   }
 }
 
@@ -54,10 +77,13 @@ export function registerResources(
       }
     }
 
-    server.resource(
+    server.registerResource(
       resource.name,
       resource.uri,
-      { description: resource.description },
+      {
+        title: resource.name,
+        description: resource.description,
+      },
       handler
     )
   }
@@ -68,6 +94,7 @@ export function registerPrompts(
   prompts: PromptDefinition[]
 ): void {
   for (const prompt of prompts) {
+    // Convert prompt arguments to Zod schema
     const argsSchema = prompt.arguments?.reduce(
       (acc, arg) => ({
         ...acc,
@@ -76,35 +103,25 @@ export function registerPrompts(
       {} as Record<string, z.ZodString | z.ZodOptional<z.ZodString>>
     )
 
-    if (argsSchema && Object.keys(argsSchema).length > 0) {
-      server.prompt(
-        prompt.name,
-        prompt.description || `Prompt: ${prompt.name}`,
-        argsSchema,
-        async (args): Promise<GetPromptResponse> => {
-          const filteredArgs = Object.fromEntries(
-            Object.entries(args).filter(([, value]) => value !== undefined)
-          ) as Record<string, string>
+    server.registerPrompt(
+      prompt.name,
+      {
+        title: prompt.name,
+        description: prompt.description || `Prompt: ${prompt.name}`,
+        argsSchema: argsSchema,
+      },
+      async (args: { [x: string]: string | undefined }) => {
+        // Filter out undefined values to match the expected type
+        const filteredArgs = Object.fromEntries(
+          Object.entries(args).filter(([, value]) => value !== undefined)
+        ) as Record<string, string>
 
-          const messages = await prompt.getMessages(filteredArgs)
-          return {
-            messages,
-            description: prompt.description,
-          }
+        const messages = await prompt.getMessages(filteredArgs)
+        return {
+          messages,
+          description: prompt.description,
         }
-      )
-    } else {
-      server.prompt(
-        prompt.name,
-        prompt.description || `Prompt: ${prompt.name}`,
-        async (): Promise<GetPromptResponse> => {
-          const messages = await prompt.getMessages()
-          return {
-            messages,
-            description: prompt.description,
-          }
-        }
-      )
-    }
+      }
+    )
   }
 }

@@ -13,8 +13,26 @@ async function main() {
     server.registry.addTool({
       name: 'get-system-load',
       description: 'Gets the current system CPU load.',
-      schema: z.object({}),
-      handler: async () => ({ load: `${(Math.random() * 100).toFixed(2)}%` }),
+      inputSchema: {},
+      annotations: {
+        title: 'Get System Load',
+        readOnlyHint: true,
+        openWorldHint: false,
+      },
+      async execute() {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                { load: `${(Math.random() * 100).toFixed(2)}%` },
+                null,
+                2
+              ),
+            },
+          ],
+        }
+      },
     })
     console.log('Tool learned!')
   }, 10000)
@@ -43,4 +61,4 @@ async function main() {
   }, 20000)
 }
 
-main()
+main().catch(console.error)

@@ -3,7 +3,9 @@ import type {
   Prompt,
   PromptMessage,
   Resource,
+  CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js'
+import { ZodRawShape } from 'zod'
 
 // Re-export the official SDK types that we use
 export type {
@@ -20,13 +22,32 @@ export type {
   ReadResourceResult,
   ListResourcesResult,
   ListResourceTemplatesResult,
+  Tool,
+  CallToolResult,
+  ListToolsResult,
 } from '@modelcontextprotocol/sdk/types.js'
 
+// DyneMCP specific tool definition that aligns with MCP SDK
 export interface ToolDefinition {
   name: string
-  description: string
-  schema: any
-  handler: (args: any) => any
+  description?: string
+  /**
+   * Input schema using ZodRawShape format as expected by MCP SDK
+   */
+  inputSchema?: ZodRawShape
+  annotations?: {
+    title?: string
+    readOnlyHint?: boolean
+    destructiveHint?: boolean
+    idempotentHint?: boolean
+    openWorldHint?: boolean
+  }
+  /**
+   * Function to execute the tool
+   * @param args The arguments passed to the tool
+   * @returns Promise resolving to tool execution result
+   */
+  execute: (args: any) => Promise<CallToolResult>
 }
 
 export interface ResourceDefinition extends Resource {

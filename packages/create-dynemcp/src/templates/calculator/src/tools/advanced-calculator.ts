@@ -10,12 +10,21 @@ const AdvancedCalculatorSchema = z.object({
 })
 
 export class AdvancedCalculatorTool extends DyneMCPTool {
-  get name() {
-    return 'advanced_calculator'
-  }
+  readonly name = 'advanced_calculator'
   readonly description =
     'A more advanced calculator that can handle complex expressions'
-  readonly schema = AdvancedCalculatorSchema
+  readonly inputSchema = {
+    expression: z
+      .string()
+      .describe(
+        'The mathematical expression to evaluate, e.g., "2 * (3 + 4) / 2"'
+      ),
+  }
+  readonly annotations = {
+    title: 'Advanced Calculator',
+    readOnlyHint: true,
+    openWorldHint: false,
+  }
 
   async execute(
     input: z.infer<typeof AdvancedCalculatorSchema>

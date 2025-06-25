@@ -1,10 +1,12 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import { z, ZodRawShape } from 'zod'
 import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
   PromptMessage,
+  CallToolResult,
 } from '../core/interfaces.js'
 
 export interface FileResourceOptions {
@@ -32,14 +34,47 @@ export interface ChatMessage {
 export function createTool(
   name: string,
   description: string,
-  schema: Record<string, any>,
-  handler: (params: any) => any | Promise<any>
+  inputSchema: Record<string, z.ZodTypeAny>,
+  handler: (params: any) => any | Promise<any>,
+  annotations?: {
+    title?: string
+    readOnlyHint?: boolean
+    destructiveHint?: boolean
+    idempotentHint?: boolean
+    openWorldHint?: boolean
+  }
 ): ToolDefinition {
   return {
     name,
     description,
-    schema,
-    handler,
+    inputSchema: inputSchema as ZodRawShape,
+    annotations,
+    async execute(args: Record<string, any>): Promise<CallToolResult> {
+      try {
+        const result = await handler(args)
+        if (result && typeof result === 'object' && 'content' in result) {
+          return result as CallToolResult
+        }
+        return {
+          content: [
+            {
+              type: 'text',
+              text: String(result),
+            },
+          ],
+        }
+      } catch (error) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text',
+              text: error instanceof Error ? error.message : String(error),
+            },
+          ],
+        }
+      }
+    },
   }
 }
 

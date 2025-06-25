@@ -90,7 +90,7 @@ export class DyneMCP {
     }
     logMsg(`Loaded prompts: ${prompts.length}`)
     if (prompts.length > 0) {
-      prompts.forEach((p) => logMsg(`  - Prompt: ${p.name || p.id}`))
+      prompts.forEach((p) => logMsg(`  - Prompt: ${p.name}`))
     }
 
     // Register components with MCP server

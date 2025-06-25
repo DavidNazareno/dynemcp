@@ -1,55 +1,95 @@
-import { z } from 'zod'
+import { z, ZodRawShape } from 'zod'
 import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
   PromptArgument,
   PromptMessage,
+  CallToolResult,
 } from './interfaces.js'
 
 // Type utilities for inference
 export type InferSchema<T> = T extends z.ZodType ? z.infer<T> : never
-export type ToolInput<T> = T extends DyneMCPTool
-  ? InferSchema<T['schema']>
-  : never
 
 /**
  * Base class for all MCP Tools
  * Provides a consistent interface and automatic type inference
  */
 export abstract class DyneMCPTool {
-  abstract readonly description: string
-  abstract readonly schema: z.ZodType
+  // Add index signature to match the interface
+  [key: string]: unknown
 
-  /**
-   * Get the tool name from the class name
-   */
-  get name(): string {
-    return this.constructor.name
+  abstract readonly name: string
+  abstract readonly description?: string
+  abstract readonly inputSchema: Record<string, z.ZodTypeAny>
+  readonly annotations?: {
+    title?: string
+    readOnlyHint?: boolean
+    destructiveHint?: boolean
+    idempotentHint?: boolean
+    openWorldHint?: boolean
   }
 
   /**
    * Execute the tool with properly typed input
    */
-  abstract execute(input: ToolInput<this>): Promise<any> | any
+  abstract execute(input: any): Promise<any> | any
 
   /**
-   * Convert the tool to ToolDefinition format
+   * Helper to create a successful result
+   */
+  protected createResult(content: any[]): CallToolResult {
+    return {
+      content: Array.isArray(content) ? content : [content],
+    }
+  }
+
+  /**
+   * Helper to create an error result
+   */
+  protected createErrorResult(error: string | Error): CallToolResult {
+    return {
+      isError: true,
+      content: [
+        {
+          type: 'text',
+          text: error instanceof Error ? error.message : error,
+        },
+      ],
+    }
+  }
+
+  /**
+   * Helper to create text content
+   */
+  protected createTextContent(text: string): { type: 'text'; text: string } {
+    return {
+      type: 'text',
+      text,
+    }
+  }
+
+  /**
+   * Convert the tool to ToolDefinition format that's compatible with MCP SDK
    */
   toDefinition(): ToolDefinition {
     return {
       name: this.name,
       description: this.description,
-      schema: this.schemaToJsonSchema(),
-      handler: this.execute.bind(this),
+      inputSchema: this.inputSchema as ZodRawShape,
+      annotations: this.annotations,
+      execute: async (args: Record<string, any>) => {
+        try {
+          const result = await this.execute(args)
+          if (result && typeof result === 'object' && 'content' in result) {
+            return result as CallToolResult
+          }
+          return this.createResult([this.createTextContent(String(result))])
+        } catch (error) {
+          return this.createErrorResult(error as Error)
+        }
+      },
     }
-  }
-
-  /**
-   * Convert Zod schema to JSON Schema
-   */
-  private schemaToJsonSchema(): Record<string, any> {
-    return zodToJsonSchema(this.schema)
   }
 }
 
@@ -162,7 +202,7 @@ export abstract class DyneMCPPrompt implements PromptDefinition {
 
     for (const arg of this.arguments) {
       if (arg.required && (!args || !args[arg.name])) {
-        throw new Error(`Missing required argument: ${arg.name}`)
+        throw new Error(`Required argument '${arg.name}' is missing`)
       }
     }
   }
@@ -175,71 +215,7 @@ export abstract class DyneMCPPrompt implements PromptDefinition {
       name: this.name,
       description: this.description,
       arguments: this.arguments,
-      getMessages: (args) => this.getMessages(args),
+      getMessages: this.getMessages.bind(this),
     }
-  }
-}
-
-/**
- * Helper function to convert Zod schema to JSON Schema
- */
-function zodToJsonSchema(
-  schema: z.ZodType<any, any, any>
-): Record<string, any> {
-  if (schema instanceof z.ZodString) {
-    const base: any = { type: 'string' }
-    if ((schema as any)._def.minLength !== undefined) {
-      base.minLength = (schema as any)._def.minLength
-    }
-    if ((schema as any)._def.maxLength !== undefined) {
-      base.maxLength = (schema as any)._def.maxLength
-    }
-    return base
-  } else if (schema instanceof z.ZodNumber) {
-    const base: any = { type: 'number' }
-    if ((schema as any)._def.minimum !== undefined) {
-      base.minimum = (schema as any)._def.minimum
-    }
-    if ((schema as any)._def.maximum !== undefined) {
-      base.maximum = (schema as any)._def.maximum
-    }
-    return base
-  } else if (schema instanceof z.ZodBoolean) {
-    return { type: 'boolean' }
-  } else if (schema instanceof z.ZodArray) {
-    return {
-      type: 'array',
-      items: zodToJsonSchema(schema.element),
-    }
-  } else if (schema instanceof z.ZodObject) {
-    const shape = schema._def.shape()
-    const properties: Record<string, any> = {}
-    const required: string[] = []
-
-    for (const [key, value] of Object.entries(shape)) {
-      properties[key] = zodToJsonSchema(value as z.ZodType<any, any, any>)
-      if (!(value instanceof z.ZodOptional)) {
-        required.push(key)
-      }
-      const description = (value as any)._def.description
-      if (description) {
-        properties[key].description = description
-      }
-    }
-
-    return {
-      type: 'object',
-      properties,
-      required: required.length > 0 ? required : undefined,
-    }
-  } else if (schema instanceof z.ZodEnum) {
-    return {
-      type: 'string',
-      enum: schema._def.values,
-    }
-  } else if (schema instanceof z.ZodOptional) {
-    return zodToJsonSchema(schema.unwrap())
-  } else {
-    return { type: 'object' }
   }
 }

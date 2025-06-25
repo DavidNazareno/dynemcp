@@ -5,4 +5,15 @@ async function main() {
   await server.start()
 }
 
-main()
+// Handle graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('\n🛑 Shutting down HTTP server...')
+  process.exit(0)
+})
+
+process.on('SIGTERM', async () => {
+  console.log('\n🛑 Shutting down HTTP server...')
+  process.exit(0)
+})
+
+main().catch(console.error)

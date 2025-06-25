@@ -247,9 +247,10 @@ export function validateTool(component: any): component is ToolDefinition {
     component &&
     typeof component === 'object' &&
     typeof component.name === 'string' &&
-    typeof component.description === 'string' &&
-    typeof component.schema === 'object' &&
-    typeof component.handler === 'function'
+    (component.description === undefined ||
+      typeof component.description === 'string') &&
+    typeof component.inputSchema === 'object' &&
+    typeof component.execute === 'function'
   )
 }
 
