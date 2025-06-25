@@ -13,7 +13,7 @@ The main DyneMCP framework provides everything you need to build, run, and deplo
 - 🏗️ **Optimized build system**: Ultra-fast builds with esbuild
 - 🔄 **Hot reload development**: Instant feedback during development
 - 📝 **Declarative configuration**: Simple JSON-based configuration
-- 🌐 **Multiple transports**: stdio, HTTP, SSE, and HTTP-Stream
+- 🌐 **Multiple transports**: stdio and Streamable HTTP (official MCP SDK standard)
 - 🔧 **Dynamic registry**: Runtime registration of tools/resources/prompts
 - 🎯 **Model sampling**: Built-in support for LLM model sampling
 - 🔒 **Security features**: Authentication, rate limiting, CORS, and more
@@ -307,46 +307,12 @@ await watch(config, (result) => {
 }
 ```
 
-### HTTP Transport
+### Streamable HTTP Transport
 
 ```json
 {
   "transport": {
-    "type": "http",
-    "options": {
-      "port": 3000,
-      "host": "localhost"
-    }
-  }
-}
-```
-
-### SSE Transport
-
-```json
-{
-  "transport": {
-    "type": "sse",
-    "options": {
-      "port": 3000,
-      "endpoint": "/sse",
-      "messageEndpoint": "/message",
-      "cors": {
-        "allowOrigin": "*",
-        "allowMethods": "GET,POST",
-        "allowHeaders": "Content-Type"
-      }
-    }
-  }
-}
-```
-
-### HTTP-Stream Transport
-
-```json
-{
-  "transport": {
-    "type": "http-stream",
+    "type": "streamable-http",
     "options": {
       "port": 4000,
       "responseMode": "stream",
@@ -466,7 +432,7 @@ export default function authenticate(
 ```json
 {
   "transport": {
-    "type": "http-stream",
+    "type": "streamable-http",
     "options": {
       "cors": {
         "allowOrigin": "https://trusted-domain.com",

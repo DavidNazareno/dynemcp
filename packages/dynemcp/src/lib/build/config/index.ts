@@ -30,7 +30,7 @@ const DyneMCPConfigSchema = z.object({
   }),
   transport: z
     .object({
-      type: z.enum(['stdio', 'tcp', 'websocket']).default('stdio'),
+      type: z.enum(['stdio', 'streamable-http']).default('stdio'),
       options: z.record(z.any()).optional(),
     })
     .optional(),

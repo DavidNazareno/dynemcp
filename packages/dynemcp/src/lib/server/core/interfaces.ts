@@ -3,6 +3,7 @@ import type {
   Prompt,
   PromptMessage,
   Resource,
+  Tool,
   CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js'
 import { ZodRawShape } from 'zod'
@@ -27,21 +28,17 @@ export type {
   ListToolsResult,
 } from '@modelcontextprotocol/sdk/types.js'
 
-// DyneMCP specific tool definition that aligns with MCP SDK
-export interface ToolDefinition {
-  name: string
-  description?: string
+// DyneMCP specific tool definition that extends MCP SDK Tool interface
+export interface ToolDefinition extends Omit<Tool, 'inputSchema'> {
   /**
-   * Input schema using ZodRawShape format as expected by MCP SDK
+   * Tool name must be a string (enforced by framework)
    */
-  inputSchema?: ZodRawShape
-  annotations?: {
-    title?: string
-    readOnlyHint?: boolean
-    destructiveHint?: boolean
-    idempotentHint?: boolean
-    openWorldHint?: boolean
-  }
+  name: string
+  /**
+   * Input schema using ZodRawShape format for convenience,
+   * converted to JSON Schema when exposed to MCP clients
+   */
+  inputSchema?: ZodRawShape | Tool['inputSchema']
   /**
    * Function to execute the tool
    * @param args The arguments passed to the tool
@@ -73,6 +70,7 @@ export interface AutoloadConfig {
   enabled: boolean
   directory: string
   pattern?: string // glob pattern for file matching
+  exclude?: string | string[] // files/patterns to exclude
 }
 
 // Logging configuration
@@ -124,7 +122,7 @@ export interface SSETransportConfig {
     endpoint?: string
     messageEndpoint?: string
     cors?: {
-      allowOrigin?: string
+      allowOrigin?: string | string[]
       allowMethods?: string
       allowHeaders?: string
       exposeHeaders?: string
@@ -133,10 +131,11 @@ export interface SSETransportConfig {
   }
 }
 
-export interface HTTPStreamTransportConfig {
-  type: 'http-stream'
+export interface StreamableHTTPTransportConfig {
+  type: 'streamable-http'
   options?: {
     port?: number
+    host?: string
     endpoint?: string
     responseMode?: 'batch' | 'stream'
     batchTimeout?: number
@@ -151,7 +150,7 @@ export interface HTTPStreamTransportConfig {
       historyDuration?: number
     }
     cors?: {
-      allowOrigin?: string
+      allowOrigin?: string | string[]
       allowMethods?: string
       allowHeaders?: string
       exposeHeaders?: string
@@ -166,12 +165,14 @@ export interface HTTPStreamTransportConfig {
 export type TransportConfig =
   | StdioTransportConfig
   | SSETransportConfig
-  | HTTPStreamTransportConfig
+  | StreamableHTTPTransportConfig
 
 export interface ServerConfig {
   name: string
   version: string
+  description?: string
   documentationUrl?: string
+  environment?: string
 }
 
 export interface DyneMCPConfig {

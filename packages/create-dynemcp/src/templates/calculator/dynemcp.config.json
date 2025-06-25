@@ -1,16 +1,16 @@
 {
   "server": {
-    "name": "calculator-mcp-server",
+    "name": "calculator",
     "version": "1.0.0"
   },
-  "description": "A Model Context Protocol (MCP) server with advanced calculator tools",
+  "description": "A mathematical MCP (Model Context Protocol) server with basic and advanced calculation tools",
   "tools": {
     "enabled": true,
     "directory": "./src/tools",
     "pattern": "**/*.{ts,js}"
   },
   "resources": {
-    "enabled": true,
+    "enabled": false,
     "directory": "./src/resources",
     "pattern": "**/*.{ts,js}"
   },
@@ -20,7 +20,12 @@
     "pattern": "**/*.{ts,js}"
   },
   "transport": {
-    "type": "stdio"
+    "type": "streamable-http",
+    "options": {
+      "port": 3001,
+      "host": "localhost",
+      "endpoint": "/mcp"
+    }
   },
   "logging": {
     "enabled": true,
@@ -36,9 +41,9 @@
     "showTransportDetails": false
   },
   "performance": {
-    "maxConcurrentRequests": 100,
+    "maxConcurrentRequests": 50,
     "requestTimeout": 30000,
-    "memoryLimit": "512mb",
+    "memoryLimit": "256mb",
     "enableMetrics": false
   },
   "security": {

@@ -157,7 +157,7 @@ create-dynemcp my-secure-agent --template secure-agent
 **What you get**:
 
 - API key authentication middleware
-- HTTP-Stream transport with sessions
+- Streamable HTTP transport with sessions
 - Rate limiting and CORS configuration
 - Security headers and input validation
 - Audit logging capabilities
@@ -329,13 +329,13 @@ export default myCustomTool
 
 ### Template Comparison
 
-| Template      | Transport   | Authentication | Use Case              | Complexity |
-| ------------- | ----------- | -------------- | --------------------- | ---------- |
-| Default       | stdio       | None           | Learning, prototyping | ⭐         |
-| Calculator    | stdio       | None           | Math operations       | ⭐⭐       |
-| HTTP Server   | HTTP        | None           | Web integration       | ⭐⭐       |
-| Secure Agent  | HTTP-Stream | API Key        | Production apps       | ⭐⭐⭐     |
-| Dynamic Agent | stdio       | None           | AI research           | ⭐⭐⭐⭐   |
+| Template      | Transport       | Authentication | Use Case              | Complexity |
+| ------------- | --------------- | -------------- | --------------------- | ---------- |
+| Default       | stdio           | None           | Learning, prototyping | ⭐         |
+| Calculator    | stdio           | None           | Math operations       | ⭐⭐       |
+| HTTP Server   | HTTP            | None           | Web integration       | ⭐⭐       |
+| Secure Agent  | Streamable HTTP | API Key        | Production apps       | ⭐⭐⭐     |
+| Dynamic Agent | stdio           | None           | AI research           | ⭐⭐⭐⭐   |
 
 ### Template Features Matrix
 

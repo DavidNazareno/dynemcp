@@ -41,10 +41,7 @@
     "tslib": "^2.3.0",
     "zod": "3.25.67",
     "express": "4.21.2",
-    "@dynemcp/dynemcp": "workspace:*",
-    "react": "19.0.0",
-    "node-fetch": "2.7.0",
-    "ws": "8.18.2"
+    "@dynemcp/dynemcp": "workspace:*"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

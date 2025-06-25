@@ -29,12 +29,12 @@ export function registerTools(
   // Register tools using the modern MCP SDK API
   for (const tool of tools) {
     server.registerTool(
-      tool.name,
+      tool.name as string,
       {
-        title: tool.name,
-        description: tool.description,
-        inputSchema: tool.inputSchema,
-        annotations: tool.annotations,
+        title: tool.name as string,
+        description: tool.description as string | undefined,
+        inputSchema: tool.inputSchema as any,
+        annotations: tool.annotations as any,
       },
       async (args: Record<string, any>) => {
         try {
@@ -44,9 +44,9 @@ export function registerTools(
             isError: true,
             content: [
               {
-                type: 'text',
+                type: 'text' as const,
                 text: error instanceof Error ? error.message : String(error),
-              },
+              } as any,
             ],
           }
         }

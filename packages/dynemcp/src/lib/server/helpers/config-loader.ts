@@ -197,7 +197,7 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
     const transportType = process.env.DYNEMCP_TRANSPORT_TYPE as
       | 'stdio'
       | 'sse'
-      | 'http-stream'
+      | 'streamable-http'
 
     if (transportType === 'stdio') {
       config.transport = { type: 'stdio' }
@@ -209,11 +209,20 @@ export function loadConfigFromEnv(): Partial<DyneMCPConfig> {
           endpoint: process.env.DYNEMCP_SSE_ENDPOINT || '/sse',
           messageEndpoint:
             process.env.DYNEMCP_SSE_MESSAGE_ENDPOINT || '/messages',
+          cors: process.env.DYNEMCP_SSE_CORS_ALLOW_ORIGIN
+            ? {
+                allowOrigin: process.env.DYNEMCP_SSE_CORS_ALLOW_ORIGIN.includes(
+                  ','
+                )
+                  ? process.env.DYNEMCP_SSE_CORS_ALLOW_ORIGIN.split(',')
+                  : process.env.DYNEMCP_SSE_CORS_ALLOW_ORIGIN,
+              }
+            : undefined,
         },
       }
-    } else if (transportType === 'http-stream') {
+    } else if (transportType === 'streamable-http') {
       config.transport = {
-        type: 'http-stream',
+        type: 'streamable-http',
         options: {
           port: parseInt(process.env.DYNEMCP_HTTP_PORT || '8080'),
           endpoint: process.env.DYNEMCP_HTTP_ENDPOINT || '/mcp',
@@ -254,11 +263,10 @@ export function createDefaultConfig(): DyneMCPConfig {
       pattern: '**/*.{ts,js}',
     },
     transport: {
-      type: 'http-stream',
+      type: 'streamable-http',
       options: {
         port: 8080,
         endpoint: '/mcp',
-        responseMode: 'batch',
       },
     },
     logging: {
@@ -321,4 +329,90 @@ export function mergeConfigs(
   const finalConfig: DyneMCPConfig = Object.assign({}, merged, { server })
 
   return ConfigSchema.parse(finalConfig)
+}
+
+export function normalizeConfig(rawConfig: any): DyneMCPConfig {
+  // Handle backward compatibility for transport types
+  if (rawConfig.transport) {
+    if (rawConfig.transport.type === 'http-stream') {
+      console.warn(
+        '⚠️  Transport type "http-stream" is deprecated. ' +
+          'Please update your configuration to use "streamable-http" instead.'
+      )
+      rawConfig.transport.type = 'streamable-http'
+    } else if (rawConfig.transport.type === 'http') {
+      console.warn(
+        '⚠️  Transport type "http" is deprecated. ' +
+          'Please update your configuration to use "streamable-http" instead.'
+      )
+      rawConfig.transport.type = 'streamable-http'
+    }
+  }
+
+  const normalizedConfig: DyneMCPConfig = {
+    server: {
+      name: rawConfig.server?.name || 'dynemcp-server',
+      version: rawConfig.server?.version || '1.0.0',
+      description: rawConfig.server?.description,
+      documentationUrl: rawConfig.server?.documentationUrl,
+      environment: rawConfig.server?.environment || 'development',
+    },
+    tools: {
+      enabled: rawConfig.tools?.enabled ?? true,
+      directory: rawConfig.tools?.directory || './src/tools',
+      pattern: rawConfig.tools?.pattern || '**/*.{ts,js}',
+      exclude: rawConfig.tools?.exclude,
+    },
+    resources: {
+      enabled: rawConfig.resources?.enabled ?? true,
+      directory: rawConfig.resources?.directory || './src/resources',
+      pattern: rawConfig.resources?.pattern || '**/*.{ts,js}',
+      exclude: rawConfig.resources?.exclude,
+    },
+    prompts: {
+      enabled: rawConfig.prompts?.enabled ?? true,
+      directory: rawConfig.prompts?.directory || './src/prompts',
+      pattern: rawConfig.prompts?.pattern || '**/*.{ts,js}',
+      exclude: rawConfig.prompts?.exclude,
+    },
+    transport: rawConfig.transport || {
+      type: 'streamable-http',
+      options: {
+        port: 8080,
+        endpoint: '/mcp',
+      },
+    },
+    logging: rawConfig.logging || {
+      enabled: true,
+      level: 'info',
+      format: 'text',
+      timestamp: true,
+      colors: true,
+    },
+    debug: rawConfig.debug || {
+      enabled: false,
+      verbose: false,
+      showComponentDetails: false,
+      showTransportDetails: false,
+    },
+    performance: rawConfig.performance || {
+      maxConcurrentRequests: 100,
+      requestTimeout: 30000,
+      memoryLimit: '512mb',
+      enableMetrics: false,
+    },
+    security: rawConfig.security || {
+      enableValidation: true,
+      strictMode: false,
+      allowedOrigins: ['*'],
+      rateLimit: {
+        enabled: false,
+        maxRequests: 100,
+        windowMs: 900000,
+      },
+    },
+    config: rawConfig.config,
+  }
+
+  return normalizedConfig
 }

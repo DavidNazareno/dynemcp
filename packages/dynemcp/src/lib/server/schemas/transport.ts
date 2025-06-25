@@ -1,16 +1,16 @@
 import { z } from 'zod'
 
 export const CorsSchema = z.object({
-  allowOrigin: z.string().optional().default('*'),
+  allowOrigin: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .default('*'),
   allowMethods: z.string().optional().default('GET, POST, OPTIONS'),
   allowHeaders: z
     .string()
     .optional()
-    .default('Content-Type, Authorization, x-api-key'),
-  exposeHeaders: z
-    .string()
-    .optional()
-    .default('Content-Type, Authorization, x-api-key'),
+    .default('Content-Type, Authorization, Mcp-Session-Id, Last-Event-ID'),
+  exposeHeaders: z.string().optional().default('Content-Type, Mcp-Session-Id'),
   maxAge: z.number().optional().default(86400),
 })
 
@@ -29,6 +29,7 @@ export const ResumabilitySchema = z.object({
   historyDuration: z.number().optional().default(300000),
 })
 
+// Keeping SSE for backward compatibility, but it's deprecated
 export const SSETransportOptionsSchema = z.object({
   port: z.number().optional().default(8080),
   endpoint: z.string().optional().default('/sse'),
@@ -36,8 +37,9 @@ export const SSETransportOptionsSchema = z.object({
   cors: CorsSchema.optional(),
 })
 
-export const HTTPStreamTransportOptionsSchema = z.object({
+export const StreamableHTTPTransportOptionsSchema = z.object({
   port: z.number().optional().default(8080),
+  host: z.string().optional().default('localhost'),
   endpoint: z.string().optional().default('/mcp'),
   responseMode: z.enum(['batch', 'stream']).optional().default('batch'),
   batchTimeout: z.number().optional().default(30000),
@@ -48,14 +50,14 @@ export const HTTPStreamTransportOptionsSchema = z.object({
   authentication: AuthMiddlewareSchema.optional(),
 })
 
+// Updated to use official MCP SDK transport types
 export const TransportSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('stdio') }),
   z.object({
-    type: z.literal('sse'),
-    options: SSETransportOptionsSchema.optional(),
-  }),
-  z.object({
-    type: z.literal('http-stream'),
-    options: HTTPStreamTransportOptionsSchema.optional(),
+    type: z.literal('streamable-http'),
+    options: StreamableHTTPTransportOptionsSchema.optional(),
   }),
 ])
+
+// Alias for backward compatibility
+export const HTTPTransportOptionsSchema = StreamableHTTPTransportOptionsSchema

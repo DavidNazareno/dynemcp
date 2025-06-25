@@ -3,7 +3,7 @@
     "name": "dynamic-agent",
     "version": "1.0.0"
   },
-  "description": "A Model Context Protocol (MCP) server",
+  "description": "A dynamic Model Context Protocol (MCP) server with session management and resumability",
   "tools": {
     "enabled": true,
     "directory": "./src/tools",
@@ -20,34 +20,68 @@
     "pattern": "**/*.{ts,js}"
   },
   "transport": {
-    "type": "stdio"
+    "type": "streamable-http",
+    "options": {
+      "port": 3001,
+      "host": "localhost",
+      "endpoint": "/mcp",
+      "responseMode": "stream",
+      "session": {
+        "enabled": true,
+        "headerName": "Mcp-Session-Id",
+        "allowClientTermination": false,
+        "maxDuration": 3600000,
+        "cleanup": {
+          "enabled": true,
+          "interval": 300000
+        }
+      },
+      "resumability": {
+        "enabled": true,
+        "historyDuration": 600000,
+        "headerName": "Last-Event-ID"
+      },
+      "cors": {
+        "allowOrigin": "*",
+        "allowMethods": "GET, POST, OPTIONS",
+        "allowHeaders": "Content-Type, Authorization, Mcp-Session-Id, Last-Event-ID",
+        "exposeHeaders": "Content-Type, Mcp-Session-Id",
+        "maxAge": 86400,
+        "credentials": false
+      },
+      "healthCheck": {
+        "enabled": true,
+        "endpoint": "/health"
+      },
+      "maxMessageSize": "1mb"
+    }
   },
   "logging": {
     "enabled": true,
-    "level": "info",
-    "format": "text",
+    "level": "debug",
+    "format": "json",
     "timestamp": true,
     "colors": true
   },
   "debug": {
-    "enabled": false,
+    "enabled": true,
     "verbose": false,
-    "showComponentDetails": false,
-    "showTransportDetails": false
+    "showComponentDetails": true,
+    "showTransportDetails": true
   },
   "performance": {
-    "maxConcurrentRequests": 100,
-    "requestTimeout": 30000,
-    "memoryLimit": "512mb",
-    "enableMetrics": false
+    "maxConcurrentRequests": 50,
+    "requestTimeout": 45000,
+    "memoryLimit": "1gb",
+    "enableMetrics": true
   },
   "security": {
     "enableValidation": true,
     "strictMode": false,
     "allowedOrigins": ["*"],
     "rateLimit": {
-      "enabled": false,
-      "maxRequests": 100,
+      "enabled": true,
+      "maxRequests": 200,
       "windowMs": 900000
     }
   },

@@ -1,206 +1,60 @@
 # Calculator DyneMCP Template
 
-A mathematical MCP (Model Context Protocol) server template with comprehensive calculation tools, mathematical resources, and specialized prompts for mathematical problem solving.
+A mathematical MCP (Model Context Protocol) server template using **Streamable HTTP transport** - perfect for learning web-based MCP integration and mathematical operations.
 
 ## 🚀 What's Included
 
-This template provides a complete mathematical agent foundation with:
+This template provides advanced mathematical capabilities with:
 
-- **Basic Calculator**: Four basic arithmetic operations with error handling
-- **Advanced Calculator**: Scientific functions (trigonometry, logarithms, powers)
-- **Mathematical Resources**: Constants, formulas, and reference materials
-- **Specialized Prompts**: Mathematical problem-solving assistance
-- **Error Handling**: Comprehensive validation and edge case management
-- **TypeScript Support**: Full type safety for mathematical operations
+- **Basic Calculator**: Addition, subtraction, multiplication, division
+- **Advanced Calculator**: Scientific functions, trigonometry, logarithms
+- **Math Context**: Mathematical constants and formulas
+- **Streamable HTTP Transport**: Modern web-compatible MCP communication
+- **Stateless Operation**: Simple HTTP request/response pattern
+- **Mathematical Resources**: Constants, formulas, and documentation
+
+## 🔌 Transport: Streamable HTTP (Basic)
+
+This template uses **Streamable HTTP transport** in basic mode, ideal for:
+
+- **Web integration**: Direct HTTP API access
+- **REST-like patterns**: Familiar request/response model
+- **Simple deployment**: No complex session management
+- **Testing**: Easy to test with standard HTTP tools
+
+### How it works:
+
+- HTTP requests to `/mcp` endpoint
+- JSON-RPC over HTTP
+- Stateless operation (no sessions)
+- CORS support for web clients
+- Batch response mode for efficiency
 
 ## 📁 Project Structure
 
 ```
-calculator-project/
+calculator-server/
 ├── src/
-│   ├── index.ts                  # Main server entry point
-│   ├── tools/                    # Mathematical tools
-│   │   ├── basic-calculator.ts   # Basic arithmetic operations
+│   ├── index.ts              # Main server entry point
+│   ├── tools/                # Mathematical tools
+│   │   ├── basic-calculator.ts    # Basic arithmetic
 │   │   └── advanced-calculator.ts # Scientific functions
-│   ├── resources/                # Mathematical resources
-│   │   └── math-reference.ts     # Constants and formulas
-│   └── prompts/                  # Mathematical prompts
-│       └── calculator-prompt.ts  # Problem-solving assistance
-├── dynemcp.config.json           # DyneMCP configuration
-├── package.json                  # Dependencies
-├── tsconfig.json                 # TypeScript config
-└── README.md                     # This file
+│   ├── resources/            # Mathematical resources
+│   └── prompts/              # Math-related prompts
+│       ├── calculator-prompt.ts   # Calculator assistance
+│       └── math-context.ts        # Mathematical context
+├── dynemcp.config.json       # Streamable HTTP configuration
+├── package.json              # Dependencies
+├── tsconfig.json             # TypeScript config
+└── README.md                 # This file
 ```
 
-## 🧮 Mathematical Tools
+## 🔧 Quick Start
 
-### Basic Calculator (`src/tools/basic-calculator.ts`)
-
-Provides fundamental arithmetic operations:
-
-```typescript
-import { DyneMCPTool } from '@dynemcp/dynemcp'
-import { z } from 'zod'
-
-const BasicCalculatorSchema = z.object({
-  a: z.number().describe('The first number'),
-  b: z.number().describe('The second number'),
-  operator: z
-    .enum(['add', 'subtract', 'multiply', 'divide'])
-    .describe('The operation to perform'),
-})
-
-export class BasicCalculatorTool extends DyneMCPTool {
-  get name() {
-    return 'basic_calculator'
-  }
-  readonly description = 'A simple calculator that can perform basic arithmetic'
-  readonly schema = BasicCalculatorSchema
-
-  async execute(input: z.infer<typeof BasicCalculatorSchema>) {
-    const { a, b, operator } = input
-    switch (operator) {
-      case 'add':
-        return { result: a + b }
-      case 'subtract':
-        return { result: a - b }
-      case 'multiply':
-        return { result: a * b }
-      case 'divide':
-        if (b === 0) throw new Error('Cannot divide by zero')
-        return { result: a / b }
-    }
-  }
-}
-```
-
-**Supported Operations**:
-
-- ➕ **Addition**: Sum two numbers
-- ➖ **Subtraction**: Subtract second from first number
-- ✖️ **Multiplication**: Multiply two numbers
-- ➗ **Division**: Divide first by second number (with zero-division protection)
-
-### Advanced Calculator (`src/tools/advanced-calculator.ts`)
-
-Provides scientific and advanced mathematical functions:
-
-```typescript
-const AdvancedCalculatorSchema = z.object({
-  operation: z.enum([
-    'power',
-    'sqrt',
-    'abs',
-    'sin',
-    'cos',
-    'tan',
-    'log',
-    'ln',
-    'ceil',
-    'floor',
-    'round',
-  ]),
-  value: z.number().describe('The input value'),
-  exponent: z.number().optional().describe('Exponent for power operation'),
-})
-
-export class AdvancedCalculatorTool extends DyneMCPTool {
-  // Implementation with comprehensive mathematical functions
-}
-```
-
-**Available Functions**:
-
-- 🔢 **Power**: Raise number to a power (`value^exponent`)
-- √ **Square Root**: Calculate square root
-- 📐 **Trigonometry**: sin, cos, tan functions
-- 📊 **Logarithms**: Natural log (ln) and base-10 log
-- 🔄 **Rounding**: ceil, floor, round operations
-- ➕ **Absolute Value**: Get absolute value
-
-## 📚 Mathematical Resources
-
-### Math Reference (`src/resources/math-reference.ts`)
-
-Comprehensive mathematical reference materials:
-
-```typescript
-const mathReference: ResourceDefinition = {
-  uri: 'math://reference',
-  name: 'Mathematical Reference',
-  description: 'Comprehensive mathematical constants and formulas',
-  content: `
-# Mathematical Reference
-
-## Constants
-- π (Pi): 3.14159265359...
-- e (Euler's number): 2.71828182846...
-- φ (Golden ratio): 1.61803398875...
-
-## Basic Formulas
-- Area of circle: A = πr²
-- Pythagorean theorem: a² + b² = c²
-- Quadratic formula: x = (-b ± √(b²-4ac)) / 2a
-
-## Trigonometric Identities
-- sin²(x) + cos²(x) = 1
-- tan(x) = sin(x) / cos(x)
-- sin(2x) = 2sin(x)cos(x)
-  `,
-  contentType: 'text/markdown',
-}
-```
-
-**Includes**:
-
-- 🔢 **Mathematical Constants**: π, e, φ, and more
-- 📐 **Geometric Formulas**: Area, volume, perimeter calculations
-- 🧮 **Algebraic Identities**: Common algebraic relationships
-- 📈 **Trigonometric Identities**: Essential trigonometric relationships
-- 📊 **Statistical Formulas**: Mean, variance, standard deviation
-
-## 💬 Mathematical Prompts
-
-### Calculator Prompt (`src/prompts/calculator-prompt.ts`)
-
-Specialized prompt for mathematical problem solving:
-
-```typescript
-const calculatorPrompt: PromptDefinition = {
-  id: 'math-assistant',
-  name: 'Mathematical Problem Solver',
-  description: 'Helps solve mathematical problems step by step',
-  content: `You are an expert mathematical assistant. When helping with math problems:
-
-1. **Break down complex problems** into smaller, manageable steps
-2. **Show your work** clearly with each calculation step
-3. **Use available tools** for precise calculations
-4. **Explain concepts** when helpful for understanding
-5. **Verify results** by working backwards when possible
-6. **Provide alternative methods** when applicable
-
-For calculations, use the available calculator tools:
-- basic_calculator: For arithmetic operations (+, -, ×, ÷)
-- advanced_calculator: For scientific functions (sin, cos, log, etc.)
-
-Always prioritize accuracy and clear explanations.`,
-}
-```
-
-**Capabilities**:
-
-- 📝 **Step-by-step Solutions**: Break down complex problems
-- 🔍 **Verification**: Double-check calculations
-- 📖 **Explanations**: Educational approach to problem solving
-- 🛠️ **Tool Integration**: Seamless use of calculator tools
-- 🎯 **Multiple Methods**: Show alternative solution approaches
-
-## 🚀 Quick Start
-
-1. **Navigate to your project**:
+1. **Navigate to your project directory**:
 
    ```bash
-   cd calculator-project
+   cd calculator-server
    ```
 
 2. **Install dependencies**:
@@ -209,300 +63,271 @@ Always prioritize accuracy and clear explanations.`,
    npm install
    ```
 
-3. **Start the development server**:
+3. **Build the project**:
 
    ```bash
-   npm run dev
+   npm run build
    ```
 
-4. **Test calculations**:
+4. **Start the HTTP server**:
+
    ```bash
-   # The server is ready to handle mathematical queries
-   # Connect with your MCP client and try:
-   # - "Calculate 15 + 27"
-   # - "What's the sine of 45 degrees?"
-   # - "Find the square root of 144"
+   npm start
    ```
 
-## 🧪 Example Usage
+5. **Test the API** (server runs on http://localhost:3001):
+   ```bash
+   # Test with curl
+   curl -X POST http://localhost:3001/mcp \
+     -H "Content-Type: application/json" \
+     -d '{
+       "jsonrpc": "2.0",
+       "id": 1,
+       "method": "tools/list"
+     }'
+   ```
 
-### Basic Arithmetic
+## 🛠️ Streamable HTTP Transport Configuration
+
+The `dynemcp.config.json` uses Streamable HTTP transport:
 
 ```json
 {
-  "tool": "basic_calculator",
-  "arguments": {
-    "a": 25,
-    "b": 17,
-    "operator": "add"
+  "transport": {
+    "type": "streamable-http",
+    "options": {
+      "port": 3001,
+      "host": "localhost",
+      "endpoint": "/mcp",
+      "responseMode": "batch",
+      "session": {
+        "enabled": false
+      },
+      "cors": {
+        "allowOrigin": "*",
+        "allowMethods": "GET, POST, OPTIONS",
+        "allowHeaders": "Content-Type",
+        "exposeHeaders": "Content-Type",
+        "maxAge": 3600
+      }
+    }
   }
 }
-
-
-// Returns: { "result": 42 }
 ```
 
-### Scientific Functions
+### Transport Features:
 
-```json
-{
-  "tool": "advanced_calculator",
-  "arguments": {
-    "operation": "sin",
-    "value": 1.5708
-  }
-}
+- ✅ **HTTP compatibility**: Standard web protocols
+- ✅ **CORS support**: Web browser integration
+- ✅ **Stateless**: Simple request/response pattern
+- ✅ **Testing**: Easy to test with HTTP tools
+- ✅ **Scalable**: Can handle multiple concurrent requests
+- ❌ **No sessions**: Each request is independent
+- ❌ **No resumability**: No connection state preservation
 
+## 🧮 Mathematical Tools
 
-// Returns: { "result": 1.0 } (sin(π/2))
+### Basic Calculator
+
+```typescript
+// Available operations:
+add(a: number, b: number)        // Addition
+subtract(a: number, b: number)   // Subtraction
+multiply(a: number, b: number)   // Multiplication
+divide(a: number, b: number)     // Division
 ```
 
-### Mathematical Reference
+### Advanced Calculator
 
-```json
-{
-  "resource": "math://reference"
-}
+```typescript
+// Scientific functions:
+power(base: number, exponent: number)
+sqrt(number: number)
+sin(angle: number)    // Radians
+cos(angle: number)    // Radians
+tan(angle: number)    // Radians
+log(number: number)   // Natural logarithm
+log10(number: number) // Base-10 logarithm
+```
 
+## 🌐 API Usage Examples
 
-// Returns the complete mathematical reference document
+### List Available Tools
+
+```bash
+curl -X POST http://localhost:3001/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/list"
+  }'
+```
+
+### Call Calculator Tool
+
+```bash
+curl -X POST http://localhost:3001/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "add",
+      "arguments": {
+        "a": 15,
+        "b": 25
+      }
+    }
+  }'
+```
+
+### Get Mathematical Constants
+
+```bash
+curl -X POST http://localhost:3001/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "resources/read",
+    "params": {
+      "uri": "math://constants"
+    }
+  }'
+```
+
+## 🎯 Use Cases
+
+Perfect for:
+
+- Mathematical web services
+- Educational platforms
+- Scientific computing APIs
+- Calculator widgets
+- Engineering applications
+- Research tools
+
+## 🔧 Development Commands
+
+```bash
+# Start development with watch mode
+npm run dev
+
+# Build for production
+npm run build
+
+# Start HTTP server
+npm start
+
+# Type checking
+npm run typecheck
+
+# Lint code
+npm run lint
+```
+
+## 🚀 Next Steps
+
+Ready for more advanced features? Try:
+
+- **dynamic-agent template**: Session management and resumability
+- **http-server template**: Full Streamable HTTP features
+- **secure-agent template**: Authentication and security
+
+## 🧪 Testing
+
+### With Browser DevTools
+
+Open browser console and test:
+
+```javascript
+fetch('http://localhost:3001/mcp', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'tools/call',
+    params: {
+      name: 'multiply',
+      arguments: { a: 7, b: 8 },
+    },
+  }),
+})
+  .then((r) => r.json())
+  .then(console.log)
+```
+
+### Integration Testing
+
+```bash
+# Install testing tools
+npm install --save-dev @types/supertest supertest
+
+# Run integration tests
+npm test
 ```
 
 ## 🔧 Customization
 
 ### Adding New Mathematical Functions
 
-Create additional tools for specialized mathematics:
-
 ```typescript
-// src/tools/statistics-calculator.ts
-import { DyneMCPTool } from '@dynemcp/dynemcp'
+// src/tools/custom-math.ts
+import { ToolDefinition } from '@dynemcp/dynemcp'
 import { z } from 'zod'
 
-const StatisticsSchema = z.object({
-  operation: z.enum(['mean', 'median', 'mode', 'variance']),
-  values: z.array(z.number()).describe('Array of numbers'),
-})
-
-export class StatisticsCalculatorTool extends DyneMCPTool {
-  get name() {
-    return 'statistics_calculator'
-  }
-  readonly description = 'Statistical calculations on arrays of numbers'
-  readonly schema = StatisticsSchema
-
-  async execute(input: z.infer<typeof StatisticsSchema>) {
-    const { operation, values } = input
-
-    switch (operation) {
-      case 'mean':
-        return { result: values.reduce((a, b) => a + b) / values.length }
-      case 'median':
-        const sorted = values.sort((a, b) => a - b)
-        const mid = Math.floor(sorted.length / 2)
-        return {
-          result:
-            sorted.length % 2 === 0
-              ? (sorted[mid - 1] + sorted[mid]) / 2
-              : sorted[mid],
-        }
-      // Add more statistical functions...
-    }
-  }
-}
-
-export default new StatisticsCalculatorTool()
-```
-
-### Adding Mathematical Constants
-
-Extend the math reference with additional constants:
-
-```typescript
-// src/resources/physics-constants.ts
-const physicsConstants: ResourceDefinition = {
-  uri: 'physics://constants',
-  name: 'Physics Constants',
-  description: 'Important physical constants and formulas',
-  content: `
-# Physics Constants
-
-## Universal Constants
-- Speed of light (c): 299,792,458 m/s
-- Planck constant (h): 6.62607015 × 10⁻³⁴ J⋅s
-- Gravitational constant (G): 6.67430 × 10⁻¹¹ m³⋅kg⁻¹⋅s⁻²
-
-## Formulas
-- E = mc² (Mass-energy equivalence)
-- F = ma (Newton's second law)
-- v = λf (Wave equation)
-  `,
-  contentType: 'text/markdown',
-}
-
-export default physicsConstants
-```
-
-### Creating Specialized Prompts
-
-Add domain-specific mathematical assistants:
-
-```typescript
-// src/prompts/geometry-assistant.ts
-const geometryPrompt: PromptDefinition = {
-  id: 'geometry-assistant',
-  name: 'Geometry Problem Solver',
-  description: 'Specialized assistant for geometric problems',
-  content: `You are a geometry expert. When solving geometric problems:
-
-1. **Visualize the problem** - describe the geometric setup
-2. **Identify known and unknown** elements
-3. **Choose appropriate formulas** from the math reference
-4. **Calculate step by step** using available tools
-5. **Verify using geometric properties** (angles sum to 180°, etc.)
-
-Focus on 2D and 3D geometry, trigonometry, and coordinate geometry.`,
-}
-
-export default geometryPrompt
-```
-
-## 📊 Advanced Features
-
-### Error Handling
-
-The template includes comprehensive error handling:
-
-```typescript
-// Division by zero protection
-if (b === 0) {
-  throw new Error('Cannot divide by zero')
-}
-
-// Domain validation for functions
-if (operation === 'sqrt' && value < 0) {
-  throw new Error('Cannot take square root of negative number')
-}
-
-// Input validation
-if (!Number.isFinite(value)) {
-  throw new Error('Input must be a finite number')
-}
-```
-
-### Precision Management
-
-Handle floating-point precision issues:
-
-```typescript
-// Round to avoid floating-point errors
-const result = Math.round((a + b) * 1e10) / 1e10
-```
-
-### Unit Conversion Support
-
-Extend with unit conversion capabilities:
-
-```typescript
-const unitConverter: ToolDefinition = {
-  name: 'unit_converter',
-  description: 'Convert between different units',
+export const factorial: ToolDefinition = {
+  name: 'factorial',
+  description: 'Calculate factorial of a number',
   schema: z.object({
-    value: z.number(),
-    fromUnit: z.string(),
-    toUnit: z.string(),
-    category: z.enum(['length', 'weight', 'temperature']),
+    n: z.number().int().min(0).describe('Non-negative integer'),
   }),
-  handler: async ({ value, fromUnit, toUnit, category }) => {
-    // Implement unit conversion logic
+  handler: async ({ n }) => {
+    if (n === 0 || n === 1) return { result: 1 }
+    let result = 1
+    for (let i = 2; i <= n; i++) {
+      result *= i
+    }
+    return { result }
   },
 }
 ```
 
-## 🎯 Use Cases
-
-### Educational Applications
-
-- **Math Tutoring**: Step-by-step problem solving
-- **Homework Help**: Guided mathematical assistance
-- **Concept Explanation**: Understanding mathematical principles
-
-### Professional Applications
-
-- **Engineering Calculations**: Technical mathematical computations
-- **Scientific Research**: Statistical and mathematical analysis
-- **Financial Modeling**: Mathematical modeling and calculations
-
-### Development Applications
-
-- **Algorithm Development**: Mathematical function testing
-- **Data Analysis**: Statistical computations
-- **Simulation**: Mathematical modeling support
-
-## 🧪 Testing
-
-### Manual Testing
-
-```bash
-# Test basic operations
-npm run dev
-
-# In your MCP client, try:
-# - Basic: "Calculate 123 + 456"
-# - Advanced: "What's the cosine of π?"
-# - Complex: "Solve x² - 5x + 6 = 0"
-```
-
-### Unit Testing
+### Adding Mathematical Resources
 
 ```typescript
-// Test mathematical accuracy
-describe('BasicCalculator', () => {
-  it('should add correctly', async () => {
-    const result = await basicCalculator.execute({
-      a: 10,
-      b: 20,
-      operator: 'add',
-    })
-    expect(result.result).toBe(30)
-  })
+// src/resources/formulas.ts
+import { ResourceDefinition } from '@dynemcp/dynemcp'
 
-  it('should handle division by zero', async () => {
-    await expect(
-      basicCalculator.execute({
-        a: 10,
-        b: 0,
-        operator: 'divide',
-      })
-    ).rejects.toThrow('Cannot divide by zero')
-  })
-})
+export const formulas: ResourceDefinition = {
+  uri: 'math://formulas/geometry',
+  name: 'Geometry Formulas',
+  description: 'Common geometric formulas',
+  content: JSON.stringify({
+    circle: {
+      area: 'π × r²',
+      circumference: '2 × π × r',
+    },
+    triangle: {
+      area: '(base × height) / 2',
+      perimeter: 'a + b + c',
+    },
+  }),
+  contentType: 'application/json',
+}
 ```
 
-## 🔗 Related Templates
+## 📚 Documentation
 
-- **Default**: For basic MCP learning and simple tools
-- **HTTP Server**: For web-based mathematical services
-- **Secure Agent**: For enterprise mathematical applications
-- **Dynamic Agent**: For adaptive mathematical reasoning
+- [DyneMCP Documentation](https://dynemcp.dev)
+- [Streamable HTTP Transport Guide](https://dynemcp.dev/transport/streamable-http)
+- [Mathematical Functions Reference](https://dynemcp.dev/examples/calculator)
 
-## 🤝 Contributing
+## 🤝 Support
 
-Improvements for mathematical functionality are welcome!
-
-1. Fork the repository
-2. Add new mathematical tools or improve existing ones
-3. Include comprehensive tests
-4. Update documentation
-5. Submit a pull request
-
-## 📄 License
-
-This template is part of the DyneMCP project and is licensed under the MIT License.
-
-## 🔗 Links
-
-- [DyneMCP Framework](https://github.com/dynemcp/dynemcp)
-- [MCP Specification](https://modelcontextprotocol.io/)
-- [Mathematical Reference](https://en.wikipedia.org/wiki/List_of_mathematical_constants)
-- [Create DyneMCP CLI](https://www.npmjs.com/package/@dynemcp/create-dynemcp)
+- GitHub Issues: Report bugs and feature requests
+- Documentation: Mathematical examples and tutorials
+- Community: Share mathematical use cases and extensions

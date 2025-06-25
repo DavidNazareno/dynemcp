@@ -18,7 +18,7 @@ export class ComponentStorage {
 
   // Tool management
   addTool(tool: ToolDefinition): void {
-    this.tools.set(tool.name, tool)
+    this.tools.set(tool.name as string, tool)
   }
 
   getTool(name: string): ToolDefinition | undefined {

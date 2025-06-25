@@ -63,14 +63,18 @@ export function validateAllTools(tools: ToolDefinition[]): void {
 
       // Validate that tool has execute function
       if (!tool.execute || typeof tool.execute !== 'function') {
-        allErrors.push(`Tool '${tool.name}' is missing execute function`)
+        allErrors.push(
+          `Tool '${tool.name as string}' is missing execute function`
+        )
         continue
       }
 
       // Validate inputSchema if present
       if (tool.inputSchema) {
         if (typeof tool.inputSchema !== 'object') {
-          allErrors.push(`Tool '${tool.name}' has invalid inputSchema`)
+          allErrors.push(
+            `Tool '${tool.name as string}' has invalid inputSchema`
+          )
         }
       }
     } catch (error) {
