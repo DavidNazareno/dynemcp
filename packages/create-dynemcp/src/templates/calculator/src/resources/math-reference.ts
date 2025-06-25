@@ -4,7 +4,7 @@ export class MathReferenceResource extends DyneMCPResource {
   readonly name = 'math_reference'
   readonly uri = 'dynemcp://resource/math-reference'
   readonly description = 'A quick reference for mathematical formulas.'
-  readonly contentType = 'text/markdown'
+  readonly mimeType = 'text/markdown'
 
   getContent(): string {
     return `

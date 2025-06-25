@@ -56,16 +56,33 @@ export abstract class DyneMCPTool {
 /**
  * Base class for all MCP Resources
  */
-export abstract class DyneMCPResource {
+export abstract class DyneMCPResource implements ResourceDefinition {
+  // Add index signature to match the interface
+  [key: string]: unknown
+
   abstract readonly uri: string
   abstract readonly name: string
   abstract readonly description?: string
-  abstract readonly contentType?: string
+  abstract readonly mimeType?: string
 
   /**
    * Get the resource content
    */
   abstract getContent(): string | Promise<string>
+
+  /**
+   * Required by ResourceDefinition interface
+   */
+  get content(): string | (() => string | Promise<string>) {
+    return this.getContent.bind(this)
+  }
+
+  /**
+   * Required by ResourceDefinition interface
+   */
+  get contentType(): string | undefined {
+    return this.mimeType
+  }
 
   /**
    * Convert the resource to ResourceDefinition format
@@ -76,7 +93,8 @@ export abstract class DyneMCPResource {
       name: this.name,
       content: this.getContent.bind(this),
       description: this.description,
-      contentType: this.contentType || 'application/octet-stream',
+      mimeType: this.mimeType,
+      contentType: this.mimeType || 'application/octet-stream',
     }
   }
 }

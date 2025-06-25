@@ -1,5 +1,9 @@
 // Import types from the official MCP SDK
-import type { Prompt, PromptMessage } from '@modelcontextprotocol/sdk/types.js'
+import type {
+  Prompt,
+  PromptMessage,
+  Resource,
+} from '@modelcontextprotocol/sdk/types.js'
 
 // Re-export the official SDK types that we use
 export type {
@@ -9,6 +13,13 @@ export type {
   GetPromptRequest,
   GetPromptResult as GetPromptResponse,
   ListPromptsResult as ListPromptsResponse,
+  Resource,
+  ResourceContents,
+  ResourceTemplate,
+  ReadResourceRequest,
+  ReadResourceResult,
+  ListResourcesResult,
+  ListResourceTemplatesResult,
 } from '@modelcontextprotocol/sdk/types.js'
 
 export interface ToolDefinition {
@@ -18,10 +29,11 @@ export interface ToolDefinition {
   handler: (args: any) => any
 }
 
-export interface ResourceDefinition {
-  name: string
-  uri: string
-  description?: string
+export interface ResourceDefinition extends Resource {
+  /**
+   * Function to generate the resource content
+   * @returns Promise resolving to resource contents
+   */
   content: string | (() => string | Promise<string>)
   contentType?: string
 }
