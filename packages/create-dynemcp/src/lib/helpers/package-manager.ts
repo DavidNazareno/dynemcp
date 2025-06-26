@@ -1,4 +1,4 @@
-import { execa } from 'execa'
+import { default as execa } from 'execa'
 import { PACKAGE_MANAGER, type PackageManager } from '../../config.js'
 
 export type { PackageManager }

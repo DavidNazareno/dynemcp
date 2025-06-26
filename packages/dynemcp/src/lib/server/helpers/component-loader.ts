@@ -213,7 +213,7 @@ ${result.code}
         exported.prototype instanceof DyneMCPPrompt
       ) {
         const instance = new exported()
-        const definition = instance.toDefinition()
+        const definition = (instance as any).toDefinition()
         if (validator(definition)) {
           return definition as T
         }
@@ -226,7 +226,7 @@ ${result.code}
       exported instanceof DyneMCPResource ||
       exported instanceof DyneMCPPrompt
     ) {
-      const definition = exported.toDefinition()
+      const definition = (exported as any).toDefinition()
       if (validator(definition)) {
         return definition as T
       }

@@ -4,7 +4,7 @@ import { PackageManager } from './package-manager.js'
  * Instala dependencias usando pnpm
  */
 export async function install(packageManager: PackageManager): Promise<void> {
-  const { execa } = await import('execa')
+  const { default: execa } = await import('execa')
 
   const args = ['install']
 
