@@ -89,8 +89,16 @@ async function findFilesRecursively(dir: string): Promise<string[]> {
       if (entry.isDirectory()) {
         await scanDirectory(fullPath)
       } else if (entry.isFile()) {
-        // Pattern matching for .ts and .js files (but not .temp.js since they're not in source)
-        if (entry.name.endsWith('.ts') || entry.name.endsWith('.js')) {
+        // Only load specific component files: tool.ts, resource.ts, prompt.ts
+        // This allows for helper files and utilities in the same directory
+        if (
+          entry.name === 'tool.ts' ||
+          entry.name === 'tool.js' ||
+          entry.name === 'resource.ts' ||
+          entry.name === 'resource.js' ||
+          entry.name === 'prompt.ts' ||
+          entry.name === 'prompt.js'
+        ) {
           files.push(fullPath)
         }
       }
@@ -103,6 +111,68 @@ async function findFilesRecursively(dir: string): Promise<string[]> {
 
 // Cache for transformed files
 const transformCache = new Map<string, string>()
+
+// Helper function to resolve and compile relative imports
+async function resolveAndCompileRelativeImports(
+  tsCode: string,
+  sourceDir: string,
+  tempDir: string
+): Promise<void> {
+  // Find relative imports in the TypeScript code
+  const importRegex = /import\s+.*?\s+from\s+['"](\.[^'"]+)['"]/g
+  const matches = Array.from(tsCode.matchAll(importRegex))
+
+  for (const match of matches) {
+    const relativeImport = match[1]
+
+    // Try different extensions
+    const extensions = ['.ts', '.js']
+    let sourceFile: string | null = null
+
+    for (const ext of extensions) {
+      const fullPath = path.resolve(sourceDir, relativeImport + ext)
+      if (fs.existsSync(fullPath)) {
+        sourceFile = fullPath
+        break
+      }
+    }
+
+    if (sourceFile) {
+      try {
+        // Create the target path in temp directory
+        const relativePath = path.relative(sourceDir, sourceFile)
+        const targetPath = path.join(
+          tempDir,
+          relativePath.replace(/\.ts$/, '.js')
+        )
+
+        // Ensure target directory exists
+        await fs.promises.mkdir(path.dirname(targetPath), { recursive: true })
+
+        // Read and compile the dependency
+        const depCode = await fs.promises.readFile(sourceFile, 'utf-8')
+        const depResult = await transform(depCode, {
+          loader: 'ts',
+          format: 'cjs',
+          target: 'node16',
+          platform: 'node',
+        })
+
+        // Write compiled dependency to temp directory
+        await fs.promises.writeFile(targetPath, depResult.code)
+
+        // Recursively process imports in the dependency
+        await resolveAndCompileRelativeImports(
+          depCode,
+          path.dirname(sourceFile),
+          tempDir
+        )
+      } catch (error) {
+        console.warn(`Failed to compile dependency ${sourceFile}: ${error}`)
+      }
+    }
+  }
+}
 
 async function loadComponentFromFile<T>(
   filePath: string,
@@ -151,6 +221,13 @@ async function loadComponentFromFile<T>(
           platform: 'node',
         })
 
+        // Process imports in the TypeScript code to resolve relative imports
+        const sourceDir = path.dirname(absolutePath)
+        const processedCode = result.code
+
+        // Handle relative imports by pre-compiling dependent files
+        await resolveAndCompileRelativeImports(tsCode, sourceDir, tempDir)
+
         // Modify the compiled code to use proper module resolution from project directory
         const projectDir = process.cwd()
         const modifiedCode = `
@@ -165,11 +242,16 @@ const projectRequire = Module.createRequire(path.join('${projectDir}', 'package.
 // Override require to use project directory resolution for external modules
 require = function(id) {
   try {
+    // For relative paths that start with '.', resolve from temp directory
+    if (id.startsWith('.')) {
+      const relativePath = path.resolve('${tempDir}', id);
+      return originalRequire(relativePath);
+    }
     // Try project directory first for external modules
-    if (!id.startsWith('.') && !path.isAbsolute(id)) {
+    if (!path.isAbsolute(id)) {
       return projectRequire(id);
     }
-    // Use original require for relative paths
+    // Use original require for absolute paths
     return originalRequire(id);
   } catch (error) {
     // Fallback to original require
@@ -177,7 +259,7 @@ require = function(id) {
   }
 };
 
-${result.code}
+${processedCode}
 `
 
         // Write the compiled JavaScript to temp directory
@@ -233,8 +315,18 @@ ${result.code}
     }
 
     // Handle object-based components
-    if (typeof exported === 'object' && validator(exported)) {
-      return exported
+    if (typeof exported === 'object') {
+      // Normalize parameters to inputSchema for tools before validation
+      if ('parameters' in exported && !('inputSchema' in exported)) {
+        const normalized = { ...exported } as any
+        normalized.inputSchema = (exported as any).parameters
+        delete normalized.parameters
+        exported = normalized
+      }
+
+      if (validator(exported)) {
+        return exported
+      }
     }
 
     return null
@@ -251,8 +343,9 @@ export function validateTool(component: unknown): component is ToolDefinition {
     typeof (component as any).name === 'string' &&
     ('description' in component === false ||
       typeof (component as any).description === 'string') &&
-    'inputSchema' in component &&
-    typeof (component as any).inputSchema === 'object' &&
+    ('inputSchema' in component || 'parameters' in component) &&
+    (typeof (component as any).inputSchema === 'object' ||
+      typeof (component as any).parameters === 'object') &&
     'execute' in component &&
     typeof (component as any).execute === 'function'
   )
@@ -285,4 +378,22 @@ export function validatePrompt(
     'getMessages' in component &&
     typeof (component as any).getMessages === 'function'
   )
+}
+
+export async function loadToolsFromDirectory(
+  options: LoadOptions
+): Promise<LoadResult<ToolDefinition>> {
+  return loadComponentsFromDirectory(options, validateTool)
+}
+
+export async function loadResourcesFromDirectory(
+  options: LoadOptions
+): Promise<LoadResult<ResourceDefinition>> {
+  return loadComponentsFromDirectory(options, validateResource)
+}
+
+export async function loadPromptsFromDirectory(
+  options: LoadOptions
+): Promise<LoadResult<PromptDefinition>> {
+  return loadComponentsFromDirectory(options, validatePrompt)
 }

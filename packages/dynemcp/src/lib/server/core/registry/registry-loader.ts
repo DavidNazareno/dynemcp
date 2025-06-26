@@ -1,8 +1,7 @@
 import {
-  loadComponentsFromDirectory,
-  validateTool,
-  validateResource,
-  validatePrompt,
+  loadToolsFromDirectory,
+  loadResourcesFromDirectory,
+  loadPromptsFromDirectory,
 } from '../../helpers/component-loader.js'
 import type {
   ToolDefinition,
@@ -29,25 +28,16 @@ export async function loadAllComponents(
 ): Promise<LoadAllResult> {
   const errors: string[] = []
 
-  // Load tools
-  const toolsResult = await loadComponentsFromDirectory(
-    options.tools,
-    validateTool
-  )
+  // Load tools using specialized loader
+  const toolsResult = await loadToolsFromDirectory(options.tools)
   errors.push(...toolsResult.errors)
 
-  // Load resources
-  const resourcesResult = await loadComponentsFromDirectory(
-    options.resources,
-    validateResource
-  )
+  // Load resources using specialized loader
+  const resourcesResult = await loadResourcesFromDirectory(options.resources)
   errors.push(...resourcesResult.errors)
 
-  // Load prompts
-  const promptsResult = await loadComponentsFromDirectory(
-    options.prompts,
-    validatePrompt
-  )
+  // Load prompts using specialized loader
+  const promptsResult = await loadPromptsFromDirectory(options.prompts)
   errors.push(...promptsResult.errors)
 
   return {

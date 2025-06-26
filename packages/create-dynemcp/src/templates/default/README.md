@@ -1,193 +1,247 @@
-# Default DyneMCP Template
+# DyneMCP Default Template
 
-A minimal MCP (Model Context Protocol) server template using **stdio transport** - perfect for learning MCP concepts and command-line integrations.
+This is the default template for DyneMCP projects, featuring a file-based architecture similar to Next.js.
 
-## 🚀 What's Included
-
-This template provides a basic foundation for MCP development with:
-
-- **Basic Tool**: Simple text manipulation tool for demonstrations
-- **Sample Resource**: Static content resource example
-- **Simple Prompt**: AI assistance prompt template
-- **Stdio Transport**: Command-line interface for MCP communication
-- **Standard Configuration**: Ready-to-use `dynemcp.config.json`
-- **TypeScript Setup**: Modern TS configuration with type safety
-- **Build Scripts**: Development and production build commands
-
-## 🔌 Transport: Standard Input/Output (stdio)
-
-This template uses **stdio transport** which is ideal for:
-
-- **Command-line tools**: Direct integration with shells and scripts
-- **Local development**: Simple testing and debugging
-- **IDE integrations**: Language servers and development tools
-- **Process communication**: Parent-child process interactions
-
-### How it works:
-
-- Communication via stdin/stdout
-- JSON-RPC messages over standard streams
-- No network configuration required
-- Perfect for local tools and utilities
-
-## 📁 Project Structure
+## 🏗️ Project Structure
 
 ```
-your-project/
-├── src/
-│   ├── index.ts              # Main server entry point
-│   ├── tools/                # MCP tools directory
-│   │   └── tools.ts          # Basic tool examples
-│   ├── resources/            # MCP resources directory
-│   │   └── resource.ts       # Static resource example
-│   └── prompts/              # MCP prompts directory
-│       └── prompt.ts         # Basic prompt template
-├── dynemcp.config.json       # DyneMCP configuration (stdio)
-├── package.json              # Node.js dependencies
-├── tsconfig.json             # TypeScript configuration
-└── README.md                 # This file
+src/
+├── index.ts                    # Server entry point
+├── tools/                      # Tools directory
+│   ├── greeter/               # Greeter tool folder
+│   │   └── tool.ts           # Main tool file (loaded automatically)
+│   └── math/                  # Math tool folder
+│       ├── tool.ts           # Main tool file (loaded automatically)
+│       └── utils.ts          # Helper utilities (NOT loaded automatically)
+├── resources/                  # Resources directory
+│   ├── framework-info/        # Framework info resource folder
+│   │   └── resource.ts       # Main resource file (loaded automatically)
+│   └── user-data/            # User data resource folder
+│       └── resource.ts       # Main resource file (loaded automatically)
+└── prompts/                    # Prompts directory
+    ├── system-context/        # System context prompt folder
+    │   └── prompt.ts         # Main prompt file (loaded automatically)
+    └── conversation/          # Conversation prompt folder
+        └── prompt.ts         # Main prompt file (loaded automatically)
 ```
 
-## 🔧 Quick Start
+## 🔑 Key Architecture Concepts
 
-1. **Navigate to your project directory**:
+### File-Based Auto-Loading
+
+DyneMCP follows a convention-over-configuration approach:
+
+- **Tools**: Only files named `tool.ts` or `tool.js` are automatically loaded as tools
+- **Resources**: Only files named `resource.ts` or `resource.js` are automatically loaded as resources
+- **Prompts**: Only files named `prompt.ts` or `prompt.js` are automatically loaded as prompts
+
+### Helper Files and Utilities
+
+You can include any number of helper files in component folders:
+
+```
+tools/
+  math/
+    tool.ts        # ✅ Loaded automatically as a tool
+    utils.ts       # ✅ Available for import but NOT loaded as a tool
+    constants.ts   # ✅ Available for import but NOT loaded as a tool
+    calculations/  # ✅ Subfolder with more utilities
+      advanced.ts  # ✅ Available for import but NOT loaded as a tool
+```
+
+### Benefits
+
+- **Clean Organization**: Each component has its own folder with utilities
+- **No Accidental Loading**: Only specific files are loaded as components
+- **Scalable**: Add as many helper files as needed without affecting auto-loading
+- **Type Safety**: Full TypeScript support with proper imports
+
+## 🛠️ Available Components
+
+### Tools
+
+- **greeter**: Simple greeting tool (`tools/greeter/tool.ts`)
+- **math**: Advanced mathematical operations with utilities (`tools/math/tool.ts`)
+
+### Resources
+
+- **framework-info**: Information about the DyneMCP framework (`resources/framework-info/resource.ts`)
+- **user-data**: User preferences and session data (`resources/user-data/resource.ts`)
+
+### Prompts
+
+- **system-context**: System instructions for the AI (`prompts/system-context/prompt.ts`)
+- **conversation**: Conversation starter template (`prompts/conversation/prompt.ts`)
+
+## 🚀 Getting Started
+
+1. **Install dependencies**:
 
    ```bash
-   cd your-project
+   pnpm install
    ```
 
-2. **Install dependencies** (if not already done):
+2. **Start development server**:
 
    ```bash
-   npm install
+   pnpm dev
    ```
 
-3. **Build the project**:
-
+3. **Build for production**:
    ```bash
-   npm run build
+   pnpm build
    ```
 
-4. **Test with MCP Inspector** (if available):
+## 📝 Creating New Components
 
-   ```bash
-   npx @modelcontextprotocol/inspector node dist/index.js
-   ```
+### Adding a New Tool
 
-5. **Or run directly for stdio communication**:
-   ```bash
-   node dist/index.js
-   ```
+```bash
+# Create folder and main tool file
+mkdir src/tools/my-tool
+touch src/tools/my-tool/tool.ts
+```
 
-## 🛠️ Stdio Transport Configuration
+```typescript
+// src/tools/my-tool/tool.ts
+import { DyneMCPTool, CallToolResult } from '@dynemcp/dynemcp'
+import { z } from 'zod'
 
-The `dynemcp.config.json` uses stdio transport:
+const MyToolSchema = z.object({
+  input: z.string().describe('Input parameter'),
+})
+
+export class MyTool extends DyneMCPTool {
+  readonly name = 'my-tool'
+  readonly description = 'Description of my tool'
+  readonly inputSchema = MyToolSchema.shape
+
+  execute(input: z.infer<typeof MyToolSchema>): CallToolResult {
+    return {
+      content: [{ type: 'text', text: `Processed: ${input.input}` }],
+    }
+  }
+}
+
+export default new MyTool()
+```
+
+### Adding Helper Utilities
+
+```typescript
+// src/tools/my-tool/utils.ts (NOT auto-loaded)
+export function helperFunction(data: string): string {
+  return data.toUpperCase()
+}
+```
+
+Then import in your tool:
+
+```typescript
+// src/tools/my-tool/tool.ts
+import { helperFunction } from './utils.js'
+```
+
+### Adding a New Resource
+
+```bash
+mkdir src/resources/my-resource
+touch src/resources/my-resource/resource.ts
+```
+
+### Adding a New Prompt
+
+```bash
+mkdir src/prompts/my-prompt
+touch src/prompts/my-prompt/prompt.ts
+```
+
+## 🔧 Configuration
+
+The project uses `dynemcp.config.json` for configuration:
 
 ```json
 {
-  "transport": {
-    "type": "stdio"
+  "name": "default-template",
+  "version": "1.0.0",
+  "description": "Default DyneMCP template with file-based architecture",
+  "autoload": {
+    "tools": {
+      "enabled": true,
+      "directory": "src/tools"
+    },
+    "resources": {
+      "enabled": true,
+      "directory": "src/resources"
+    },
+    "prompts": {
+      "enabled": true,
+      "directory": "src/prompts"
+    }
   }
 }
 ```
 
-### Transport Features:
+## 📚 Learn More
 
-- ✅ **Simple setup**: No ports or network configuration
-- ✅ **Low latency**: Direct process communication
-- ✅ **Security**: No network exposure
-- ✅ **Debugging**: Easy to trace with standard tools
-- ❌ **Network access**: Cannot be accessed remotely
-- ❌ **Web integration**: Not suitable for web applications
+- [DyneMCP Documentation](https://dynemcp.dev)
+- [MCP Protocol Specification](https://spec.modelcontextprotocol.io/)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 
-## 🎯 Use Cases
+## 🤝 Contributing
 
-Perfect for:
+1. Follow the file-based architecture patterns
+2. Use TypeScript for type safety
+3. Include helper utilities in component folders
+4. Test your components thoroughly
+5. Update documentation as needed
 
-- Learning MCP basics
-- Command-line utilities
-- Local development tools
-- IDE extensions
-- Build system integrations
-- Testing and prototyping
+## Object-Based Tool Definition Example
 
-## 🔧 Development Commands
+DyneMCP supports two formats for defining tools:
 
-```bash
-# Start development with watch mode
-npm run dev
-
-# Build for production
-npm run build
-
-# Start built server
-npm start
-
-# Type checking
-npm run typecheck
-
-# Lint code
-npm run lint
-```
-
-## 🚀 Next Steps
-
-Once comfortable with stdio transport, consider exploring:
-
-- **calculator template**: Streamable HTTP transport basics
-- **dynamic-agent template**: Session management
-- **http-server template**: Full HTTP features
-- **secure-agent template**: Authentication & security
-
-## 🔧 Customization
-
-### Adding New Tools
-
-Create new files in `src/tools/`:
+### 1. Class-Based (Working)
 
 ```typescript
-// src/tools/my-tool.ts
+export class MyTool extends DyneMCPTool {
+  readonly name = 'my_tool'
+  readonly description = 'Description'
+  readonly inputSchema = MySchema.shape
+
+  execute(input: any): CallToolResult {
+    return { content: [{ type: 'text', text: 'result' }] }
+  }
+}
+export default new MyTool()
+```
+
+### 2. Object-Based (Fixed with v0.0.19-canary.20250626T15430+)
+
+```typescript
 import { ToolDefinition } from '@dynemcp/dynemcp'
 import { z } from 'zod'
 
-export const myTool: ToolDefinition = {
-  name: 'my-tool',
-  description: 'My custom tool',
-  schema: z.object({
-    input: z.string().describe('Tool input'),
-  }),
-  handler: async ({ input }) => {
-    // Your tool logic here
-    return { result: `Processed: ${input}` }
+const MySchema = z.object({
+  value: z.number().describe('A number'),
+})
+
+const myTool: ToolDefinition = {
+  name: 'my_tool',
+  description: 'Description',
+  inputSchema: MySchema.shape, // ZodRawShape automatically converted to ZodObject
+  execute: async (args) => {
+    return { content: [{ type: 'text', text: 'result' }] }
   },
 }
+export default myTool
 ```
 
-### Adding Resources
+## Fix for keyValidator.\_parse Error
 
-Create new files in `src/resources/`:
+The `keyValidator._parse is not a function` error has been fixed in the latest version. The framework now:
 
-```typescript
-// src/resources/my-resource.ts
-import { ResourceDefinition } from '@dynemcp/dynemcp'
+1. Detects when `inputSchema` is a `ZodRawShape`
+2. Automatically converts it to a `ZodObject` (which has the `_parse` method)
+3. Passes the proper Zod object to the MCP SDK
 
-export const myResource: ResourceDefinition = {
-  uri: 'my://resource',
-  name: 'My Resource',
-  description: 'Custom resource',
-  content: 'Resource content here',
-  contentType: 'text/plain',
-}
-```
-
-## 📚 Documentation
-
-- [DyneMCP Documentation](https://dynemcp.dev)
-- [MCP Specification](https://spec.modelcontextprotocol.io)
-- [TypeScript Guide](https://www.typescriptlang.org/docs/)
-
-## 🤝 Support
-
-- GitHub Issues: Report bugs and feature requests
-- Documentation: Comprehensive guides and examples
-- Community: Join our Discord for help and discussions
+This means both class-based and object-based tool definitions work seamlessly.

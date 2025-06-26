@@ -213,7 +213,7 @@ export abstract class DyneMCPResource implements ResourceDefinition {
   }
 
   /**
-   * Convert the resource to ResourceDefinition format
+   * Convert the resource to Resource format
    */
   toDefinition(): ResourceDefinition {
     return {
@@ -296,7 +296,7 @@ export abstract class DyneMCPPrompt implements PromptDefinition {
   }
 
   /**
-   * Convert the prompt to PromptDefinition format
+   * Convert the prompt to Prompt format
    */
   toDefinition(): PromptDefinition {
     return {

@@ -11,6 +11,12 @@
 # 6. Install dependencies using pnpm.
 # 7. Start the development server with the inspector.
 
+
+pnpm run clean
+pnpm install
+pnpm run beautify
+
+
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
