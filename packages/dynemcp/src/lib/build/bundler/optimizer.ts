@@ -2,14 +2,14 @@
  * Bundle optimizer for DyneMCP projects
  */
 
-import * as fs from 'fs'
+import { promises as fs, statSync, readFileSync } from 'fs'
 
 /**
  * Optimize the bundled file for production
  */
 export async function optimizeBundle(filePath: string): Promise<void> {
   try {
-    const content = await fs.promises.readFile(filePath, 'utf-8')
+    const content = await fs.readFile(filePath, 'utf-8')
     let optimizedContent = content
 
     // Remove console.log statements in production
@@ -32,7 +32,7 @@ export async function optimizeBundle(filePath: string): Promise<void> {
     optimizedContent = optimizeMCPImports(optimizedContent)
 
     // Write optimized content back
-    await fs.promises.writeFile(filePath, optimizedContent)
+    await fs.writeFile(filePath, optimizedContent)
 
     const originalSize = Buffer.byteLength(content, 'utf-8')
     const optimizedSize = Buffer.byteLength(optimizedContent, 'utf-8')
@@ -113,8 +113,8 @@ export function generateBundleStats(filePath: string): {
   characters: number
 } {
   try {
-    const stats = fs.statSync(filePath)
-    const content = fs.readFileSync(filePath, 'utf-8')
+    const stats = statSync(filePath)
+    const content = readFileSync(filePath, 'utf-8')
 
     return {
       size: stats.size,

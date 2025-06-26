@@ -94,7 +94,7 @@ export class SSETransport implements LegacyTransport {
     // Deprecated - will throw error on connect
   }
 
-  async connect(server: McpServer): Promise<void> {
+  async connect(): Promise<void> {
     console.warn(
       '⚠️  SSE transport is deprecated. ' +
         'Please use streamable-http transport instead, which incorporates SSE as ' +
@@ -147,7 +147,7 @@ export class StreamableHTTPTransport implements LegacyTransport {
     })
   }
 
-  private setupMiddleware(options: any): void {
+  private setupMiddleware(options: Record<string, unknown>): void {
     // Security: Validate Origin headers to prevent DNS rebinding attacks
     const originMiddleware: express.RequestHandler = (req, res, next) => {
       const origin = req.headers.origin
@@ -165,7 +165,7 @@ export class StreamableHTTPTransport implements LegacyTransport {
     // JSON parsing with size limits
     this.app.use(
       express.json({
-        limit: options.maxMessageSize ?? '4mb',
+        limit: (options as any).maxMessageSize ?? '4mb',
         verify: (req, res, buf) => {
           // Validate JSON-RPC structure
           if (buf.length > 0) {
@@ -184,14 +184,15 @@ export class StreamableHTTPTransport implements LegacyTransport {
     if (options.cors) {
       this.app.use(
         cors({
-          origin: options.cors.allowOrigin ?? '*',
-          methods: options.cors.allowMethods ?? 'GET, POST, OPTIONS',
+          origin: (options as any).cors?.allowOrigin ?? '*',
+          methods: (options as any).cors?.allowMethods ?? 'GET, POST, OPTIONS',
           allowedHeaders:
-            options.cors.allowHeaders ??
+            (options as any).cors?.allowHeaders ??
             'Content-Type, Authorization, Mcp-Session-Id, Last-Event-ID',
           exposedHeaders:
-            options.cors.exposeHeaders ?? 'Content-Type, Mcp-Session-Id',
-          maxAge: options.cors.maxAge ?? 86400,
+            (options as any).cors?.exposeHeaders ??
+            'Content-Type, Mcp-Session-Id',
+          maxAge: (options as any).cors?.maxAge ?? 86400,
           credentials: true,
         })
       )
@@ -213,16 +214,16 @@ export class StreamableHTTPTransport implements LegacyTransport {
     return allowedOrigins === origin
   }
 
-  private validateJSONRPCMessage(message: any): void {
+  private validateJSONRPCMessage(message: unknown): void {
     if (!message || typeof message !== 'object') {
       throw new Error('Message must be an object')
     }
 
-    if (message.jsonrpc !== '2.0') {
+    if ((message as any).jsonrpc !== '2.0') {
       throw new Error('Invalid JSON-RPC version, must be "2.0"')
     }
 
-    if (!message.method && message.id === undefined) {
+    if (!(message as any).method && (message as any).id === undefined) {
       throw new Error(
         'Message must have either method (for requests/notifications) or id (for responses)'
       )
@@ -339,8 +340,8 @@ export class StreamableHTTPTransport implements LegacyTransport {
           // Process the request through StreamableHTTPServerTransport
           // IMPORTANT: Pass req.body explicitly to avoid "stream is not readable" error
           await this.transport.handleRequest(req, res, req.body)
-        } catch (error) {
-          console.error('Error handling MCP request:', error)
+        } catch {
+          console.error('Error handling MCP request')
           if (!res.headersSent) {
             res.status(500).json({
               error: 'Internal server error',
@@ -367,15 +368,25 @@ export class StreamableHTTPTransport implements LegacyTransport {
 
           // Keep connection alive
           const keepAlive = setInterval(() => {
-            res.write(':\n\n') // SSE comment to keep connection alive
+            if (!res.closed && !res.destroyed) {
+              res.write(':\n\n') // SSE comment to keep connection alive
+            } else {
+              clearInterval(keepAlive)
+            }
           }, 30000)
 
-          req.on('close', () => {
+          // Clean up on multiple close events
+          const cleanup = () => {
             clearInterval(keepAlive)
             console.log('🔌 SSE connection closed')
-          })
-        } catch (error) {
-          console.error('Error handling SSE connection:', error)
+          }
+
+          req.on('close', cleanup)
+          req.on('aborted', cleanup)
+          res.on('close', cleanup)
+          res.on('finish', cleanup)
+        } catch {
+          console.error('Error handling SSE connection')
           if (!res.headersSent) {
             res.status(500).json({
               error: 'Internal server error',
@@ -431,10 +442,14 @@ export class StreamableHTTPTransport implements LegacyTransport {
       console.log('🛑 Shutting down Streamable HTTP transport...')
 
       return new Promise((resolve) => {
-        this.server!.close(() => {
-          console.log('✅ Streamable HTTP transport stopped')
+        if (this.server) {
+          this.server.close(() => {
+            console.log('✅ Streamable HTTP transport stopped')
+            resolve()
+          })
+        } else {
           resolve()
-        })
+        }
       })
     }
   }
@@ -490,7 +505,7 @@ export async function detectTransport(
     if (response.ok) {
       return CLI.TRANSPORT_TYPES[1] as 'streamable-http'
     }
-  } catch (error) {
+  } catch {
     // Try legacy SSE detection
     try {
       const sseResponse = await fetch(serverUrl, {
@@ -501,7 +516,7 @@ export async function detectTransport(
       if (sseResponse.ok) {
         return 'legacy-sse'
       }
-    } catch (sseError) {
+    } catch {
       // Fall back to stdio if network transports fail
       return CLI.TRANSPORT_TYPES[0] as 'stdio'
     }

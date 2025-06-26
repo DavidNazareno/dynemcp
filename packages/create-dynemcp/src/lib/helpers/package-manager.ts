@@ -41,10 +41,10 @@ export function getRunCommand(
 
 export async function installDependencies(projectPath: string): Promise<void> {
   try {
-    await execa(PACKAGE_MANAGER.ALTERNATIVES[0], ['install'], {
+    await execa(PACKAGE_MANAGER.PREFERRED, ['install'], {
       cwd: projectPath,
       stdio: 'inherit',
-    }) // 'npm'
+    })
   } catch (error) {
     throw new Error(
       `Failed to install dependencies: ${error instanceof Error ? error.message : error}`

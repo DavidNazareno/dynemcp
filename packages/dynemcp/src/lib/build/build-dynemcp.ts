@@ -213,7 +213,7 @@ export async function buildCli(
     if (shouldLog()) console.log('🔧 Building DyneMCP CLI tool...')
 
     // Load configuration
-    const config = loadConfig(options.configPath)
+    const config = await loadConfig(options.configPath)
     const buildConfig = getBuildConfig(config)
 
     // Merge options with config
@@ -287,7 +287,7 @@ export async function clean(
     let outDir = options.outDir || './dist'
 
     if (!options.outDir && options.configPath) {
-      const config = loadConfig(options.configPath)
+      const config = await loadConfig(options.configPath)
       const buildConfig = getBuildConfig(config)
       outDir = buildConfig.outDir
     }
@@ -309,7 +309,7 @@ export async function analyze(
     let entryPoint = options.entryPoint || './src/index.ts'
 
     if (!options.entryPoint && options.configPath) {
-      const config = loadConfig(options.configPath)
+      const config = await loadConfig(options.configPath)
       const buildConfig = getBuildConfig(config)
       entryPoint = buildConfig.entryPoint
     }

@@ -2,7 +2,7 @@
  * Configuration utilities for DyneMCP projects
  */
 
-import * as fs from 'fs'
+import { promises as fs } from 'fs'
 import path from 'path'
 import { z } from 'zod'
 import { PATHS, CLI } from '../../../config.js'
@@ -128,31 +128,32 @@ const BuildConfigSchema = z.object({
 export type BuildConfig = z.infer<typeof BuildConfigSchema>
 
 /**
- * Load the DyneMCP configuration file
+ * Load the DyneMCP configuration file (async)
  */
-export function loadConfig(
+export async function loadConfig(
   configPath: string = PATHS.DEFAULT_CONFIG
-): DyneMCPConfig {
+): Promise<DyneMCPConfig> {
   const absolutePath = path.isAbsolute(configPath)
     ? configPath
     : path.join(process.cwd(), configPath)
 
   try {
-    if (!fs.existsSync(absolutePath)) {
+    try {
+      await fs.access(absolutePath)
+    } catch {
       throw new Error(`Configuration file not found: ${absolutePath}`)
     }
 
-    const configContent = fs.readFileSync(absolutePath, 'utf-8')
+    const configContent = await fs.readFile(absolutePath, 'utf-8')
     const config: unknown = JSON.parse(configContent)
 
     return DyneMCPConfigSchema.parse(config)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('Invalid configuration:', error.errors)
+      throw new Error(`Invalid configuration: ${JSON.stringify(error.errors)}`)
     } else {
-      console.error('Failed to load configuration:', error)
+      throw new Error(`Failed to load configuration: ${error}`)
     }
-    process.exit(1)
   }
 }
 
@@ -279,11 +280,12 @@ export function validateBuildConfig(config: BuildConfig): void {
     BuildConfigSchema.parse(config)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('Invalid build configuration:', error.errors)
+      throw new Error(
+        `Invalid build configuration: ${JSON.stringify(error.errors)}`
+      )
     } else {
-      console.error('Failed to validate build configuration:', error)
+      throw new Error(`Failed to validate build configuration: ${error}`)
     }
-    process.exit(1)
   }
 }
 

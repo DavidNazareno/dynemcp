@@ -88,9 +88,9 @@ export class StatusTool extends DyneMCPTool {
 
 ## Performance Metrics
 ${
-  includeMetrics
-    ? `- Memory Usage: ${Math.round(statusData.metrics!.memoryUsage.heapUsed / 1024 / 1024)}MB heap
-- RSS Memory: ${Math.round(statusData.metrics!.memoryUsage.rss / 1024 / 1024)}MB`
+  includeMetrics && statusData.metrics
+    ? `- Memory Usage: ${Math.round(statusData.metrics.memoryUsage.heapUsed / 1024 / 1024)}MB heap
+- RSS Memory: ${Math.round(statusData.metrics.memoryUsage.rss / 1024 / 1024)}MB`
     : 'Metrics disabled'
 }
 

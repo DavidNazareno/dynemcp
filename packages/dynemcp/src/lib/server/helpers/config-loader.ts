@@ -339,77 +339,84 @@ export function mergeConfigs(
   return ConfigSchema.parse(finalConfig)
 }
 
-export function normalizeConfig(rawConfig: any): DyneMCPConfig {
+// TODO: Remove all any types
+export function normalizeConfig(
+  rawConfig: Record<string, unknown>
+): DyneMCPConfig {
   // Handle backward compatibility for transport types
-  if (rawConfig.transport) {
-    if (rawConfig.transport.type === 'http-stream') {
+  if ((rawConfig as any).transport) {
+    const transport = (rawConfig as any).transport
+    if (transport.type === 'http-stream') {
       console.warn(
         '⚠️  Transport type "http-stream" is deprecated. ' +
           `Please update your configuration to use "${CLI.TRANSPORT_TYPES[1]}" instead.`
       )
-      rawConfig.transport.type = CLI.TRANSPORT_TYPES[1]
-    } else if (rawConfig.transport.type === 'http') {
+      transport.type = CLI.TRANSPORT_TYPES[1]
+    } else if (transport.type === 'http') {
       console.warn(
         '⚠️  Transport type "http" is deprecated. ' +
           `Please update your configuration to use "${CLI.TRANSPORT_TYPES[1]}" instead.`
       )
-      rawConfig.transport.type = CLI.TRANSPORT_TYPES[1]
+      transport.type = CLI.TRANSPORT_TYPES[1]
     }
   }
 
   const normalizedConfig: DyneMCPConfig = {
     server: {
-      name: rawConfig.server?.name || 'dynemcp-server',
-      version: rawConfig.server?.version || '1.0.0',
-      description: rawConfig.server?.description,
-      documentationUrl: rawConfig.server?.documentationUrl,
-      environment: rawConfig.server?.environment || 'development',
+      name: (rawConfig as any).server?.name || 'dynemcp-server',
+      version: (rawConfig as any).server?.version || '1.0.0',
+      description: (rawConfig as any).server?.description,
+      documentationUrl: (rawConfig as any).server?.documentationUrl,
+      environment: (rawConfig as any).server?.environment || 'development',
     },
     tools: {
-      enabled: rawConfig.tools?.enabled ?? true,
-      directory: rawConfig.tools?.directory || PATHS.TOOLS_DIR,
-      pattern: rawConfig.tools?.pattern || PATHS.FILE_PATTERNS.TYPESCRIPT,
-      exclude: rawConfig.tools?.exclude,
+      enabled: (rawConfig as any).tools?.enabled ?? true,
+      directory: (rawConfig as any).tools?.directory || PATHS.TOOLS_DIR,
+      pattern:
+        (rawConfig as any).tools?.pattern || PATHS.FILE_PATTERNS.TYPESCRIPT,
+      exclude: (rawConfig as any).tools?.exclude,
     },
     resources: {
-      enabled: rawConfig.resources?.enabled ?? true,
-      directory: rawConfig.resources?.directory || PATHS.RESOURCES_DIR,
-      pattern: rawConfig.resources?.pattern || PATHS.FILE_PATTERNS.TYPESCRIPT,
-      exclude: rawConfig.resources?.exclude,
+      enabled: (rawConfig as any).resources?.enabled ?? true,
+      directory: (rawConfig as any).resources?.directory || PATHS.RESOURCES_DIR,
+      pattern:
+        (rawConfig as any).resources?.pattern || PATHS.FILE_PATTERNS.TYPESCRIPT,
+      exclude: (rawConfig as any).resources?.exclude,
     },
     prompts: {
-      enabled: rawConfig.prompts?.enabled ?? true,
-      directory: rawConfig.prompts?.directory || PATHS.PROMPTS_DIR,
-      pattern: rawConfig.prompts?.pattern || PATHS.FILE_PATTERNS.TYPESCRIPT,
-      exclude: rawConfig.prompts?.exclude,
+      enabled: (rawConfig as any).prompts?.enabled ?? true,
+      directory: (rawConfig as any).prompts?.directory || PATHS.PROMPTS_DIR,
+      pattern:
+        (rawConfig as any).prompts?.pattern || PATHS.FILE_PATTERNS.TYPESCRIPT,
+      exclude: (rawConfig as any).prompts?.exclude,
     },
-    transport: rawConfig.transport || {
+    transport: (rawConfig as any).transport || {
       type: CLI.TRANSPORT_TYPES[1], // 'streamable-http'
       options: {
         port: NETWORK.DEFAULT_HTTP_PORT,
         endpoint: NETWORK.DEFAULT_MCP_ENDPOINT,
       },
     },
-    logging: rawConfig.logging || {
+    logging: (rawConfig as any).logging || {
       enabled: true,
       level: 'info',
       format: 'text',
       timestamp: true,
       colors: true,
     },
-    debug: rawConfig.debug || {
+    debug: (rawConfig as any).debug || {
       enabled: false,
       verbose: false,
       showComponentDetails: false,
       showTransportDetails: false,
     },
-    performance: rawConfig.performance || {
+    performance: (rawConfig as any).performance || {
       maxConcurrentRequests: 100,
       requestTimeout: 30000,
       memoryLimit: '512mb',
       enableMetrics: false,
     },
-    security: rawConfig.security || {
+    security: (rawConfig as any).security || {
       enableValidation: true,
       strictMode: false,
       allowedOrigins: ['*'],
@@ -419,7 +426,7 @@ export function normalizeConfig(rawConfig: any): DyneMCPConfig {
         windowMs: 900000,
       },
     },
-    config: rawConfig.config,
+    config: (rawConfig as any).config,
   }
 
   return normalizedConfig

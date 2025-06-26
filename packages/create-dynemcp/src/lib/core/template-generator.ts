@@ -9,8 +9,7 @@ import fs from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
 import { Sema } from 'async-sema'
-// We'll use the getPackageVersion function instead of importing package.json directly
-import { PATHS } from '../../config.js'
+import { LOGGING, PATHS } from '../../config.js'
 
 import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces.js'
 
@@ -320,21 +319,15 @@ export const installTemplate = async ({
     console.log('\nInstalling dependencies. This may take a moment...')
     try {
       await installDependencies(root)
-      console.log('✅ Dependencies installed successfully!')
+      console.log(
+        `${LOGGING.EMOJIS.SUCCESS} Dependencies installed successfully!`
+      )
     } catch {
       console.error(
-        '❌ Failed to install dependencies. Please run the command below to install manually:'
+        `${LOGGING.EMOJIS.ERROR} Failed to install dependencies. Please run the command below to install manually:`
       )
     }
   }
-
-  // Al final del proceso de generación, después de escribir el README.md (si existe), agregar una nota:
-  // (esto se puede hacer justo después de la generación del README o en el mismo paso si ya se genera)
-  //
-  // Nota para el usuario:
-  // "Para debuggear tu servidor con el Inspector MCP, ejecuta:
-  // pnpm run dev:inspector
-  // Esto abrirá la UI del Inspector y lanzará tu servidor correctamente. No uses la opción --config del Inspector salvo que estés usando un archivo de configuración para el Inspector. Los argumentos después de 'node ./dist/server.js' se pasan a tu servidor."
 }
 
 /**
@@ -352,8 +345,10 @@ async function updateProjectConfig(
       config.server = { ...config.server, name: projectName }
       await fs.writeFile(configPath, JSON.stringify(config, null, 2))
     }
-  } catch {
-    // If config file doesn't exist or is invalid, do nothing
+  } catch (error) {
+    console.error(
+      `${LOGGING.EMOJIS.ERROR} Failed to update project config: ${error}`
+    )
   }
 }
 

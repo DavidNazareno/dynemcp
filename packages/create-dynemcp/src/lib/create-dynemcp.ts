@@ -69,23 +69,23 @@ async function promptForTemplate(): Promise<string> {
     message: '🧩 Select a project template:',
     choices: [
       {
-        name: 'Default - A minimal setup with basic examples.',
+        name: 'Default - A minimal setup with basic examples. (Recommended) Transport: STUDIO',
         value: 'default',
       },
       {
-        name: 'Calculator - An agent with mathematical tools.',
+        name: 'Calculator - An agent with mathematical tools. Transport: STREAMABLE HTTP',
         value: 'calculator',
       },
       {
-        name: 'HTTP Server - A basic server using the HTTP transport.',
+        name: 'HTTP Server - A basic server using the HTTP transport. Transport: STREAMABLE HTTP',
         value: 'http-server',
       },
       {
-        name: 'Secure Agent - A production-ready agent with authentication.',
+        name: 'Secure Agent - A production-ready agent with authentication. Transport: STREAMABLE HTTP',
         value: 'secure-agent',
       },
       {
-        name: 'Dynamic Agent - An agent that learns skills and uses sampling.',
+        name: 'Dynamic Agent - An agent that learns skills and uses sampling. Transport: STREAMABLE HTTP',
         value: 'dynamic-agent',
       },
     ],
@@ -142,12 +142,13 @@ async function run(): Promise<void> {
           await installDependencies(projectPath)
           spinner.succeed('Dependencies installed successfully!')
         } catch (error) {
+          console.error(error)
           spinner.fail('Failed to install dependencies')
           console.error(
             chalk.yellow('You can install dependencies manually by running:')
           )
           console.error(chalk.cyan(`  cd ${projectName}`))
-          console.error(chalk.cyan('  npm install'))
+          console.error(chalk.cyan('  pnpm install'))
         }
       }
 
@@ -158,11 +159,11 @@ async function run(): Promise<void> {
       console.log('Next steps:')
       console.log(chalk.cyan(`  cd ${projectName}`))
       if (options.skipInstall) {
-        console.log(chalk.cyan('  npm install'))
+        console.log(chalk.cyan('  pnpm install'))
       }
-      console.log(chalk.cyan('  npm run dev'))
+      console.log(chalk.cyan('  pnpm run dev'))
       console.log()
-      console.log('📚 Documentation: https://github.com/dynemcp/dynemcp')
+      console.log('📚 Documentation: https://github.com/DavidNazareno/dynemcp')
       console.log()
     } catch (error) {
       spinner.fail('Failed to create project')

@@ -25,7 +25,7 @@ export async function createProject(
   await installTemplate({
     appName: projectName,
     root: projectPath,
-    packageManager: PACKAGE_MANAGER.ALTERNATIVES[0] as PackageManager, // 'npm'
+    packageManager: PACKAGE_MANAGER.PREFERRED as PackageManager,
     template,
     mode: 'ts',
     tailwind: false,

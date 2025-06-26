@@ -1,5 +1,5 @@
-import * as fs from 'fs'
-import * as path from 'path'
+import { readFileSync, existsSync } from 'fs'
+import { isAbsolute, resolve, basename } from 'path'
 import { z, ZodRawShape } from 'zod'
 import type {
   ToolDefinition,
@@ -35,7 +35,7 @@ export function createTool(
   name: string,
   description: string,
   inputSchema: Record<string, z.ZodTypeAny>,
-  handler: (params: any) => any | Promise<any>,
+  handler: (params: Record<string, unknown>) => unknown | Promise<unknown>,
   annotations?: {
     title?: string
     readOnlyHint?: boolean
@@ -83,16 +83,16 @@ export function createFileResource(
   filePath: string,
   options: FileResourceOptions = {}
 ): ResourceDefinition {
-  const absolutePath = path.isAbsolute(filePath)
+  const absolutePath = isAbsolute(filePath)
     ? filePath
-    : path.resolve(process.cwd(), filePath)
+    : resolve(process.cwd(), filePath)
 
-  if (!fs.existsSync(absolutePath)) {
+  if (!existsSync(absolutePath)) {
     throw new Error(`File not found: ${absolutePath}`)
   }
 
-  const fileName = path.basename(absolutePath)
-  const fileContent = fs.readFileSync(absolutePath, 'utf-8')
+  const fileName = basename(absolutePath)
+  const fileContent = readFileSync(absolutePath, 'utf-8')
 
   return {
     uri: options.uri || `file://${absolutePath}`,

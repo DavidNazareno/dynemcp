@@ -50,11 +50,9 @@ const LOGGING = {
 // Package Manager Configuration
 const PACKAGE_MANAGER = {
   PREFERRED: 'pnpm',
-  ALTERNATIVES: ['npm', 'yarn'] as const,
+  ALTERNATIVES: [] as const,
   EXEC_COMMANDS: {
     pnpm: 'pnpx',
-    npm: 'npx',
-    yarn: 'yarn dlx',
   },
 } as const
 

@@ -14,7 +14,7 @@ export type InferSchema<T> = T extends z.ZodType ? z.infer<T> : never
 /**
  * Helper function to convert Zod object schema to ZodRawShape
  */
-export function zodObjectToRawShape<T extends z.ZodObject<any>>(
+export function zodObjectToRawShape<T extends z.ZodObject<z.ZodRawShape>>(
   schema: T
 ): T['shape'] {
   return schema.shape
@@ -52,7 +52,7 @@ export function createErrorResponse(error: string | Error): CallToolResult {
 /**
  * Helper function to wrap execution with proper error handling
  */
-export function withErrorHandling<T extends (...args: any[]) => any>(
+export function withErrorHandling<T extends (...args: unknown[]) => unknown>(
   fn: T
 ): (...args: Parameters<T>) => Promise<CallToolResult> {
   return async (...args: Parameters<T>) => {
@@ -71,7 +71,7 @@ export function withErrorHandling<T extends (...args: any[]) => any>(
 /**
  * Simplified typed tool creator function
  */
-export function createTypedTool<T extends z.ZodObject<any>>(config: {
+export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
   name: string
   description: string
   schema: T
@@ -84,14 +84,14 @@ export function createTypedTool<T extends z.ZodObject<any>>(config: {
   }
   execute: (
     input: z.infer<T>
-  ) => Promise<CallToolResult> | CallToolResult | string | any
+  ) => Promise<CallToolResult> | CallToolResult | string | unknown
 }): ToolDefinition {
   return {
     name: config.name,
     description: config.description,
     inputSchema: config.schema.shape,
     annotations: config.annotations,
-    execute: withErrorHandling(config.execute),
+    execute: withErrorHandling(config.execute as any),
   }
 }
 
@@ -117,14 +117,14 @@ export abstract class DyneMCPTool {
   /**
    * Execute the tool with properly typed input
    */
-  abstract execute(input: any): Promise<any> | any
+  abstract execute(input: Record<string, unknown>): Promise<unknown> | unknown
 
   /**
    * Helper to create a successful result
    */
-  protected createResult(content: any[]): CallToolResult {
+  protected createResult(content: unknown[]): CallToolResult {
     return {
-      content: Array.isArray(content) ? content : [content],
+      content: Array.isArray(content) ? content : ([content] as any),
     }
   }
 
@@ -176,7 +176,7 @@ export abstract class DyneMCPTool {
       description: this.description,
       inputSchema: this.inputSchema as ZodRawShape,
       annotations: this.annotations,
-      execute: withErrorHandling(this.execute.bind(this)),
+      execute: withErrorHandling(this.execute.bind(this) as any),
     }
   }
 }

@@ -3,6 +3,8 @@
  */
 
 import { z } from 'zod'
+import { promises as fs } from 'fs'
+import * as path from 'path'
 import { PATHS } from '../../config.js'
 
 // Base configuration schema
@@ -17,33 +19,31 @@ export const BaseConfigSchema = z.object({
 export type BaseConfig = z.infer<typeof BaseConfigSchema>
 
 /**
- * Load base configuration
+ * Load base configuration (async)
  */
-export function loadBaseConfig(
+export async function loadBaseConfig(
   configPath: string = PATHS.DEFAULT_CONFIG
-): BaseConfig {
+): Promise<BaseConfig> {
   try {
-    const fs = require('fs')
-    const path = require('path')
-
     const absolutePath = path.isAbsolute(configPath)
       ? configPath
       : path.join(process.cwd(), configPath)
 
-    if (!fs.existsSync(absolutePath)) {
+    try {
+      await fs.access(absolutePath)
+    } catch {
       throw new Error(`Configuration file not found: ${absolutePath}`)
     }
 
-    const configContent = fs.readFileSync(absolutePath, 'utf-8')
+    const configContent = await fs.readFile(absolutePath, 'utf-8')
     const config: unknown = JSON.parse(configContent)
 
     return BaseConfigSchema.parse(config)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('Invalid configuration:', error.errors)
+      throw new Error(`Invalid configuration: ${JSON.stringify(error.errors)}`)
     } else {
-      console.error('Failed to load configuration:', error)
+      throw new Error(`Failed to load configuration: ${error}`)
     }
-    process.exit(1)
   }
 }

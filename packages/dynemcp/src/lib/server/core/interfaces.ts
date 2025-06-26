@@ -44,7 +44,7 @@ export interface ToolDefinition extends Omit<Tool, 'inputSchema'> {
    * @param args The arguments passed to the tool
    * @returns Promise resolving to tool execution result
    */
-  execute: (args: any) => Promise<CallToolResult>
+  execute: (args: Record<string, unknown>) => Promise<CallToolResult>
 }
 
 export interface ResourceDefinition extends Resource {
@@ -189,4 +189,71 @@ export interface DyneMCPConfig {
     file?: string
     env?: boolean
   }
+}
+
+// Additional type-safe interfaces
+
+/**
+ * Type-safe CLI options interface
+ */
+export interface CliOptions {
+  config?: string
+  verbose?: boolean
+  debug?: boolean
+  help?: boolean
+  version?: boolean
+  [key: string]: unknown
+}
+
+/**
+ * Development command options
+ */
+export interface DevOptions extends CliOptions {
+  port?: number
+  host?: string
+  watch?: boolean
+  _: string[]
+}
+
+/**
+ * Generic command arguments interface
+ */
+export interface CommandArguments {
+  _: string[]
+  [key: string]: unknown
+}
+
+/**
+ * JSONRPC message validation interface
+ */
+export interface JSONRPCMessageData {
+  jsonrpc?: string
+  id?: string | number
+  method?: string
+  params?: Record<string, unknown>
+  result?: unknown
+  error?: {
+    code: number
+    message: string
+    data?: unknown
+  }
+}
+
+/**
+ * Component validation function type
+ */
+export type ComponentValidator<T> = (component: unknown) => component is T
+
+/**
+ * Tool handler function type
+ */
+export type ToolHandler = (
+  params: Record<string, unknown>
+) => unknown | Promise<unknown>
+
+/**
+ * Raw configuration data before validation
+ */
+export interface RawConfigData {
+  [key: string]: unknown
 }

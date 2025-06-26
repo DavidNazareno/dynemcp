@@ -2,8 +2,8 @@
  * Manifest generator for DyneMCP projects
  */
 
-import * as fs from 'fs'
-import * as path from 'path'
+import { promises as fs } from 'fs'
+import { join } from 'path'
 import type { Metafile } from 'esbuild'
 
 export interface BuildManifest {
@@ -86,8 +86,8 @@ export async function generateManifest(
     )
 
     // Write manifest file
-    const manifestPath = path.join(outDir, 'build-manifest.json')
-    await fs.promises.writeFile(manifestPath, JSON.stringify(manifest, null, 2))
+    const manifestPath = join(outDir, 'build-manifest.json')
+    await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2))
 
     if (shouldLog()) console.log(`📋 Build manifest generated: ${manifestPath}`)
   } catch (error) {
@@ -194,8 +194,8 @@ export async function generateHTMLReport(
 </body>
 </html>`
 
-    const reportPath = path.join(outDir, 'build-report.html')
-    await fs.promises.writeFile(reportPath, html)
+    const reportPath = join(outDir, 'build-report.html')
+    await fs.writeFile(reportPath, html)
 
     if (shouldLog()) console.log(`📊 HTML report generated: ${reportPath}`)
   } catch (error) {

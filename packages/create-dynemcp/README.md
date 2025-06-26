@@ -525,7 +525,7 @@ This project is licensed under the MIT License - see the [LICENSE](../../LICENSE
 
 ## 🔗 Links
 
-- [DyneMCP Framework](https://github.com/dynemcp/dynemcp)
+- [DyneMCP Framework](https://github.com/DavidNazareno/dynemcp)
 - [MCP Specification](https://modelcontextprotocol.io/)
 - [npm Package](https://www.npmjs.com/package/@dynemcp/create-dynemcp)
 - [Documentation](https://dynemcp.dev/create-dynemcp)

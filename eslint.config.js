@@ -21,6 +21,7 @@ export default [
       '**/vitest.config.*.timestamp*',
       '**/test-output',
       '**/dist',
+      '**/.astro',
     ],
   },
   ...compat.extends('plugin:@nx/typescript', 'plugin:prettier/recommended'),

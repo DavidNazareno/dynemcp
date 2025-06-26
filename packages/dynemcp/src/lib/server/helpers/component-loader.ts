@@ -24,7 +24,7 @@ export interface LoadResult<T> {
 
 export async function loadComponentsFromDirectory<T>(
   options: LoadOptions,
-  validator: (component: any) => component is T
+  validator: (component: unknown) => component is T
 ): Promise<LoadResult<T>> {
   const { enabled, directory } = options
 
@@ -106,7 +106,7 @@ const transformCache = new Map<string, string>()
 
 async function loadComponentFromFile<T>(
   filePath: string,
-  validator: (component: any) => component is T
+  validator: (component: unknown) => component is T
 ): Promise<T | null> {
   try {
     const absolutePath = path.resolve(process.cwd(), filePath)
@@ -243,36 +243,46 @@ ${result.code}
   }
 }
 
-export function validateTool(component: any): component is ToolDefinition {
+export function validateTool(component: unknown): component is ToolDefinition {
   return (
-    component &&
+    component !== null &&
     typeof component === 'object' &&
-    typeof component.name === 'string' &&
-    (component.description === undefined ||
-      typeof component.description === 'string') &&
-    typeof component.inputSchema === 'object' &&
-    typeof component.execute === 'function'
+    'name' in component &&
+    typeof (component as any).name === 'string' &&
+    ('description' in component === false ||
+      typeof (component as any).description === 'string') &&
+    'inputSchema' in component &&
+    typeof (component as any).inputSchema === 'object' &&
+    'execute' in component &&
+    typeof (component as any).execute === 'function'
   )
 }
 
 export function validateResource(
-  component: any
+  component: unknown
 ): component is ResourceDefinition {
   return (
-    component &&
+    component !== null &&
     typeof component === 'object' &&
-    typeof component.uri === 'string' &&
-    typeof component.name === 'string' &&
-    (typeof component.content === 'string' ||
-      typeof component.content === 'function')
+    'uri' in component &&
+    typeof (component as any).uri === 'string' &&
+    'name' in component &&
+    typeof (component as any).name === 'string' &&
+    'content' in component &&
+    (typeof (component as any).content === 'string' ||
+      typeof (component as any).content === 'function')
   )
 }
 
-export function validatePrompt(component: any): component is PromptDefinition {
+export function validatePrompt(
+  component: unknown
+): component is PromptDefinition {
   return (
-    component &&
+    component !== null &&
     typeof component === 'object' &&
-    typeof component.name === 'string' &&
-    typeof component.getMessages === 'function'
+    'name' in component &&
+    typeof (component as any).name === 'string' &&
+    'getMessages' in component &&
+    typeof (component as any).getMessages === 'function'
   )
 }

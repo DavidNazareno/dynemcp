@@ -13,6 +13,7 @@ import { spawn, ChildProcess } from 'child_process'
 import { build, watch, clean, analyze } from '../build/build-dynemcp.js'
 import { createMCPServer } from '../server/core/server/server-dynemcp.js'
 import { loadConfig } from '../server/core/config.js'
+import type { CliOptions } from '../server/core/interfaces.js'
 
 // Import configuration
 import {
@@ -91,6 +92,7 @@ type DevOptions = {
   transport?: string
   port?: number
   host?: string
+  _: string[] // Add missing property for yargs
 }
 
 /**
@@ -99,7 +101,7 @@ type DevOptions = {
 function spawnProcess(
   command: string,
   args: string[],
-  options: any = {}
+  options: CliOptions = {}
 ): ChildProcess {
   const proc = spawn(command, args, {
     stdio: 'inherit',
@@ -304,7 +306,7 @@ async function launchInspector(
 /**
  * Main dev function that handles all development modes
  */
-async function dev(argv: DevOptions & { _: any[] }): Promise<void> {
+async function dev(argv: DevOptions): Promise<void> {
   // Extract mode from positional arguments or mode option
   let mode: DevMode = 'default'
 
@@ -495,7 +497,7 @@ const cli = yargs(hideBin(process.argv))
     },
     async (argv: any) => {
       console.log(chalk.green('🚀 Starting DyneMCP production server...'))
-      const config = loadConfig(argv.config)
+      const config = await loadConfig(argv.config)
       const server = createMCPServer(
         config.server.name,
         argv.config,

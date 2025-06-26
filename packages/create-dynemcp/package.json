@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/create-dynemcp",
-  "version": "0.0.17-canary.20250625T20555",
+  "version": "0.0.19-canary.20250626T15430",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
@@ -31,8 +31,10 @@
     }
   },
   "dependencies": {
+    "@dynemcp/dynemcp": "0.0.19-canary.20250626T15430",
     "async-sema": "^3.1.1",
     "chalk": "4.1.2",
+    "commander": "8.3.0",
     "fast-glob": "^3.3.3",
     "fs-extra": "11.2.0",
     "inquirer": "^9.2.16",
@@ -40,8 +42,7 @@
     "execa": "^9.6.0",
     "tslib": "^2.3.0",
     "zod": "3.25.67",
-    "express": "4.21.2",
-    "@dynemcp/dynemcp": "0.0.17-canary.20250625T20555"
+    "express": "4.21.2"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
