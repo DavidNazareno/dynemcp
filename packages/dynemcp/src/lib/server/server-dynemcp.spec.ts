@@ -53,7 +53,10 @@ vi.mock('./core/server/server-initializer', () => ({
   createMCPServerInstance: vi.fn().mockImplementation((config) => ({
     tool: vi.fn(),
     connect: vi.fn().mockResolvedValue(undefined),
-    _serverInfo: { name: config.name || 'test', version: config.version || '1.0.0' },
+    _serverInfo: {
+      name: config.name || 'test',
+      version: config.version || '1.0.0',
+    },
   })),
   registerTools: vi.fn(),
   registerResources: vi.fn(),
