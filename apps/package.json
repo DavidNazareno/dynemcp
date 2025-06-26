@@ -1,7 +1,7 @@
 {
   "name": "docs",
   "type": "module",
-  "version": "0.0.19-canary.20250626T15430",
+  "version": "0.0.20-canary.20250626T18090",
   "private": true,
   "scripts": {
     "clean": "rm -rf .astro node_modules "
