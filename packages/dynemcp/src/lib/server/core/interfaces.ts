@@ -1,32 +1,11 @@
 // Import types from the official MCP SDK
-import type {
-  Prompt,
-  PromptMessage,
-  Resource,
-  Tool,
-  CallToolResult,
-} from '@modelcontextprotocol/sdk/types.js'
+import type { Prompt, Resource, Tool } from '@modelcontextprotocol/sdk/types.js'
 import { ZodRawShape } from 'zod'
 
 // Re-export the official SDK types that we use
-export type {
-  PromptArgument,
-  Prompt,
-  PromptMessage,
-  GetPromptRequest,
-  GetPromptResult as GetPromptResponse,
-  ListPromptsResult as ListPromptsResponse,
-  Resource,
-  ResourceContents,
-  ResourceTemplate,
-  ReadResourceRequest,
-  ReadResourceResult,
-  ListResourcesResult,
-  ListResourceTemplatesResult,
-  Tool,
-  CallToolResult,
-  ListToolsResult,
-} from '@modelcontextprotocol/sdk/types.js'
+export type { Prompt, Resource, Tool } from '@modelcontextprotocol/sdk/types.js'
+
+// DyneMCP config and CLI types remain here
 
 // DyneMCP specific tool definition that extends MCP SDK Tool interface
 export interface ToolDefinition extends Omit<Tool, 'inputSchema'> {
@@ -44,7 +23,7 @@ export interface ToolDefinition extends Omit<Tool, 'inputSchema'> {
    * @param args The arguments passed to the tool
    * @returns Promise resolving to tool execution result
    */
-  execute: (args: Record<string, unknown>) => Promise<CallToolResult>
+  execute: (args: Record<string, unknown>) => Promise<unknown>
 }
 
 export interface ResourceDefinition extends Resource {
@@ -63,7 +42,7 @@ export interface PromptDefinition extends Prompt {
    * @param args Arguments passed to the prompt
    * @returns Promise resolving to an array of prompt messages
    */
-  getMessages: (args?: Record<string, string>) => Promise<PromptMessage[]>
+  getMessages: (args?: Record<string, string>) => Promise<unknown[]>
 }
 
 export interface AutoloadConfig {

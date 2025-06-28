@@ -5,6 +5,7 @@
 The DyneMCP Registry module provides a robust, modular system for dynamically loading, caching, and managing tools, prompts, and resources within the DyneMCP framework. It is designed for extensibility, type safety, and maintainability.
 
 **All previous registry functionality is preserved:**
+
 - Batch loading of all components (tools, resources, prompts) from the filesystem
 - Tool validation and error/warning logging
 - Helpers for querying: `getAllTools`, `getTool`, `getAllResources`, `getResource`, `getAllPrompts`, `getPrompt`
@@ -33,22 +34,22 @@ import {
   DefaultRegistryLoader,
   InMemoryRegistryStorage,
   registry, // Singleton instance
-} from '@/registry';
+} from '@/registry'
 
 // Batch load all components from the filesystem
 await registry.loadAll({
   tools: { enabled: true, directory: './tools' },
   resources: { enabled: true, directory: './resources' },
   prompts: { enabled: true, directory: './prompts' },
-});
+})
 
 // Query helpers
-const allTools = registry.getAllTools();
-const tool = registry.getTool('my-tool');
-const stats = registry.stats;
+const allTools = registry.getAllTools()
+const tool = registry.getTool('my-tool')
+const stats = registry.stats
 
 // Load a tool by id (dynamic, on-demand)
-const loadedTool = await registry.get('tool', 'my-tool');
+const loadedTool = await registry.get('tool', 'my-tool')
 ```
 
 ## Extension Points

@@ -44,4 +44,5 @@ export { ConfigError } from './core/errors.js'
 
 // Zod schemas for runtime validation and transport configuration
 export * from './core/schemas.js'
-export * from './core/transport.js'
+// export * from './core/transport.js'
+export * from '../communication/core/factory.js'

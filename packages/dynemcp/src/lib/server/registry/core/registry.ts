@@ -16,7 +16,7 @@ import {
   loadToolsFromDirectory,
   loadResourcesFromDirectory,
   loadPromptsFromDirectory,
-} from '../../helpers/component-loader.js'
+} from '../../components/component-loader.js'
 import { validateAllTools } from '../../core/validation.js'
 
 /**
