@@ -1,12 +1,12 @@
 // component-loader.ts
-// DyneMCP Component Loader: Orquestador de carga de tools, resources y prompts
-// ---------------------------------------------------------------------------
+// DyneMCP Component Loader: Orchestrates loading of tools, resources, and prompts
+// -----------------------------------------------------------------------------
 
 import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
-} from '../core/interfaces.js'
+} from '../api/core/interfaces.js'
 import { findFilesRecursively } from './core/loaders/file-discovery.js'
 import { loadComponentFromFile } from './core/loaders/dynamic-loader.js'
 import {
@@ -15,19 +15,35 @@ import {
   validatePrompt,
 } from './core/loaders/validators.js'
 
+/**
+ * Options for loading components from a directory.
+ * - enabled: Whether autoload is enabled for this component type.
+ * - directory: The root directory to search for components.
+ * - pattern: (Optional) Glob or regex pattern for matching files (not yet implemented).
+ */
 export interface LoadOptions {
   enabled: boolean
   directory: string
   pattern?: string
 }
 
+/**
+ * Result of loading components from a directory.
+ * - components: Array of successfully loaded and validated components.
+ * - errors: Array of error messages for failed loads.
+ */
 export interface LoadResult<T> {
   components: T[]
   errors: string[]
 }
 
 /**
- * Carga componentes genéricos desde un directorio usando un validador.
+ * Generic loader for components (tools, resources, prompts) from a directory.
+ * Uses a type guard validator to ensure only valid components are loaded.
+ *
+ * @param options - LoadOptions specifying directory and enablement
+ * @param validator - Type guard function for the component type
+ * @returns LoadResult<T> with loaded components and any errors
  */
 export async function loadComponentsFromDirectory<T>(
   options: LoadOptions,
@@ -40,6 +56,7 @@ export async function loadComponentsFromDirectory<T>(
   const components: T[] = []
   const errors: string[] = []
   try {
+    // Check if the directory exists before searching
     if (!(await import('fs').then((fs) => fs.existsSync(directory)))) {
       if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
         console.warn(
@@ -48,9 +65,11 @@ export async function loadComponentsFromDirectory<T>(
       }
       return { components: [], errors: [] }
     }
+    // Recursively find all matching component files
     const files = await findFilesRecursively(directory)
     for (const file of files) {
       try {
+        // Dynamically import and validate each component
         const component = await loadComponentFromFile(file, validator)
         if (component) {
           components.push(component)
@@ -74,7 +93,9 @@ export async function loadComponentsFromDirectory<T>(
 }
 
 /**
- * Carga todos los tools desde un directorio.
+ * Loads all tools from a directory using the standard tool validator.
+ * @param options - LoadOptions for tools
+ * @returns LoadResult<ToolDefinition>
  */
 export async function loadToolsFromDirectory(
   options: LoadOptions
@@ -83,7 +104,9 @@ export async function loadToolsFromDirectory(
 }
 
 /**
- * Carga todos los resources desde un directorio.
+ * Loads all resources from a directory using the standard resource validator.
+ * @param options - LoadOptions for resources
+ * @returns LoadResult<ResourceDefinition>
  */
 export async function loadResourcesFromDirectory(
   options: LoadOptions
@@ -92,7 +115,9 @@ export async function loadResourcesFromDirectory(
 }
 
 /**
- * Carga todos los prompts desde un directorio.
+ * Loads all prompts from a directory using the standard prompt validator.
+ * @param options - LoadOptions for prompts
+ * @returns LoadResult<PromptDefinition>
  */
 export async function loadPromptsFromDirectory(
   options: LoadOptions

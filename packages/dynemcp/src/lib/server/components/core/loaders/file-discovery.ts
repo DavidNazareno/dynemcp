@@ -31,7 +31,9 @@ export async function findFilesRecursively(dir: string): Promise<string[]> {
           entry.name === 'resource.ts' ||
           entry.name === 'resource.js' ||
           entry.name === 'prompt.ts' ||
-          entry.name === 'prompt.js'
+          entry.name === 'prompt.js' ||
+          entry.name === 'resources-template.ts' ||
+          entry.name === 'resources-template.js'
         ) {
           files.push(fullPath)
         }

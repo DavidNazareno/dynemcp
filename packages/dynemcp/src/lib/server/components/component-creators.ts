@@ -5,10 +5,26 @@ import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
-  PromptMessage,
-  CallToolResult,
-} from '../core/interfaces.js'
+} from '../api/core/interfaces.js'
 
+// Inline type for a prompt message (MCP-compatible)
+export interface PromptMessage {
+  role: 'user' | 'assistant'
+  content: {
+    type: 'text'
+    text: string
+  }
+}
+
+// Inline type for a tool call result (MCP-compatible)
+export interface CallToolResult {
+  content: Array<{ type: 'text'; text: string }>
+  isError?: boolean
+}
+
+/**
+ * Options for creating a file-based resource.
+ */
 export interface FileResourceOptions {
   name?: string
   description?: string
@@ -16,21 +32,39 @@ export interface FileResourceOptions {
   contentType?: string
 }
 
+/**
+ * Options for creating a dynamic resource.
+ */
 export interface DynamicResourceOptions {
   description?: string
   contentType?: string
 }
 
+/**
+ * Options for creating a prompt.
+ */
 export interface PromptOptions {
   description?: string
 }
 
+/**
+ * Chat message structure for chat prompts.
+ */
 export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
 }
 
-// Tool helpers
+/**
+ * Helper to create a ToolDefinition for MCP servers.
+ * Handles result normalization and error handling for tool execution.
+ *
+ * @param name - Tool name
+ * @param description - Tool description
+ * @param inputSchema - Zod schema for tool input
+ * @param handler - Async/sync function to execute the tool
+ * @param annotations - Optional MCP tool annotations
+ */
 export function createTool(
   name: string,
   description: string,
@@ -78,7 +112,13 @@ export function createTool(
   }
 }
 
-// Resource helpers
+/**
+ * Helper to create a file-based ResourceDefinition for MCP servers.
+ * Reads the file content at creation time.
+ *
+ * @param filePath - Path to the file
+ * @param options - Optional resource metadata
+ */
 export function createFileResource(
   filePath: string,
   options: FileResourceOptions = {}
@@ -103,6 +143,15 @@ export function createFileResource(
   }
 }
 
+/**
+ * Helper to create a dynamic ResourceDefinition for MCP servers.
+ * The content is generated on demand by the provided function.
+ *
+ * @param uri - Resource URI
+ * @param name - Resource name
+ * @param generator - Function that returns the resource content
+ * @param options - Optional resource metadata
+ */
 export function createDynamicResource(
   uri: string,
   name: string,
@@ -118,7 +167,14 @@ export function createDynamicResource(
   }
 }
 
-// Prompt helpers
+/**
+ * Helper to create a simple PromptDefinition for MCP servers.
+ * Returns a single user message with the provided content.
+ *
+ * @param name - Prompt name
+ * @param content - Prompt text
+ * @param options - Optional prompt metadata
+ */
 export function createPrompt(
   name: string,
   content: string,
@@ -135,34 +191,31 @@ export function createPrompt(
             type: 'text',
             text: content,
           },
-        } as PromptMessage,
+        },
       ]
     },
   }
 }
 
+/**
+ * Helper to create a system prompt (alias for createPrompt).
+ */
 export function createSystemPrompt(
   name: string,
   content: string,
   options: PromptOptions = {}
 ): PromptDefinition {
-  return {
-    name,
-    description: options.description || name,
-    async getMessages(): Promise<PromptMessage[]> {
-      return [
-        {
-          role: 'user',
-          content: {
-            type: 'text',
-            text: content,
-          },
-        } as PromptMessage,
-      ]
-    },
-  }
+  return createPrompt(name, content, options)
 }
 
+/**
+ * Helper to create a chat-style PromptDefinition for MCP servers.
+ * Accepts an array of chat messages (user/assistant) and returns them as prompt messages.
+ *
+ * @param name - Prompt name
+ * @param messages - Array of chat messages
+ * @param options - Optional prompt metadata
+ */
 export function createChatPrompt(
   name: string,
   messages: ChatMessage[],
