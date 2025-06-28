@@ -1,6 +1,6 @@
-/**
- * Dependency analyzer for DyneMCP projects
- */
+// analyzer.ts
+// Dependency analysis logic for DyneMCP projects
+// ---------------------------------------------
 
 import { build } from 'esbuild'
 import type { Metafile } from 'esbuild'
@@ -79,7 +79,7 @@ export function generateDependencyReport(analysis: DependencyAnalysis): string {
   report += '================================\n'
   report += `📦 Dependencies: ${analysis.dependencies.length}\n`
   report += `📁 Modules: ${analysis.modules}\n`
-  report += `🧩 Chunks: ${analysis.chunks}\n`
+  report += `🗩 Chunks: ${analysis.chunks}\n`
   report += `💾 Size: ${sizeKB} KB (${sizeMB} MB)\n`
 
   if (analysis.dependencies.length > 0) {
@@ -90,9 +90,4 @@ export function generateDependencyReport(analysis: DependencyAnalysis): string {
   }
 
   return report
-}
-
-export default {
-  analyzeDependencies,
-  generateDependencyReport,
 }

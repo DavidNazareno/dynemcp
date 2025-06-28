@@ -23,7 +23,10 @@ export {
   clean,
   analyze,
 } from './build/build-dynemcp.js'
-export type { DyneMCPBuildOptions, BuildResult } from './build/build-dynemcp.js'
+export type {
+  DyneMCPBuildOptions,
+  BuildResult,
+} from './build/main/core/interfaces.js'
 export type { BuildConfig, DyneMCPConfig } from './build/config/index.js'
 export { createDefaultConfig } from './build/config/index.js'
 export * from './build/bundler/index.js'

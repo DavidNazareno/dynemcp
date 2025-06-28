@@ -1,6 +1,6 @@
-/**
- * Bundle optimizer for DyneMCP projects
- */
+// optimizer.ts
+// Bundle optimization and statistics logic for DyneMCP projects
+// ------------------------------------------------------------
 
 import { promises as fs, statSync, readFileSync } from 'fs'
 
@@ -53,7 +53,7 @@ export async function optimizeBundle(filePath: string): Promise<void> {
 /**
  * Optimize imports specifically for MCP server environment
  */
-function optimizeMCPImports(content: string): string {
+export function optimizeMCPImports(content: string): string {
   // Remove unused MCP imports in production
   if (process.env.NODE_ENV === 'production') {
     // Remove debug imports
@@ -133,14 +133,4 @@ export function generateBundleStats(filePath: string): {
       characters: 0,
     }
   }
-}
-
-function shouldLog() {
-  return !process.env.DYNE_MCP_STDIO_LOG_SILENT
-}
-
-export default {
-  optimizeBundle,
-  optimizeMCPImports,
-  generateBundleStats,
 }

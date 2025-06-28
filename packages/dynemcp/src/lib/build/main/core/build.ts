@@ -1,0 +1,61 @@
+// core/build.ts
+// Main build logic for DyneMCP
+// ----------------------------
+
+import { ConsoleLogger } from '../../../cli/index.js'
+import type { DyneMCPBuildOptions, BuildResult } from './interfaces.js'
+import { loadConfig, getBuildConfig } from '../../config/index.js'
+import { bundle } from '../../bundler/index.js'
+import type { BundleOptions } from '../../bundler/core/bundle.js'
+
+function shouldLog() {
+  return !process.env.DYNE_MCP_STDIO_LOG_SILENT
+}
+
+/**
+ * Build a DyneMCP project with advanced features.
+ * This is the main entrypoint for production builds.
+ */
+export async function build(
+  options: DyneMCPBuildOptions = {}
+): Promise<BuildResult> {
+  const logger = options.logger ?? new ConsoleLogger()
+  const startTime = Date.now()
+
+  try {
+    if (shouldLog()) logger.info('🚀 Starting DyneMCP build process...')
+    const buildConfig = getBuildConfig()
+    // Only the main build logic, no analysis or CLI helpers here
+    const finalOptions = {
+      ...buildConfig,
+      ...options,
+      watch: options.watch || false,
+    } as BundleOptions & { outDir: string; outFile: string }
+    const bundleResult = await bundle(finalOptions)
+    const result: BuildResult = {
+      ...bundleResult,
+      config: buildConfig,
+    }
+    return result
+  } catch (error) {
+    const logger = options.logger ?? new ConsoleLogger()
+    const endTime = Date.now()
+    const duration = endTime - startTime
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    if (shouldLog())
+      logger.error(`❌ Build failed after ${duration}ms: ${errorMessage}`)
+    return {
+      success: false,
+      errors: [errorMessage],
+      stats: {
+        startTime,
+        endTime,
+        duration,
+        entryPoints: [],
+        outputSize: 0,
+        dependencies: 0,
+      },
+      config: {} as any,
+    }
+  }
+}

@@ -14,6 +14,7 @@ The server module is composed of several focused submodules:
 - **components/**: Offers helpers for dynamic loading and declarative creation of tools, resources, and prompts, supporting plug-and-play extensibility.
 
 ## Key Features
+
 - **MCP-compliant**: Strictly follows the Model Context Protocol specification and SDK.
 - **Modular**: Each concern (config, transport, registry, etc.) is isolated and extensible.
 - **Plug-and-play**: Easily add new tools, resources, or prompts by dropping files or using factory helpers.
@@ -30,6 +31,7 @@ await server.start()
 ```
 
 ## Submodules
+
 - See each submodule's README for detailed usage and API:
   - [`main/`](./main/README.md)
   - [`api/`](./api/README.md)
@@ -39,10 +41,12 @@ await server.start()
   - [`components/`](./components/README.md)
 
 ## Best Practices
+
 - Organize your tools, resources, and prompts in clear directories.
 - Use the provided loaders and factory helpers for maximum extensibility.
 - Validate your configuration and schemas for robust, predictable behavior.
 - Follow the MCP SDK and protocol for compatibility and security.
 
 ## License
-MIT 
+
+MIT

@@ -1,6 +1,6 @@
-/**
- * Manifest generator for DyneMCP projects
- */
+// manifest.ts
+// Build manifest and HTML report logic for DyneMCP projects
+// --------------------------------------------------------
 
 import { promises as fs } from 'fs'
 import { join } from 'path'
@@ -12,19 +12,9 @@ export interface BuildManifest {
   entryPoints: string[]
   outputs: Record<
     string,
-    {
-      size: number
-      imports: string[]
-      exports: string[]
-    }
+    { size: number; imports: string[]; exports: string[] }
   >
-  dependencies: Record<
-    string,
-    {
-      version: string
-      size: number
-    }
-  >
+  dependencies: Record<string, { version: string; size: number }>
   stats: {
     totalSize: number
     totalModules: number
@@ -201,13 +191,4 @@ export async function generateHTMLReport(
   } catch (error) {
     if (shouldLog()) console.warn('⚠️  Could not generate HTML report:', error)
   }
-}
-
-function shouldLog() {
-  return !process.env.DYNE_MCP_STDIO_LOG_SILENT
-}
-
-export default {
-  generateManifest,
-  generateHTMLReport,
 }
