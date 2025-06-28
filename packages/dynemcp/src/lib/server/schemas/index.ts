@@ -1,5 +1,5 @@
 // Configuration schemas
-export * from './config.js'
+export * from '../config/schemas.js'
 
 // Transport schemas
-export * from './transport.js'
+export * from '../config/transport.js'

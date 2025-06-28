@@ -8,7 +8,7 @@ import chalk from 'chalk'
 import path from 'path'
 import fs from 'fs-extra'
 import { build, watch, buildCli, clean, analyze } from '../build-dynemcp.js'
-import { PATHS } from '../../../config.js'
+import { PATHS } from '../../../global/config-all-contants.js'
 
 interface CliOptions {
   config?: string

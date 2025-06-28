@@ -5,7 +5,7 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 import { z } from 'zod'
-import { PATHS, CLI } from '../../../config.js'
+import { PATHS, CLI } from '../../../global/config-all-contants.js'
 
 // Define the schema for dynemcp.config.json
 const DyneMCPConfigSchema = z.object({

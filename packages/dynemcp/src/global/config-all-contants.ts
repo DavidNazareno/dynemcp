@@ -48,7 +48,6 @@ export const NETWORK = {
 // File Paths and Directories
 export const PATHS = {
   /** Default config file name */
-  DEFAULT_CONFIG: 'dynemcp.config.json',
 
   /** Default build output directory */
   BUILD_OUTPUT_DIR: 'dist',
@@ -59,15 +58,6 @@ export const PATHS = {
   /** Default source directory */
   SOURCE_DIR: 'src',
 
-  /** Default tools directory */
-  TOOLS_DIR: './src/tools',
-
-  /** Default resources directory */
-  RESOURCES_DIR: './src/resources',
-
-  /** Default prompts directory */
-  PROMPTS_DIR: './src/prompts',
-
   /** Default file patterns */
   FILE_PATTERNS: {
     TYPESCRIPT: '**/*.{ts,js}',
@@ -75,23 +65,24 @@ export const PATHS = {
     ALL_SOURCES: '**/*.{ts,js,json}',
   },
 } as const
-
 // CLI Defaults
 export const CLI = {
   /** Default transport type */
   DEFAULT_TRANSPORT: 'stdio',
 
   /** Available transport types */
-  TRANSPORT_TYPES: ['stdio', 'streamable-http', 'console'] as const,
+  TRANSPORT_TYPES: ['stdio', 'streamable-http'],
 
+  //OLD
   /** Available development modes */
-  DEV_MODES: ['default', 'inspector'] as const,
+  /*  DEV_MODES: ['default', 'inspector'], */
 
-  /** Default log level */
+  //OLD
+  /* /** Default log level 
   DEFAULT_LOG_LEVEL: 'info',
 
-  /** Available log levels */
-  LOG_LEVELS: ['debug', 'info', 'warn', 'error'] as const,
+  /** Available log levels 
+  LOG_LEVELS: ['debug', 'info', 'warn', 'error'], */
 } as const
 
 // Inspector Configuration
@@ -222,8 +213,8 @@ export function setStdioLogSilent(silent: boolean): void {
 
 // Type Exports
 export type TransportType = (typeof CLI.TRANSPORT_TYPES)[number]
-export type DevMode = (typeof CLI.DEV_MODES)[number]
-export type LogLevel = (typeof CLI.LOG_LEVELS)[number]
+/* export type DevMode = (typeof CLI.DEV_MODES)[number]
+export type LogLevel = (typeof CLI.LOG_LEVELS)[number] */
 export type TemplateName = (typeof TEMPLATES.AVAILABLE_TEMPLATES)[number]
 export type PackageManager =
   | typeof PACKAGE_MANAGER.PREFERRED
@@ -247,7 +238,7 @@ export const DYNEMCP_CLI = {
     transport: CLI.DEFAULT_TRANSPORT,
     clean: BUILD.DEFAULT_CLEAN,
     analyze: BUILD.DEFAULT_ANALYZE,
-    logLevel: CLI.DEFAULT_LOG_LEVEL,
+    /* logLevel: CLI.DEFAULT_LOG_LEVEL, */
   },
 
   /** CLI examples */
@@ -343,10 +334,10 @@ export const DYNEMCP_TRANSPORT = {
   },
 
   /** Default config paths */
-  CONFIG_PATHS: {
-    PRIMARY: PATHS.DEFAULT_CONFIG,
+  /*  CONFIG_PATHS: {
+    PRIMARY: 'dynemcp.config.ts',
     FALLBACK: 'dynemcp.config.json',
-  },
+  }, */
 } as const
 
 // =============================================================================

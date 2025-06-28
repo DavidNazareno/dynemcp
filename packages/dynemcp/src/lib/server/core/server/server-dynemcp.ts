@@ -1,40 +1,25 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { DyneMCPConfig } from '../config.js'
+import type { DyneMCPConfig } from '../../config/interfaces.js'
 import {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
-  ServerConfig,
 } from '../interfaces.js'
-import { loadConfig } from '../config.js'
 import { registry } from '../registry/registry.js'
+import { CLI } from '../../../../global/config-all-contants.js'
+import { loadConfig } from '../../config/core/loader.js'
 import { createTransport } from '../../transport/index.js'
-import {
-  createMCPServerInstance,
-  registerTools,
-  registerResources,
-  registerPrompts,
-} from './server-initializer.js'
-import { CLI } from '../../../../config.js'
 
 export class DyneMCP {
   private server: McpServer
+  private transport: any
+  private isInitialized: boolean = false
   private config: DyneMCPConfig
-  private isInitialized = false
-  private transport?: any
 
-  public readonly registry = registry
-
-  constructor(name?: string, configPath?: string, version?: string) {
-    this.config = loadConfig(configPath)
-
-    // Override config with constructor parameters
-    if (name) this.config.server.name = name
-    if (version) this.config.server.version = version
-
-    this.server = createMCPServerInstance({
-      ...(this.config.server as ServerConfig),
-    })
+  constructor(config?: DyneMCPConfig | string) {
+    this.config =
+      typeof config === 'string' ? loadConfig(config) : config || loadConfig()
+    this.server = new McpServer()
   }
 
   /**
@@ -45,11 +30,11 @@ export class DyneMCP {
   }
 
   /**
-   * Helper for debug logging to STDERR if DYNE_MCP_DEBUG_STDERR=1
+   * Helper for debug logging to STDERR if DYNE_MCP_DEBUG=1
    */
-  private debugLog(msg: string) {
-    if (process.env.DYNE_MCP_DEBUG_STDERR === '1') {
-      console.error(msg)
+  private debugLog(msg: string): void {
+    if (process.env.DYNE_MCP_DEBUG) {
+      console.error(`[DEBUG] ${msg}`)
     }
   }
 
@@ -95,14 +80,30 @@ export class DyneMCP {
     }
 
     // Register components with MCP server
-    registerTools(this.server, tools)
-    registerResources(this.server, resources)
-    registerPrompts(this.server, prompts)
+    this.registerComponents(tools, resources, prompts)
 
     this.isInitialized = true
     if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
       console.log('✅ DyneMCP server initialized successfully')
     }
+  }
+
+  private registerComponents(
+    tools: ToolDefinition[],
+    resources: ResourceDefinition[],
+    prompts: PromptDefinition[]
+  ): void {
+    tools.forEach((tool) => {
+      this.server.registerTool(tool.name, tool.handler)
+    })
+
+    resources.forEach((resource) => {
+      this.server.registerResource(resource.name, resource.handler)
+    })
+
+    prompts.forEach((prompt) => {
+      this.server.registerPrompt(prompt.name, prompt.handler)
+    })
   }
 
   /**

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { NETWORK, CLI } from '../../../config.js'
+import { NETWORK } from '../../../../global/config-all-contants.js'
 
 export const CorsSchema = z.object({
   allowOrigin: z
@@ -30,14 +30,6 @@ export const ResumabilitySchema = z.object({
   historyDuration: z.number().optional().default(300000),
 })
 
-// Keeping SSE for backward compatibility, but it's deprecated
-export const SSETransportOptionsSchema = z.object({
-  port: z.number().optional().default(NETWORK.DEFAULT_HTTP_PORT),
-  endpoint: z.string().optional().default('/sse'),
-  messageEndpoint: z.string().optional().default('/messages'),
-  cors: CorsSchema.optional(),
-})
-
 export const StreamableHTTPTransportOptionsSchema = z.object({
   port: z.number().optional().default(NETWORK.DEFAULT_HTTP_PORT),
   host: z.string().optional().default(NETWORK.DEFAULT_HTTP_HOST),
@@ -51,14 +43,31 @@ export const StreamableHTTPTransportOptionsSchema = z.object({
   authentication: AuthMiddlewareSchema.optional(),
 })
 
-// Updated to use official MCP SDK transport types
+export const SSETransportOptionsSchema = z.object({
+  port: z.number().optional().default(NETWORK.DEFAULT_HTTP_PORT),
+  endpoint: z.string().optional().default(NETWORK.DEFAULT_MCP_ENDPOINT),
+  messageEndpoint: z.string().optional().default('/message'),
+  cors: CorsSchema.optional(),
+})
+
 export const TransportSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal(CLI.TRANSPORT_TYPES[0]) }), // 'stdio'
   z.object({
-    type: z.literal(CLI.TRANSPORT_TYPES[1]), // 'streamable-http'
+    type: z.literal('sse'),
+    options: SSETransportOptionsSchema.optional(),
+  }),
+  z.object({
+    type: z.literal('streamable-http'),
     options: StreamableHTTPTransportOptionsSchema.optional(),
   }),
 ])
 
-// Alias for backward compatibility
-export const HTTPTransportOptionsSchema = StreamableHTTPTransportOptionsSchema
+// Export types derived from schemas
+export type Cors = z.infer<typeof CorsSchema>
+export type AuthMiddleware = z.infer<typeof AuthMiddlewareSchema>
+export type Session = z.infer<typeof SessionSchema>
+export type Resumability = z.infer<typeof ResumabilitySchema>
+export type StreamableHTTPTransportOptions = z.infer<
+  typeof StreamableHTTPTransportOptionsSchema
+>
+export type SSETransportOptions = z.infer<typeof SSETransportOptionsSchema>
+export type TransportConfig = z.infer<typeof TransportSchema>

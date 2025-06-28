@@ -22,6 +22,8 @@ export default [
       '**/test-output',
       '**/dist',
       '**/.astro',
+      './packages/create-dynemcp/package.json',
+      './packages/dynemcp/package.json',
     ],
   },
   ...compat.extends('plugin:@nx/typescript', 'plugin:prettier/recommended'),

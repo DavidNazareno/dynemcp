@@ -29,7 +29,7 @@ import {
   setStdioLogSilent,
   isStdioLogSilent,
   type DevMode,
-} from '../../config.js'
+} from '../../global/config-all-contants.js'
 
 // Logger interface and implementations
 export interface Logger {
