@@ -6,15 +6,6 @@
 // Main server entry points
 export * from './main/index.js'
 
-// API types and helpers (avoid ambiguous re-exports)
-export type {
-  ToolDefinition,
-  ResourceDefinition,
-  PromptDefinition,
-  CallToolResult,
-  PromptMessage,
-} from './api/index.js'
-
 // Registry system
 export * from './registry/index.js'
 
@@ -31,3 +22,6 @@ export * from './communication/index.js'
 
 // Component loading/creation helpers
 export * from './components/index.js'
+
+// API público completo
+export * from './api/index.js'

@@ -5,22 +5,9 @@ import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
+  PromptMessage,
+  CallToolResult,
 } from '../api/core/interfaces.js'
-
-// Inline type for a prompt message (MCP-compatible)
-export interface PromptMessage {
-  role: 'user' | 'assistant'
-  content: {
-    type: 'text'
-    text: string
-  }
-}
-
-// Inline type for a tool call result (MCP-compatible)
-export interface CallToolResult {
-  content: Array<{ type: 'text'; text: string }>
-  isError?: boolean
-}
 
 /**
  * Options for creating a file-based resource.

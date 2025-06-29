@@ -24,21 +24,10 @@ export interface DyneMCPConfig {
   transport: TransportConfig
 }
 
-// Type definition for SSE transport configuration
-export interface SSETransportConfig {
-  type: 'sse'
-  options?: {
-    port?: number
-    endpoint?: string
-    messageEndpoint?: string
-    cors?: {
-      allowOrigin?: string | string[]
-      allowMethods?: string
-      allowHeaders?: string
-      exposeHeaders?: string
-      maxAge?: number
-    }
-  }
+// Type definition for Stdio transport configuration
+export interface StdioTransportConfig {
+  type: 'stdio'
+  options?: Record<string, unknown>
 }
 
 // Type definition for Streamable HTTP transport configuration
@@ -74,4 +63,6 @@ export interface StreamableHTTPTransportConfig {
 }
 
 // Union type for all supported transport configurations
-export type TransportConfig = SSETransportConfig | StreamableHTTPTransportConfig
+export type TransportConfig =
+  | StdioTransportConfig
+  | StreamableHTTPTransportConfig

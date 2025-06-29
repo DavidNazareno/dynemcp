@@ -1,6 +1,6 @@
 import { DyneMCPTool, CallToolResult } from '@dynemcp/dynemcp'
 import { z } from 'zod'
-import { safeEvaluate } from './utils.js'
+import { safeEvaluate } from './utils'
 
 const AdvancedCalculatorSchema = z.object({
   expression: z

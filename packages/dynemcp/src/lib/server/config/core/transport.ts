@@ -30,6 +30,8 @@ export const ResumabilitySchema = z.object({
   historyDuration: z.number().optional().default(300000),
 })
 
+export const StdioTransportOptionsSchema = z.object({})
+
 export const StreamableHTTPTransportOptionsSchema = z.object({
   port: z.number().optional().default(NETWORK.DEFAULT_HTTP_PORT),
   host: z.string().optional().default(NETWORK.DEFAULT_HTTP_HOST),
@@ -52,8 +54,8 @@ export const SSETransportOptionsSchema = z.object({
 
 export const TransportSchema = z.discriminatedUnion('type', [
   z.object({
-    type: z.literal('sse'),
-    options: SSETransportOptionsSchema.optional(),
+    type: z.literal('stdio'),
+    options: StdioTransportOptionsSchema.optional(),
   }),
   z.object({
     type: z.literal('streamable-http'),
@@ -70,4 +72,5 @@ export type StreamableHTTPTransportOptions = z.infer<
   typeof StreamableHTTPTransportOptionsSchema
 >
 export type SSETransportOptions = z.infer<typeof SSETransportOptionsSchema>
+export type StdioTransportOptions = z.infer<typeof StdioTransportOptionsSchema>
 export type TransportConfig = z.infer<typeof TransportSchema>

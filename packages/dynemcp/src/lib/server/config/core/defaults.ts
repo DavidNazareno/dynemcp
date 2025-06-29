@@ -8,7 +8,7 @@ export const DEFAULT_SERVER_VERSION = '1.0.0'
 // Default transport type for DyneMCP
 export const DEFAULT_TRANSPORT_TYPE = CLI.TRANSPORT_TYPES[1] // 'streamable-http'
 // Default config file name
-export const DEFAULT_CONFIG = 'dynemcp.config.ts'
+export const DEFAULT_CONFIG = 'dynemcp.config.json'
 
 // Default directories for autoloaded components
 export const DEFAULT_TOOLS_DIR = './src/tools'

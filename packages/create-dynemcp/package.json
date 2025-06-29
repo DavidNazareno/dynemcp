@@ -10,7 +10,9 @@
     "create-dynemcp": "./dist/index.js"
   },
   "scripts": {
-    "clean": "rm -rf dist && rm -rf node_modules"
+    "clean": "rm -rf dist && rm -rf node_modules",
+    "copy-templates": "cp -r src/lib/template/templates dist/templates",
+    "postbuild": "npm run copy-templates"
   },
   "nx": {
     "targets": {
@@ -50,6 +52,6 @@
   },
   "files": [
     "dist",
-    "src/lib/template/templates"
+    "templates"
   ]
 }

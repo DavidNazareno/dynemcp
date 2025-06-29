@@ -10,9 +10,20 @@ export async function getAvailableTemplates(): Promise<string[]> {
 }
 
 /**
- * Returns the absolute path to the templates directory (igual que Next.js)
+ * Returns the absolute path to the templates directory
  */
 export function getTemplatesDir(): string {
   const __dirname = path.dirname(fileURLToPath(import.meta.url))
-  return path.resolve(__dirname, '../templates')
+  // En desarrollo, las plantillas están en src/lib/template/templates
+  // En producción, las plantillas están en dist/templates
+  const isDev = process.env.NODE_ENV === 'development'
+  const templatesPath = isDev
+    ? path.resolve(__dirname, '../templates')
+    : path.resolve(__dirname, '../../../templates')
+
+  console.log('Current directory:', __dirname)
+  console.log('Templates directory:', templatesPath)
+  console.log('Environment:', process.env.NODE_ENV)
+
+  return templatesPath
 }
