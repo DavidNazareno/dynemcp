@@ -1,4 +1,12 @@
 import path from 'path'
+import { TEMPLATES } from '../../../global/config-all-constants.js'
+
+/**
+ * Returns a list of available templates in the templates directory
+ */
+export async function getAvailableTemplates(): Promise<string[]> {
+  return [...TEMPLATES.AVAILABLE_TEMPLATES]
+}
 
 /**
  * Returns the absolute path to the templates directory

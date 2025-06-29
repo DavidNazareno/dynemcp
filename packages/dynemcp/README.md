@@ -33,21 +33,25 @@ dynemcp/
 ## Main Modules
 
 ### 1. CLI (`src/cli/`)
+
 - Unified entrypoint for all developer commands: `dev`, `build`, `start`, `clean`, `analyze`.
 - Modular, type-safe, and easy to extend.
 - See [`src/cli/README.md`](./src/cli/README.md) for details.
 
 ### 2. Build System (`src/build/`)
+
 - Handles all build, watch, clean, analyze, and CLI bundling tasks.
 - Zero-config: always uses a default, production-ready config.
 - See [`src/build/README.md`](./src/build/README.md) for details.
 
 ### 3. Server (`src/server/`)
+
 - The DyneMCP server runtime: fast, extensible, and robust.
 - Supports custom tools, resources, and prompts.
 - See [`src/server/README.md`](./src/server/README.md) for details.
 
 ### 4. Global Config (`src/global/config-all-contants.ts`)
+
 - Centralized, minimal set of constants and helpers shared across modules.
 
 ---
@@ -55,6 +59,7 @@ dynemcp/
 ## Usage
 
 ### Install
+
 ```sh
 npm install dynemcp
 # or
@@ -64,6 +69,7 @@ pnpm add dynemcp
 ```
 
 ### CLI Examples
+
 ```sh
 # Start dev server
 dynemcp dev
@@ -87,6 +93,7 @@ dynemcp analyze
 ---
 
 ## Extending DyneMCP
+
 - Add new CLI commands in `src/cli/core/cli.ts`.
 - Add new build tasks in `src/build/main/core/`.
 - Add new server features in `src/server/main/core/`.
@@ -96,6 +103,7 @@ dynemcp analyze
 ---
 
 ## Best Practices
+
 - Expose only the minimal public API at the top level.
 - Use async/await for all I/O and process management.
 - Keep command handlers and entrypoints minimal; delegate logic to helpers or submodules.
@@ -105,4 +113,4 @@ dynemcp analyze
 
 ## License
 
-MIT 
+MIT

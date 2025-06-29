@@ -1,6 +1,8 @@
+// ... aquí irá la lógica de package-info ...
+
 import fs from 'fs'
 import path from 'path'
-import { getTemplatesDir } from './paths.js'
+import { getTemplatesDir } from '../../template/core/helpers.js'
 
 /**
  * Returns the version from package.json

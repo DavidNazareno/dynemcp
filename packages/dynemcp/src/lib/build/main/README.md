@@ -27,6 +27,7 @@ import {
 ```
 
 ### Functions
+
 - `build(options: DyneMCPBuildOptions): Promise<BuildResult>` — Main build function for production.
 - `buildCli(options: DyneMCPBuildOptions): Promise<BuildResult>` — Build the CLI entrypoint.
 - `watch(options: DyneMCPBuildOptions): Promise<BuildContext>` — Build in watch mode with hot-reloading.
@@ -34,11 +35,13 @@ import {
 - `analyze(options: { entryPoint?: string; configPath?: string }): Promise<any>` — Analyze project dependencies.
 
 ### Types
+
 - `DyneMCPBuildOptions` — Options for building a DyneMCP project.
 - `BuildResult` — Result of a build operation.
 - `BuildConfig` — The default build configuration type.
 
 ## Best Practices
+
 - **Do not override build options:** The build is always optimized for production.
 - **Use the provided API:** All build operations should go through the exported functions for consistency and type safety.
 - **Keep logic in `core/`:** If you extend the build system, add new logic as a new module in `core/` and re-export it from `index.ts`.
@@ -60,4 +63,4 @@ main/
 
 ---
 
-For more details, see the [DyneMCP documentation](../../../../README.md). 
+For more details, see the [DyneMCP documentation](../../../../README.md).

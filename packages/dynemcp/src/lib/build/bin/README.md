@@ -17,6 +17,7 @@ dynebuild [command] [options]
 ```
 
 ### Commands
+
 - `build` — Build the project (default)
 - `watch` — Build in watch mode (hot-reloading)
 - `cli` — Build the CLI tool
@@ -24,6 +25,7 @@ dynebuild [command] [options]
 - `analyze` — Analyze project dependencies
 
 ### Options
+
 - `-c, --config <path>` — Path to the config file (default: `./dynemcp.config.json`)
 - `--clean` — Clean build directory before building
 - `--analyze` — Analyze dependencies and generate report
@@ -35,6 +37,7 @@ dynebuild [command] [options]
 - `-v, --version` — Show version
 
 ### Examples
+
 ```sh
 dynebuild                    # Build with default config
 dynebuild --clean --analyze  # Clean and build with analysis
@@ -45,6 +48,7 @@ dynebuild analyze            # Analyze dependencies
 ```
 
 ## Best Practices
+
 - **Keep logic in `core/`:** All CLI logic should be implemented in `core/cli.ts` for maintainability.
 - **Use the provided API:** Always use the exported helpers and commands for consistency.
 - **Handle errors gracefully:** The CLI entrypoint handles unhandled promise rejections and unexpected errors.
@@ -61,4 +65,4 @@ bin/
 
 ---
 
-For more details, see the [DyneMCP documentation](../../../../README.md). 
+For more details, see the [DyneMCP documentation](../../../../README.md).

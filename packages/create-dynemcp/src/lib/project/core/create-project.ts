@@ -1,14 +1,6 @@
 import fs from 'fs-extra'
-import { installTemplate } from './template-generator.js'
-import { PACKAGE_MANAGER, TEMPLATES } from '../../config.js'
-import type { PackageManager } from '../helpers/package-manager.js'
-
-/**
- * Returns a list of available templates in the templates directory
- */
-export async function getAvailableTemplates(): Promise<string[]> {
-  return [...TEMPLATES.AVAILABLE_TEMPLATES]
-}
+import { installTemplate } from '../../template/index.js'
+import { PACKAGE_MANAGER } from '../../../global/config-all-constants.js'
 
 /**
  * Creates a new project using the specified template and options
@@ -25,7 +17,7 @@ export async function createProject(
   await installTemplate({
     appName: projectName,
     root: projectPath,
-    packageManager: PACKAGE_MANAGER.PREFERRED as PackageManager,
+    packageManager: PACKAGE_MANAGER.PREFERRED,
     template,
     mode: 'ts',
     tailwind: false,

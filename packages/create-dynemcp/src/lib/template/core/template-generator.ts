@@ -1,7 +1,7 @@
-import { installDependencies } from '../helpers/package-manager.js'
-import { copy } from '../helpers/copy.js'
-import { getTemplatesDir } from '../helpers/paths.js'
-import { getPackageVersion } from '../helpers/package-info.js'
+import { installDependencies } from '../../project/core/package-manager'
+import { copy } from '../../project/core/copy'
+import { getTemplatesDir } from '../../project/core/paths'
+import { getPackageVersion } from '../../project/core/package-info'
 
 import fastGlob from 'fast-glob'
 import os from 'os'
@@ -9,19 +9,13 @@ import fs from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
 import { Sema } from 'async-sema'
-import { LOGGING, PATHS } from '../../config.js'
+import { LOGGING, PATHS } from '../../global/config-all-constants.js'
 
 import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces.js'
 
-// Get the templates directory path
 const templatesDir = getTemplatesDir()
-
-// Get the package version
 const pkgVersion = getPackageVersion()
 
-/**
- * Get the file path for a given file in a template, e.g. "dynemcp.config.json".
- */
 export const getTemplateFile = ({
   template,
   file,
@@ -31,9 +25,6 @@ export const getTemplateFile = ({
 
 export const SRC_DIR_NAMES = [PATHS.SOURCE_DIR, 'prompts', 'resources', 'tools']
 
-/**
- * Install a DyneMCP internal template to a given `root` directory.
- */
 export const installTemplate = async ({
   appName,
   root,
@@ -48,9 +39,7 @@ export const installTemplate = async ({
 }: InstallTemplateArgs): Promise<void> => {
   console.log(`Using ${packageManager}.`)
 
-  /**
-   * Copy the template files to the target directory.
-   */
+  // Copy the template files to the target directory.
   console.log('\nInitializing project with template:', template, '\n')
   const templatePath = path.join(templatesDir, template)
   const copySource = ['**']
@@ -65,7 +54,6 @@ export const installTemplate = async ({
         case 'gitignore': {
           return `.${name}`
         }
-        // Handle README template file
         case 'README-template.md': {
           return 'README.md'
         }
@@ -95,14 +83,11 @@ export const installTemplate = async ({
 
   // update import alias in any files if not using the default
   if (importAlias !== '@/*') {
-    // Asegurarnos de que fastGlob se usa correctamente como módulo ES
     const globFn = fastGlob.glob || fastGlob
     const files = await globFn('**/*', {
       cwd: root,
       dot: true,
       stats: false,
-      // We don't want to modify compiler options in [ts/js]config.json
-      // and none of the files in the .git folder
       ignore: [
         'tsconfig.json',
         'jsconfig.json',
@@ -141,7 +126,6 @@ export const installTemplate = async ({
       // Only reorganize directories if template doesn't already have src/ structure
       await Promise.all(
         SRC_DIR_NAMES.map(async (dir) => {
-          // Skip moving the 'src' directory itself
           if (dir === PATHS.SOURCE_DIR) {
             return
           }
@@ -149,7 +133,6 @@ export const installTemplate = async ({
           const sourcePath = path.join(root, dir)
           const targetPath = path.join(root, PATHS.SOURCE_DIR, dir)
 
-          // Check if the source directory exists before attempting to move it
           if (await fs.stat(sourcePath).catch(() => false)) {
             await fs.mkdir(path.dirname(targetPath), { recursive: true })
             await fs
@@ -165,10 +148,8 @@ export const installTemplate = async ({
     }
   }
 
-  /** Copy the version from package.json or override for tests. */
   const version = process.env.DYNEMCP_TEST_VERSION ?? pkgVersion
 
-  // Generate scripts using the new simplified development modes
   const generateScripts = () => {
     const baseScripts = {
       build: 'dynemcp build',
@@ -181,8 +162,6 @@ export const installTemplate = async ({
         ? 'eslint . --ext .js,.jsx,.ts,.tsx --fix'
         : undefined,
     }
-
-    // Simple scripts that work for any transport type
     return {
       ...baseScripts,
       dev: 'dynemcp dev',
@@ -190,7 +169,6 @@ export const installTemplate = async ({
     }
   }
 
-  /** Create a package.json for the new project and write it to disk. */
   interface PackageJson {
     name: string
     version: string
@@ -207,16 +185,12 @@ export const installTemplate = async ({
     version: '0.1.0',
     private: true,
     scripts: generateScripts(),
-    /**
-     * Default dependencies.
-     */
     dependencies: {
       '@modelcontextprotocol/sdk': '^1.12.1',
       '@dynemcp/dynemcp': `^${version}`,
       zod: '^3.22.4',
     },
     devDependencies: {
-      // Basic dev dependencies - the CLI handles concurrently, nodemon, etc. internally
       prettier: '^3.2.5',
     },
   }
@@ -228,14 +202,10 @@ export const installTemplate = async ({
     packageJson.devDependencies['@types/cors'] = '^2.8.17'
   }
 
-  // Remove undefined values
   if (!packageJson.scripts.lint) {
     delete packageJson.scripts.lint
   }
 
-  /**
-   * TypeScript projects will have type definitions and other devDependencies.
-   */
   if (mode === 'ts') {
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
@@ -247,7 +217,6 @@ export const installTemplate = async ({
     }
   }
 
-  /* Add Tailwind CSS dependencies. */
   if (tailwind) {
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
@@ -257,7 +226,6 @@ export const installTemplate = async ({
     }
   }
 
-  /* Default ESLint dependencies. */
   if (eslint) {
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
@@ -267,23 +235,19 @@ export const installTemplate = async ({
     }
   }
 
-  // Add common dev dependencies (DyneMCP CLI handles build tools internally)
   packageJson.devDependencies = {
     ...packageJson.devDependencies,
     vitest: '^1.4.0',
   }
 
-  // Add Node.js engine requirement
   packageJson.engines = {
     node: '>=16.0.0',
   }
 
-  // Add package manager
   packageJson.packageManager = 'pnpm@10.9.0'
 
   const devDeps = Object.keys(packageJson.devDependencies).length
   if (!devDeps) {
-    // Usar una asignación temporal para evitar el error de TypeScript
     const tempJson = packageJson as unknown as {
       devDependencies?: Record<string, string>
     }
@@ -295,7 +259,6 @@ export const installTemplate = async ({
     JSON.stringify(packageJson, null, 2) + os.EOL
   )
 
-  // Update dynemcp.config.json with project name and build configuration
   await updateProjectConfig(root, appName)
 
   if (skipInstall) return
@@ -314,7 +277,6 @@ export const installTemplate = async ({
 
   console.log()
 
-  // Final installation
   if (!skipInstall) {
     console.log('\nInstalling dependencies. This may take a moment...')
     try {
@@ -330,26 +292,22 @@ export const installTemplate = async ({
   }
 }
 
-/**
- * Updates project configuration files with the project name
- */
 async function updateProjectConfig(
   projectPath: string,
   projectName: string
 ): Promise<void> {
+  const configPath = path.join(projectPath, 'dynemcp.config.json')
+  let config: any = {}
   try {
-    const configPath = path.join(projectPath, PATHS.DEFAULT_CONFIG)
     if (existsSync(configPath)) {
-      const config = JSON.parse(await fs.readFile(configPath, 'utf8'))
-      config.name = projectName
-      config.server = { ...config.server, name: projectName }
-      await fs.writeFile(configPath, JSON.stringify(config, null, 2))
+      config = JSON.parse(await fs.readFile(configPath, 'utf8'))
     }
-  } catch (error) {
-    console.error(
-      `${LOGGING.EMOJIS.ERROR} Failed to update project config: ${error}`
-    )
+  } catch {
+    // ignore
   }
+  config.name = projectName
+  config.build = config.build || {}
+  await fs.writeFile(configPath, JSON.stringify(config, null, 2) + os.EOL)
 }
 
-export * from './interfaces.js'
+// ... aquí irá la lógica de template-generator ...

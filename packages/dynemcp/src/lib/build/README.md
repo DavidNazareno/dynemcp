@@ -5,6 +5,7 @@ The DyneMCP build system is a modular, zero-config, production-ready solution fo
 ## Architecture
 
 - **Modular:** The build system is split into focused modules:
+
   - `main/` — Main build API (build, watch, clean, analyze, CLI build)
   - `bundler/` — Advanced bundling and analysis (esbuild-based)
   - `config/` — Zero-config, type-safe configuration utilities
@@ -60,4 +61,4 @@ build/
 
 ---
 
-For details on each module, see their respective `README.md` files. 
+For details on each module, see their respective `README.md` files.

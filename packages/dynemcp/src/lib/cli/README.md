@@ -42,12 +42,13 @@ cli/
   Analyzes project dependencies.
 
 ### Common Options
-- `--config, -c`  Path to `dynemcp.config.json` (default: auto-detect)
-- `--clean`       Clean before building
-- `--analyze`     Analyze dependencies after build
-- `--transport`   Transport type (`stdio`, `streamable-http`)
-- `--port`        HTTP server port (default: 3000)
-- `--host`        HTTP server host (default: localhost)
+
+- `--config, -c` Path to `dynemcp.config.json` (default: auto-detect)
+- `--clean` Clean before building
+- `--analyze` Analyze dependencies after build
+- `--transport` Transport type (`stdio`, `streamable-http`)
+- `--port` HTTP server port (default: 3000)
+- `--host` HTTP server host (default: localhost)
 
 ---
 
@@ -96,4 +97,4 @@ dynemcp analyze
 
 ## License
 
-MIT 
+MIT

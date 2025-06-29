@@ -1,5 +1,8 @@
 import { default as execa } from 'execa'
-import { PACKAGE_MANAGER, type PackageManager } from '../../config.js'
+import {
+  PACKAGE_MANAGER,
+  type PackageManager,
+} from '../../../global/config-all-constants.js'
 
 export type { PackageManager }
 

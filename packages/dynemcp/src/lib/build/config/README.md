@@ -11,17 +11,24 @@ This module provides configuration utilities for the DyneMCP build system. It is
 ## Public API
 
 ```ts
-import { loadConfig, getBuildConfig, DyneMCPConfig } from '@dynemcp/build/config'
+import {
+  loadConfig,
+  getBuildConfig,
+  DyneMCPConfig,
+} from '@dynemcp/build/config'
 ```
 
 ### Functions
+
 - `loadConfig(configPath?: string): Promise<DyneMCPConfig>` — Loads and validates the DyneMCP config file.
 - `getBuildConfig(): BuildConfig` — Returns the default, production-ready build configuration.
 
 ### Types
+
 - `DyneMCPConfig` — The validated config type for DyneMCP projects.
 
 ## Best Practices
+
 - **Do not override build options:** The build is always optimized for production.
 - **Validate your config:** Use `loadConfig` to ensure your config file is valid before running any build operations.
 - **Keep custom logic in your app:** This module is intentionally minimal and should not be extended with custom logic.
@@ -39,4 +46,4 @@ config/
 
 ---
 
-For more details, see the [DyneMCP documentation](../../../../README.md). 
+For more details, see the [DyneMCP documentation](../../../../README.md).
