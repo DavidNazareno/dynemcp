@@ -26,6 +26,7 @@
     "src/**/*.spec.jsx",
     "src/**/*.d.ts"
   ],
+  "exclude": ["src/lib/template/templates"],
   "references": [
     {
       "path": "./tsconfig.lib.json"

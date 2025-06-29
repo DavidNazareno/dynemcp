@@ -9,5 +9,6 @@
  * All exports are re-exported from their respective submodules' public APIs.
  */
 export * from './cli/index.js'
-export * from './project/index.js'
-export * from './template/index.js'
+export * from './project/core/create-project.js'
+export * from './template/core/template-generator.js'
+export * from './template/core/interfaces.js'

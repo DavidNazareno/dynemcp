@@ -9,31 +9,28 @@
  */
 
 // Main transport types and interfaces
-export * from './core/interfaces.js'
+export * from './interfaces.js'
 
 // Zod schemas for transport config validation
-export * from './core/schemas.js'
+export * from './schemas.js'
 
 // Default config values for transports
-export * from './core/defaults.js'
+export * from './defaults.js'
 
 // Custom transport errors
-export * from './core/errors.js'
+export * from './errors.js'
 
 // JSON-RPC helpers and type guards
-export * from './core/jsonrpc.js'
+export * from './jsonrpc.js'
 
 // Transport implementations
-export { StdioTransport } from './core/stdio.js'
-export { StreamableHTTPTransport } from './core/http.js'
+export { StdioTransport } from '../stdio/server.js'
+export { StreamableHTTPTransport } from '../http/server.js'
 
-import type { TransportConfig } from './core/interfaces.js'
-import { StdioTransport } from './core/stdio.js'
-import { StreamableHTTPTransport } from './core/http.js'
-import { TRANSPORT_TYPES } from './types'
-import { Transport } from './interfaces'
-import { StdioServerTransport } from '../stdio/server'
-import { HttpServerTransport } from '../http/server'
+import { StdioTransport } from '../stdio/server.js'
+import { StreamableHTTPTransport } from '../http/server.js'
+import { TRANSPORT_TYPES } from './defaults.js'
+import type { Transport } from './interfaces.js'
 
 /**
  * Factory function to create the appropriate transport based on config.
@@ -43,10 +40,10 @@ export function createTransport(config: {
   options?: any
 }): Transport {
   switch (config.type) {
-    case TRANSPORT_TYPES.STDIO_SERVER:
-      return new StdioServerTransport(config.options)
-    case TRANSPORT_TYPES.HTTP_SERVER:
-      return new HttpServerTransport(config.options)
+    case TRANSPORT_TYPES[0]: // 'stdio'
+      return new StdioTransport() as unknown as Transport
+    case TRANSPORT_TYPES[1]: // 'streamable-http'
+      return new StreamableHTTPTransport(config.options) as unknown as Transport
     default:
       throw new Error(`Unknown transport type: ${config.type}`)
   }

@@ -31,13 +31,15 @@ export async function copy(
       ignore: ['**/node_modules/**', '**/.git/**'],
     })
 
+    console.log('[DEBUG] Archivos encontrados para copiar:', files)
+
     for (const file of files) {
       const src = path.resolve(cwd, file)
       const isDirectory = fs.statSync(src).isDirectory()
 
       // Skip directories - we'll copy their contents when they match the pattern
       if (isDirectory) {
-        console.log(`⏭️  Skipping directory: ${file}`)
+        console.log(`[DEBUG] ⏭️  Skipping directory: ${file}`)
         continue
       }
 
@@ -52,6 +54,7 @@ export async function copy(
       // Ensure the directory exists
       await fs.ensureDir(path.dirname(dest))
       await fs.copy(src, dest)
+      console.log(`[DEBUG] Copiado: ${src} -> ${dest}`)
     }
   } catch (error) {
     console.error('❌ Error copying files:', error)

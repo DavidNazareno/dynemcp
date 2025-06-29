@@ -3,6 +3,7 @@
 // ------------------------------------------------------------
 
 import { promises as fs, statSync, readFileSync } from 'fs'
+import { shouldLog } from './utils.js'
 
 /**
  * Optimize the bundled file for production

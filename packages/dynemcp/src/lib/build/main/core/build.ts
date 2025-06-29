@@ -2,9 +2,9 @@
 // Main build logic for DyneMCP
 // ----------------------------
 
-import { ConsoleLogger } from '../../../cli/index.js'
+import { ConsoleLogger } from '../../../cli/core/logger.js'
 import type { DyneMCPBuildOptions, BuildResult } from './interfaces.js'
-import { loadConfig, getBuildConfig } from '../../config/index.js'
+import { getBuildConfig } from '../../config/index.js'
 import { bundle } from '../../bundler/index.js'
 import type { BundleOptions } from '../../bundler/core/bundle.js'
 
@@ -34,7 +34,11 @@ export async function build(
     const bundleResult = await bundle(finalOptions)
     const result: BuildResult = {
       ...bundleResult,
-      config: buildConfig,
+      config: {
+        ...buildConfig,
+        format: buildConfig.format as 'cjs' | 'esm' | 'iife',
+        platform: buildConfig.platform as 'node' | 'browser',
+      },
     }
     return result
   } catch (error) {

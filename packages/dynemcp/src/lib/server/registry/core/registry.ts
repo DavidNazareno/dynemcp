@@ -17,7 +17,7 @@ import {
   loadResourcesFromDirectory,
   loadPromptsFromDirectory,
 } from '../../components/component-loader.js'
-import { validateAllTools } from '../../core/validation.js'
+import { validateTool } from '../../components/core/loaders/validators.js'
 
 /**
  * DyneMCP Registry - Main Registry Class
@@ -83,7 +83,7 @@ export class DyneMCPRegistry implements Registry {
     )
     // Validate tools
     try {
-      validateAllTools(toolsResult.components)
+      validateTool(toolsResult.components)
     } catch (error) {
       if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
         console.warn(

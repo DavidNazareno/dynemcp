@@ -6,8 +6,8 @@ import { type BuildContext } from 'esbuild'
 import type { DyneMCPBuildOptions } from './interfaces.js'
 import { getBuildConfig } from '../../config/index.js'
 import { bundleWatch } from '../../bundler/index.js'
-import { ConsoleLogger } from '../../../cli/index.js'
 import type { BundleOptions } from '../../bundler/core/bundle.js'
+import { ConsoleLogger } from '../../../cli/core/logger.js'
 
 function shouldLog() {
   return !process.env.DYNE_MCP_STDIO_LOG_SILENT

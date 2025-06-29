@@ -131,9 +131,8 @@ export class DyneMCP {
     if (typeof this.transport.connect === 'function') {
       await this.transport.connect(this.server)
     }
-
     // Only log if transport is not stdio
-    if (transportConfig.type !== TRANSPORT_TYPES[0]) {
+    if (String(transportConfig.type) !== 'stdio') {
       if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
         console.log(
           `🎯 MCP server "${this.config.server.name}" started successfully`
@@ -157,7 +156,7 @@ export class DyneMCP {
     // Only log if transport is not stdio
     if (
       this.config.transport?.type &&
-      this.config.transport.type !== TRANSPORT_TYPES[0]
+      String(this.config.transport.type) !== 'stdio'
     ) {
       if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
         console.log('🛑 MCP server stopped')

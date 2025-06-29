@@ -1,7 +1,7 @@
-import { installDependencies } from '../../project/core/package-manager'
-import { copy } from '../../project/core/copy'
-import { getTemplatesDir } from '../../project/core/paths'
-import { getPackageVersion } from '../../project/core/package-info'
+import { installDependencies } from '../../project/core/package-manager.js'
+import { copy } from '../../project/core/copy.js'
+// import { getTemplatesDir } from '../../project/core/paths' // Archivo no encontrado, comentar o eliminar
+import { getPackageVersion } from '../../project/core/package-info.js'
 
 import fastGlob from 'fast-glob'
 import os from 'os'
@@ -9,9 +9,10 @@ import fs from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
 import { Sema } from 'async-sema'
-import { LOGGING, PATHS } from '../../global/config-all-constants.js'
 
 import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces.js'
+import { getTemplatesDir } from './helpers.js'
+import { LOGGING, PATHS } from '../../../global/config-all-constants.js'
 
 const templatesDir = getTemplatesDir()
 const pkgVersion = getPackageVersion()
@@ -46,6 +47,9 @@ export const installTemplate = async ({
   if (!eslint) copySource.push('!.eslintrc.js', '!.eslintignore')
   if (!tailwind) copySource.push('!tailwind.config.js', '!postcss.config.js')
 
+  console.log('[DEBUG] templatePath:', templatePath)
+  console.log('[DEBUG] copySource:', copySource)
+
   await copy(copySource, root, {
     parents: true,
     cwd: templatePath,
@@ -63,6 +67,7 @@ export const installTemplate = async ({
       }
     },
   })
+  console.log('[DEBUG] copy completado')
 
   const tsconfigFile = path.join(
     root,

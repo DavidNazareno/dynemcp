@@ -28,7 +28,11 @@ export async function buildCli(
     const bundleResult = await bundleCli(finalOptions)
     const result: BuildResult = {
       ...bundleResult,
-      config: buildConfig,
+      config: {
+        ...buildConfig,
+        format: buildConfig.format as 'cjs' | 'esm' | 'iife',
+        platform: buildConfig.platform as 'node' | 'browser',
+      },
     }
     if (bundleResult.success) {
       if (process.env.DYNE_MCP_STDIO_LOG_SILENT !== 'true')

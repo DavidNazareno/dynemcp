@@ -2,8 +2,8 @@
 // Dynamic loading logic for the DyneMCP Registry module
 // ----------------------------------------------------
 
-import { RegistryItem, RegistryLoader } from './interfaces'
-import { RegistryItemLoadError } from './errors'
+import { RegistryItem, RegistryLoader } from './interfaces.js'
+import { RegistryItemLoadError } from './errors.js'
 
 /**
  * Default implementation of the RegistryLoader interface.
@@ -17,7 +17,7 @@ export class DefaultRegistryLoader implements RegistryLoader {
     try {
       // Example dynamic import path logic (customize as needed)
       const modulePath = `../${type}s/${id}`
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+
       const module = await import(modulePath)
       return { id, type, module }
     } catch (err: any) {

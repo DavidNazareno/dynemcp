@@ -15,7 +15,6 @@
   "nx": {
     "targets": {
       "postbuild": {
-        "command": "cp -r packages/create-dynemcp/src/templates packages/create-dynemcp/dist/ && chmod +x packages/create-dynemcp/dist/index.js",
         "cwd": "packages/create-dynemcp/dist/lib/index.js",
         "parallel": false
       }
@@ -48,5 +47,9 @@
     "@types/inquirer": "^9.0.8",
     "@types/node": "^20.19.0",
     "@types/validate-npm-package-name": "^4.0.2"
-  }
+  },
+  "files": [
+    "dist",
+    "src/lib/template/templates"
+  ]
 }
