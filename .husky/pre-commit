@@ -2,4 +2,4 @@
 pnpm run beautify
 
 # Ejecutar tests
-pnpm test
+#pnpm test

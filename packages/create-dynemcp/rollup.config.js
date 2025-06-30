@@ -18,6 +18,18 @@ export default {
   ],
   plugins: [typescript({ tsconfig: './tsconfig.rollup.json' })],
   external: [
-    'fs', 'path', 'os', 'chalk', 'commander', 'inquirer', 'ora', 'execa', 'fast-glob', 'fs-extra', 'async-sema', 'url', 'fs/promises'
+    'fs',
+    'path',
+    'os',
+    'chalk',
+    'commander',
+    'inquirer',
+    'ora',
+    'execa',
+    'fast-glob',
+    'fs-extra',
+    'async-sema',
+    'url',
+    'fs/promises',
   ],
 }
