@@ -1,6 +1,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { TransportError } from '../core/errors'
+import { isJSONRPCNotification } from '../core/jsonrpc'
+import { parseRootList } from '../../api/core/root'
 
 /**
  * StdioTransport provides communication over standard input/output streams.
@@ -8,6 +10,7 @@ import { TransportError } from '../core/errors'
  */
 export class StdioTransport {
   private transport?: StdioServerTransport
+  private roots: any = []
 
   /**
    * Connects the MCP server using stdio transport.
@@ -16,6 +19,18 @@ export class StdioTransport {
   async connect(server: McpServer): Promise<void> {
     this.transport = new StdioServerTransport()
     try {
+      // Intercept incoming messages to handle roots/didChange
+      const origOnMessage = this.transport.onmessage?.bind(this.transport)
+      this.transport.onmessage = (msg: any) => {
+        if (isJSONRPCNotification(msg) && msg.method === 'roots/didChange') {
+          const roots = parseRootList(msg.params)
+          this.roots = roots
+          // Optionally, emit an event or log
+          console.log('🌱 Roots updated (stdio):', roots)
+          return // Do not forward this notification to the MCP server
+        }
+        if (origOnMessage) origOnMessage(msg)
+      }
       await server.connect(this.transport)
       // No logs in stdio mode to avoid contaminating output
     } catch (error) {
@@ -23,6 +38,13 @@ export class StdioTransport {
         `Failed to connect stdio transport: ${error}`
       )
     }
+  }
+
+  /**
+   * Get the current roots (single-session)
+   */
+  getRoots() {
+    return this.roots || []
   }
 
   /**

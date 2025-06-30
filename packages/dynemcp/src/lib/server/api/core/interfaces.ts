@@ -3,6 +3,16 @@
 // ------------------------------------------------------
 
 import { z } from 'zod'
+// Import types from the SDK
+import type {
+  Tool as SDKTool,
+  Resource as SDKResource,
+  Prompt as SDKPrompt,
+  SamplingMessage as SDKSamplingMessage,
+  CallToolResult as SDKCallToolResult,
+  Root as SDKRoot,
+  RootsListChangedNotification as SDKRootsListChangedNotification,
+} from '@modelcontextprotocol/sdk'
 
 /**
  * Tool argument definition for prompts.
@@ -26,47 +36,25 @@ export interface PromptMessage {
 /**
  * Result format for tool execution.
  */
-export interface CallToolResult {
-  content: Array<{ type: string; [key: string]: unknown }>
-  isError?: boolean
-}
+export type CallToolResult = SDKCallToolResult
 
-/**
- * Tool definition interface for DyneMCP tools.
- */
-export interface ToolDefinition {
-  name: string
-  description?: string
-  inputSchema?: z.ZodRawShape | Record<string, unknown>
-  annotations?: Record<string, unknown>
-  execute: (args: Record<string, unknown>) => Promise<CallToolResult>
-}
-
-/**
- * Resource definition interface for DyneMCP resources.
- */
-export interface ResourceDefinition {
-  uri: string
-  name: string
-  description?: string
-  mimeType?: string
-  content: string | (() => string | Promise<string>)
-  contentType?: string
-}
-
-/**
- * Prompt definition interface for DyneMCP prompts.
- */
-export interface PromptDefinition {
-  name: string
-  description?: string
-  arguments?: PromptArgument[]
-  getMessages: (args?: Record<string, string>) => Promise<PromptMessage[]>
-}
+// Usar type alias si no hay extensión
+export type ToolDefinition = SDKTool
+export type ResourceDefinition = SDKResource
+export type PromptDefinition = SDKPrompt
 
 /**
  * Type utility for inferring types from Zod schemas.
  */
 export type InferSchema<T> = T extends z.ZodType ? z.infer<T> : never
 
-// No additional interfaces are needed here, as the main API classes are abstract classes.
+// Sampling types (MCP)
+export type SamplingMessage = SDKSamplingMessage
+// (No hay SamplingRequest/SamplingResult explícitos en el SDK)
+
+// Roots types (MCP)
+export type Root = SDKRoot
+export type RootList = Root[]
+export type RootChangeNotification = SDKRootsListChangedNotification
+
+// No additional interfaces are needed aquí, los tipos principales vienen del SDK.

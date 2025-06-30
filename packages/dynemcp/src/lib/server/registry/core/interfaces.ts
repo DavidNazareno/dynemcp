@@ -5,9 +5,12 @@
 /**
  * Represents a generic registry item (Tool, Prompt, Resource, etc).
  */
+
+export type RegistryItemType = 'tool' | 'prompt' | 'resource' | 'sample'
+
 export interface RegistryItem {
   id: string
-  type: 'tool' | 'prompt' | 'resource'
+  type: RegistryItemType
   module: any
 }
 
@@ -15,20 +18,14 @@ export interface RegistryItem {
  * Interface for the Registry Loader.
  */
 export interface RegistryLoader {
-  loadItem(
-    type: 'tool' | 'prompt' | 'resource',
-    id: string
-  ): Promise<RegistryItem>
+  loadItem(type: RegistryItemType, id: string): Promise<RegistryItem>
 }
 
 /**
  * Interface for the Registry Storage backend.
  */
 export interface RegistryStorage {
-  getItem(
-    type: 'tool' | 'prompt' | 'resource',
-    id: string
-  ): RegistryItem | undefined
+  getItem(type: RegistryItemType, id: string): RegistryItem | undefined
   setItem(item: RegistryItem): void
   clear(): void
 }
@@ -37,7 +34,7 @@ export interface RegistryStorage {
  * Main Registry interface.
  */
 export interface Registry {
-  get(type: 'tool' | 'prompt' | 'resource', id: string): Promise<RegistryItem>
+  get(type: RegistryItemType, id: string): Promise<RegistryItem>
   preloadAll(): Promise<void>
 }
 
@@ -58,4 +55,5 @@ export interface LoadAllOptions {
   tools: { enabled: boolean; directory: string }
   resources: { enabled: boolean; directory: string }
   prompts: { enabled: boolean; directory: string }
+  samples: { enabled: boolean; directory: string }
 }

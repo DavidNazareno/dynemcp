@@ -11,7 +11,7 @@ import { RegistryItemLoadError } from './errors'
  */
 export class DefaultRegistryLoader implements RegistryLoader {
   async loadItem(
-    type: 'tool' | 'prompt' | 'resource',
+    type: 'tool' | 'prompt' | 'resource' | 'sample',
     id: string
   ): Promise<RegistryItem> {
     try {

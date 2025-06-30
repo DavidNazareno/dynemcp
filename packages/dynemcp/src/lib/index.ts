@@ -17,3 +17,6 @@ export type { Logger } from './cli/core/logger.js'
 
 // Main framework exports (legacy/compat)
 export { createMCPServer } from './server/index.js'
+export { tool } from './server/api/index.js'
+export { resource, prompt } from './server/api/index.js'
+export { sample } from './server/api/index.js'

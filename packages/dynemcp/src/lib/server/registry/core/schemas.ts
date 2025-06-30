@@ -9,7 +9,7 @@ import { z } from 'zod'
  */
 export const RegistryItemSchema = z.object({
   id: z.string(),
-  type: z.enum(['tool', 'prompt', 'resource']),
+  type: z.enum(['tool', 'prompt', 'resource', 'sample']),
   module: z.any(),
 })
 

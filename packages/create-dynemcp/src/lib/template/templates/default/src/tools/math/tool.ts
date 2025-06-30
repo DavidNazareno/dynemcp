@@ -1,4 +1,4 @@
-import { DyneMCPTool, CallToolResult } from '@dynemcp/dynemcp'
+import { tool } from '@dynemcp/dynemcp'
 import { z } from 'zod'
 import { factorial, isPrime, gcd, MATH_CONSTANTS } from './utils'
 
@@ -9,27 +9,15 @@ const MathSchema = z.object({
   numbers: z.array(z.number()).describe('Array of numbers to operate on'),
 })
 
-export class MathTool extends DyneMCPTool {
-  readonly name = 'math'
-  readonly description =
-    'Performs various mathematical operations including advanced functions'
-  readonly inputSchema = MathSchema.shape
-  override readonly annotations = {
-    title: 'Advanced Math Tool',
-    readOnlyHint: true,
-    openWorldHint: false,
-  }
-
-  execute(input: z.infer<typeof MathSchema>): CallToolResult {
-    const { operation, numbers } = input
-
+export default tool(
+  MathSchema,
+  async ({ operation, numbers }) => {
     if (!numbers?.length) {
       return {
         content: [{ type: 'text', text: 'At least one number is required' }],
         isError: true,
       }
     }
-
     let result: number | boolean
     try {
       switch (operation) {
@@ -74,10 +62,7 @@ export class MathTool extends DyneMCPTool {
           if (numbers.length !== 1) {
             return {
               content: [
-                {
-                  type: 'text',
-                  text: 'Prime check requires exactly 1 number',
-                },
+                { type: 'text', text: 'Prime check requires exactly 1 number' },
               ],
               isError: true,
             }
@@ -104,11 +89,9 @@ export class MathTool extends DyneMCPTool {
             isError: true,
           }
       }
-
       const constants = Object.entries(MATH_CONSTANTS)
         .map(([key, value]) => `${key}: ${value}`)
         .join(', ')
-
       return {
         content: [
           {
@@ -128,7 +111,15 @@ export class MathTool extends DyneMCPTool {
         isError: true,
       }
     }
+  },
+  {
+    name: 'math',
+    description:
+      'Performs various mathematical operations including advanced functions',
+    meta: {
+      title: 'Advanced Math Tool',
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
   }
-}
-
-export default new MathTool()
+)

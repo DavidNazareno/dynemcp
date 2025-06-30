@@ -1,13 +1,12 @@
-import { DyneMCPResource } from '@dynemcp/dynemcp'
+import { resource } from '@dynemcp/dynemcp'
 
-export class UserDataResource extends DyneMCPResource {
-  readonly uri = 'resource://user-data'
-  readonly name = 'user-data'
-  readonly description = 'User data and preferences'
-  readonly mimeType = 'application/json'
-
-  getContent(): string {
-    return JSON.stringify(
+export default resource({
+  uri: 'resource://user-data',
+  name: 'user-data',
+  description: 'User data and preferences',
+  mimeType: 'application/json',
+  getContent: () =>
+    JSON.stringify(
       {
         userPreferences: {
           theme: 'auto',
@@ -23,8 +22,5 @@ export class UserDataResource extends DyneMCPResource {
       },
       null,
       2
-    )
-  }
-}
-
-export default new UserDataResource()
+    ),
+})

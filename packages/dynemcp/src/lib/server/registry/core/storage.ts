@@ -10,10 +10,7 @@ import type { RegistryItem, RegistryStorage } from './interfaces'
 export class InMemoryRegistryStorage implements RegistryStorage {
   private items: Map<string, RegistryItem> = new Map()
 
-  getItem(
-    type: 'tool' | 'prompt' | 'resource',
-    id: string
-  ): RegistryItem | undefined {
+  getItem(type: RegistryItem['type'], id: string): RegistryItem | undefined {
     return this.items.get(this.key(type, id))
   }
 
@@ -54,6 +51,17 @@ export class InMemoryRegistryStorage implements RegistryStorage {
     prompts.forEach((prompt) => {
       if (prompt.type === 'prompt') {
         this.setItem(prompt)
+      }
+    })
+  }
+
+  /**
+   * Add multiple samples to the storage.
+   */
+  addSamples(samples: RegistryItem[]): void {
+    samples.forEach((sample) => {
+      if (sample.type === 'sample') {
+        this.setItem(sample)
       }
     })
   }

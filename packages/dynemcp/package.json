@@ -43,7 +43,8 @@
     "express": "4.21.2",
     "tslib": "^2.3.0",
     "yargs": "17.7.2",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.14.1",

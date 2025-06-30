@@ -10,6 +10,7 @@ export const DEFAULT_REGISTRY_TYPES = [
   'prompt',
   'resource',
   'resource-template',
+  'sample',
 ] as const
 
 /**

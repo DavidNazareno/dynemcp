@@ -6,6 +6,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { TransportError } from '../core/errors'
 import { NETWORK, CLI } from '../../../../global/config-all-contants'
+import { isJSONRPCNotification } from '../core/jsonrpc'
+import { parseRootList } from '../../api/core/root'
 
 /**
  * StreamableHTTPTransport provides HTTP POST and optional SSE streaming for MCP communication.
@@ -23,6 +25,7 @@ export class StreamableHTTPTransport {
     string,
     { id: string; created: Date; lastAccess: Date }
   >()
+  private sessionRoots = new Map<string, any>() // sessionId -> roots
 
   constructor(options: any = {}) {
     this.app = express()
@@ -238,8 +241,31 @@ export class StreamableHTTPTransport {
       this.app.post(this.endpoint, authMiddleware, async (req, res) => {
         try {
           // Handle session management
-          this.handleSessionManagement(req, res)
+          const sessionId = this.handleSessionManagement(req, res)
           if (res.headersSent) return // Session validation failed
+
+          // --- ROOTS NOTIFICATION HANDLER ---
+          const body = req.body
+          if (
+            isJSONRPCNotification(body) &&
+            body.method === 'roots/didChange'
+          ) {
+            // Only handle if session is enabled
+            if (sessionId) {
+              const roots = parseRootList(body.params)
+              this.sessionRoots.set(sessionId, roots)
+              res.status(200).json({ result: 'Roots updated', roots })
+              console.log(`🌱 Roots updated for session ${sessionId}:`, roots)
+              return
+            } else {
+              res
+                .status(400)
+                .json({ error: 'Session required for roots/didChange' })
+              return
+            }
+          }
+          // --- END ROOTS HANDLER ---
+
           // Process the request through StreamableHTTPServerTransport
           await this.transport.handleRequest(req, res, req.body)
         } catch {
@@ -347,5 +373,12 @@ export class StreamableHTTPTransport {
         }
       })
     }
+  }
+
+  /**
+   * Get the current roots for a session (if any)
+   */
+  getRootsForSession(sessionId: string) {
+    return this.sessionRoots.get(sessionId) || []
   }
 }

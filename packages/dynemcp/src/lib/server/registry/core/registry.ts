@@ -16,6 +16,7 @@ import {
   loadToolsFromDirectory,
   loadResourcesFromDirectory,
   loadPromptsFromDirectory,
+  loadSamplesFromDirectory,
 } from '../../components/component-loader'
 import { validateTool } from '../../components/core/loaders/validators'
 
@@ -54,11 +55,13 @@ export class DyneMCPRegistry implements Registry {
     if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
       console.log('🔄 Loading components...')
     }
-    const [toolsResult, resourcesResult, promptsResult] = await Promise.all([
-      loadToolsFromDirectory(options.tools),
-      loadResourcesFromDirectory(options.resources),
-      loadPromptsFromDirectory(options.prompts),
-    ])
+    const [toolsResult, resourcesResult, promptsResult, samplesResult] =
+      await Promise.all([
+        loadToolsFromDirectory(options.tools),
+        loadResourcesFromDirectory(options.resources),
+        loadPromptsFromDirectory(options.prompts),
+        loadSamplesFromDirectory(options.samples),
+      ])
     this.storage.clear()
     this.storage.addTools(
       toolsResult.components.map((tool) => ({
@@ -79,6 +82,13 @@ export class DyneMCPRegistry implements Registry {
         id: prompt.name,
         type: 'prompt',
         module: prompt,
+      }))
+    )
+    this.storage.addSamples(
+      samplesResult.components.map((sample) => ({
+        id: sample.name || sample.id,
+        type: 'sample',
+        module: sample,
       }))
     )
     // Validate tools
@@ -139,6 +149,15 @@ export class DyneMCPRegistry implements Registry {
   }
 
   /**
+   * Get all registered samples.
+   */
+  getAllSamples(): RegistryItem[] {
+    return Array.from(this.storage['items'].values()).filter(
+      (item) => (item as RegistryItem).type === 'sample'
+    ) as RegistryItem[]
+  }
+
+  /**
    * Get a specific tool by id.
    */
   getTool(id: string): RegistryItem | undefined {
@@ -157,6 +176,13 @@ export class DyneMCPRegistry implements Registry {
    */
   getPrompt(id: string): RegistryItem | undefined {
     return this.storage.getItem('prompt', id)
+  }
+
+  /**
+   * Get a specific sample by id.
+   */
+  getSample(id: string): RegistryItem | undefined {
+    return this.storage.getItem('sample', id)
   }
 
   /**
