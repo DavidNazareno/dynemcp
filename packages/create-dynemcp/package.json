@@ -7,21 +7,12 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "create-dynemcp": "./dist/index.js"
+    "create-dynemcp": "./dist/bin.js"
   },
   "scripts": {
     "build": "rm -rf dist && rollup -c && tsc --emitDeclarationOnly --outDir dist",
     "clean": "rm -rf dist",
-    "copy-templates": "cp -r src/lib/template/templates dist/templates",
-    "postbuild": "npm run copy-templates"
-  },
-  "nx": {
-    "targets": {
-      "postbuild": {
-        "cwd": "packages/create-dynemcp/dist/lib/index.js",
-        "parallel": false
-      }
-    }
+    "copy-templates": "cp -r src/lib/template/templates dist/templates"
   },
   "exports": {
     "./package.json": "./package.json",

@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /**
  * DyneBuild CLI Entrypoint
  * All CLI logic lives in ./core/cli.ts

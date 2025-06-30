@@ -74,6 +74,7 @@
     "nx": "21.2.0",
     "prettier": "^3.0.0",
     "rollup": "^4.44.1",
+    "rollup-plugin-copy": "^3.5.0",
     "tslib": "^2.3.0",
     "tsx": "^4.20.3",
     "typescript": "~5.8.3",

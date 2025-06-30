@@ -83,7 +83,7 @@ echo "----------------------------------------"
 # 3. Run the create-dynemcp generator from the examples directory
 echo "🌱 Creating new test MCP server from template '$TEMPLATE_NAME'..."
 # We need to call the generator using a relative path from the new CWD
-node ../packages/create-dynemcp/dist/src/index.js $APP_NAME --template $TEMPLATE_NAME --yes --skip-install
+node ../packages/create-dynemcp/dist/bin.js $APP_NAME --template $TEMPLATE_NAME --yes --skip-install
 echo "✅ MCP server created at '$APP_NAME'."
 echo "----------------------------------------"
 

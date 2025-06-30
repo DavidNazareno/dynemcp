@@ -28,6 +28,7 @@ export async function copy(
       cwd,
       dot: true,
       absolute: false,
+      onlyFiles: true,
       ignore: ['**/node_modules/**', '**/.git/**'],
     })
 
@@ -35,14 +36,6 @@ export async function copy(
 
     for (const file of files) {
       const src = path.resolve(cwd, file)
-      const isDirectory = fs.statSync(src).isDirectory()
-
-      // Skip directories - we'll copy their contents when they match the pattern
-      if (isDirectory) {
-        console.log(`[DEBUG] ⏭️  Skipping directory: ${file}`)
-        continue
-      }
-
       const filename = rename
         ? rename(path.basename(file))
         : path.basename(file)

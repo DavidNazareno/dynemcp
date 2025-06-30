@@ -8,19 +8,11 @@
   "module": "./dist/lib/index.js",
   "types": "./dist/lib/index.d.ts",
   "bin": {
-    "dynemcp": "./dist/cli.js"
+    "dynemcp": "./dist/cli.cjs"
   },
   "scripts": {
     "build": "rm -rf dist && rollup -c && tsc --emitDeclarationOnly --outDir dist",
     "clean": "rm -rf dist"
-  },
-  "nx": {
-    "targets": {
-      "postbuild": {
-        "cwd": "packages/dynemcp/dist/cli.js",
-        "parallel": false
-      }
-    }
   },
   "exports": {
     "./package.json": "./package.json",

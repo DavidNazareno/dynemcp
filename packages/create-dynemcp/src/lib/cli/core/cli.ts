@@ -9,10 +9,12 @@ import {
   installDependencies,
   validateProjectName,
 } from '../../project'
+import { fileURLToPath } from 'url'
 
-const packageJson = JSON.parse(
-  readFileSync(new URL('../../../../package.json', import.meta.url), 'utf8')
-)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const packageJsonPath = path.resolve(__dirname, '../../../package.json')
+const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'))
 const version = packageJson.version
 
 const program = new Command('create-dynemcp')

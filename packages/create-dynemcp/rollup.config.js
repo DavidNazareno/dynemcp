@@ -1,7 +1,11 @@
 import typescript from '@rollup/plugin-typescript'
+import copy from 'rollup-plugin-copy'
 
 export default {
-  input: 'src/index.ts',
+  input: {
+    index: 'src/index.ts',
+    bin: 'src/bin.ts',
+  },
   output: [
     {
       dir: 'dist',
@@ -16,7 +20,15 @@ export default {
       entryFileNames: '[name].js',
     },
   ],
-  plugins: [typescript({ tsconfig: './tsconfig.rollup.json' })],
+  plugins: [
+    typescript({ tsconfig: './tsconfig.rollup.json' }),
+    copy({
+      targets: [
+        { src: 'src/lib/template/templates', dest: 'dist' },
+        { src: 'package.json', dest: 'dist' },
+      ],
+    }),
+  ],
   external: [
     'fs',
     'path',
