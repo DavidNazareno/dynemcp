@@ -1,9 +1,9 @@
 import { promises as fsPromises } from 'fs'
 import path from 'path'
-import { ConfigSchema, BaseConfigSchema, type BaseConfig } from './schemas.js'
-import type { DyneMCPConfig } from './interfaces.js'
-import { ConfigError } from './errors.js'
-import { createDefaultConfig, DEFAULT_CONFIG } from './defaults.js'
+import { ConfigSchema, BaseConfigSchema, type BaseConfig } from './schemas'
+import type { DyneMCPConfig } from './interfaces'
+import { ConfigError } from './errors'
+import { createDefaultConfig, DEFAULT_CONFIG } from './defaults'
 
 /**
  * Resolves the absolute path to the configuration file.

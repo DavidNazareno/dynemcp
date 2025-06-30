@@ -5,7 +5,7 @@
  * All CLI logic lives in ./core/cli.ts
  */
 
-import { run } from './core/cli.js'
+import { run } from './core/cli'
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {

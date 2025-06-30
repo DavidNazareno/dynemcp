@@ -10,7 +10,8 @@
     "create-dynemcp": "./dist/index.js"
   },
   "scripts": {
-    "clean": "rm -rf dist && rm -rf node_modules",
+    "build": "rm -rf dist && rollup -c && tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rm -rf dist",
     "copy-templates": "cp -r src/lib/template/templates dist/templates",
     "postbuild": "npm run copy-templates"
   },

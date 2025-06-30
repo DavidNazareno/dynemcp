@@ -11,7 +11,7 @@
  */
 
 // Type utilities and interfaces
-export type { InferSchema } from './core/interfaces.js'
+export type { InferSchema } from './core/interfaces'
 export type {
   ToolDefinition,
   ResourceDefinition,
@@ -19,7 +19,7 @@ export type {
   PromptArgument,
   PromptMessage,
   CallToolResult,
-} from './core/interfaces.js'
+} from './core/interfaces'
 
 // Utility functions
 export {
@@ -27,9 +27,9 @@ export {
   createTextResponse,
   createErrorResponse,
   withErrorHandling,
-} from './core/utils.js'
+} from './core/utils'
 
 // Base classes and helpers
-export { DyneMCPTool, createTypedTool } from './core/tool.js'
-export { DyneMCPResource } from './core/resource.js'
-export { DyneMCPPrompt } from './core/prompt.js'
+export { DyneMCPTool, createTypedTool } from './core/tool'
+export { DyneMCPResource } from './core/resource'
+export { DyneMCPPrompt } from './core/prompt'

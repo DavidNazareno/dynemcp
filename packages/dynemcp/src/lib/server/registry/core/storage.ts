@@ -2,7 +2,7 @@
 // Storage backend logic for the DyneMCP Registry module
 // -----------------------------------------------------
 
-import { RegistryItem, RegistryStorage } from './interfaces.js'
+import type { RegistryItem, RegistryStorage } from './interfaces'
 
 /**
  * In-memory implementation of the RegistryStorage interface.

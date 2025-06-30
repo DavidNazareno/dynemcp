@@ -19,10 +19,10 @@ export type {
   ServerConfig,
   AutoloadConfig,
   TransportConfig,
-} from './core/interfaces.js'
+} from './core/interfaces'
 
 // Utilities for loading and validating configuration
-export { loadConfig, loadBaseConfig } from './core/loader.js'
+export { loadConfig, loadBaseConfig } from './core/loader'
 
 // Centralized default values for all configuration sections
 export {

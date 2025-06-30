@@ -4,12 +4,9 @@ import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
-} from '../../api/core/interfaces.js'
-import type { ServerInitializationOptions } from './interfaces.js'
-import {
-  createTextResponse,
-  createErrorResponse,
-} from '../../api/core/utils.js'
+} from '../../api'
+import type { ServerInitializationOptions } from './interfaces'
+import { createTextResponse, createErrorResponse } from '../../api'
 
 export function createMCPServerInstance(
   options: ServerInitializationOptions

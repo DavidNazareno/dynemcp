@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import { TransportError } from '../core/errors.js'
+import { TransportError } from '../core/errors'
 
 /**
  * StdioTransport provides communication over standard input/output streams.

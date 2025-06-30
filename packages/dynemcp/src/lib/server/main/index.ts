@@ -3,10 +3,10 @@
 // -----------------------------------------------------
 
 // Types and interfaces
-export type { ServerInitializationOptions } from './core/interfaces.js'
+export type { ServerInitializationOptions } from './core/interfaces'
 
 // Main server class and factory
-export { DyneMCP, createMCPServer } from './core/server.js'
+export { DyneMCP, createMCPServer } from './core/server'
 
 // Initialization and registration utilities
 export {
@@ -15,10 +15,10 @@ export {
   registerResources,
   registerPrompts,
   registerComponents,
-} from './core/initializer.js'
+} from './core/initializer'
 
 // Custom errors
-export { ServerInitializationError } from './core/errors.js'
+export { ServerInitializationError } from './core/errors'
 
 // Utilities
-export { logMsg } from './core/utils.js'
+export { logMsg } from './core/utils'

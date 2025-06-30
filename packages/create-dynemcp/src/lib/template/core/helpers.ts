@@ -1,6 +1,6 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { TEMPLATES } from '../../../global/config-all-constants.js'
+import { TEMPLATES } from '../../../global/config-all-constants'
 
 /**
  * Returns a list of available templates in the templates directory

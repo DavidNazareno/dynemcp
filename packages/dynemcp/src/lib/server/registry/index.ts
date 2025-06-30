@@ -18,24 +18,21 @@ export type {
   RegistryLoader,
   RegistryStorage,
   Registry,
-} from './core/interfaces.js'
+} from './core/interfaces'
 
 // Utilities for loading and managing registry items
-export { DefaultRegistryLoader } from './core/loader.js'
-export { InMemoryRegistryStorage } from './core/storage.js'
-export { DyneMCPRegistry } from './core/registry.js'
+export { DefaultRegistryLoader } from './core/loader'
+export { InMemoryRegistryStorage } from './core/storage'
+export { DyneMCPRegistry } from './core/registry'
 
 // Centralized default values for the registry
 export {
   DEFAULT_REGISTRY_TYPES,
   DEFAULT_STORAGE_BACKEND,
-} from './core/defaults.js'
+} from './core/defaults'
 
 // Error handling utilities for registry errors
-export {
-  RegistryItemNotFoundError,
-  RegistryItemLoadError,
-} from './core/errors.js'
+export { RegistryItemNotFoundError, RegistryItemLoadError } from './core/errors'
 
 // Zod schemas for runtime validation
-export * from './core/schemas.js'
+export * from './core/schemas'

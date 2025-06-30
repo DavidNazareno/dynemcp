@@ -2,11 +2,11 @@
 // Main build logic for DyneMCP
 // ----------------------------
 
-import { ConsoleLogger } from '../../../cli/core/logger.js'
-import type { DyneMCPBuildOptions, BuildResult } from './interfaces.js'
-import { getBuildConfig } from '../../config/index.js'
-import { bundle } from '../../bundler/index.js'
-import type { BundleOptions } from '../../bundler/core/bundle.js'
+import { ConsoleLogger } from '../../../cli/core/logger'
+import type { DyneMCPBuildOptions, BuildResult } from './interfaces'
+import { getBuildConfig } from '../../config'
+import { bundle } from '../../bundler'
+import type { BundleOptions } from '../../bundler/core/bundle'
 
 function shouldLog() {
   return !process.env.DYNE_MCP_STDIO_LOG_SILENT

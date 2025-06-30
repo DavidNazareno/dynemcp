@@ -21,7 +21,7 @@ export interface BuildConfig {
   watch: boolean
 }
 
-import type { BundleResult } from '../../bundler/core/bundle.js'
+import type { BundleResult } from '../../bundler'
 
 /**
  * Options for building a DyneMCP project.

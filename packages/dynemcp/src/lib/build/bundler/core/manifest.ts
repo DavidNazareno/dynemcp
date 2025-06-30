@@ -5,7 +5,7 @@
 import { promises as fs } from 'fs'
 import { join } from 'path'
 import type { Metafile } from 'esbuild'
-import { shouldLog } from './utils.js'
+import { shouldLog } from './utils'
 
 export interface BuildManifest {
   version: string

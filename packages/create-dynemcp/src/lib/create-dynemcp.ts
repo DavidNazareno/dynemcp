@@ -7,7 +7,7 @@
  * It simply delegates to the modular CLI implementation.
  */
 
-import { run } from './cli/index.js'
+import { run } from './cli/core/cli'
 
 run().catch((e) => {
   console.error('Unexpected error:', e)

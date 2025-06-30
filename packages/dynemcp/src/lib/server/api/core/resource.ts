@@ -2,7 +2,7 @@
 // Base class for DyneMCP Resources
 // --------------------------------
 
-import type { ResourceDefinition } from './interfaces.js'
+import type { ResourceDefinition } from './interfaces'
 
 /**
  * Base class for all MCP Resources

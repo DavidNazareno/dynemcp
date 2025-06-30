@@ -1,5 +1,5 @@
-import { NETWORK, CLI, PATHS } from '../../../../global/config-all-contants.js'
-import { DyneMCPConfig } from './interfaces.js'
+import { NETWORK, CLI, PATHS } from '../../../../global/config-all-contants'
+import type { DyneMCPConfig } from './interfaces'
 
 // Default server name for DyneMCP
 export const DEFAULT_SERVER_NAME = 'dynemcp-server'

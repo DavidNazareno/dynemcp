@@ -4,10 +4,10 @@
  */
 
 // Main server entry points
-export * from './main/index.js'
+export * from './main'
 
 // Registry system
-export * from './registry/index.js'
+export * from './registry'
 
 // Config system (avoid ambiguous re-exports)
 export type {
@@ -15,13 +15,13 @@ export type {
   ServerConfig,
   TransportConfig,
   AutoloadConfig,
-} from './config/index.js'
+} from './config'
 
 // Communication/transport system
-export * from './communication/index.js'
+export * from './communication'
 
 // Component loading/creation helpers
-export * from './components/index.js'
+export * from './components'
 
-// API público completo
-export * from './api/index.js'
+// API public complete
+export * from './api'

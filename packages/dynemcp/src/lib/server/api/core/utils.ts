@@ -3,7 +3,7 @@
 // ---------------------------------------------
 
 import { z } from 'zod'
-import type { CallToolResult } from './interfaces.js'
+import type { CallToolResult } from './interfaces'
 
 /**
  * Helper function to convert Zod object schema to ZodRawShape

@@ -1,11 +1,13 @@
 // validators.ts
 // Type guards for validating dynamically loaded components in the DyneMCP framework
 
-import {
+// validators.ts
+// Type guards for validating dynamically loaded components in the DyneMCP framework
+import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
-} from '../../../api/index.js'
+} from '../../../api'
 
 /**
  * Checks if a value is a valid ToolDefinition.

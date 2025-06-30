@@ -1,15 +1,15 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { DyneMCPConfig } from '../../config/core/interfaces.js'
+import type { DyneMCPConfig } from '../../config/'
 import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
-} from '../../api/core/interfaces.js'
-import { registry } from '../../registry/core/registry.js'
-import { loadConfig } from '../../config/core/loader.js'
-import { createTransport, TRANSPORT_TYPES } from '../../communication/index.js'
-import { logMsg } from './utils.js'
-import { registerComponents } from './initializer.js'
+} from '../../api'
+import { registry } from '../../registry/core/registry'
+import { loadConfig } from '../../config/core/loader'
+import { createTransport, TRANSPORT_TYPES } from '../../communication'
+import { logMsg } from './utils'
+import { registerComponents } from './initializer'
 
 export class DyneMCP {
   private server: McpServer

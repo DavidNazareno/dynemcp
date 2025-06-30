@@ -2,7 +2,7 @@ import type {
   JSONRPCRequest,
   JSONRPCResponse,
   JSONRPCNotification,
-} from './interfaces.js'
+} from './interfaces'
 
 /**
  * Type guard for JSON-RPC request messages.

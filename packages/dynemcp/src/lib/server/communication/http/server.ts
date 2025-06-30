@@ -4,8 +4,8 @@ import path from 'path'
 import { randomUUID } from 'crypto'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
-import { TransportError } from '../core/errors.js'
-import { NETWORK, CLI } from '../../../../global/config-all-contants.js'
+import { TransportError } from '../core/errors'
+import { NETWORK, CLI } from '../../../../global/config-all-contants'
 
 /**
  * StreamableHTTPTransport provides HTTP POST and optional SSE streaming for MCP communication.

@@ -5,7 +5,7 @@
 // It is designed for extensibility and plug-and-play use in the DyneMCP framework.
 
 // Component loading helpers (dynamic discovery and validation)
-export * from './component-loader.js'
+export * from './component-loader'
 
 // Component creation helpers (factory functions for tools/resources/prompts)
-export * from './component-creators.js'
+export * from './component-creators'

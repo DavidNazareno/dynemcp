@@ -2,8 +2,8 @@
 // Dynamic loading logic for the DyneMCP Registry module
 // ----------------------------------------------------
 
-import { RegistryItem, RegistryLoader } from './interfaces.js'
-import { RegistryItemLoadError } from './errors.js'
+import type { RegistryItem, RegistryLoader } from './interfaces'
+import { RegistryItemLoadError } from './errors'
 
 /**
  * Default implementation of the RegistryLoader interface.

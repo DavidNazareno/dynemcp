@@ -1,0 +1,24 @@
+import typescript from '@rollup/plugin-typescript'
+
+export default {
+  input: 'src/lib/index.ts',
+  output: [
+    {
+      dir: 'dist',
+      format: 'esm',
+      sourcemap: true,
+      entryFileNames: '[name].js',
+    },
+    {
+      dir: 'dist/cjs',
+      format: 'cjs',
+      sourcemap: true,
+      entryFileNames: '[name].js',
+    },
+  ],
+  plugins: [typescript({ tsconfig: './tsconfig.rollup.json' })],
+  external: [
+    'fs', 'path', 'os', 'chalk', 'commander', 'inquirer', 'ora', 'execa', 'fast-glob', 'fs-extra', 'async-sema', 'url',
+    'esbuild', 'yargs', 'yargs/helpers', '@modelcontextprotocol/sdk/server/mcp.js', 'zod', '@modelcontextprotocol/sdk/server/stdio.js', 'express', 'cors', 'crypto', '@modelcontextprotocol/sdk/server/streamableHttp.js', 'child_process'
+  ],
+}

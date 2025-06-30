@@ -2,9 +2,9 @@
 // Build logic for DyneMCP CLI tool
 // -------------------------------
 
-import type { DyneMCPBuildOptions, BuildResult } from './interfaces.js'
-import { getBuildConfig } from '../../config/index.js'
-import { bundleCli, type BundleOptions } from '../../bundler/index.js'
+import type { DyneMCPBuildOptions, BuildResult } from './interfaces'
+import { getBuildConfig } from '../../config'
+import { bundleCli, type BundleOptions } from '../../bundler'
 
 /**
  * Build a DyneMCP CLI tool.

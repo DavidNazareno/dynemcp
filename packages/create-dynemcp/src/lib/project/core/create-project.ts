@@ -1,6 +1,6 @@
 import fs from 'fs-extra'
-import { installTemplate } from '../../template/index.js'
-import { PACKAGE_MANAGER } from '../../../global/config-all-constants.js'
+import { installTemplate } from '../../template'
+import { PACKAGE_MANAGER } from '../../../global/config-all-constants'
 
 /**
  * Creates a new project using the specified template and options

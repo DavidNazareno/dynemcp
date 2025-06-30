@@ -2,9 +2,9 @@
 // Base class and helpers for DyneMCP Tools
 // ----------------------------------------
 
-import { z, ZodRawShape } from 'zod'
-import type { ToolDefinition, CallToolResult } from './interfaces.js'
-import { withErrorHandling } from './utils.js'
+import { z, type ZodRawShape } from 'zod'
+import type { ToolDefinition, CallToolResult } from './interfaces'
+import { withErrorHandling } from './utils'
 
 /**
  * Simplified typed tool creator function

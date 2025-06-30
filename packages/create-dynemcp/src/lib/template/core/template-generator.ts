@@ -1,7 +1,4 @@
-import { installDependencies } from '../../project/core/package-manager.js'
-import { copy } from '../../project/core/copy.js'
-// import { getTemplatesDir } from '../../project/core/paths' // Archivo no encontrado, comentar o eliminar
-import { getPackageVersion } from '../../project/core/package-info.js'
+import { installDependencies, copy, getPackageVersion } from '../../project'
 
 import fastGlob from 'fast-glob'
 import os from 'os'
@@ -10,9 +7,9 @@ import { existsSync } from 'fs'
 import path from 'path'
 import { Sema } from 'async-sema'
 
-import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces.js'
-import { getTemplatesDir } from './helpers.js'
-import { LOGGING, PATHS } from '../../../global/config-all-constants.js'
+import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces'
+import { getTemplatesDir } from './helpers'
+import { LOGGING, PATHS } from '../../../global/config-all-constants'
 
 const templatesDir = getTemplatesDir()
 const pkgVersion = getPackageVersion()

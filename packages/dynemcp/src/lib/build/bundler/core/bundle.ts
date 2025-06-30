@@ -8,10 +8,10 @@ import {
   type BuildOptions as EsbuildBuildOptions,
   type BuildContext,
 } from 'esbuild'
-import { analyzeDependencies } from './analyzer.js'
-import { optimizeBundle } from './optimizer.js'
-import { generateManifest } from './manifest.js'
-import { BuildConfig } from '../../main/core/interfaces.js'
+import { analyzeDependencies } from './analyzer'
+import { optimizeBundle } from './optimizer'
+import { generateManifest } from './manifest'
+import type { BuildConfig } from '../../main'
 
 export interface BundleResult {
   success: boolean

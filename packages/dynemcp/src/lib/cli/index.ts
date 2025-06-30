@@ -1,1 +1,1 @@
-export { cli, dev } from './core/cli.js'
+export { cli, dev } from './core/cli'

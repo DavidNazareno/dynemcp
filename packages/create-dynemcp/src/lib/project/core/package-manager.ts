@@ -2,7 +2,7 @@ import { default as execa } from 'execa'
 import {
   PACKAGE_MANAGER,
   type PackageManager,
-} from '../../../global/config-all-constants.js'
+} from '../../../global/config-all-constants'
 
 export type { PackageManager }
 

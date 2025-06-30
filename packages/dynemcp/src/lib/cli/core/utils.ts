@@ -1,8 +1,8 @@
 import { spawn, ChildProcess } from 'child_process'
 import chalk from 'chalk'
-import { loadConfig } from '../../server/config/index.js'
-import { DYNEMCP_CLI, CLI } from '../../../global/config-all-contants.js'
-import type { DevOptions } from './types.js'
+import { loadConfig } from '../../server/config'
+import { DYNEMCP_CLI, CLI } from '../../../global/config-all-contants'
+import type { DevOptions } from './types'
 
 export function spawnProcess(
   command: string,

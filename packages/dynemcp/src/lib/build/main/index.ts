@@ -4,9 +4,9 @@
  * This file only re-exports the public API for the DyneMCP build system
  */
 
-export * from './core/build.js'
-export * from './core/build-cli.js'
-export * from './core/watch.js'
-export * from './core/clean.js'
-export * from './core/analyze.js'
-export * from './core/interfaces.js'
+export * from './core/build'
+export * from './core/build-cli'
+export * from './core/watch'
+export * from './core/clean'
+export * from './core/analyze'
+export * from './core/interfaces'

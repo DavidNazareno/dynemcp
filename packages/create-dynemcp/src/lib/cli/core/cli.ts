@@ -8,7 +8,7 @@ import {
   createProject,
   installDependencies,
   validateProjectName,
-} from '../../project/index.js'
+} from '../../project'
 
 const packageJson = JSON.parse(
   readFileSync(new URL('../../../../package.json', import.meta.url), 'utf8')

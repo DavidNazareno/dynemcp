@@ -9,28 +9,28 @@
  */
 
 // Main transport types and interfaces
-export * from './interfaces.js'
+export * from './interfaces'
 
 // Zod schemas for transport config validation
-export * from './schemas.js'
+export * from './schemas'
 
 // Default config values for transports
-export * from './defaults.js'
+export * from './defaults'
 
 // Custom transport errors
-export * from './errors.js'
+export * from './errors'
 
 // JSON-RPC helpers and type guards
-export * from './jsonrpc.js'
+export * from './jsonrpc'
 
 // Transport implementations
-export { StdioTransport } from '../stdio/server.js'
-export { StreamableHTTPTransport } from '../http/server.js'
+export { StdioTransport } from '../stdio/server'
+export { StreamableHTTPTransport } from '../http/server'
 
-import { StdioTransport } from '../stdio/server.js'
-import { StreamableHTTPTransport } from '../http/server.js'
-import { TRANSPORT_TYPES } from './defaults.js'
-import type { Transport } from './interfaces.js'
+import { StdioTransport } from '../stdio/server'
+import { StreamableHTTPTransport } from '../http/server'
+import { TRANSPORT_TYPES } from './defaults'
+import type { Transport } from './interfaces'
 
 /**
  * Factory function to create the appropriate transport based on config.

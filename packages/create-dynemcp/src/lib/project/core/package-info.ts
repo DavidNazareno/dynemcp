@@ -2,7 +2,7 @@
 
 import fs from 'fs'
 import path from 'path'
-import { getTemplatesDir } from '../../template/core/helpers.js'
+import { getTemplatesDir } from '../../template'
 
 /**
  * Returns the version from package.json

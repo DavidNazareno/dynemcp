@@ -5,8 +5,8 @@
 import chalk from 'chalk'
 import path from 'path'
 import fs from 'fs-extra'
-import { build, watch, buildCli, clean, analyze } from '../../main/index.js'
-import { PATHS } from '../../../../global/config-all-contants.js'
+import { build, watch, buildCli, clean, analyze } from '../../main'
+import { PATHS } from '../../../../global/config-all-contants'
 
 export interface CliOptions {
   config?: string

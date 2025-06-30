@@ -8,7 +8,7 @@ import { pathToFileURL } from 'url'
 import {
   transformTsFile,
   resolveAndCompileRelativeImports,
-} from './ts-compiler.js'
+} from './ts-compiler'
 
 /**
  * Dynamically imports a component file (TypeScript or JavaScript), normalizes its export,

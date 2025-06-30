@@ -2,22 +2,22 @@
 // Main Registry implementation for the DyneMCP Registry module
 // -----------------------------------------------------------
 
-import {
+import type {
   Registry,
   RegistryItem,
   RegistryLoader,
   RegistryStats,
   LoadAllOptions,
-} from './interfaces.js'
-import { RegistryItemNotFoundError } from './errors.js'
-import { InMemoryRegistryStorage } from './storage.js'
-import { DefaultRegistryLoader } from './loader.js'
+} from './interfaces'
+import { RegistryItemNotFoundError } from './errors'
+import { InMemoryRegistryStorage } from './storage'
+import { DefaultRegistryLoader } from './loader'
 import {
   loadToolsFromDirectory,
   loadResourcesFromDirectory,
   loadPromptsFromDirectory,
-} from '../../components/component-loader.js'
-import { validateTool } from '../../components/core/loaders/validators.js'
+} from '../../components/component-loader'
+import { validateTool } from '../../components/core/loaders/validators'
 
 /**
  * DyneMCP Registry - Main Registry Class

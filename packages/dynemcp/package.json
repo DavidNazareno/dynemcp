@@ -11,12 +11,12 @@
     "dynemcp": "./dist/cli.js"
   },
   "scripts": {
-    "clean": "rm -rf dist && rm -rf node_modules"
+    "build": "rm -rf dist && rollup -c && tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rm -rf dist"
   },
   "nx": {
     "targets": {
       "postbuild": {
-        "command": "chmod +x packages/dynemcp/dist/cli.js",
         "cwd": "packages/dynemcp/dist/cli.js",
         "parallel": false
       }

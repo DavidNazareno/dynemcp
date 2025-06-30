@@ -2,8 +2,8 @@
 // Clean logic for DyneMCP build output directory
 // ----------------------------------------------
 
-import { loadConfig, getBuildConfig } from '../../config/index.js'
-import { cleanBuildDir } from '../../bundler/index.js'
+import { loadConfig, getBuildConfig } from '../../config'
+import { cleanBuildDir } from '../../bundler'
 
 /**
  * Clean the build output directory.

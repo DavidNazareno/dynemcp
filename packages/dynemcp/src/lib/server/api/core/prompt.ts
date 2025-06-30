@@ -6,7 +6,7 @@ import type {
   PromptDefinition,
   PromptArgument,
   PromptMessage,
-} from './interfaces.js'
+} from './interfaces'
 
 /**
  * Base class for all MCP Prompts

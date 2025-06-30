@@ -8,8 +8,7 @@
       "vite/client",
       "node",
       "vitest"
-    ],
-    "forceConsistentCasingInFileNames": true
+    ]
   },
   "include": [
     "vite.config.ts",
@@ -25,10 +24,5 @@
     "src/**/*.test.jsx",
     "src/**/*.spec.jsx",
     "src/**/*.d.ts"
-  ],
-  "references": [
-    {
-      "path": "./tsconfig.lib.json"
-    }
   ]
 }

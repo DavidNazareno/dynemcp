@@ -2,7 +2,7 @@
 // Dependency analysis logic for DyneMCP
 // -------------------------------------
 
-import { analyzeDependencies } from '../../bundler/index.js'
+import { analyzeDependencies } from '../../bundler'
 
 /**
  * Analyze the project dependencies.

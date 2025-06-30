@@ -1,13 +1,13 @@
 import { readFileSync, existsSync } from 'fs'
 import { isAbsolute, resolve, basename } from 'path'
-import { z, ZodRawShape } from 'zod'
+import { z, type ZodRawShape } from 'zod'
 import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
   PromptMessage,
   CallToolResult,
-} from '../api/core/interfaces.js'
+} from '../api'
 
 /**
  * Options for creating a file-based resource.

@@ -6,7 +6,7 @@
 // All implementation logic has been moved to ./core/
 // This file only re-exports the public API for the DyneMCP bundler
 
-export * from './core/bundle.js'
-export * from './core/analyzer.js'
-export * from './core/manifest.js'
-export * from './core/optimizer.js'
+export * from './core/bundle'
+export * from './core/analyzer'
+export * from './core/manifest'
+export * from './core/optimizer'

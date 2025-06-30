@@ -6,14 +6,14 @@ import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
-} from '../api/core/interfaces.js'
-import { findFilesRecursively } from './core/loaders/file-discovery.js'
-import { loadComponentFromFile } from './core/loaders/dynamic-loader.js'
+} from '../api'
+import { findFilesRecursively } from './core/loaders/file-discovery'
+import { loadComponentFromFile } from './core/loaders/dynamic-loader'
 import {
   validateTool,
   validateResource,
   validatePrompt,
-} from './core/loaders/validators.js'
+} from './core/loaders/validators'
 
 /**
  * Options for loading components from a directory.

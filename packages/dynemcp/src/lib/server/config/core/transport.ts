@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { NETWORK } from '../../../../global/config-all-contants.js'
+import { NETWORK } from '../../../../global/config-all-contants'
 
 export const CorsSchema = z.object({
   allowOrigin: z

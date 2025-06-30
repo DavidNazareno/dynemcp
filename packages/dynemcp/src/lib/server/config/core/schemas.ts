@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { DEFAULT_SERVER_VERSION } from './defaults.js'
-import { TransportSchema } from './transport.js'
+import { DEFAULT_SERVER_VERSION } from './defaults'
+import { TransportSchema } from './transport'
 
 // Base schema for minimal configuration validation
 export const BaseConfigSchema = z.object({
