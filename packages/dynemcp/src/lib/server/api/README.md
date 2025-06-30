@@ -86,9 +86,7 @@ async function sendMcpRequest(method: string, params: any) {
 
 const result = await sample(
   {
-    messages: [
-      { role: 'user', content: { type: 'text', text: 'Say hello!' } }
-    ],
+    messages: [{ role: 'user', content: { type: 'text', text: 'Say hello!' } }],
     systemPrompt: 'You are a helpful assistant.',
     includeContext: 'thisServer',
     maxTokens: 50,
