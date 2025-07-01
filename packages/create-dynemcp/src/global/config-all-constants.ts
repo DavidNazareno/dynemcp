@@ -9,6 +9,8 @@
 // GLOBAL CONFIGURATION (imported inline to avoid path issues)
 // =============================================================================
 
+const SDK_VERSION = '1.13.2'
+
 // Network Configuration
 const NETWORK = {
   DEFAULT_HTTP_PORT: 3001,
@@ -389,4 +391,4 @@ export function createProjectPaths(projectName: string) {
 // EXPORTS
 // =============================================================================
 
-export { NETWORK, PATHS, TEMPLATES, LOGGING, PACKAGE_MANAGER }
+export { NETWORK, PATHS, TEMPLATES, LOGGING, PACKAGE_MANAGER, SDK_VERSION }

@@ -186,8 +186,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/dynemcp
       '@modelcontextprotocol/sdk':
-        specifier: ^1.12.1
-        version: 1.13.0
+        specifier: ^1.13.2
+        version: 1.13.2
       zod:
         specifier: ^3.22.4
         version: 3.25.67
@@ -272,8 +272,8 @@ importers:
   packages/dynemcp:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.12.1
-        version: 1.13.0
+        specifier: ^1.13.2
+        version: 1.13.2
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -2674,10 +2674,10 @@ packages:
       }
     hasBin: true
 
-  '@modelcontextprotocol/sdk@1.13.0':
+  '@modelcontextprotocol/sdk@1.13.2':
     resolution:
       {
-        integrity: sha512-P5FZsXU0kY881F6Hbk9GhsYx02/KgWK1DYf7/tyE/1lcFKhDYPQR9iYjhQXJn+Sg6hQleMo3DB7h7+p4wgp2Lw==,
+        integrity: sha512-Vx7qOcmoKkR3qhaQ9qf3GxiVKCEu+zfJddHv6x3dY/9P6+uIwJnmuAur5aB+4FDXf41rRrDnOEGkviX5oYZ67w==,
       }
     engines: { node: '>=18' }
 
@@ -17079,7 +17079,7 @@ snapshots:
 
   '@modelcontextprotocol/inspector-cli@0.14.3':
     dependencies:
-      '@modelcontextprotocol/sdk': 1.13.0
+      '@modelcontextprotocol/sdk': 1.13.2
       commander: 13.1.0
       spawn-rx: 5.1.2
     transitivePeerDependencies:
@@ -17087,7 +17087,7 @@ snapshots:
 
   '@modelcontextprotocol/inspector-client@0.14.3(@types/react-dom@19.0.0)(@types/react@19.0.0)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.19.1)(typescript@5.8.3)))':
     dependencies:
-      '@modelcontextprotocol/sdk': 1.13.0
+      '@modelcontextprotocol/sdk': 1.13.2
       '@radix-ui/react-checkbox': 1.3.2(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dialog': 1.1.14(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-icons': 1.3.2(react@18.3.1)
@@ -17120,7 +17120,7 @@ snapshots:
 
   '@modelcontextprotocol/inspector-server@0.14.3':
     dependencies:
-      '@modelcontextprotocol/sdk': 1.13.0
+      '@modelcontextprotocol/sdk': 1.13.2
       cors: 2.8.5
       express: 5.1.0
       ws: 8.18.2
@@ -17135,7 +17135,7 @@ snapshots:
       '@modelcontextprotocol/inspector-cli': 0.14.3
       '@modelcontextprotocol/inspector-client': 0.14.3(@types/react-dom@19.0.0)(@types/react@19.0.0)(tailwindcss@3.4.17(ts-node@10.9.2(@swc/core@1.5.29(@swc/helpers@0.5.17))(@types/node@20.19.1)(typescript@5.8.3)))
       '@modelcontextprotocol/inspector-server': 0.14.3
-      '@modelcontextprotocol/sdk': 1.13.0
+      '@modelcontextprotocol/sdk': 1.13.2
       concurrently: 9.2.0
       open: 10.1.2
       shell-quote: 1.8.3
@@ -17154,7 +17154,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@modelcontextprotocol/sdk@1.13.0':
+  '@modelcontextprotocol/sdk@1.13.2':
     dependencies:
       ajv: 6.12.6
       content-type: 1.0.5

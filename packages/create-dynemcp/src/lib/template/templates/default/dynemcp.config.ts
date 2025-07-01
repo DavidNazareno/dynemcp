@@ -1,6 +1,4 @@
-import { defineConfig } from '@/config'
-
-export default defineConfig({
+export default {
   server: {
     name: 'dynemcp-project',
     version: '1.0.0',
@@ -33,10 +31,10 @@ export default defineConfig({
     colors: true,
   },
   debug: {
-    enabled: false,
-    verbose: false,
-    showComponentDetails: false,
-    showTransportDetails: false,
+    enabled: true,
+    verbose: true,
+    showComponentDetails: true,
+    showTransportDetails: true,
   },
   performance: {
     maxConcurrentRequests: 100,
@@ -57,5 +55,4 @@ export default defineConfig({
   config: {
     env: true,
   },
-  // Puedes agregar aquí logging, debug, performance, security, config si los soporta el tipado
-})
+}

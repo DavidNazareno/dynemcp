@@ -55,12 +55,19 @@ export class DyneMCPRegistry implements Registry {
     if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
       console.log('🔄 Loading components...')
     }
+
+    // Provide default samples configuration if not provided
+    const samplesConfig = options.samples || {
+      enabled: false,
+      directory: './src/samples',
+    }
+
     const [toolsResult, resourcesResult, promptsResult, samplesResult] =
       await Promise.all([
         loadToolsFromDirectory(options.tools),
         loadResourcesFromDirectory(options.resources),
         loadPromptsFromDirectory(options.prompts),
-        loadSamplesFromDirectory(options.samples),
+        loadSamplesFromDirectory(samplesConfig),
       ])
     this.storage.clear()
     this.storage.addTools(

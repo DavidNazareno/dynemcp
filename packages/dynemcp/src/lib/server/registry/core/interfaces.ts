@@ -55,5 +55,5 @@ export interface LoadAllOptions {
   tools: { enabled: boolean; directory: string }
   resources: { enabled: boolean; directory: string }
   prompts: { enabled: boolean; directory: string }
-  samples: { enabled: boolean; directory: string }
+  samples?: { enabled: boolean; directory: string }
 }

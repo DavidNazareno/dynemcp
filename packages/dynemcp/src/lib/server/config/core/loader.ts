@@ -1,9 +1,58 @@
 import { promises as fsPromises } from 'fs'
 import path from 'path'
+import { spawn } from 'child_process'
 import { ConfigSchema, BaseConfigSchema, type BaseConfig } from './schemas'
 import type { DyneMCPConfig } from './interfaces'
 import { ConfigError } from './errors'
 import { createDefaultConfig, DEFAULT_CONFIG } from './defaults'
+
+/**
+ * Executes a TypeScript file using tsx and returns the result
+ */
+async function executeTypeScriptFile(tsPath: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    // Create a wrapper script that imports and exports the config
+    const wrapperScript = `
+      import config from '${tsPath.replace(/\\/g, '\\\\')}';
+      console.log(JSON.stringify(config));
+    `
+
+    const tsxProcess = spawn('npx', ['tsx', '-e', wrapperScript], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      cwd: process.cwd(),
+    })
+
+    let stdout = ''
+    let stderr = ''
+
+    tsxProcess.stdout.on('data', (data) => {
+      stdout += data.toString()
+    })
+
+    tsxProcess.stderr.on('data', (data) => {
+      stderr += data.toString()
+    })
+
+    tsxProcess.on('close', (code) => {
+      if (code === 0) {
+        try {
+          const config = JSON.parse(stdout.trim())
+          resolve(config)
+        } catch (error) {
+          reject(
+            new Error(`Failed to parse TypeScript config output: ${error}`)
+          )
+        }
+      } else {
+        reject(new Error(`TypeScript config execution failed: ${stderr}`))
+      }
+    })
+
+    tsxProcess.on('error', (error) => {
+      reject(new Error(`Failed to execute TypeScript config: ${error.message}`))
+    })
+  })
+}
 
 /**
  * Resolves the absolute path to the configuration file.
@@ -32,14 +81,9 @@ async function readConfigFile(configPath: string): Promise<any> {
   }
   try {
     if (absolutePath.endsWith('.ts')) {
-      // Dynamic import for TypeScript config
-      const imported = await import(absolutePath)
-      if (typeof imported.defineConfig !== 'function') {
-        throw ConfigError.invalidConfig(
-          'Missing defineConfig export in TS config'
-        )
-      }
-      return imported.defineConfig()
+      // Execute TypeScript file using tsx
+      const result = await executeTypeScriptFile(absolutePath)
+      return result
     } else {
       const content = await fsPromises.readFile(absolutePath, 'utf-8')
       return JSON.parse(content)

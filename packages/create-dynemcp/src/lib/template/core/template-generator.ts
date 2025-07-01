@@ -9,7 +9,11 @@ import { Sema } from 'async-sema'
 
 import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces'
 import { getTemplatesDir } from './helpers'
-import { LOGGING, PATHS } from '../../../global/config-all-constants'
+import {
+  LOGGING,
+  PATHS,
+  SDK_VERSION,
+} from '../../../global/config-all-constants'
 
 const templatesDir = getTemplatesDir()
 const pkgVersion = getPackageVersion()
@@ -188,7 +192,7 @@ export const installTemplate = async (
       private: true,
       scripts: generateScripts(),
       dependencies: {
-        '@modelcontextprotocol/sdk': '^1.12.1',
+        '@modelcontextprotocol/sdk': `^${SDK_VERSION}`,
         '@dynemcp/dynemcp': `^${version}`,
         zod: '^3.22.4',
       },
