@@ -30,6 +30,7 @@ config/
 - **Defaults**: All config sections have centralized defaults, making it easy to extend or override.
 - **Error Handling**: Custom error classes provide clear, actionable error messages for configuration issues.
 - **Transport Config**: Transport configuration is modular and validated, supporting all built-in and custom transports.
+- **Advanced Sections**: The configuration supports advanced sections for `logging`, `debug`, `performance`, `security` y `config` (env), todas con tipado y validación estricta y valores por defecto.
 
 ## Usage
 
@@ -53,6 +54,65 @@ import { ConfigSchema } from '@/server/config'
 ```ts
 import { createDefaultConfig } from '@/server/config'
 const defaultConfig = createDefaultConfig()
+```
+
+### Default Sections Example
+
+```ts
+import {
+  DEFAULT_LOGGING_CONFIG,
+  DEFAULT_DEBUG_CONFIG,
+  DEFAULT_PERFORMANCE_CONFIG,
+  DEFAULT_SECURITY_CONFIG,
+  DEFAULT_ENV_CONFIG,
+} from '@/server/config'
+
+console.log(DEFAULT_LOGGING_CONFIG)
+// { enabled: true, level: 'info', format: 'text', timestamp: true, colors: true }
+```
+
+### Example dynemcp.config.ts
+
+```ts
+import { defineConfig } from '@/config'
+
+export default defineConfig({
+  server: { name: 'my-server', version: '1.0.0' },
+  tools: { enabled: true, directory: './src/tools' },
+  // ...
+  logging: {
+    enabled: true,
+    level: 'info',
+    format: 'text',
+    timestamp: true,
+    colors: true,
+  },
+  debug: {
+    enabled: false,
+    verbose: false,
+    showComponentDetails: false,
+    showTransportDetails: false,
+  },
+  performance: {
+    maxConcurrentRequests: 100,
+    requestTimeout: 30000,
+    memoryLimit: '512mb',
+    enableMetrics: false,
+  },
+  security: {
+    enableValidation: true,
+    strictMode: false,
+    allowedOrigins: ['*'],
+    rateLimit: {
+      enabled: false,
+      maxRequests: 100,
+      windowMs: 900000,
+    },
+  },
+  config: {
+    env: true,
+  },
+})
 ```
 
 ### Error Handling

@@ -14,14 +14,62 @@ export interface ServerConfig {
   documentationUrl?: string
 }
 
+// Logging configuration
+export interface LoggingConfig {
+  enabled: boolean
+  level: 'info' | 'warn' | 'error' | 'debug'
+  format: 'text' | 'json'
+  timestamp: boolean
+  colors: boolean
+}
+
+// Debug configuration
+export interface DebugConfig {
+  enabled: boolean
+  verbose: boolean
+  showComponentDetails: boolean
+  showTransportDetails: boolean
+}
+
+// Performance configuration
+export interface PerformanceConfig {
+  maxConcurrentRequests: number
+  requestTimeout: number
+  memoryLimit: string
+  enableMetrics: boolean
+}
+
+// Security configuration
+export interface SecurityConfig {
+  enableValidation: boolean
+  strictMode: boolean
+  allowedOrigins: string[]
+  rateLimit: {
+    enabled: boolean
+    maxRequests: number
+    windowMs: number
+  }
+}
+
+// Config (env) configuration
+export interface EnvConfig {
+  env: boolean
+}
+
 // Main configuration interface for DyneMCP
 export interface DyneMCPConfig {
   server: ServerConfig
   tools: AutoloadConfig
   resources: AutoloadConfig
   prompts: AutoloadConfig
-  resourcesTemplates: AutoloadConfig
+  resourcesTemplates?: AutoloadConfig
   transport: TransportConfig
+  description?: string
+  logging?: LoggingConfig
+  debug?: DebugConfig
+  performance?: PerformanceConfig
+  security?: SecurityConfig
+  config?: EnvConfig
 }
 
 // Type definition for Stdio transport configuration

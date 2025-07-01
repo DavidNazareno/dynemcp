@@ -15,7 +15,7 @@ export type DyneMCPConfig = typeof DyneMCPConfigSchema._type
  * Load the DyneMCP configuration file (async, for general config only)
  */
 export async function loadConfig(
-  configPath = 'dynemcp.config.json'
+  configPath = 'dynemcp.config.ts'
 ): Promise<DyneMCPConfig> {
   const absolutePath = path.isAbsolute(configPath)
     ? configPath
@@ -28,10 +28,17 @@ export async function loadConfig(
       throw new Error(`Configuration file not found: ${absolutePath}`)
     }
 
-    const configContent = await fs.readFile(absolutePath, 'utf-8')
-    const config: unknown = JSON.parse(configContent)
-
-    return DyneMCPConfigSchema.parse(config)
+    if (absolutePath.endsWith('.ts')) {
+      const imported = await import(absolutePath)
+      if (typeof imported.default !== 'function') {
+        throw new Error('Missing default export (defineConfig) in TS config')
+      }
+      return imported.default()
+    } else {
+      const configContent = await fs.readFile(absolutePath, 'utf-8')
+      const config: unknown = JSON.parse(configContent)
+      return DyneMCPConfigSchema.parse(config)
+    }
   } catch (error) {
     if (error instanceof Error && 'errors' in error) {
       throw new Error(

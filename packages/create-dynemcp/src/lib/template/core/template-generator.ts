@@ -261,8 +261,6 @@ export const installTemplate = async (
       JSON.stringify(packageJson, null, 2) + os.EOL
     )
 
-    await updateProjectConfig(args.root, args.appName)
-
     if (args.skipInstall) return
 
     console.log('\nInstalling dependencies:')
@@ -298,22 +296,4 @@ export const installTemplate = async (
     console.error('[installTemplate] Error:', error)
     throw error
   }
-}
-
-async function updateProjectConfig(
-  projectPath: string,
-  projectName: string
-): Promise<void> {
-  const configPath = path.join(projectPath, 'dynemcp.config.json')
-  let config: any = {}
-  try {
-    if (existsSync(configPath)) {
-      config = JSON.parse(await fs.readFile(configPath, 'utf8'))
-    }
-  } catch {
-    // ignore
-  }
-  config.name = projectName
-  config.build = config.build || {}
-  await fs.writeFile(configPath, JSON.stringify(config, null, 2) + os.EOL)
 }

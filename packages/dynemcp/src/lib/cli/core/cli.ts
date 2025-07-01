@@ -13,7 +13,7 @@ const addConfigOption = (y: Argv) =>
   y.option('config', {
     alias: 'c',
     type: 'string',
-    describe: 'Path to dynemcp.config.json',
+    describe: 'Path to dynemcp.config.ts',
   })
 
 const cli = yargs(hideBin(process.argv))

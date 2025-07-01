@@ -25,7 +25,7 @@ export async function getEffectiveTransport(argv: DevOptions): Promise<{
   port?: number
   host?: string
 }> {
-  const DEFAULT_CONFIG_PATH = 'dynemcp.config.json'
+  const DEFAULT_CONFIG_PATH = 'dynemcp.config.ts'
   const configPath = argv.config || DEFAULT_CONFIG_PATH
   const transportType = argv.transport
   let configTransport: string | undefined

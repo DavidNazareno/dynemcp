@@ -18,7 +18,7 @@ function resolveConfigPath(configPath?: string): string {
 }
 
 /**
- * Reads and parses the configuration JSON file.
+ * Reads and parses the configuration file, supporting both JSON and TypeScript (with defineConfig).
  * @param configPath Path to the config file.
  * @returns Parsed configuration object.
  * @throws ConfigError if the file is not found or invalid.
@@ -31,8 +31,19 @@ async function readConfigFile(configPath: string): Promise<any> {
     throw ConfigError.fileNotFound(absolutePath)
   }
   try {
-    const content = await fsPromises.readFile(absolutePath, 'utf-8')
-    return JSON.parse(content)
+    if (absolutePath.endsWith('.ts')) {
+      // Dynamic import for TypeScript config
+      const imported = await import(absolutePath)
+      if (typeof imported.defineConfig !== 'function') {
+        throw ConfigError.invalidConfig(
+          'Missing defineConfig export in TS config'
+        )
+      }
+      return imported.defineConfig()
+    } else {
+      const content = await fsPromises.readFile(absolutePath, 'utf-8')
+      return JSON.parse(content)
+    }
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw ConfigError.parseError(error.message)

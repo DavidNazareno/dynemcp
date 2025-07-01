@@ -46,3 +46,12 @@ export { ConfigError } from './core/errors.js'
 export * from './core/schemas.js'
 // export * from './core/transport.js'
 export * from '../communication/core/factory.js'
+
+/**
+ * Helper for user config files: defineConfig
+ */
+export function defineConfig<
+  T extends import('./core/interfaces').DyneMCPConfig,
+>(config: T): () => T {
+  return () => config
+}
