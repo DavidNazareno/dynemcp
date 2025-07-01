@@ -44,32 +44,6 @@ export class DyneMCP {
     }
     this.server = new McpServer(serverConfig)
 
-    // MCP pagination handlers
-    const s = this.server.server // Server base
-    // tools/list
-    s.setRequestHandler({ method: 'tools/list' } as any, (req: any) => {
-      const { cursor } = req.params || {}
-      const { items, nextCursor } = registry.getPaginatedTools(cursor)
-      return { tools: items, nextCursor }
-    })
-    // prompts/list
-    s.setRequestHandler({ method: 'prompts/list' } as any, (req: any) => {
-      const { cursor } = req.params || {}
-      const { items, nextCursor } = registry.getPaginatedPrompts(cursor)
-      return { prompts: items, nextCursor }
-    })
-    // resources/list
-    s.setRequestHandler({ method: 'resources/list' } as any, (req: any) => {
-      const { cursor } = req.params || {}
-      const { items, nextCursor } = registry.getPaginatedResources(cursor)
-      return { resources: items, nextCursor }
-    })
-
-    // MCP ping handler
-    s.setRequestHandler({ method: 'ping' } as any, (_req: any) => {
-      return {}
-    })
-
     setCurrentDyneMCPInstance(this)
   }
 
@@ -305,41 +279,3 @@ export async function createMCPServer(
 ): Promise<DyneMCP> {
   return DyneMCP.create(config)
 }
-
-// === CHECK DE VARIABLES DE ENTORNO CRÍTICAS ===
-;(function checkCriticalEnv() {
-  const isProduction = process.env.NODE_ENV === 'production'
-  // JWT_SECRET obligatorio y fuerte
-  if (
-    !process.env.JWT_SECRET ||
-    process.env.JWT_SECRET === 'changeme' ||
-    process.env.JWT_SECRET.length < 32
-  ) {
-    throw new Error(
-      '[SECURITY] JWT_SECRET is not set, is too short, or is insecure (changeme). Define a strong JWT_SECRET (>=32 chars) in your environment variables.'
-    )
-  }
-  // NODE_ENV debe ser production en producción
-  if (isProduction && process.env.NODE_ENV !== 'production') {
-    throw new Error(
-      '[SECURITY] NODE_ENV must be set to production in production environments.'
-    )
-  }
-  // expectedAudience (si se usa en config)
-  if (
-    isProduction &&
-    process.env.EXPECTED_AUDIENCE &&
-    ['changeme', 'test', 'default', ''].includes(process.env.EXPECTED_AUDIENCE)
-  ) {
-    throw new Error(
-      '[SECURITY] EXPECTED_AUDIENCE is not set or is insecure. Set a unique, non-default value for expectedAudience.'
-    )
-  }
-  // Claves de API externas (solo warning)
-  const externalKeys = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY']
-  for (const key of externalKeys) {
-    if (!process.env[key]) {
-      console.warn(`[WARNING] ${key} is not set. Some features may not work.`)
-    }
-  }
-})()

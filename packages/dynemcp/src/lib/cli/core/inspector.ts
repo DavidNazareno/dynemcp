@@ -97,7 +97,13 @@ async function launchStdioTransport(config?: string) {
   }
 
   console.log(DYNEMCP_SERVER.MESSAGES.INSPECTOR_STARTING)
-  const inspectorArgs = getInspectorArgs(CLI.TRANSPORT_TYPES[0])
+  const serverCmd = 'node'
+  const serverArgs = ['dist/server.js']
+  const inspectorArgs = [
+    '@modelcontextprotocol/inspector',
+    serverCmd,
+    ...serverArgs,
+  ]
   const inspectorOptions = getInspectorSpawnOptions(CLI.TRANSPORT_TYPES[0])
 
   const inspectorProcess = spawnProcess(

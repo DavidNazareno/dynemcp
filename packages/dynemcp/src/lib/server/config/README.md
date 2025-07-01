@@ -163,6 +163,7 @@ transport: {
 ```
 
 **Precedence:**
+
 - If `transport.options.rateLimit` is set, it is used.
 - Otherwise, if `security.rateLimit.enabled` is true, it is used.
 - Otherwise, a safe default (100 requests/15 min) is used.
@@ -178,10 +179,12 @@ See [express-rate-limit](https://www.npmjs.com/package/express-rate-limit) for a
 - **For JWT authentication, set the `expectedAudience` option in your middleware or config to enforce that only tokens intended for this server are accepted.**
   - Example:
     ```ts
-    app.use(jwtAuthMiddleware({
-      allowedRoles: ['admin'],
-      expectedAudience: 'my-mcp-server',
-    }))
+    app.use(
+      jwtAuthMiddleware({
+        allowedRoles: ['admin'],
+        expectedAudience: 'my-mcp-server',
+      })
+    )
     ```
   - This prevents token passthrough and confused deputy attacks. In production, a warning is shown if not set.
 

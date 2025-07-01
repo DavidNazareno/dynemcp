@@ -178,10 +178,12 @@ app.use(jwtAuthMiddleware())
 app.use(jwtAuthMiddleware(['admin', 'user']))
 
 // With allowed roles and audience validation (recommended for production)
-app.use(jwtAuthMiddleware({
-  allowedRoles: ['admin'],
-  expectedAudience: 'my-mcp-server', // <-- set your audience string here
-}))
+app.use(
+  jwtAuthMiddleware({
+    allowedRoles: ['admin'],
+    expectedAudience: 'my-mcp-server', // <-- set your audience string here
+  })
+)
 ```
 
 - `expectedAudience` enforces that the JWT `aud` claim matches the expected value. This is a critical security measure to prevent token passthrough and confused deputy attacks.
@@ -229,7 +231,7 @@ export default tool(
     description: 'Pick a fruit',
     complete: async ({ argument, partialInput }) => {
       if (argument === 'fruit') {
-        return ['apple', 'banana', 'orange'].filter(f =>
+        return ['apple', 'banana', 'orange'].filter((f) =>
           f.startsWith(partialInput)
         )
       }
@@ -248,15 +250,16 @@ import { z } from 'zod'
 export default prompt({
   name: 'country-prompt',
   description: 'Prompt with country autocompletion',
-  arguments: [
-    { name: 'country', description: 'Country name', required: true },
-  ],
+  arguments: [{ name: 'country', description: 'Country name', required: true }],
   getMessages: async (args) => [
-    { role: 'user', content: { type: 'text', text: `Country: ${args?.country}` } },
+    {
+      role: 'user',
+      content: { type: 'text', text: `Country: ${args?.country}` },
+    },
   ],
   complete: async ({ argument, partialInput }) => {
     if (argument === 'country') {
-      return ['Argentina', 'Brazil', 'Canada', 'Denmark'].filter(c =>
+      return ['Argentina', 'Brazil', 'Canada', 'Denmark'].filter((c) =>
         c.toLowerCase().startsWith(partialInput.toLowerCase())
       )
     }
@@ -342,7 +345,7 @@ export default tool(
         total: count,
         message: `Processed ${i} of ${count}`,
       })
-      await new Promise(r => setTimeout(r, 100)) // Simulate work
+      await new Promise((r) => setTimeout(r, 100)) // Simulate work
     }
     return { result: `Done!` }
   },
@@ -380,7 +383,7 @@ export default tool(
         // Cleanup, log, etc.
         throw new Error('Request cancelled by client')
       }
-      await new Promise(r => setTimeout(r, 100))
+      await new Promise((r) => setTimeout(r, 100))
     }
     return { result: `Done!` }
   }

@@ -118,10 +118,12 @@ dynemcp analyze
 - Example:
 
 ```ts
-app.use(jwtAuthMiddleware({
-  allowedRoles: ['admin'],
-  expectedAudience: 'my-mcp-server',
-}))
+app.use(
+  jwtAuthMiddleware({
+    allowedRoles: ['admin'],
+    expectedAudience: 'my-mcp-server',
+  })
+)
 ```
 
 - If `expectedAudience` is not set in production, a warning will be printed.
@@ -133,16 +135,19 @@ app.use(jwtAuthMiddleware({
 DyneMCP incluye un **check automático de variables de entorno críticas** al arrancar el servidor. Si alguna variable esencial falta o es insegura, el servidor no arranca y muestra un error claro. Esto te protege contra despliegues inseguros por error humano, algo que la mayoría de frameworks (incluyendo Next.js y Astro) no hacen por defecto.
 
 ### Variables chequeadas:
+
 - `JWT_SECRET`: Debe estar definida, no ser `changeme` y tener al menos 32 caracteres.
 - `NODE_ENV`: Debe ser `production` en producción.
 - `EXPECTED_AUDIENCE`: (si se usa) Debe estar definida y no ser un valor genérico como `changeme`, `test`, `default` o vacío.
 - Claves de API externas (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`): Si faltan, se muestra un warning pero no se detiene el arranque.
 
 ### ¿Qué ocurre si falta alguna?
+
 - Si falta o es insegura una variable crítica, el proceso falla inmediatamente y muestra un error explicativo.
 - Si falta una clave de API externa, solo se muestra un warning.
 
 ### ¿Por qué es importante?
+
 - Evita que tu servidor arranque en modo inseguro por accidente.
 - Te diferencia de otros frameworks y plantillas populares.
 - Es una defensa extra para tus usuarios y para ti mismo.
