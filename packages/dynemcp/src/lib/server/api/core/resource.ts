@@ -3,26 +3,37 @@
 // -------------------------------------
 
 import type { ResourceDefinition } from './interfaces'
+import type { ZodSchema } from 'zod'
 
 /**
  * Nueva API funcional para definir recursos (resources) de DyneMCP.
  * Permite una sintaxis simple y flexible:
  *
- * export default resource({ uri, name, description, mimeType, getContent })
+ * export default resource({ uri, name, description, mimeType, paramsSchema, getContent })
  */
 export function resource(config: {
   uri: string
   name: string
   description?: string
   mimeType?: string
-  getContent: () => string | Promise<string>
+  paramsSchema?: ZodSchema<any>
+  getContent: (params?: Record<string, any>) => string | Promise<string>
 }): ResourceDefinition {
   return {
     uri: config.uri,
     name: config.name,
     description: config.description,
-    mimeType: config.mimeType,
-    content: config.getContent,
-    contentType: config.mimeType || 'application/octet-stream',
+    async content(params?: Record<string, any>) {
+      if (config.paramsSchema) {
+        const parsed = config.paramsSchema.safeParse(params)
+        if (!parsed.success) {
+          throw new Error(
+            'Invalid parameters: ' + JSON.stringify(parsed.error.format())
+          )
+        }
+        return config.getContent(parsed.data)
+      }
+      return config.getContent(params)
+    },
   }
 }

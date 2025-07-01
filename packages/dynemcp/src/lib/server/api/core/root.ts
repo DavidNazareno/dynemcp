@@ -2,7 +2,7 @@
 // Helpers para trabajar con Roots en MCP
 // --------------------------------------
 
-import type { Root, RootList, RootChangeNotification } from './interfaces'
+import type { Root, RootList } from './interfaces'
 
 /**
  * Valida si un objeto es un Root válido.

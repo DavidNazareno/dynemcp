@@ -8,6 +8,7 @@ import { TransportError } from '../core/errors'
 import { NETWORK, CLI } from '../../../../global/config-all-contants'
 import { isJSONRPCNotification } from '../core/jsonrpc'
 import { parseRootList } from '../../api/core/root'
+import { registry } from '../../registry/core/registry'
 
 /**
  * StreamableHTTPTransport provides HTTP POST and optional SSE streaming for MCP communication.
@@ -203,11 +204,21 @@ export class StreamableHTTPTransport {
    * Dynamically loads authentication middleware if configured.
    */
   private async loadAuthenticationMiddleware(): Promise<express.RequestHandler> {
-    if (!this.options?.authentication?.path) {
+    // Use registry to find src/middleware.ts automatically
+    const middlewarePath = registry.getAuthenticationMiddlewarePath()
+    if (!middlewarePath) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(
+          'Authentication middleware (src/middleware.ts) is required in production. Please create src/middleware.ts and export a default Express middleware.'
+        )
+      }
+      // In development, allow all requests but log a warning
+      console.warn(
+        '⚠️ No authentication middleware (src/middleware.ts) found. All requests are allowed (development only).'
+      )
       return (req, res, next) => next()
     }
     try {
-      const middlewarePath = path.resolve(this.options.authentication.path)
       const middlewareModule = await import(middlewarePath)
       if (typeof middlewareModule.default !== 'function') {
         throw new Error(

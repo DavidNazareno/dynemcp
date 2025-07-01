@@ -118,6 +118,74 @@ Use the provided utilities for consistent error and response handling. Handler f
 - All templates and examples use the new API.
 - The registry and loader support automatic discovery of all component types, including sampling endpoints.
 
+## Dynamic Resource Templates
+
+Dynamically expose resources using URI templates (RFC 6570) with the `resourceTemplate` API. This allows you to define resources whose content is generated on demand, and whose URI can include parameters.
+
+### Usage
+
+Create a `resource-template.ts` file inside any resource folder (e.g., `src/resources/user-data/resource-template.ts`).
+
+```ts
+import { resourceTemplate } from '@dynemcp/dynemcp'
+
+export default resourceTemplate({
+  uriTemplate: '/user-data/{id}',
+  name: 'User Data Dynamic Resource',
+  description: 'Dynamic resource for user data',
+  mimeType: 'text/plain',
+  async getContent(params) {
+    // params.id will be available
+    return `Dynamic content for user with id: ${params.id}`
+  },
+})
+```
+
+- The framework will automatically discover and register all `resource-template.ts` files in subfolders of `resources/`.
+- The resource will be available to MCP clients using the defined URI template.
+
+## 🔒 Built-in JWT Authentication Middleware
+
+The DyneMCP API provides a ready-to-use JWT authentication middleware for Express-based servers.
+
+- Import it from `@dynemcp/dynemcp/auth/jwt-middleware`.
+- Use it in your server or reference it in your config for automatic integration.
+- In production, authentication is required and the server will refuse to start without it.
+
+### Usage Example
+
+```ts
+// dynemcp.config.ts
+transport: {
+  type: 'streamable-http',
+  options: {
+    authentication: {
+      path: './src/auth/jwt-middleware.ts'
+    }
+  }
+}
+```
+
+### Example: Making an authenticated request
+
+Generate a JWT token (for example, using [jwt.io](https://jwt.io/) or any JWT library) with your secret:
+
+```sh
+export JWT_SECRET=changeme
+node -e "console.log(require('jsonwebtoken').sign({ user: 'alice', role: 'admin' }, process.env.JWT_SECRET))"
+```
+
+Then, make a request to your DyneMCP server:
+
+```sh
+curl -X POST http://localhost:3000/mcp \
+  -H "Authorization: Bearer <your_token_here>" \
+  -H "Content-Type: application/json" \
+  -d '{ "jsonrpc": "2.0", "method": "tools/list", "id": 1 }'
+```
+
+If the token is valid, you'll get a response. If not, you'll get a 401 Unauthorized error.
+
 ## License
 
 MIT

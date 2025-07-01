@@ -1,5 +1,5 @@
 import { NETWORK, CLI, PATHS } from '../../../../global/config-all-contants'
-import type { DyneMCPConfig } from './interfaces'
+import type { DyneMCPConfig, LoggingConfig } from './interfaces'
 
 // Default server name for DyneMCP
 export const DEFAULT_SERVER_NAME = 'dynemcp-server'
@@ -30,10 +30,10 @@ export const DEFAULT_TRANSPORT_OPTIONS = {
 }
 
 // Default logging configuration
-export const DEFAULT_LOGGING_CONFIG = {
+export const DEFAULT_LOGGING_CONFIG: LoggingConfig = {
   enabled: true,
   level: 'info',
-  format: 'text',
+  format: 'json',
   timestamp: true,
   colors: true,
 }

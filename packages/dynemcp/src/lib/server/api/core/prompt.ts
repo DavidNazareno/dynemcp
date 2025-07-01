@@ -2,11 +2,8 @@
 // API funcional para DyneMCP Prompts
 // -----------------------------------
 
-import type {
-  PromptDefinition,
-  PromptArgument,
-  PromptMessage,
-} from './interfaces'
+import type { LoadedPrompt, PromptArgument, PromptMessage } from './interfaces'
+import { z } from 'zod'
 
 /**
  * Nueva API funcional para definir prompts (prompts) de DyneMCP.
@@ -18,12 +15,14 @@ export function prompt(config: {
   name: string
   description?: string
   arguments?: PromptArgument[]
+  argsSchema?: z.ZodRawShape | Record<string, z.ZodTypeAny>
   getMessages: (args?: Record<string, string>) => Promise<PromptMessage[]>
-}): PromptDefinition {
+}): LoadedPrompt {
   return {
     name: config.name,
-    description: config.description,
+    description: config.description ?? '',
     arguments: config.arguments,
+    argsSchema: config.argsSchema,
     getMessages: config.getMessages,
   }
 }

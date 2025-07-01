@@ -190,3 +190,119 @@ The `keyValidator._parse is not a function` error has been fixed in the latest v
 3. Passes the proper Zod object to the MCP SDK
 
 This means both class-based and object-based tool definitions work seamlessly.
+
+## 🧪 Creating and Running Samples (LLM Sampling)
+
+A **sample** is a request for an LLM completion (sampling) that you can define as a TypeScript file exporting a `SamplingRequest` object.
+
+### How to create a sample
+
+1. Create a file in `src/samples/` (e.g., `src/samples/hello-world.ts`).
+2. Export an object of type `SamplingRequest`:
+
+```ts
+import type { SamplingRequest } from '@dynemcp/dynemcp'
+
+const helloWorld: SamplingRequest = {
+  messages: [{ role: 'user', content: { type: 'text', text: 'Say hello!' } }],
+  maxTokens: 50,
+}
+
+export default helloWorld
+```
+
+### How to run a sample
+
+Import the object and use the `sample` helper from the framework:
+
+```ts
+import helloWorld from './samples/hello-world'
+import { sample } from '@dynemcp/dynemcp'
+
+const result = await sample(helloWorld)
+console.log(result.content.text)
+```
+
+- You do **not** need to register or autoload samples.
+- You can run samples from tools, endpoints, tests, or internal logic.
+
+#### Example: Integrating a sample in a tool
+
+```ts
+import { z } from 'zod'
+import { sample } from '@dynemcp/dynemcp'
+import helloWorld from '../samples/hello-world'
+
+export default {
+  name: 'run-hello-sample',
+  description: 'Runs the hello-world sample',
+  inputSchema: z.object({}),
+  async execute(_, context) {
+    return await sample(helloWorld)
+  },
+}
+```
+
+## 🧩 Dynamic Resource Templates
+
+You can create dynamic resources by adding a `resource-template.ts` file inside any subfolder of `src/resources/`.
+
+- Use the `resourceTemplate` API to define a resource with a URI template and a dynamic content generator.
+- The framework will automatically discover and register all such templates.
+
+### Example
+
+```
+src/resources/user-data/resource-template.ts
+```
+
+```ts
+import { resourceTemplate } from '@dynemcp/dynemcp'
+
+export default resourceTemplate({
+  uriTemplate: '/user-data/{id}',
+  name: 'User Data Dynamic Resource',
+  description: 'Dynamic resource for user data, generated on demand.',
+  mimeType: 'text/plain',
+  async getContent(params: { id: string }) {
+    // Example: fetch or generate content dynamically based on params.id
+    return `Dynamic content for user with id: ${params.id}`
+  },
+})
+```
+
+- The framework will automatically discover and register all `resource-template.ts` files in subfolders of `resources/`.
+- The resource will be available to MCP clients using the defined URI template.
+
+## 🔒 Authentication Middleware (JWT)
+
+This template includes a ready-to-use JWT authentication middleware in `src/middleware.ts`.
+
+- The server will refuse to start in production if you do not create `src/middleware.ts`.
+- In development, all requests are allowed by default, but a warning will be logged.
+
+### How to use
+
+1. The middleware is already included in the template at `src/middleware.ts` and uses the framework's JWT middleware by default.
+2. You can customize `src/middleware.ts` to add your own logic (roles, claims, etc.).
+3. Set your JWT secret in the environment variable `JWT_SECRET`.
+
+### Example: Making an authenticated request
+
+Generate a JWT token (for example, using [jwt.io](https://jwt.io/) or any JWT library) with your secret:
+
+```sh
+export JWT_SECRET=changeme
+node -e "console.log(require('jsonwebtoken').sign({ user: 'alice', role: 'admin' }, process.env.JWT_SECRET))"
+```
+
+Then, make a request to your DyneMCP server:
+
+```sh
+curl -X POST http://localhost:3000/mcp \
+  -H "Authorization: Bearer <your_token_here>" \
+  -H "Content-Type: application/json" \
+  -d '{ "jsonrpc": "2.0", "method": "tools/list", "id": 1 }'
+```
+
+If the token is valid, you'll get a response. If not, you'll get a 401 Unauthorized error.

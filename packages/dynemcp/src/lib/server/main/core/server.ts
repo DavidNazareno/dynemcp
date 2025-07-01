@@ -4,21 +4,31 @@ import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
+  SamplingRequest,
+  SamplingResult,
 } from '../../api'
 import { registry } from '../../registry/core/registry'
 import { loadConfig } from '../../config/core/loader'
-import { createTransport, TRANSPORT_TYPES } from '../../communication'
+import {
+  createTransport,
+  TRANSPORT_TYPES,
+  type Transport,
+} from '../../communication'
 import { logMsg } from './utils'
 import { registerComponents } from './initializer'
+import { setCurrentDyneMCPInstance } from './server-instance'
 
+/**
+ * Clase principal para el servidor DyneMCP
+ */
 export class DyneMCP {
   private server: McpServer
-  private transport: any
+  private transport: Transport | undefined
   private isInitialized = false
   private config: DyneMCPConfig
 
   /**
-   * Use DyneMCP.create() for async construction.
+   * Constructor privado. Usar DyneMCP.create() para instanciar.
    */
   private constructor(config: DyneMCPConfig) {
     this.config = config
@@ -26,34 +36,146 @@ export class DyneMCP {
       name: config.server.name,
       version: config.server.version,
     }
-    if ('capabilities' in config.server && config.server.capabilities) {
-      serverConfig.capabilities = config.server.capabilities
+    if (
+      'capabilities' in config.server &&
+      (config.server as any).capabilities
+    ) {
+      serverConfig.capabilities = (config.server as any).capabilities
     }
     this.server = new McpServer(serverConfig)
+    setCurrentDyneMCPInstance(this)
   }
 
   /**
-   * Async factory for DyneMCP, supports config path or object.
+   * Fábrica asíncrona para crear una instancia de DyneMCP.
+   * Permite pasar un objeto de configuración o una ruta.
    */
   static async create(config?: DyneMCPConfig | string): Promise<DyneMCP> {
-    let resolvedConfig: DyneMCPConfig
-    if (typeof config === 'string' || typeof config === 'undefined') {
-      resolvedConfig = await loadConfig(config)
-    } else {
-      resolvedConfig = config
-    }
+    const resolvedConfig: DyneMCPConfig =
+      typeof config === 'string' || typeof config === 'undefined'
+        ? await loadConfig(config)
+        : config
     return new DyneMCP(resolvedConfig)
   }
 
+  // =====================
+  // Métodos públicos
+  // =====================
+
   /**
-   * Get the current server configuration
+   * Devuelve la configuración actual del servidor
    */
   getConfig(): DyneMCPConfig {
     return this.config
   }
 
   /**
-   * Helper for debug logging to STDERR if DYNE_MCP_DEBUG=1
+   * Inicializa el servidor y carga todos los componentes
+   */
+  async init(): Promise<void> {
+    if (this.isInitialized) return
+
+    this.log('🚀 Inicializando DyneMCP server...')
+
+    await registry.loadAll({
+      tools: this.config.tools,
+      resources: this.config.resources,
+      prompts: this.config.prompts,
+      // resourceTemplates se cargan automáticamente desde las carpetas de resources
+    })
+
+    this.logLoadedComponents()
+
+    // Registrar componentes en el servidor MCP
+    registerComponents(
+      this.server,
+      this.tools,
+      this.resources,
+      this.prompts,
+      this.resourceTemplates
+    )
+
+    this.isInitialized = true
+    this.log('✅ DyneMCP server inicializado correctamente')
+  }
+
+  /**
+   * Arranca el servidor MCP
+   */
+  async start(): Promise<void> {
+    await this.init()
+    this.setupTransport()
+    await this.connectTransport()
+    this.logTransportInfo()
+  }
+
+  /**
+   * Detiene el servidor MCP
+   */
+  async stop(): Promise<void> {
+    if (this.transport?.close) {
+      await this.transport.close()
+    }
+    if (this.isCustomTransport()) {
+      this.log('🛑 MCP server detenido')
+    }
+  }
+
+  /**
+   * Estadísticas del servidor
+   */
+  get stats() {
+    return {
+      ...registry.stats,
+      server: {
+        name: this.config.server.name,
+        version: this.config.server.version,
+      },
+      transport: this.config.transport?.type || TRANSPORT_TYPES[0],
+    }
+  }
+
+  /**
+   * Herramientas registradas
+   */
+  get tools(): ToolDefinition[] {
+    return registry.getAllTools().map((item) => item.module as ToolDefinition)
+  }
+
+  /**
+   * Recursos registrados
+   */
+  get resources(): ResourceDefinition[] {
+    return registry
+      .getAllResources()
+      .map((item) => item.module as ResourceDefinition)
+  }
+
+  /**
+   * Prompts registrados
+   */
+  get prompts(): PromptDefinition[] {
+    return registry
+      .getAllPrompts()
+      .map((item) => item.module as PromptDefinition)
+  }
+
+  get resourceTemplates() {
+    return registry.getAllResourceTemplates()
+  }
+
+  async sample(request: SamplingRequest): Promise<SamplingResult> {
+    if (typeof (this.server as any).send !== 'function') {
+      throw new Error('McpServer does not support send method')
+    }
+    return await (this.server as any).send('sampling/createMessage', request)
+  }
+
+  // Métodos privados
+  // =====================
+
+  /**
+   * Log de debug si DYNE_MCP_DEBUG=1
    */
   private debugLog(msg: string): void {
     if (process.env.DYNE_MCP_DEBUG) {
@@ -62,76 +184,67 @@ export class DyneMCP {
   }
 
   /**
-   * Initialize the server and load all components
+   * Log estándar si no está silenciado
    */
-  async init(): Promise<void> {
-    if (this.isInitialized) return
-
+  private log(msg: string): void {
     if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-      console.log('🚀 Initializing DyneMCP server...')
-    }
-
-    // Load all components using unified registry
-    await registry.loadAll({
-      tools: this.config.tools,
-      resources: this.config.resources,
-      prompts: this.config.prompts,
-    })
-
-    // LOG: Show how many and which tools/resources/prompts were loaded
-    const tools = registry
-      .getAllTools()
-      .map((item) => item.module as ToolDefinition)
-    const resources = registry
-      .getAllResources()
-      .map((item) => item.module as ResourceDefinition)
-    const prompts = registry
-      .getAllPrompts()
-      .map((item) => item.module as PromptDefinition)
-    // Use logMsg helper
-    logMsg(`Loaded tools: ${tools.length}`, this.debugLog.bind(this))
-    if (tools.length > 0) {
-      tools.forEach((t) =>
-        logMsg(`  - Tool: ${t.name}`, this.debugLog.bind(this))
-      )
-    }
-    logMsg(`Loaded resources: ${resources.length}`, this.debugLog.bind(this))
-    if (resources.length > 0) {
-      resources.forEach((r) =>
-        logMsg(`  - Resource: ${r.name}`, this.debugLog.bind(this))
-      )
-    }
-    logMsg(`Loaded prompts: ${prompts.length}`, this.debugLog.bind(this))
-    if (prompts.length > 0) {
-      prompts.forEach((p) =>
-        logMsg(`  - Prompt: ${p.name}`, this.debugLog.bind(this))
-      )
-    }
-
-    // Register components with MCP server
-    registerComponents(this.server, tools, resources, prompts)
-
-    this.isInitialized = true
-    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-      console.log('✅ DyneMCP server initialized successfully')
+      console.log(msg)
     }
   }
 
   /**
-   * Start the MCP server
+   * Muestra por log los componentes cargados
    */
-  async start(): Promise<void> {
-    await this.init()
+  private logLoadedComponents(): void {
+    const tools = this.tools
+    const resources = this.resources
+    const prompts = this.prompts
+    logMsg(`Loaded tools: ${tools.length}`, this.debugLog.bind(this))
+    tools.forEach((t) =>
+      logMsg(`  - Tool: ${t.name}`, this.debugLog.bind(this))
+    )
 
-    // Create and connect transport
+    logMsg(`Loaded resources: ${resources.length}`, this.debugLog.bind(this))
+    resources.forEach((r) =>
+      logMsg(`  - Resource: ${r.name}`, this.debugLog.bind(this))
+    )
+
+    logMsg(`Loaded prompts: ${prompts.length}`, this.debugLog.bind(this))
+    prompts.forEach((p) =>
+      logMsg(`  - Prompt: ${p.name}`, this.debugLog.bind(this))
+    )
+  }
+
+  /**
+   * Inicializa el transporte según la configuración
+   */
+  private setupTransport(): void {
     const transportConfig = this.config.transport || {
       type: TRANSPORT_TYPES[0],
     }
-    this.transport = createTransport(transportConfig)
-    if (typeof this.transport.connect === 'function') {
-      await this.transport.connect(this.server)
+    this.transport = createTransport(transportConfig) as Transport
+  }
+
+  /**
+   * Conecta el transporte al servidor MCP
+   */
+  private async connectTransport(): Promise<void> {
+    if (
+      this.transport &&
+      'start' in this.transport &&
+      typeof this.transport.start === 'function'
+    ) {
+      await this.server.connect(this.transport)
     }
-    // Only log if transport is not stdio
+  }
+
+  /**
+   * Muestra información del transporte si no es stdio
+   */
+  private logTransportInfo(): void {
+    const transportConfig = this.config.transport || {
+      type: TRANSPORT_TYPES[0],
+    }
     if (String(transportConfig.type) !== 'stdio') {
       if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
         console.log(
@@ -147,65 +260,18 @@ export class DyneMCP {
   }
 
   /**
-   * Stop the MCP server
+   * Indica si el transporte es distinto de stdio
    */
-  async stop(): Promise<void> {
-    if (this.transport?.disconnect) {
-      await this.transport.disconnect()
-    }
-    // Only log if transport is not stdio
-    if (
+  private isCustomTransport(): boolean {
+    return (
       this.config.transport?.type &&
       String(this.config.transport.type) !== 'stdio'
-    ) {
-      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-        console.log('🛑 MCP server stopped')
-      }
-    }
-  }
-
-  /**
-   * Get server statistics
-   */
-  get stats() {
-    return {
-      ...registry.stats,
-      server: {
-        name: this.config.server.name,
-        version: this.config.server.version,
-      },
-      transport: this.config.transport?.type || TRANSPORT_TYPES[0],
-    }
-  }
-
-  /**
-   * Get all registered tools
-   */
-  get tools(): ToolDefinition[] {
-    return registry.getAllTools().map((item) => item.module as ToolDefinition)
-  }
-
-  /**
-   * Get all registered resources
-   */
-  get resources(): ResourceDefinition[] {
-    return registry
-      .getAllResources()
-      .map((item) => item.module as ResourceDefinition)
-  }
-
-  /**
-   * Get all registered prompts
-   */
-  get prompts(): PromptDefinition[] {
-    return registry
-      .getAllPrompts()
-      .map((item) => item.module as PromptDefinition)
+    )
   }
 }
 
 /**
- * Async factory for DyneMCP server instance
+ * Fábrica asíncrona para instancia de DyneMCP
  */
 export async function createMCPServer(
   config?: DyneMCPConfig | string

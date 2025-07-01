@@ -16,11 +16,16 @@ export type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
+  LoadedTool,
+  LoadedPrompt,
+  LoadedResource,
+  LoadedResourceTemplate,
   PromptArgument,
   PromptMessage,
   CallToolResult,
   SamplingRequest,
   SamplingResult,
+  ResourceTemplateDefinition,
 } from './core/interfaces'
 
 // Utility functions
@@ -43,3 +48,5 @@ export { prompt } from './core/prompt'
 export { sample } from './core/sampling'
 
 export * from './core/root'
+
+export { resourceTemplate } from './core/resource-template'

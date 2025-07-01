@@ -124,15 +124,3 @@ export async function loadPromptsFromDirectory(
 ): Promise<LoadResult<PromptDefinition>> {
   return loadComponentsFromDirectory(options, validatePrompt)
 }
-
-/**
- * Loads all samples from a directory using the standard sample validator.
- * @param options - LoadOptions for samples
- * @returns LoadResult<SampleDefinition>
- */
-export async function loadSamplesFromDirectory(
-  options: LoadOptions
-): Promise<LoadResult<any>> {
-  // Falta: implementar validateSample
-  return loadComponentsFromDirectory(options, (c): c is any => !!c)
-}

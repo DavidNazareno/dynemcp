@@ -4,10 +4,15 @@ import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
+  PromptMessage,
+  ResourceTemplateDefinition,
 } from '../../api'
 import type { ServerInitializationOptions } from './interfaces'
 import { createTextResponse, createErrorResponse } from '../../api'
 
+/**
+ * Crea una instancia de McpServer con las opciones dadas.
+ */
 export function createMCPServerInstance(
   options: ServerInitializationOptions
 ): McpServer {
@@ -18,44 +23,54 @@ export function createMCPServerInstance(
   })
 }
 
+/**
+ * Registra un conjunto de herramientas (tools) en el servidor MCP.
+ */
 export function registerTools(
   server: McpServer,
   tools: ToolDefinition[]
 ): void {
   for (const tool of tools) {
     server.registerTool(
-      tool.name as string,
+      tool.name,
       {
-        title: tool.name as string,
-        description: tool.description as string | undefined,
-        inputSchema: tool.inputSchema as any,
-        annotations: tool.annotations as any,
+        title: tool.name,
+        description: tool.description,
+        inputSchema: (tool as any).inputSchema,
+        annotations: (tool as any).annotations,
       },
-      async (args: Record<string, any>) => {
+      async (args: Record<string, unknown>) => {
         try {
-          const result = await tool.execute(args || {})
+          const result = await (tool as any).execute(args || {})
           if (
             result &&
             typeof result === 'object' &&
-            Array.isArray((result as any).content)
+            Array.isArray((result as { content?: unknown[] }).content)
           ) {
-            const safeContent = (result as any).content.map((item: any) => {
-              if (
-                item &&
-                typeof item === 'object' &&
-                typeof item.type === 'string'
-              ) {
-                if (item.type === 'text' && typeof item.text === 'string') {
-                  return { type: 'text', text: item.text }
+            // Sanitiza el contenido para asegurar que cada item tenga el formato correcto
+            const safeContent = (result as { content: unknown[] }).content.map(
+              (item) => {
+                if (
+                  item &&
+                  typeof item === 'object' &&
+                  'type' in item &&
+                  typeof (item as any).type === 'string'
+                ) {
+                  if (
+                    (item as any).type === 'text' &&
+                    typeof (item as any).text === 'string'
+                  ) {
+                    return { type: 'text', text: (item as any).text }
+                  }
+                  // Aquí puedes agregar validaciones para otros tipos (image, audio, etc.)
                 }
-                // Aquí puedes agregar validaciones para otros tipos (image, audio, etc.)
+                return { type: 'text', text: JSON.stringify(item) }
               }
-              return { type: 'text', text: JSON.stringify(item) }
-            })
+            )
             return { ...result, content: safeContent }
           }
           return createTextResponse(String(result))
-        } catch (error: any) {
+        } catch (error) {
           return createErrorResponse(
             error instanceof Error ? error : new Error(String(error))
           )
@@ -65,6 +80,9 @@ export function registerTools(
   }
 }
 
+/**
+ * Registra un conjunto de recursos (resources) en el servidor MCP.
+ */
 export function registerResources(
   server: McpServer,
   resources: ResourceDefinition[]
@@ -99,11 +117,15 @@ export function registerResources(
   }
 }
 
+/**
+ * Registra un conjunto de prompts en el servidor MCP.
+ */
 export function registerPrompts(
   server: McpServer,
   prompts: PromptDefinition[]
 ): void {
   for (const prompt of prompts) {
+    // Construye el esquema de argumentos para el prompt
     const argsSchema = prompt.arguments?.reduce(
       (acc, arg) => ({
         ...acc,
@@ -117,57 +139,75 @@ export function registerPrompts(
       {
         title: prompt.name,
         description: prompt.description || `Prompt: ${prompt.name}`,
-        argsSchema: argsSchema,
+        argsSchema,
       },
-      async (args: { [x: string]: string | undefined }) => {
+      async (args: Record<string, string | undefined>, _extra: unknown) => {
+        // Filtra los argumentos undefined
         const filteredArgs = Object.fromEntries(
           Object.entries(args).filter(([, value]) => value !== undefined)
         ) as Record<string, string>
 
-        const messages = await prompt.getMessages(filteredArgs)
+        const messages: PromptMessage[] = await (prompt as any).getMessages(
+          filteredArgs
+        )
         // Valida y transforma cada mensaje para cumplir el contrato del SDK
-        const safeMessages = Array.isArray(messages)
-          ? messages.map((msg: any) => {
-              const role: 'user' | 'assistant' =
-                msg && (msg.role === 'user' || msg.role === 'assistant')
-                  ? msg.role
-                  : 'assistant'
-              if (
-                msg &&
-                typeof msg === 'object' &&
-                msg.content &&
-                typeof msg.content === 'object' &&
-                msg.content.type === 'text' &&
-                typeof msg.content.text === 'string'
-              ) {
+        const safeMessages = (
+          Array.isArray(messages)
+            ? messages.map((msg) => {
+                const role: 'user' | 'assistant' =
+                  msg && (msg.role === 'user' || msg.role === 'assistant')
+                    ? msg.role
+                    : 'assistant'
+                if (
+                  msg &&
+                  typeof msg === 'object' &&
+                  msg.content &&
+                  typeof msg.content === 'object' &&
+                  msg.content.type === 'text' &&
+                  typeof msg.content.text === 'string'
+                ) {
+                  return {
+                    role,
+                    content: {
+                      type: 'text',
+                      text: msg.content.text,
+                      _meta: {} as { [x: string]: unknown },
+                    },
+                  }
+                }
+                // fallback: siempre retorna un mensaje de texto válido
                 return {
                   role,
                   content: {
                     type: 'text',
-                    text: msg.content.text as string,
-                  } as {
-                    type: 'text'
-                    text: string
+                    text: JSON.stringify(msg),
+                    _meta: {} as { [x: string]: unknown },
                   },
                 }
-              }
-              // fallback: always return a valid text message
-              return {
-                role,
-                content: {
-                  type: 'text',
-                  text: JSON.stringify(msg),
-                } as {
-                  type: 'text'
-                  text: string
-                },
-              }
-            })
-          : []
+              })
+            : []
+        ) as Array<{
+          role: 'user' | 'assistant'
+          content: {
+            type: 'text'
+            text: string
+            _meta?: { [x: string]: unknown }
+          }
+        }>
 
         return {
           messages: safeMessages,
           description: prompt.description,
+        } as {
+          messages: Array<{
+            role: 'user' | 'assistant'
+            content: {
+              type: 'text'
+              text: string
+              _meta?: { [x: string]: unknown }
+            }
+          }>
+          description: string
         }
       }
     )
@@ -175,15 +215,30 @@ export function registerPrompts(
 }
 
 /**
- * Register tools, resources, and prompts with the MCP server.
+ * Registers a set of resource templates in the MCP server.
+ */
+export function registerResourceTemplates(
+  server: McpServer,
+  resourceTemplates: ResourceTemplateDefinition[]
+): void {
+  for (const tpl of resourceTemplates) {
+    // TODO: Replace with the correct SDK method when available
+    // server.registerResourceTemplate(...)
+  }
+}
+
+/**
+ * Registra tools, resources y prompts en el servidor MCP.
  */
 export function registerComponents(
   server: McpServer,
   tools: ToolDefinition[],
   resources: ResourceDefinition[],
-  prompts: PromptDefinition[]
+  prompts: PromptDefinition[],
+  resourceTemplates: ResourceTemplateDefinition[] = []
 ): void {
   registerTools(server, tools)
   registerResources(server, resources)
   registerPrompts(server, prompts)
+  registerResourceTemplates(server, resourceTemplates)
 }

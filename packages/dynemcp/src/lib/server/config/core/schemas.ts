@@ -75,7 +75,7 @@ export const ConfigSchema = z.object({
   tools: AutoloadConfigSchema,
   resources: AutoloadConfigSchema,
   prompts: AutoloadConfigSchema,
-  resourcesTemplates: AutoloadConfigSchema.optional(),
+  resourcesTemplates: AutoloadConfigSchema,
   transport: TransportSchema,
   description: z.string().optional(),
   logging: LoggingConfigSchema.optional(),

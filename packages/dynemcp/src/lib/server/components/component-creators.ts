@@ -1,9 +1,11 @@
 import { readFileSync, existsSync } from 'fs'
 import { isAbsolute, resolve, basename } from 'path'
-import { z, type ZodRawShape } from 'zod'
+import { z, type ZodRawShape, type ZodTypeAny, ZodObject } from 'zod'
 import type {
-  ToolDefinition,
-  ResourceDefinition,
+  LoadedTool,
+  LoadedPrompt,
+  LoadedResource,
+  LoadedResourceTemplate,
   PromptDefinition,
   PromptMessage,
   CallToolResult,
@@ -55,47 +57,37 @@ export interface ChatMessage {
 export function createTool(
   name: string,
   description: string,
-  inputSchema: Record<string, z.ZodTypeAny>,
+  inputSchema: ZodRawShape | ZodObject<any, any, any>,
   handler: (params: Record<string, unknown>) => unknown | Promise<unknown>,
-  annotations?: {
-    title?: string
-    readOnlyHint?: boolean
-    destructiveHint?: boolean
-    idempotentHint?: boolean
-    openWorldHint?: boolean
-  }
-): ToolDefinition {
+  annotations?: Record<string, unknown>,
+  outputSchema?: ZodRawShape | ZodObject<any, any, any>
+): LoadedTool {
   return {
     name,
     description,
-    inputSchema: inputSchema as ZodRawShape,
+    inputSchema,
+    outputSchema,
     annotations,
     async execute(args: Record<string, any>): Promise<CallToolResult> {
       try {
         const result = await handler(args)
-        if (result && typeof result === 'object' && 'content' in result) {
+        if (result && typeof result === 'object' && 'success' in result) {
           return result as CallToolResult
         }
         return {
-          content: [
-            {
-              type: 'text',
-              text: String(result),
-            },
-          ],
+          success: true,
+          error: undefined,
+          result: String(result),
         }
       } catch (error) {
         return {
-          isError: true,
-          content: [
-            {
-              type: 'text',
-              text: error instanceof Error ? error.message : String(error),
-            },
-          ],
+          success: false,
+          error: error instanceof Error ? error.message : String(error),
+          result: undefined,
         }
       }
     },
+    parameters: {}, // Optionally fill if needed
   }
 }
 
@@ -109,7 +101,7 @@ export function createTool(
 export function createFileResource(
   filePath: string,
   options: FileResourceOptions = {}
-): ResourceDefinition {
+): LoadedResource {
   const absolutePath = isAbsolute(filePath)
     ? filePath
     : resolve(process.cwd(), filePath)
@@ -126,7 +118,6 @@ export function createFileResource(
     name: options.name || fileName,
     content: fileContent,
     description: options.description,
-    contentType: options.contentType || 'text/plain',
   }
 }
 
@@ -143,14 +134,15 @@ export function createDynamicResource(
   uri: string,
   name: string,
   generator: () => string | Promise<string>,
-  options: DynamicResourceOptions = {}
-): ResourceDefinition {
+  options: DynamicResourceOptions = {},
+  paramsSchema?: ZodRawShape | ZodObject<any, any, any>
+): LoadedResource {
   return {
     uri,
     name,
     content: generator,
     description: options.description,
-    contentType: options.contentType || 'application/octet-stream',
+    paramsSchema,
   }
 }
 
@@ -160,27 +152,22 @@ export function createDynamicResource(
  *
  * @param name - Prompt name
  * @param content - Prompt text
+ * @param getMessages - Function to get prompt messages
+ * @param argsSchema - Zod schema for prompt arguments
  * @param options - Optional prompt metadata
  */
 export function createPrompt(
   name: string,
   content: string,
+  getMessages: (args?: Record<string, string>) => Promise<PromptMessage[]>,
+  argsSchema?: ZodRawShape | Record<string, ZodTypeAny>,
   options: PromptOptions = {}
-): PromptDefinition {
+): LoadedPrompt {
   return {
     name,
     description: options.description || name,
-    async getMessages(): Promise<PromptMessage[]> {
-      return [
-        {
-          role: 'user',
-          content: {
-            type: 'text',
-            text: content,
-          },
-        },
-      ]
-    },
+    getMessages,
+    argsSchema,
   }
 }
 
@@ -190,9 +177,11 @@ export function createPrompt(
 export function createSystemPrompt(
   name: string,
   content: string,
+  getMessages: (args?: Record<string, string>) => Promise<PromptMessage[]>,
+  argsSchema?: Record<string, any>,
   options: PromptOptions = {}
 ): PromptDefinition {
-  return createPrompt(name, content, options)
+  return createPrompt(name, content, getMessages, argsSchema, options)
 }
 
 /**
@@ -201,27 +190,33 @@ export function createSystemPrompt(
  *
  * @param name - Prompt name
  * @param messages - Array of chat messages
+ * @param getMessages - Function to get prompt messages
+ * @param argsSchema - Zod schema for prompt arguments
  * @param options - Optional prompt metadata
  */
 export function createChatPrompt(
   name: string,
   messages: ChatMessage[],
+  getMessages: (args?: Record<string, string>) => Promise<PromptMessage[]>,
+  argsSchema?: Record<string, any>,
   options: PromptOptions = {}
 ): PromptDefinition {
+  return createPrompt(name, '', getMessages, argsSchema, options)
+}
+
+export function createResourceTemplate(
+  uriTemplate: string,
+  name: string,
+  getContent: (params: Record<string, string>) => Promise<string> | string,
+  options: { description?: string; mimeType?: string } = {},
+  paramsSchema?: ZodRawShape | ZodObject<any, any, any>
+): LoadedResourceTemplate {
   return {
+    uriTemplate,
     name,
-    description: options.description || name,
-    async getMessages(): Promise<PromptMessage[]> {
-      return messages.map(
-        (message) =>
-          ({
-            role: message.role,
-            content: {
-              type: 'text',
-              text: message.content,
-            },
-          }) as PromptMessage
-      )
-    },
+    getContent,
+    description: options.description,
+    mimeType: options.mimeType,
+    paramsSchema,
   }
 }

@@ -8,6 +8,7 @@ import type {
   RegistryLoader,
   RegistryStats,
   LoadAllOptions,
+  RegistryItemType,
 } from './interfaces'
 import { RegistryItemNotFoundError } from './errors'
 import { InMemoryRegistryStorage } from './storage'
@@ -16,9 +17,10 @@ import {
   loadToolsFromDirectory,
   loadResourcesFromDirectory,
   loadPromptsFromDirectory,
-  loadSamplesFromDirectory,
 } from '../../components/component-loader'
 import { validateTool } from '../../components/core/loaders/validators'
+import path from 'path'
+import fs from 'fs'
 
 /**
  * DyneMCP Registry - Main Registry Class
@@ -32,6 +34,8 @@ export class DyneMCPRegistry implements Registry {
   private storage: InMemoryRegistryStorage
   private loader: RegistryLoader
   private isLoaded = false
+  private resourceTemplates: RegistryItem[] = []
+  private authenticationMiddlewarePath: string | null = null
 
   constructor(
     loader: RegistryLoader = new DefaultRegistryLoader(),
@@ -56,19 +60,11 @@ export class DyneMCPRegistry implements Registry {
       console.log('🔄 Loading components...')
     }
 
-    // Provide default samples configuration if not provided
-    const samplesConfig = options.samples || {
-      enabled: false,
-      directory: './src/samples',
-    }
-
-    const [toolsResult, resourcesResult, promptsResult, samplesResult] =
-      await Promise.all([
-        loadToolsFromDirectory(options.tools),
-        loadResourcesFromDirectory(options.resources),
-        loadPromptsFromDirectory(options.prompts),
-        loadSamplesFromDirectory(samplesConfig),
-      ])
+    const [toolsResult, resourcesResult, promptsResult] = await Promise.all([
+      loadToolsFromDirectory(options.tools),
+      loadResourcesFromDirectory(options.resources),
+      loadPromptsFromDirectory(options.prompts),
+    ])
     this.storage.clear()
     this.storage.addTools(
       toolsResult.components.map((tool) => ({
@@ -89,13 +85,6 @@ export class DyneMCPRegistry implements Registry {
         id: prompt.name,
         type: 'prompt',
         module: prompt,
-      }))
-    )
-    this.storage.addSamples(
-      samplesResult.components.map((sample) => ({
-        id: sample.name || sample.id,
-        type: 'sample',
-        module: sample,
       }))
     )
     // Validate tools
@@ -125,6 +114,45 @@ export class DyneMCPRegistry implements Registry {
       console.warn('⚠️ Loading errors:', allErrors)
     }
     this.isLoaded = true
+
+    // Buscar y cargar resource-template.ts en cada subcarpeta de resources
+    this.resourceTemplates = []
+    const resourcesRoot = Array.isArray(options.resources)
+      ? options.resources[0]
+      : options.resources
+    if (resourcesRoot && fs.existsSync(resourcesRoot)) {
+      const subdirs = fs
+        .readdirSync(resourcesRoot, { withFileTypes: true })
+        .filter((dirent) => dirent.isDirectory())
+        .map((dirent) => dirent.name)
+      for (const subdir of subdirs) {
+        const resourceTemplatePath = path.join(
+          resourcesRoot,
+          subdir,
+          'resource-template.ts'
+        )
+        if (fs.existsSync(resourceTemplatePath)) {
+          // Dynamic import (ESM):
+          const mod = await import(resourceTemplatePath)
+          if (mod && mod.default) {
+            this.resourceTemplates.push({
+              id: mod.default.uriTemplate || `${subdir}-template`,
+              type: 'resource',
+              module: mod.default,
+            })
+          }
+        }
+      }
+    }
+
+    // Discover src/middleware.ts for authentication
+    const projectRoot = process.cwd()
+    const candidate = path.join(projectRoot, 'src', 'middleware.ts')
+    if (fs.existsSync(candidate)) {
+      this.authenticationMiddlewarePath = candidate
+    } else {
+      this.authenticationMiddlewarePath = null
+    }
   }
 
   /**
@@ -156,15 +184,6 @@ export class DyneMCPRegistry implements Registry {
   }
 
   /**
-   * Get all registered samples.
-   */
-  getAllSamples(): RegistryItem[] {
-    return Array.from(this.storage['items'].values()).filter(
-      (item) => (item as RegistryItem).type === 'sample'
-    ) as RegistryItem[]
-  }
-
-  /**
    * Get a specific tool by id.
    */
   getTool(id: string): RegistryItem | undefined {
@@ -183,13 +202,6 @@ export class DyneMCPRegistry implements Registry {
    */
   getPrompt(id: string): RegistryItem | undefined {
     return this.storage.getItem('prompt', id)
-  }
-
-  /**
-   * Get a specific sample by id.
-   */
-  getSample(id: string): RegistryItem | undefined {
-    return this.storage.getItem('sample', id)
   }
 
   /**
@@ -223,10 +235,7 @@ export class DyneMCPRegistry implements Registry {
   /**
    * Get or load a registry item by type and id.
    */
-  async get(
-    type: 'tool' | 'prompt' | 'resource',
-    id: string
-  ): Promise<RegistryItem> {
+  async get(type: RegistryItemType, id: string): Promise<RegistryItem> {
     let item = this.storage.getItem(type, id)
     if (!item) {
       item = await this.loader.loadItem(type, id)
@@ -241,6 +250,20 @@ export class DyneMCPRegistry implements Registry {
    */
   async preloadAll(): Promise<void> {
     // Optionally implement preloading logic here
+  }
+
+  /**
+   * Get all resource templates.
+   */
+  getAllResourceTemplates(): any[] {
+    return this.resourceTemplates.map((item) => item.module)
+  }
+
+  /**
+   * Get the resolved path to the authentication middleware, if found.
+   */
+  getAuthenticationMiddlewarePath(): string | null {
+    return this.authenticationMiddlewarePath
   }
 }
 

@@ -62,7 +62,7 @@ export interface DyneMCPConfig {
   tools: AutoloadConfig
   resources: AutoloadConfig
   prompts: AutoloadConfig
-  resourcesTemplates?: AutoloadConfig
+  resourcesTemplates: AutoloadConfig
   transport: TransportConfig
   description?: string
   logging?: LoggingConfig

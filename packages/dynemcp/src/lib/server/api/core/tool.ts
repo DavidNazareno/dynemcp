@@ -3,9 +3,8 @@
 // ----------------------------------------
 
 import { z } from 'zod'
-import type { ToolDefinition, CallToolResult } from './interfaces'
+import type { LoadedTool, CallToolResult } from './interfaces'
 import { withErrorHandling } from './utils'
-import { zodToJsonSchema } from 'zod-to-json-schema'
 
 /**
  * Simplified typed tool creator function
@@ -14,23 +13,21 @@ export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
   name: string
   description: string
   schema: T
-  annotations?: {
-    title?: string
-    readOnlyHint?: boolean
-    destructiveHint?: boolean
-    idempotentHint?: boolean
-    openWorldHint?: boolean
-  }
+  inputSchema?: z.ZodRawShape | z.ZodObject<any, any, any>
+  outputSchema?: z.ZodRawShape | z.ZodObject<any, any, any>
+  annotations?: Record<string, unknown>
   execute: (
     input: z.infer<T>
   ) => Promise<CallToolResult> | CallToolResult | string | unknown
-}): ToolDefinition {
+}): LoadedTool {
   return {
     name: config.name,
     description: config.description,
-    inputSchema: config.schema.shape,
+    inputSchema: config.inputSchema ?? config.schema.shape,
+    outputSchema: config.outputSchema,
     annotations: config.annotations,
     execute: withErrorHandling(config.execute as any),
+    parameters: {}, // Optionally fill if needed
   }
 }
 
@@ -49,23 +46,19 @@ export function tool<
   options: {
     name: string
     description?: string
+    inputSchema?: z.ZodRawShape | z.ZodObject<any, any, any>
+    outputSchema?: z.ZodRawShape | z.ZodObject<any, any, any>
+    annotations?: Record<string, unknown>
     meta?: Meta
-    annotations?: {
-      title?: string
-      readOnlyHint?: boolean
-      destructiveHint?: boolean
-      idempotentHint?: boolean
-      openWorldHint?: boolean
-      [key: string]: any
-    }
   }
-): ToolDefinition {
+): LoadedTool {
   return {
     name: options.name,
-    description: options.description,
-    inputSchema:
-      zodToJsonSchema(schema).definitions?.Input || zodToJsonSchema(schema),
+    description: options.description ?? '',
+    inputSchema: options.inputSchema ?? schema.shape,
+    outputSchema: options.outputSchema,
     annotations: options.annotations ?? options.meta,
     execute: withErrorHandling(handler as any),
+    parameters: {}, // Optionally fill if needed
   }
 }

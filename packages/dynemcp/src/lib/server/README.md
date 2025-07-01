@@ -47,6 +47,62 @@ await server.start()
 - Validate your configuration and schemas for robust, predictable behavior.
 - Follow the MCP SDK and protocol for compatibility and security.
 
+## Authentication Middleware (Security Requirement)
+
+**In production, you MUST configure an authentication middleware for your MCP server.**
+
+- If no authentication middleware is configured and `NODE_ENV=production`, the server will refuse to start.
+- In development, all requests are allowed by default, but a warning will be logged.
+
+### How to configure authentication
+
+1. Create a middleware (e.g., JWT, API Key, OAuth) and export it as default from a file:
+
+```ts
+// src/auth/jwt-middleware.ts
+import { Request, Response, NextFunction } from 'express'
+import jwt from 'jsonwebtoken'
+
+const SECRET = process.env.JWT_SECRET || 'changeme'
+
+export default function jwtAuthMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const authHeader = req.headers.authorization
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res
+      .status(401)
+      .json({ error: 'Missing or invalid Authorization header' })
+  }
+  const token = authHeader.slice(7)
+  try {
+    const payload = jwt.verify(token, SECRET)
+    ;(req as any).user = payload
+    next()
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid or expired token' })
+  }
+}
+```
+
+2. Reference the middleware in your transport config:
+
+```ts
+// dynemcp.config.ts
+transport: {
+  type: 'streamable-http',
+  options: {
+    authentication: {
+      path: './src/auth/jwt-middleware.ts'
+    }
+  }
+}
+```
+
+**WARNING:** Never run your MCP server in production without authentication. All requests will be allowed if no middleware is configured and this is a critical security risk.
+
 ## License
 
 MIT

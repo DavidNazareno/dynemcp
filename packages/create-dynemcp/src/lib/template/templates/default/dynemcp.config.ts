@@ -15,6 +15,11 @@ export default {
     directory: './src/resources',
     pattern: '**/*.{ts,js}',
   },
+  resourcesTemplates: {
+    enabled: true,
+    directory: './src/resources',
+    pattern: '**/resource-template.{ts,js}',
+  },
   prompts: {
     enabled: true,
     directory: './src/prompts',

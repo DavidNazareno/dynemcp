@@ -126,5 +126,19 @@ export async function loadConfig(configPath?: string): Promise<DyneMCPConfig> {
   }
   // Merge and validate
   const merged = { ...defaults, ...fileConfig }
+
+  // Ensure required AutoloadConfig fields are present and never undefined
+  if (
+    typeof merged.resourcesTemplates === 'undefined' ||
+    merged.resourcesTemplates === null
+  ) {
+    merged.resourcesTemplates = {
+      enabled: true,
+      directory: './src/resources/templates',
+      pattern: '*.ts',
+      exclude: [],
+    }
+  }
+
   return ConfigSchema.parse(merged)
 }

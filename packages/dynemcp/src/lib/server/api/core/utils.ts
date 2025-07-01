@@ -19,12 +19,9 @@ export function zodObjectToRawShape<T extends z.ZodObject<z.ZodRawShape>>(
  */
 export function createTextResponse(text: string): CallToolResult {
   return {
-    content: [
-      {
-        type: 'text',
-        text,
-      },
-    ],
+    success: true,
+    error: undefined,
+    result: text,
   }
 }
 
@@ -33,13 +30,9 @@ export function createTextResponse(text: string): CallToolResult {
  */
 export function createErrorResponse(error: string | Error): CallToolResult {
   return {
-    content: [
-      {
-        type: 'text',
-        text: error instanceof Error ? error.message : error,
-      },
-    ],
-    isError: true,
+    success: false,
+    error: error instanceof Error ? error.message : error,
+    result: undefined,
   }
 }
 
@@ -52,7 +45,7 @@ export function withErrorHandling<T extends (...args: unknown[]) => unknown>(
   return async (...args: Parameters<T>) => {
     try {
       const result = await fn(...args)
-      if (result && typeof result === 'object' && 'content' in result) {
+      if (result && typeof result === 'object' && 'success' in result) {
         return result as CallToolResult
       }
       return createTextResponse(String(result))
