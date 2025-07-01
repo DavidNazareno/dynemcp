@@ -41,6 +41,7 @@
     "cors": "^2.8.5",
     "esbuild": "0.25.5",
     "express": "4.21.2",
+    "express-rate-limit": "6.7.0",
     "jsonwebtoken": "^9.0.2",
     "tslib": "^2.3.0",
     "yargs": "17.7.2",

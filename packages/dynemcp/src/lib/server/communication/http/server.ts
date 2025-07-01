@@ -1,6 +1,5 @@
 import express from 'express'
 import cors from 'cors'
-import path from 'path'
 import { randomUUID } from 'crypto'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
@@ -9,6 +8,8 @@ import { NETWORK, CLI } from '../../../../global/config-all-contants'
 import { isJSONRPCNotification } from '../core/jsonrpc'
 import { parseRootList } from '../../api/core/root'
 import { registry } from '../../registry/core/registry'
+import rateLimit from 'express-rate-limit'
+import { createDefaultConfig } from '../../config'
 
 /**
  * StreamableHTTPTransport provides HTTP POST and optional SSE streaming for MCP communication.
@@ -46,6 +47,57 @@ export class StreamableHTTPTransport {
    * Sets up middleware for security, CORS, and JSON parsing.
    */
   private setupMiddleware(options: Record<string, unknown>): void {
+    // Rate limiting (security best practice)
+    let rateLimitOptions = (options as any).rateLimit
+    const isProduction = process.env.NODE_ENV === 'production'
+    if (!rateLimitOptions) {
+      // Buscar en la config global de seguridad
+      const globalConfig = createDefaultConfig()
+      const securityRateLimit = globalConfig.security?.rateLimit
+      if (securityRateLimit && securityRateLimit.enabled !== false) {
+        rateLimitOptions = {
+          windowMs: securityRateLimit.windowMs ?? 15 * 60 * 1000,
+          max: securityRateLimit.maxRequests ?? 100,
+          standardHeaders: true,
+          legacyHeaders: false,
+          message: {
+            error: 'Too many requests, please try again later.',
+            code: 'RATE_LIMIT_EXCEEDED',
+          },
+        }
+      }
+    }
+    if (!rateLimitOptions) {
+      // Fallback hardcodeado
+      rateLimitOptions = {
+        windowMs: 15 * 60 * 1000,
+        max: 100,
+        standardHeaders: true,
+        legacyHeaders: false,
+        message: {
+          error: 'Too many requests, please try again later.',
+          code: 'RATE_LIMIT_EXCEEDED',
+        },
+      }
+    }
+    // Mitigación: Forzar rate limiting en producción
+    if (
+      isProduction &&
+      (rateLimitOptions.max === 0 || rateLimitOptions.enabled === false)
+    ) {
+      throw new Error(
+        '[SECURITY] Rate limiting must be enabled in production. Set security.rateLimit.enabled = true or configure rateLimit in transport options.'
+      )
+    } else if (
+      !isProduction &&
+      (rateLimitOptions.max === 0 || rateLimitOptions.enabled === false)
+    ) {
+      console.warn(
+        '[SECURITY] WARNING: Rate limiting is disabled. This is unsafe for production.'
+      )
+    }
+    this.app.use(rateLimit(rateLimitOptions))
+
     // Security: Validate Origin headers to prevent DNS rebinding attacks
     const originMiddleware: express.RequestHandler = (req, res, next) => {
       const origin = req.headers.origin
@@ -241,6 +293,22 @@ export class StreamableHTTPTransport {
     try {
       // Load authentication middleware
       const authMiddleware = await this.loadAuthenticationMiddleware()
+      // Mitigación: Forzar autenticación en producción
+      if (
+        process.env.NODE_ENV === 'production' &&
+        !this.options?.authentication?.path
+      ) {
+        throw new Error(
+          '[SECURITY] Authentication middleware is required in production. Set transport.options.authentication.path or create src/middleware.ts.'
+        )
+      } else if (
+        process.env.NODE_ENV !== 'production' &&
+        !this.options?.authentication?.path
+      ) {
+        console.warn(
+          '[SECURITY] WARNING: Authentication is disabled. This is unsafe for production.'
+        )
+      }
       // Connect to MCP server
       await server.connect(this.transport)
       // Setup session termination endpoint

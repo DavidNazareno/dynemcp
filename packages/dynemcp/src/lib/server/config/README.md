@@ -128,12 +128,62 @@ try {
 }
 ```
 
+### Rate Limiting Configuration
+
+You can configure rate limiting for your DyneMCP server in two ways:
+
+1. **Globally** via `security.rateLimit`:
+
+```ts
+security: {
+  rateLimit: {
+    enabled: true,
+    maxRequests: 100, // requests per windowMs
+    windowMs: 900000, // 15 minutes
+  }
+}
+```
+
+2. **Per-transport** via `transport.options.rateLimit` (overrides global):
+
+```ts
+transport: {
+  type: 'streamable-http',
+  options: {
+    rateLimit: {
+      windowMs: 10 * 60 * 1000, // 10 minutes
+      max: 50, // 50 requests per IP per window
+      message: {
+        error: 'Too many requests, slow down!',
+        code: 'RATE_LIMIT_EXCEEDED',
+      },
+    },
+  },
+}
+```
+
+**Precedence:**
+- If `transport.options.rateLimit` is set, it is used.
+- Otherwise, if `security.rateLimit.enabled` is true, it is used.
+- Otherwise, a safe default (100 requests/15 min) is used.
+
+See [express-rate-limit](https://www.npmjs.com/package/express-rate-limit) for all available options.
+
 ## Best Practices
 
 - **Validate all configuration** using the provided schemas before using it in your application.
 - **Do not duplicate validation logic** in other parts of the codebase—always use the loader and schemas.
 - **Keep all config-related logic in this module** for maintainability and clarity.
 - **Extend types and schemas here** if you add new configuration options to the framework.
+- **For JWT authentication, set the `expectedAudience` option in your middleware or config to enforce that only tokens intended for this server are accepted.**
+  - Example:
+    ```ts
+    app.use(jwtAuthMiddleware({
+      allowedRoles: ['admin'],
+      expectedAudience: 'my-mcp-server',
+    }))
+    ```
+  - This prevents token passthrough and confused deputy attacks. In production, a warning is shown if not set.
 
 ## Extending Configuration
 

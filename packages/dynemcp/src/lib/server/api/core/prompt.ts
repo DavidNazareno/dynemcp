@@ -17,6 +17,11 @@ export function prompt(config: {
   arguments?: PromptArgument[]
   argsSchema?: z.ZodRawShape | Record<string, z.ZodTypeAny>
   getMessages: (args?: Record<string, string>) => Promise<PromptMessage[]>
+  complete?: (params: {
+    argument: string
+    partialInput: string
+    context?: Record<string, unknown>
+  }) => Promise<string[]> | string[]
 }): LoadedPrompt {
   return {
     name: config.name,
@@ -24,5 +29,6 @@ export function prompt(config: {
     arguments: config.arguments,
     argsSchema: config.argsSchema,
     getMessages: config.getMessages,
+    complete: config.complete,
   }
 }

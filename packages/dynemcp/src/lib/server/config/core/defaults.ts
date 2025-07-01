@@ -80,6 +80,13 @@ export function createDefaultConfig(): DyneMCPConfig {
     server: {
       name: DEFAULT_SERVER_NAME,
       version: DEFAULT_SERVER_VERSION,
+      capabilities: {
+        logging: {},
+        prompts: { listChanged: true },
+        resources: { subscribe: true, listChanged: true },
+        tools: { listChanged: true },
+        completions: {},
+      },
     },
     tools: {
       ...DEFAULT_AUTOLOAD_CONFIG,

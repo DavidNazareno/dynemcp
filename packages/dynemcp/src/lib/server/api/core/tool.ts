@@ -19,6 +19,11 @@ export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
   execute: (
     input: z.infer<T>
   ) => Promise<CallToolResult> | CallToolResult | string | unknown
+  complete?: (params: {
+    argument: string
+    partialInput: string
+    context?: Record<string, unknown>
+  }) => Promise<string[]> | string[]
 }): LoadedTool {
   return {
     name: config.name,
@@ -28,6 +33,7 @@ export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
     annotations: config.annotations,
     execute: withErrorHandling(config.execute as any),
     parameters: {}, // Optionally fill if needed
+    complete: config.complete,
   }
 }
 
@@ -50,6 +56,11 @@ export function tool<
     outputSchema?: z.ZodRawShape | z.ZodObject<any, any, any>
     annotations?: Record<string, unknown>
     meta?: Meta
+    complete?: (params: {
+      argument: string
+      partialInput: string
+      context?: Record<string, unknown>
+    }) => Promise<string[]> | string[]
   }
 ): LoadedTool {
   return {
@@ -60,5 +71,6 @@ export function tool<
     annotations: options.annotations ?? options.meta,
     execute: withErrorHandling(handler as any),
     parameters: {}, // Optionally fill if needed
+    complete: options.complete,
   }
 }

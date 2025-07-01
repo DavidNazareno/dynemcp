@@ -50,11 +50,21 @@ export interface LoadedTool extends ToolDefinition {
   outputSchema?: ZodRawShape | ZodObject<any, any, any>
   annotations?: Record<string, unknown>
   execute: (args: Record<string, unknown>) => Promise<CallToolResult>
+  complete?: (params: {
+    argument: string
+    partialInput: string
+    context?: Record<string, unknown>
+  }) => Promise<string[]> | string[]
 }
 
 export interface LoadedPrompt extends PromptDefinition {
   argsSchema?: ZodRawShape | Record<string, ZodTypeAny>
   getMessages: (args?: Record<string, string>) => Promise<PromptMessage[]>
+  complete?: (params: {
+    argument: string
+    partialInput: string
+    context?: Record<string, unknown>
+  }) => Promise<string[]> | string[]
 }
 
 /**
@@ -116,6 +126,11 @@ export interface ResourceTemplateDefinition {
 export interface LoadedResource extends ResourceDefinition {
   content: string | (() => string | Promise<string>)
   paramsSchema?: ZodRawShape | ZodObject<any, any, any>
+  complete?: (params: {
+    argument: string
+    partialInput: string
+    context?: Record<string, unknown>
+  }) => Promise<string[]> | string[]
   // Add more fields as needed for dynamic resources
 }
 

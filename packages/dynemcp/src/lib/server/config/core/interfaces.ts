@@ -12,6 +12,7 @@ export interface ServerConfig {
   version: string
   description?: string
   documentationUrl?: string
+  capabilities?: Record<string, any>
 }
 
 // Logging configuration
@@ -106,6 +107,18 @@ export interface StreamableHTTPTransportConfig {
     }
     authentication?: {
       path: string
+    }
+    /**
+     * Rate limiting options (see express-rate-limit)
+     * Example:
+     *   rateLimit: { windowMs: 900000, max: 100 }
+     */
+    rateLimit?: {
+      windowMs?: number
+      max?: number
+      standardHeaders?: boolean
+      legacyHeaders?: boolean
+      message?: string | object
     }
   }
 }

@@ -18,6 +18,11 @@ export function resource(config: {
   mimeType?: string
   paramsSchema?: ZodSchema<any>
   getContent: (params?: Record<string, any>) => string | Promise<string>
+  complete?: (params: {
+    argument: string
+    partialInput: string
+    context?: Record<string, unknown>
+  }) => Promise<string[]> | string[]
 }): ResourceDefinition {
   return {
     uri: config.uri,
@@ -35,5 +40,6 @@ export function resource(config: {
       }
       return config.getContent(params)
     },
+    // complete: config.complete, // No permitido por el tipo ResourceDefinition del SDK
   }
 }

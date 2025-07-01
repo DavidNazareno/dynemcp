@@ -21,6 +21,7 @@ import {
 import { validateTool } from '../../components/core/loaders/validators'
 import path from 'path'
 import fs from 'fs'
+import { paginateWithCursor } from '../../api/core/utils'
 
 /**
  * DyneMCP Registry - Main Registry Class
@@ -264,6 +265,45 @@ export class DyneMCPRegistry implements Registry {
    */
   getAuthenticationMiddlewarePath(): string | null {
     return this.authenticationMiddlewarePath
+  }
+
+  /**
+   * Get a component (tool, prompt, resource) by type and id, exposing its completion logic if present.
+   */
+  getComponentWithCompletion(
+    type: RegistryItemType,
+    id: string
+  ): any | undefined {
+    let item: any
+    if (type === 'tool') item = this.getTool(id)
+    else if (type === 'prompt') item = this.getPrompt(id)
+    else if (type === 'resource') item = this.getResource(id)
+    if (!item) return undefined
+    return item.module
+  }
+
+  /**
+   * Get paginated tools (MCP-style cursor pagination).
+   */
+  getPaginatedTools(cursor?: string, pageSize?: number) {
+    const all = this.getAllTools().map((item) => item.module)
+    return paginateWithCursor(all, cursor, pageSize)
+  }
+
+  /**
+   * Get paginated prompts (MCP-style cursor pagination).
+   */
+  getPaginatedPrompts(cursor?: string, pageSize?: number) {
+    const all = this.getAllPrompts().map((item) => item.module)
+    return paginateWithCursor(all, cursor, pageSize)
+  }
+
+  /**
+   * Get paginated resources (MCP-style cursor pagination).
+   */
+  getPaginatedResources(cursor?: string, pageSize?: number) {
+    const all = this.getAllResources().map((item) => item.module)
+    return paginateWithCursor(all, cursor, pageSize)
   }
 }
 
