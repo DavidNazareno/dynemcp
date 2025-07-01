@@ -6,23 +6,25 @@ import {
   parseRootList,
 } from '@dynemcp/dynemcp'
 
-// Ejemplo de roots sugeridos por el cliente MCP
+// --- Example roots suggested by the MCP client --- //
+// You can use this as a reference for your own root definitions
 export const exampleRoots: RootList = [
   { uri: 'file:///home/user/projects/frontend', name: 'Frontend Repository' },
   { uri: 'https://api.example.com/v1', name: 'API Endpoint' },
 ]
 
-// Validar si un objeto es un root válido
+// --- Logic (helpers) --- //
+// Checks if an object is a valid Root
 export function checkRoot(obj: any): boolean {
   return isRoot(obj)
 }
 
-// Validar si un objeto es una lista de roots válida
+// Checks if an object is a valid list of Roots
 export function checkRootList(obj: any): boolean {
   return isRootList(obj)
 }
 
-// Parsear y normalizar una lista de roots desde cualquier entrada
+// Parses and normalizes a list of roots from any input
 export function getRootsFromInput(input: any): RootList {
   return parseRootList(input)
 }

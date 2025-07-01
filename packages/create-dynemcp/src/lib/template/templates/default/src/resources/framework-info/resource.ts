@@ -1,11 +1,9 @@
 import { resource } from '@dynemcp/dynemcp'
 
-export default resource({
-  uri: 'info://framework',
-  name: 'Framework Information',
-  description: 'Information about the DyneMCP framework',
-  mimeType: 'text/markdown',
-  getContent: () => `# DyneMCP Framework
+// --- Logic --- //
+// Returns a markdown string with framework information for the resource
+function getFrameworkInfo() {
+  return `# DyneMCP Framework
 
 ## Overview
 DyneMCP (Dynamic Model Context Protocol) is a TypeScript-first framework for building MCP servers with a focus on developer experience and type safety.
@@ -32,5 +30,15 @@ npm start
 \`\`\`
 
 ## Documentation
-Visit [dynemcp.dev](https://dynemcp.dev) for comprehensive documentation and examples.`,
+Visit [dynemcp.dev](https://dynemcp.dev) for comprehensive documentation and examples.`
+}
+
+// --- Export --- //
+// This resource provides information about the DyneMCP framework in markdown format
+export default resource({
+  uri: 'info://framework',
+  name: 'Framework Information',
+  description: 'Information about the DyneMCP framework',
+  mimeType: 'text/markdown',
+  getContent: getFrameworkInfo,
 })

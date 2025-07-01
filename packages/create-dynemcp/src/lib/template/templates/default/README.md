@@ -1,6 +1,14 @@
 # DyneMCP Default Template
 
-This is the default template for DyneMCP projects, featuring a file-based architecture similar to Next.js.
+This is the official default template for DyneMCP projects. It provides a clean, scalable, and type-safe starting point for building Model Context Protocol (MCP) servers using a file-based architecture inspired by frameworks like Next.js.
+
+## 🚀 Features
+
+- **File-based auto-loading** for tools, resources, and prompts
+- **TypeScript-first**: full type safety and IntelliSense
+- **Extensible**: add your own tools, resources, and prompts easily
+- **Helper utilities**: organize helpers alongside components without accidental auto-loading
+- **Ready for LLM completions**: includes a sample for LLM integration
 
 ## 🏗️ Project Structure
 
@@ -9,178 +17,115 @@ src/
 ├── index.ts                    # Server entry point
 ├── tools/                      # Tools directory
 │   ├── greeter/               # Greeter tool folder
-│   │   └── tool.ts           # Main tool file (loaded automatically)
+│   │   └── tool.ts           # Main tool file (auto-loaded)
 │   └── math/                  # Math tool folder
-│       ├── tool.ts           # Main tool file (loaded automatically)
-│       └── utils.ts          # Helper utilities (NOT loaded automatically)
+│       ├── tool.ts           # Main tool file (auto-loaded)
+│       └── utils.ts          # Helper utilities (NOT auto-loaded)
 ├── resources/                  # Resources directory
 │   ├── framework-info/        # Framework info resource folder
-│   │   └── resource.ts       # Main resource file (loaded automatically)
+│   │   └── resource.ts       # Main resource file (auto-loaded)
 │   └── user-data/            # User data resource folder
-│       └── resource.ts       # Main resource file (loaded automatically)
-└── prompts/                    # Prompts directory
-    ├── system-context/        # System context prompt folder
-    │   └── prompt.ts         # Main prompt file (loaded automatically)
-    └── conversation/          # Conversation prompt folder
-        └── prompt.ts         # Main prompt file (loaded automatically)
+│       └── resource.ts       # Main resource file (auto-loaded)
+├── prompts/                    # Prompts directory
+│   ├── system-context/        # System context prompt folder
+│   │   └── prompt.ts         # Main prompt file (auto-loaded)
+│   └── conversation/          # Conversation prompt folder
+│       └── prompt.ts         # Main prompt file (auto-loaded)
+├── samples/                    # LLM sample directory
+│   └── hello-sample/         # Example LLM completion sample
+│       └── sample.ts         # Main sample file
+└── roots/                      # Roots helpers and examples
+    └── roots.ts              # Example and helpers for roots
 ```
 
-## 🔑 Key Architecture Concepts
+## 🔑 Conventions
 
-### File-Based Auto-Loading
+- **Tools**: Only files named `tool.ts` or `tool.js` in `src/tools/**/` are auto-loaded as tools.
+- **Resources**: Only files named `resource.ts` or `resource.js` in `src/resources/**/` are auto-loaded as resources.
+- **Prompts**: Only files named `prompt.ts` or `prompt.js` in `src/prompts/**/` are auto-loaded as prompts.
+- **Helpers**: Any other files (e.g., `utils.ts`) are ignored by the loader and can be freely used for utilities.
 
-DyneMCP follows a convention-over-configuration approach:
-
-- **Tools**: Only files named `tool.ts` or `tool.js` are automatically loaded as tools
-- **Resources**: Only files named `resource.ts` or `resource.js` are automatically loaded as resources
-- **Prompts**: Only files named `prompt.ts` or `prompt.js` are automatically loaded as prompts
-
-### Helper Files and Utilities
-
-You can include any number of helper files in component folders:
-
-```
-tools/
-  math/
-    tool.ts        # ✅ Loaded automatically as a tool
-    utils.ts       # ✅ Available for import but NOT loaded as a tool
-    constants.ts   # ✅ Available for import but NOT loaded as a tool
-    calculations/  # ✅ Subfolder with more utilities
-      advanced.ts  # ✅ Available for import but NOT loaded as a tool
-```
-
-### Benefits
-
-- **Clean Organization**: Each component has its own folder with utilities
-- **No Accidental Loading**: Only specific files are loaded as components
-- **Scalable**: Add as many helper files as needed without affecting auto-loading
-- **Type Safety**: Full TypeScript support with proper imports
-
-## 🛠️ Available Components
-
-### Tools
-
-- **greeter**: Simple greeting tool (`tools/greeter/tool.ts`)
-- **math**: Advanced mathematical operations with utilities (`tools/math/tool.ts`)
-
-### Resources
-
-- **framework-info**: Information about the DyneMCP framework (`resources/framework-info/resource.ts`)
-- **user-data**: User preferences and session data (`resources/user-data/resource.ts`)
-
-### Prompts
-
-- **system-context**: System instructions for the AI (`prompts/system-context/prompt.ts`)
-- **conversation**: Conversation starter template (`prompts/conversation/prompt.ts`)
-
-## 🚀 Getting Started
-
-1. **Install dependencies**:
-
-   ```bash
-   pnpm install
-   ```
-
-2. **Start development server**:
-
-   ```bash
-   pnpm dev
-   ```
-
-3. **Build for production**:
-   ```bash
-   pnpm build
-   ```
-
-## 📝 Creating New Components
-
-### Adding a New Tool
-
-```bash
-# Create folder and main tool file
-mkdir src/tools/my-tool
-touch src/tools/my-tool/tool.ts
-```
+## 🛠️ Example: Creating a Tool
 
 ```typescript
 // src/tools/my-tool/tool.ts
-import { DyneMCPTool, CallToolResult } from '@dynemcp/dynemcp'
+import { tool } from '@dynemcp/dynemcp'
 import { z } from 'zod'
 
+// --- Schema (Arguments) --- //
 const MyToolSchema = z.object({
   input: z.string().describe('Input parameter'),
 })
 
-export class MyTool extends DyneMCPTool {
-  readonly name = 'my-tool'
-  readonly description = 'Description of my tool'
-  readonly inputSchema = MyToolSchema.shape
-
-  execute(input: z.infer<typeof MyToolSchema>): CallToolResult {
-    return {
-      content: [{ type: 'text', text: `Processed: ${input.input}` }],
-    }
-  }
+// --- Logic --- //
+function processInput(input: string) {
+  return input.toUpperCase()
 }
 
-export default new MyTool()
+// --- Export --- //
+export default tool(
+  MyToolSchema,
+  async ({ input }) => ({
+    content: [{ type: 'text', text: `Processed: ${processInput(input)}` }],
+  }),
+  {
+    name: 'my-tool',
+    description: 'Processes the input string',
+  }
+)
 ```
 
-### Adding Helper Utilities
+## 🛠️ Example: Creating a Resource
 
 ```typescript
-// src/tools/my-tool/utils.ts (NOT auto-loaded)
-export function helperFunction(data: string): string {
-  return data.toUpperCase()
+// src/resources/my-resource/resource.ts
+import { resource } from '@dynemcp/dynemcp'
+
+function getMyResource() {
+  return JSON.stringify({ message: 'Hello from my resource!' })
 }
+
+export default resource({
+  uri: 'resource://my-resource',
+  name: 'my-resource',
+  description: 'A sample resource',
+  mimeType: 'application/json',
+  getContent: getMyResource,
+})
 ```
 
-Then import in your tool:
+## 🛠️ Example: Creating a Prompt
 
 ```typescript
-// src/tools/my-tool/tool.ts
-import { helperFunction } from './utils.js'
-```
+// src/prompts/my-prompt/prompt.ts
+import { prompt } from '@dynemcp/dynemcp'
 
-### Adding a New Resource
+const MyPromptArguments = [
+  { name: 'topic', description: 'The topic to discuss', required: true },
+]
 
-```bash
-mkdir src/resources/my-resource
-touch src/resources/my-resource/resource.ts
-```
-
-### Adding a New Prompt
-
-```bash
-mkdir src/prompts/my-prompt
-touch src/prompts/my-prompt/prompt.ts
-```
-
-## 🔧 Configuration
-
-The project uses `dynemcp.config.json` for configuration:
-
-```json
-{
-  "name": "default-template",
-  "version": "1.0.0",
-  "description": "Default DyneMCP template with file-based architecture",
-  "autoload": {
-    "tools": {
-      "enabled": true,
-      "directory": "src/tools"
+async function getMessages(args: Record<string, any> = {}) {
+  return [
+    {
+      role: 'user',
+      content: { type: 'text', text: `Let's talk about ${args.topic}` },
     },
-    "resources": {
-      "enabled": true,
-      "directory": "src/resources"
-    },
-    "prompts": {
-      "enabled": true,
-      "directory": "src/prompts"
-    }
-  }
+  ]
 }
+
+export default prompt({
+  name: 'my-prompt',
+  description: 'A simple prompt example',
+  arguments: MyPromptArguments,
+  getMessages,
+})
 ```
+
+## 🧩 Extending the Template
+
+- Add new tools, resources, or prompts by following the folder/file conventions above.
+- Use helper files for shared logic or utilities.
+- See the included examples for best practices on code organization and comments.
 
 ## 📚 Learn More
 
@@ -190,11 +135,11 @@ The project uses `dynemcp.config.json` for configuration:
 
 ## 🤝 Contributing
 
-1. Follow the file-based architecture patterns
-2. Use TypeScript for type safety
-3. Include helper utilities in component folders
-4. Test your components thoroughly
-5. Update documentation as needed
+- Follow the file-based architecture patterns
+- Use TypeScript for type safety
+- Include helper utilities in component folders
+- Test your components thoroughly
+- Update documentation as needed
 
 ## Object-Based Tool Definition Example
 
