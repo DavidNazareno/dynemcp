@@ -1,14 +1,14 @@
 // ts-compiler.ts
 // Utilities for dynamic TypeScript compilation and import resolution
-// Used by the DyneMCP framework to support plug-and-play component loading
+// Enables runtime loading of .ts components for DyneMCP plug-and-play architecture.
 
 import fs from 'fs'
 import path from 'path'
 import { transform } from 'esbuild'
 
 /**
- * Compiles a TypeScript file to JavaScript using esbuild.
- * This is used to allow dynamic loading of .ts components at runtime.
+ * transformTsFile: Compiles a TypeScript file to JavaScript using esbuild.
+ * Used for dynamic runtime loading of .ts components.
  *
  * @param tsPath - The absolute path to the TypeScript file
  * @param jsPath - The absolute path where the compiled JavaScript should be written
@@ -30,8 +30,8 @@ export async function transformTsFile(
 }
 
 /**
- * Recursively resolves and compiles all relative imports in a TypeScript file.
- * Ensures that all dependencies are available for dynamic import at runtime.
+ * resolveAndCompileRelativeImports: Recursively resolves and compiles all relative imports in a TypeScript file.
+ * Ensures all dependencies are available for dynamic import at runtime.
  *
  * @param tsCode - The TypeScript source code as a string
  * @param sourceDir - The directory of the source file

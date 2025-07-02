@@ -1,3 +1,6 @@
+// Loader and parser for DyneMCP server configuration files
+// Supports loading, merging, and validating config from JSON or TypeScript files.
+
 import { promises as fsPromises } from 'fs'
 import path from 'path'
 import { spawn } from 'child_process'
@@ -7,7 +10,7 @@ import { ConfigError } from './errors'
 import { createDefaultConfig, DEFAULT_CONFIG } from './defaults'
 
 /**
- * Executes a TypeScript file using tsx and returns the result
+ * executeTypeScriptFile: Executes a TypeScript config file using tsx and returns the result.
  */
 async function executeTypeScriptFile(tsPath: string): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -55,7 +58,7 @@ async function executeTypeScriptFile(tsPath: string): Promise<any> {
 }
 
 /**
- * Resolves the absolute path to the configuration file.
+ * resolveConfigPath: Resolves the absolute path to the configuration file.
  * @param configPath Optional path to the config file.
  * @returns Absolute path to the config file.
  */
@@ -67,10 +70,10 @@ function resolveConfigPath(configPath?: string): string {
 }
 
 /**
- * Reads and parses the configuration file, supporting both JSON and TypeScript (with defineConfig).
+ * readConfigFile: Reads and parses the configuration file (JSON or TypeScript).
+ * Throws ConfigError if the file is not found or invalid.
  * @param configPath Path to the config file.
  * @returns Parsed configuration object.
- * @throws ConfigError if the file is not found or invalid.
  */
 async function readConfigFile(configPath: string): Promise<any> {
   const absolutePath = resolveConfigPath(configPath)
@@ -97,7 +100,7 @@ async function readConfigFile(configPath: string): Promise<any> {
 }
 
 /**
- * Loads the base configuration (minimal fields only).
+ * loadBaseConfig: Loads the base configuration (minimal fields only).
  * @param configPath Optional path to the config file.
  * @returns Parsed and validated base configuration.
  */
@@ -107,7 +110,7 @@ export async function loadBaseConfig(configPath?: string): Promise<BaseConfig> {
 }
 
 /**
- * Loads the full configuration, merging with defaults and validating.
+ * loadConfig: Loads the full configuration, merging with defaults and validating.
  * @param configPath Optional path to the config file.
  * @returns Parsed and validated full configuration.
  */
@@ -126,19 +129,6 @@ export async function loadConfig(configPath?: string): Promise<DyneMCPConfig> {
   }
   // Merge and validate
   const merged = { ...defaults, ...fileConfig }
-
-  // Ensure required AutoloadConfig fields are present and never undefined
-  if (
-    typeof merged.resourcesTemplates === 'undefined' ||
-    merged.resourcesTemplates === null
-  ) {
-    merged.resourcesTemplates = {
-      enabled: true,
-      directory: './src/resources/templates',
-      pattern: '*.ts',
-      exclude: [],
-    }
-  }
 
   return ConfigSchema.parse(merged)
 }

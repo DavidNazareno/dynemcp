@@ -1,5 +1,6 @@
 /**
  * Custom error class for configuration-related errors in DyneMCP.
+ * Provides static helpers for common config error scenarios (file not found, invalid config, parse error).
  */
 export class ConfigError extends Error {
   constructor(

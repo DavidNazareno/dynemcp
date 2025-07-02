@@ -2,8 +2,9 @@
 
 The DyneBuild CLI is the command-line interface for building, cleaning, and analyzing DyneMCP projects. It is modular, robust, and designed for developer productivity.
 
-## Architecture
+## Overview
 
+- **Purpose:** Provides a unified CLI for all build-related operations in DyneMCP projects.
 - **Modular:** All CLI logic is implemented in `core/cli.ts`. The `index.ts` file is a minimal entrypoint that delegates to the core.
 - **Extensible:** The CLI supports multiple commands (`build`, `watch`, `cli`, `clean`, `analyze`) and can be extended with new commands in the future.
 - **Type-safe:** All options and helpers are typed for reliability and maintainability.
@@ -23,6 +24,8 @@ dynebuild [command] [options]
 - `cli` — Build the CLI tool
 - `clean` — Clean the build directory
 - `analyze` — Analyze project dependencies
+- `help` — Show help message
+- `version` — Show CLI version
 
 ### Options
 

@@ -1,3 +1,7 @@
+// CLI entry point for DyneMCP
+// Sets up all main commands (dev, build, start, clean, analyze) using yargs and connects them to their handlers.
+// Each command is configured with options and examples for developer usability.
+
 import yargs, { type Argv } from 'yargs'
 import { hideBin } from 'yargs/helpers'
 

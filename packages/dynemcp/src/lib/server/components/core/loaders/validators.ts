@@ -1,8 +1,7 @@
 // validators.ts
 // Type guards for validating dynamically loaded components in the DyneMCP framework
+// Ensures that tools, resources, and prompts conform to expected contracts.
 
-// validators.ts
-// Type guards for validating dynamically loaded components in the DyneMCP framework
 import type {
   ToolDefinition,
   ResourceDefinition,
@@ -10,7 +9,7 @@ import type {
 } from '../../../api'
 
 /**
- * Checks if a value is a valid ToolDefinition.
+ * validateTool: Checks if a value is a valid ToolDefinition.
  * Used to ensure dynamically loaded modules conform to the expected tool contract.
  */
 export function validateTool(component: unknown): component is ToolDefinition {
@@ -30,7 +29,7 @@ export function validateTool(component: unknown): component is ToolDefinition {
 }
 
 /**
- * Checks if a value is a valid ResourceDefinition.
+ * validateResource: Checks if a value is a valid ResourceDefinition.
  * Used to ensure dynamically loaded modules conform to the expected resource contract.
  */
 export function validateResource(
@@ -50,7 +49,7 @@ export function validateResource(
 }
 
 /**
- * Checks if a value is a valid PromptDefinition.
+ * validatePrompt: Checks if a value is a valid PromptDefinition.
  * Used to ensure dynamically loaded modules conform to the expected prompt contract.
  */
 export function validatePrompt(

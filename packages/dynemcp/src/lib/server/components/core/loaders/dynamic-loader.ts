@@ -1,5 +1,6 @@
 // dynamic-loader.ts
 // Dynamic import and normalization utilities for DyneMCP framework components
+// Provides dynamic loading and validation for tools, resources, and prompts.
 
 import fs from 'fs'
 import path from 'path'
@@ -11,9 +12,8 @@ import {
 } from './ts-compiler'
 
 /**
- * Dynamically imports a component file (TypeScript or JavaScript), normalizes its export,
- * and validates it using the provided type guard. This enables plug-and-play loading of
- * tools, resources, and prompts in the DyneMCP framework.
+ * loadComponentFromFile: Dynamically imports and validates a component file (TS/JS).
+ * Normalizes exports and supports legacy/modern formats for plug-and-play loading.
  *
  * @param filePath - Absolute path to the component file
  * @param validator - Type guard function to validate the loaded export

@@ -1,3 +1,6 @@
+// Default values and settings for DyneMCP server configuration
+// Provides defaults for server, transport, logging, performance, security, and autoloaded components.
+
 import { NETWORK, CLI, PATHS } from '../../../../global/config-all-contants'
 import type { DyneMCPConfig, LoggingConfig } from './interfaces'
 
@@ -72,7 +75,7 @@ export const DEFAULT_ENV_CONFIG = {
 }
 
 /**
- * Creates a default DyneMCP configuration object.
+ * createDefaultConfig: Creates a default DyneMCP configuration object.
  * @returns {DyneMCPConfig} The default configuration.
  */
 export function createDefaultConfig(): DyneMCPConfig {

@@ -1,3 +1,6 @@
+// Component creator helpers for DyneMCP
+// Provides factory functions for tools, resources, prompts, and resource templates.
+
 import { readFileSync, existsSync } from 'fs'
 import { isAbsolute, resolve, basename } from 'path'
 import { z, type ZodRawShape, type ZodTypeAny, ZodObject } from 'zod'
@@ -45,7 +48,7 @@ export interface ChatMessage {
 }
 
 /**
- * Helper to create a ToolDefinition for MCP servers.
+ * createTool: Helper to create a ToolDefinition for MCP servers.
  * Handles result normalization and error handling for tool execution.
  *
  * @param name - Tool name
@@ -92,7 +95,7 @@ export function createTool(
 }
 
 /**
- * Helper to create a file-based ResourceDefinition for MCP servers.
+ * createFileResource: Helper to create a file-based ResourceDefinition for MCP servers.
  * Reads the file content at creation time.
  *
  * @param filePath - Path to the file
@@ -122,7 +125,7 @@ export function createFileResource(
 }
 
 /**
- * Helper to create a dynamic ResourceDefinition for MCP servers.
+ * createDynamicResource: Helper to create a dynamic ResourceDefinition for MCP servers.
  * The content is generated on demand by the provided function.
  *
  * @param uri - Resource URI
@@ -147,7 +150,7 @@ export function createDynamicResource(
 }
 
 /**
- * Helper to create a simple PromptDefinition for MCP servers.
+ * createPrompt: Helper to create a simple PromptDefinition for MCP servers.
  * Returns a single user message with the provided content.
  *
  * @param name - Prompt name
@@ -172,7 +175,7 @@ export function createPrompt(
 }
 
 /**
- * Helper to create a system prompt (alias for createPrompt).
+ * createSystemPrompt: Helper to create a system prompt (alias for createPrompt).
  */
 export function createSystemPrompt(
   name: string,
@@ -185,7 +188,7 @@ export function createSystemPrompt(
 }
 
 /**
- * Helper to create a chat-style PromptDefinition for MCP servers.
+ * createChatPrompt: Helper to create a chat-style PromptDefinition for MCP servers.
  * Accepts an array of chat messages (user/assistant) and returns them as prompt messages.
  *
  * @param name - Prompt name
@@ -204,6 +207,9 @@ export function createChatPrompt(
   return createPrompt(name, '', getMessages, argsSchema, options)
 }
 
+/**
+ * createResourceTemplate: Helper to create a resource template definition for dynamic resources.
+ */
 export function createResourceTemplate(
   uriTemplate: string,
   name: string,

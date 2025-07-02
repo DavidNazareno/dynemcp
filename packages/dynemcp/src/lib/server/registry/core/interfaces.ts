@@ -1,11 +1,11 @@
 // interfaces.ts
 // Public types and interfaces for the DyneMCP Registry module
+// Defines core types for registry items, loader, storage, and batch loading options.
 // ----------------------------------------------------------
 
 /**
- * Represents a generic registry item (Tool, Prompt, Resource, etc).
+ * RegistryItemType: Supported component types in the registry.
  */
-
 export type RegistryItemType = 'tool' | 'prompt' | 'resource' | 'sample'
 
 export interface RegistryItem {
@@ -15,14 +15,18 @@ export interface RegistryItem {
 }
 
 /**
- * Interface for the Registry Loader.
+ * RegistryItem: Represents a single item (tool, prompt, resource, sample) in the registry.
+ */
+
+/**
+ * RegistryLoader: Interface for loading items into the registry.
  */
 export interface RegistryLoader {
   loadItem(type: RegistryItemType, id: string): Promise<RegistryItem>
 }
 
 /**
- * Interface for the Registry Storage backend.
+ * RegistryStorage: Interface for registry storage backends.
  */
 export interface RegistryStorage {
   getItem(type: RegistryItemType, id: string): RegistryItem | undefined
@@ -31,7 +35,7 @@ export interface RegistryStorage {
 }
 
 /**
- * Main Registry interface.
+ * Registry: Main registry interface for loading and preloading items.
  */
 export interface Registry {
   get(type: RegistryItemType, id: string): Promise<RegistryItem>
@@ -39,7 +43,7 @@ export interface Registry {
 }
 
 /**
- * Statistics for the registry contents.
+ * RegistryStats: Statistics about the registry contents.
  */
 export interface RegistryStats {
   tools: number
@@ -49,7 +53,7 @@ export interface RegistryStats {
 }
 
 /**
- * Options for batch loading all components into the registry.
+ * LoadAllOptions: Options for batch loading all components into the registry.
  */
 export interface LoadAllOptions {
   tools: { enabled: boolean; directory: string }

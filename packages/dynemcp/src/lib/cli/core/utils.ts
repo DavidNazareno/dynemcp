@@ -4,6 +4,10 @@ import { loadConfig } from '../../server/config'
 import { DYNEMCP_CLI, CLI } from '../../../global/config-all-contants'
 import type { DevOptions } from './types'
 
+// Utility functions for DyneMCP CLI
+// Includes process spawning and transport/host/port resolution helpers.
+
+// Spawns a child process with inherited stdio and error handling
 export function spawnProcess(
   command: string,
   args: string[],
@@ -20,6 +24,7 @@ export function spawnProcess(
   return proc
 }
 
+// Resolves the effective transport, port, and host for the dev server
 export async function getEffectiveTransport(argv: DevOptions): Promise<{
   transport: string
   port?: number

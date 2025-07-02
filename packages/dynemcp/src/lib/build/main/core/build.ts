@@ -1,6 +1,10 @@
 // core/build.ts
 // Main build logic for DyneMCP
 // ----------------------------
+//
+// - Provides the main production build entrypoint for DyneMCP projects.
+// - Merges config, user, and environment options for robust, zero-config builds.
+// - Uses the bundler to produce optimized output and returns build results.
 
 import { ConsoleLogger } from '../../../cli/core/logger'
 import type { DyneMCPBuildOptions, BuildResult } from './interfaces'
@@ -15,6 +19,9 @@ function shouldLog() {
 /**
  * Build a DyneMCP project with advanced features.
  * This is the main entrypoint for production builds.
+ *
+ * @param options DyneMCPBuildOptions (optional)
+ * @returns BuildResult with stats, config, and errors if any
  */
 export async function build(
   options: DyneMCPBuildOptions = {}

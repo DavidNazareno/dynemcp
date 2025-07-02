@@ -1,6 +1,10 @@
 // core/cli.ts
 // DyneBuild CLI core logic for DyneMCP
 // ------------------------------------
+//
+// - Implements the main CLI for building, cleaning, and analyzing DyneMCP projects.
+// - Supports commands: build, watch, cli, clean, analyze, help, version.
+// - Handles argument parsing, help/version output, and command dispatch.
 
 import chalk from 'chalk'
 import path from 'path'
@@ -20,6 +24,9 @@ export interface CliOptions {
   version?: boolean
 }
 
+/**
+ * Show CLI help message.
+ */
 export function showHelp(): void {
   console.log(`
 ${chalk.bold.blue('🚀 DyneBuild CLI')} - Advanced MCP Server Builder
@@ -59,6 +66,9 @@ ${chalk.bold('Configuration:')}
 `)
 }
 
+/**
+ * Show CLI version.
+ */
 export function showVersion(): void {
   const packageJson = JSON.parse(
     fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf-8')
@@ -66,6 +76,9 @@ export function showVersion(): void {
   console.log(`DyneBuild CLI v${packageJson.version}`)
 }
 
+/**
+ * Parse CLI arguments into command and options.
+ */
 export function parseArgs(args: string[]): {
   command: string
   options: CliOptions
@@ -122,6 +135,9 @@ export function parseArgs(args: string[]): {
   return { command, options }
 }
 
+/**
+ * Main CLI entrypoint. Parses args, dispatches commands, and handles errors.
+ */
 export async function run(): Promise<void> {
   try {
     const args = process.argv.slice(2)

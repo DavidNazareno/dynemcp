@@ -9,7 +9,9 @@ This module provides all configuration types, schemas, utilities, and defaults r
 - Enable easy extension and maintenance of configuration options
 - Ensure robust error handling and clear defaults
 
-## Structure
+---
+
+## Directory Structure
 
 ```
 config/
@@ -23,6 +25,19 @@ config/
   index.ts         # Public API entrypoint for config
 ```
 
+---
+
+## Main Files (core/)
+
+- **defaults.ts**: Default values and settings for all config sections (server, transport, logging, etc.).
+- **errors.ts**: Custom error classes for configuration-related errors.
+- **interfaces.ts**: TypeScript interfaces and types for all config sections.
+- **loader.ts**: Utilities for loading, merging, and validating config from JSON or TypeScript files.
+- **schemas.ts**: Zod schemas for runtime validation of all config sections.
+- **transport.ts**: Zod schemas and types for all supported transport options (stdio, HTTP, SSE).
+
+---
+
 ## Key Concepts
 
 - **TypeScript Types**: All configuration objects are strongly typed for safety and autocompletion.
@@ -30,7 +45,9 @@ config/
 - **Defaults**: All config sections have centralized defaults, making it easy to extend or override.
 - **Error Handling**: Custom error classes provide clear, actionable error messages for configuration issues.
 - **Transport Config**: Transport configuration is modular and validated, supporting all built-in and custom transports.
-- **Advanced Sections**: The configuration supports advanced sections for `logging`, `debug`, `performance`, `security` y `config` (env), todas con tipado y validación estricta y valores por defecto.
+- **Advanced Sections**: The configuration supports advanced sections for `logging`, `debug`, `performance`, `security`, and `config` (env), all with strict typing, validation, and defaults.
+
+---
 
 ## Usage
 
@@ -137,8 +154,8 @@ You can configure rate limiting for your DyneMCP server in two ways:
 ```ts
 security: {
   rateLimit: {
-    enabled: true,
-    maxRequests: 100, // requests per windowMs
+    enabled: true, // requests per windowMs
+    maxRequests: 100,
     windowMs: 900000, // 15 minutes
   }
 }
@@ -170,6 +187,8 @@ transport: {
 
 See [express-rate-limit](https://www.npmjs.com/package/express-rate-limit) for all available options.
 
+---
+
 ## Best Practices
 
 - **Validate all configuration** using the provided schemas before using it in your application.
@@ -188,12 +207,16 @@ See [express-rate-limit](https://www.npmjs.com/package/express-rate-limit) for a
     ```
   - This prevents token passthrough and confused deputy attacks. In production, a warning is shown if not set.
 
+---
+
 ## Extending Configuration
 
 1. Add new fields to `interfaces.ts` and `schemas.ts`.
 2. Add defaults in `defaults.ts`.
 3. Update loader logic if needed.
 4. Add tests for new config options.
+
+---
 
 ## Maintainers
 

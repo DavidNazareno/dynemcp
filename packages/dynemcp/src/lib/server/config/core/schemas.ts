@@ -1,8 +1,11 @@
+// Zod schemas for DyneMCP server configuration validation
+// Provides schemas for all config sections: server, autoload, logging, debug, performance, security, env, and main config.
+
 import { z } from 'zod'
 import { DEFAULT_SERVER_VERSION } from './defaults'
 import { TransportSchema } from './transport'
 
-// Base schema for minimal configuration validation
+// BaseConfigSchema: Minimal configuration validation
 export const BaseConfigSchema = z.object({
   server: z.object({
     name: z.string(),
@@ -11,7 +14,7 @@ export const BaseConfigSchema = z.object({
   description: z.string().optional(),
 })
 
-// Schema for autoload configuration
+// AutoloadConfigSchema: Validation for autoloaded component directories
 export const AutoloadConfigSchema = z.object({
   enabled: z.boolean().default(true),
   directory: z.string(),
@@ -19,7 +22,7 @@ export const AutoloadConfigSchema = z.object({
   exclude: z.array(z.string()).optional(),
 })
 
-// Schema for server configuration
+// ServerConfigSchema: Validation for server config
 export const ServerConfigSchema = z.object({
   name: z.string().default('dynemcp-server'),
   version: z.string().default(DEFAULT_SERVER_VERSION),
@@ -27,7 +30,7 @@ export const ServerConfigSchema = z.object({
   description: z.string().optional(),
 })
 
-// Logging schema
+// LoggingConfigSchema: Validation for logging config
 export const LoggingConfigSchema = z.object({
   enabled: z.boolean(),
   level: z.enum(['info', 'warn', 'error', 'debug']),
@@ -36,7 +39,7 @@ export const LoggingConfigSchema = z.object({
   colors: z.boolean(),
 })
 
-// Debug schema
+// DebugConfigSchema: Validation for debug config
 export const DebugConfigSchema = z.object({
   enabled: z.boolean(),
   verbose: z.boolean(),
@@ -44,7 +47,7 @@ export const DebugConfigSchema = z.object({
   showTransportDetails: z.boolean(),
 })
 
-// Performance schema
+// PerformanceConfigSchema: Validation for performance config
 export const PerformanceConfigSchema = z.object({
   maxConcurrentRequests: z.number(),
   requestTimeout: z.number(),
@@ -52,7 +55,7 @@ export const PerformanceConfigSchema = z.object({
   enableMetrics: z.boolean(),
 })
 
-// Security schema
+// SecurityConfigSchema: Validation for security config
 export const SecurityConfigSchema = z.object({
   enableValidation: z.boolean(),
   strictMode: z.boolean(),
@@ -64,12 +67,12 @@ export const SecurityConfigSchema = z.object({
   }),
 })
 
-// Env config schema
+// EnvConfigSchema: Validation for env config
 export const EnvConfigSchema = z.object({
   env: z.boolean(),
 })
 
-// Main schema for full DyneMCP configuration
+// ConfigSchema: Main schema for full DyneMCP configuration
 export const ConfigSchema = z.object({
   server: ServerConfigSchema,
   tools: AutoloadConfigSchema,

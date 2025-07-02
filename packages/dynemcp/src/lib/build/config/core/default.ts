@@ -1,13 +1,17 @@
 // default.ts
 // Default build configuration for DyneMCP projects (zero-config, production-ready)
 // ------------------------------------------------------------------------------
+//
+// - Provides the default, production-optimized build configuration for DyneMCP projects.
+// - Users must not modify this file; all builds are zero-config and locked for safety.
+// - For advanced customization, contact framework maintainers.
 
 /**
  * DyneMCP build system configuration.
  *
- * ⚠️ NO MODIFICAR: Este archivo es parte del framework y no debe ser editado por el usuario final.
- * El build está 100% preconfigurado para funcionar de forma óptima y segura.
- * Si necesitas personalización avanzada, contacta a los mantenedores del framework.
+ * ⚠️ DO NOT MODIFY: This file is part of the framework and must not be edited by end users.
+ * The build is 100% preconfigured for optimal and secure operation.
+ * For advanced customization, contact the framework maintainers.
  */
 export const DEFAULT_BUILD_CONFIG = {
   entryPoint: './src/index.ts',

@@ -2,6 +2,9 @@
  * DyneMCP Build Configuration Module
  * Zero-config, production-ready. All logic lives in core/.
  * This file only exports the public API for config loading and build config.
+ *
+ * - Loads and validates DyneMCP build configuration (async).
+ * - Exposes the default build config (users cannot override).
  */
 
 import { promises as fs } from 'fs'
@@ -12,7 +15,10 @@ import { DEFAULT_BUILD_CONFIG } from './default'
 export type DyneMCPConfig = typeof DyneMCPConfigSchema._type
 
 /**
- * Load the DyneMCP configuration file (async, for general config only)
+ * Load the DyneMCP configuration file (async, for general config only).
+ *
+ * @param configPath Path to config file (default: dynemcp.config.ts)
+ * @returns DyneMCPConfig object
  */
 export async function loadConfig(
   configPath = 'dynemcp.config.ts'
@@ -51,7 +57,9 @@ export async function loadConfig(
 }
 
 /**
- * Get the default build configuration (users cannot override this)
+ * Get the default build configuration (users cannot override this).
+ *
+ * @returns Default build config object
  */
 export function getBuildConfig() {
   return DEFAULT_BUILD_CONFIG

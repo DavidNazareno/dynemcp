@@ -2,6 +2,10 @@
 import { defineConfig } from 'astro/config'
 import starlight from '@astrojs/starlight'
 
+// Import the logo images
+import lightLogo from './src/assets/Black-Text-Logo-DYNEMCP.svg'
+import darkLogo from './src/assets/White-Text-Logo-DYNEMCP.svg'
+
 // https://astro.build/config
 export default defineConfig({
   outDir: '../dist/apps',
@@ -11,8 +15,8 @@ export default defineConfig({
       title: 'DyneMCP',
       description: 'Build powerful MCP servers with TypeScript',
       logo: {
-        light: './src/assets/Black-Text-Logo-DYNEMCP.svg',
-        dark: './src/assets/White-Text-Logo-DYNEMCP.svg',
+        light: lightLogo,
+        dark: darkLogo,
         replacesTitle: true,
         alt: 'DyneMCP Logo',
       },
@@ -29,47 +33,41 @@ export default defineConfig({
       },
       sidebar: [
         {
-          label: 'Getting Started',
+          label: 'Start Here',
           items: [
-            { label: 'Introduction', link: '/' },
-            { label: 'Getting Started', link: '/getting-started/' },
-            { label: 'Framework Overview', link: '/framework/' },
+            { label: 'Getting Started', link: '/guides/getting-started' },
+            { label: 'Project Templates', link: '/guides/templates' },
           ],
         },
         {
           label: 'Guides',
           items: [
-            { label: 'Architecture', link: '/guides/architecture/' },
-            { label: 'Security', link: '/guides/security/' },
-            { label: 'Performance', link: '/guides/performance/' },
-            { label: 'Testing', link: '/guides/testing/' },
-            { label: 'Deployment', link: '/guides/deployment/' },
-            { label: 'Contributing', link: '/guides/contributing/' },
-            { label: 'FAQ', link: '/guides/faq/' },
-          ],
-        },
-        {
-          label: 'API Reference',
-          items: [
-            { label: 'Server API', link: '/api/server/' },
-            { label: 'Tool API', link: '/api/tools/' },
-            { label: 'Resource API', link: '/api/resources/' },
-            { label: 'Transport API', link: '/api/transport/' },
-            { label: 'Registry API', link: '/api/registry/' },
-            { label: 'Configuration API', link: '/api/config/' },
-          ],
-        },
-        {
-          label: 'Core Features',
-          items: [
-            { label: 'Tools System', link: '/tools/' },
-            { label: 'Templates', link: '/templates/' },
-            { label: 'CLI Reference', link: '/cli/' },
+            { label: 'Security Best Practices', link: '/guides/security' },
+            { label: 'Production Deployment', link: '/guides/deployment' },
+            { label: 'Performance Optimization', link: '/guides/performance' },
+            { label: 'Monitoring', link: '/guides/monitoring' },
+            { label: 'Compliance', link: '/guides/compliance' },
           ],
         },
         {
           label: 'Reference',
-          autogenerate: { directory: 'reference' },
+          items: [
+            { label: 'Server Architecture', link: '/reference/server' },
+            { label: 'Build System', link: '/reference/build-system' },
+            { label: 'Configuration', link: '/reference/configuration' },
+            { label: 'API Reference', link: '/reference/api' },
+            { label: 'Transport Options', link: '/reference/transport' },
+            { label: 'CLI Reference', link: '/reference/cli' },
+          ],
+        },
+        {
+          label: 'API Documentation',
+          items: [
+            { label: 'Tools API', link: '/api/tools' },
+            { label: 'Resources API', link: '/api/resources' },
+            { label: 'Registry API', link: '/api/registry' },
+            { label: 'Communication API', link: '/api/communication' },
+          ],
         },
       ],
       /*   customCss: ['./src/styles/custom.css'], */

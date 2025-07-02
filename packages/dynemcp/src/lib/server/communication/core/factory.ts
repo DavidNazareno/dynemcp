@@ -1,11 +1,14 @@
 /**
- * DyneMCP Transport Module
+ * DyneMCP Transport Module: Public entrypoint for all transport types, schemas, and utilities
  *
  * This is the public entrypoint for all transport types, schemas, and utilities.
  * It re-exports everything from the modular core transport system.
  *
  * Usage example:
  *   import { StdioTransport, StreamableHTTPTransport, TransportConfigSchema, createTransport } from '@/server/transport'
+ *
+ * - Re-exports all main contracts, schemas, defaults, errors, and helpers for transports.
+ * - Provides the createTransport factory for instantiating the correct transport by config.
  */
 
 // Main transport types and interfaces
@@ -33,7 +36,11 @@ import { TRANSPORT_TYPES } from './defaults'
 import type { Transport } from './interfaces'
 
 /**
- * Factory function to create the appropriate transport based on config.
+ * createTransport: Factory function to create the appropriate transport based on config.
+ *
+ * - Accepts a config object with a 'type' and optional 'options'.
+ * - Returns an instance of the corresponding Transport implementation.
+ * - Throws if the type is unknown.
  */
 export function createTransport(config: {
   type: string

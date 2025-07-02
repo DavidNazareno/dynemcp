@@ -1,9 +1,10 @@
 // interfaces.ts
 // Public types and interfaces for the DyneMCP Main Server module
+// Defines options for initializing the main server instance.
 // -------------------------------------------------------------
 
 /**
- * Options for initializing the DyneMCP server.
+ * ServerInitializationOptions: Options for initializing the DyneMCP server.
  */
 export interface ServerInitializationOptions {
   name: string

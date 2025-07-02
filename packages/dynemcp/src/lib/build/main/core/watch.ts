@@ -1,6 +1,10 @@
 // core/watch.ts
 // Watch mode logic for DyneMCP build
 // ----------------------------------
+//
+// - Provides the watch mode entrypoint for DyneMCP projects.
+// - Enables hot-reloading and rebuilds on file changes for development.
+// - Uses the bundler in watch mode and returns the build context.
 
 import { type BuildContext } from 'esbuild'
 import type { DyneMCPBuildOptions } from './interfaces'
@@ -16,6 +20,9 @@ function shouldLog() {
 /**
  * Build a DyneMCP project in watch mode.
  * This function enables hot-reloading and rebuilds on file changes.
+ *
+ * @param options DyneMCPBuildOptions (optional)
+ * @returns BuildContext from esbuild
  */
 export async function watch(
   options: DyneMCPBuildOptions = {}

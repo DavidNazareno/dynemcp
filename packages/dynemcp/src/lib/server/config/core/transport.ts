@@ -1,6 +1,10 @@
+// Zod schemas for DyneMCP transport configuration
+// Provides schemas for stdio, HTTP, SSE, and related transport options.
+
 import { z } from 'zod'
 import { NETWORK } from '../../../../global/config-all-contants'
 
+// CorsSchema: CORS options for HTTP/SSE transports
 export const CorsSchema = z.object({
   allowOrigin: z
     .union([z.string(), z.array(z.string())])
@@ -15,23 +19,28 @@ export const CorsSchema = z.object({
   maxAge: z.number().optional().default(86400),
 })
 
+// AuthMiddlewareSchema: Authentication middleware options
 export const AuthMiddlewareSchema = z.object({
   path: z.string(),
 })
 
+// SessionSchema: Session options for HTTP transport
 export const SessionSchema = z.object({
   enabled: z.boolean().optional().default(true),
   headerName: z.string().optional().default('Mcp-Session-Id'),
   allowClientTermination: z.boolean().optional().default(true),
 })
 
+// ResumabilitySchema: Resumability options for HTTP transport
 export const ResumabilitySchema = z.object({
   enabled: z.boolean().optional().default(false),
   historyDuration: z.number().optional().default(300000),
 })
 
+// StdioTransportOptionsSchema: Options for stdio transport
 export const StdioTransportOptionsSchema = z.object({})
 
+// StreamableHTTPTransportOptionsSchema: Options for HTTP transport
 export const StreamableHTTPTransportOptionsSchema = z.object({
   port: z.number().optional().default(NETWORK.DEFAULT_HTTP_PORT),
   host: z.string().optional().default(NETWORK.DEFAULT_HTTP_HOST),
@@ -45,6 +54,7 @@ export const StreamableHTTPTransportOptionsSchema = z.object({
   authentication: AuthMiddlewareSchema.optional(),
 })
 
+// SSETransportOptionsSchema: Options for SSE transport
 export const SSETransportOptionsSchema = z.object({
   port: z.number().optional().default(NETWORK.DEFAULT_HTTP_PORT),
   endpoint: z.string().optional().default(NETWORK.DEFAULT_MCP_ENDPOINT),
@@ -52,6 +62,7 @@ export const SSETransportOptionsSchema = z.object({
   cors: CorsSchema.optional(),
 })
 
+// TransportSchema: Discriminated union for all supported transport types
 export const TransportSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('stdio'),

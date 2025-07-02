@@ -5,8 +5,11 @@ import { isJSONRPCNotification } from '../core/jsonrpc'
 import { parseRootList } from '../../api/core/root'
 
 /**
- * StdioTransport provides communication over standard input/output streams.
- * Ideal for CLI tools and local integrations.
+ * StdioTransport: STDIO transport for DyneMCP MCP protocol
+ *
+ * - Provides communication over standard input/output streams.
+ * - Ideal for CLI tools and local integrations.
+ * - Handles roots/didChange notifications and integrates with the MCP server.
  */
 export class StdioTransport {
   private transport?: StdioServerTransport

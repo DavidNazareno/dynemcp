@@ -1,12 +1,18 @@
 // optimizer.ts
 // Bundle optimization and statistics logic for DyneMCP projects
 // ------------------------------------------------------------
+//
+// - Provides bundle optimization utilities for DyneMCP builds.
+// - Removes debug code, source maps, and unused imports for production.
+// - Generates bundle statistics for reporting and analysis.
 
 import { promises as fs, statSync, readFileSync } from 'fs'
 import { shouldLog } from './utils'
 
 /**
- * Optimize the bundled file for production
+ * Optimize the bundled file for production.
+ *
+ * @param filePath Path to the bundle file
  */
 export async function optimizeBundle(filePath: string): Promise<void> {
   try {
@@ -52,7 +58,10 @@ export async function optimizeBundle(filePath: string): Promise<void> {
 }
 
 /**
- * Optimize imports specifically for MCP server environment
+ * Optimize imports specifically for MCP server environment.
+ *
+ * @param content Bundle file content
+ * @returns Optimized content string
  */
 export function optimizeMCPImports(content: string): string {
   // Remove unused MCP imports in production
@@ -104,7 +113,10 @@ export function optimizeMCPImports(content: string): string {
 }
 
 /**
- * Generate bundle statistics
+ * Generate bundle statistics.
+ *
+ * @param filePath Path to the bundle file
+ * @returns Object with size, lines, characters, etc.
  */
 export function generateBundleStats(filePath: string): {
   size: number

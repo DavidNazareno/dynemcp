@@ -1,13 +1,12 @@
-// loader.ts
 // Dynamic loading logic for the DyneMCP Registry module
-// ----------------------------------------------------
+// Provides the default RegistryLoader for dynamic module imports.
 
 import type { RegistryItem, RegistryLoader } from './interfaces'
 import { RegistryItemLoadError } from './errors'
 
 /**
- * Default implementation of the RegistryLoader interface.
- * Dynamically imports a module based on type and id.
+ * DefaultRegistryLoader: Loads registry items dynamically by type and id.
+ * Can be extended or replaced for custom loading strategies.
  */
 export class DefaultRegistryLoader implements RegistryLoader {
   async loadItem(

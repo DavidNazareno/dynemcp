@@ -1,6 +1,9 @@
 // utils.ts
 // Utility functions for DyneMCP API
 // -----------------------------------
+//
+// - Centralizes common helpers for schema conversion, response formatting, error handling, pagination, and progress notifications.
+// - Used throughout the API for robust and DRY code.
 
 import { z } from 'zod'
 import type { CallToolResult } from './interfaces'

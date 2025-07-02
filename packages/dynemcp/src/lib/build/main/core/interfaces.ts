@@ -1,6 +1,9 @@
 // interfaces.ts
 // Public types and contracts for DyneMCP main build
 // --------------------------------------------------
+//
+// - Defines the main types and interfaces for the DyneMCP build system.
+// - Includes BuildConfig, DyneMCPBuildOptions, and BuildResult for type safety and extensibility.
 
 // Inline BuildConfig type based on DEFAULT_BUILD_CONFIG
 export interface BuildConfig {

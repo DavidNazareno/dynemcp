@@ -1,3 +1,6 @@
+// Type definitions and interfaces for DyneMCP server configuration
+// Defines all config sections: autoload, server, logging, debug, performance, security, transport, and main config.
+
 // Type definition for autoloaded configuration sections
 export interface AutoloadConfig {
   enabled: boolean
@@ -63,7 +66,6 @@ export interface DyneMCPConfig {
   tools: AutoloadConfig
   resources: AutoloadConfig
   prompts: AutoloadConfig
-  resourcesTemplates: AutoloadConfig
   transport: TransportConfig
   description?: string
   logging?: LoggingConfig

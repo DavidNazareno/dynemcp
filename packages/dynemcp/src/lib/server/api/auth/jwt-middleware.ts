@@ -1,4 +1,17 @@
-// If you use TypeScript, install types: pnpm add -D @types/jsonwebtoken
+// jwt-middleware.ts
+// JWT authentication middleware for DyneMCP servers
+// -------------------------------------------------
+//
+// - Provides a ready-to-use Express middleware for JWT authentication in DyneMCP servers.
+// - Supports allowed roles and audience validation for robust security.
+// - Enforces best practices: in production, expectedAudience should be set to prevent token passthrough attacks.
+//
+// Usage:
+//   import jwtAuthMiddleware from '@dynemcp/dynemcp/auth/jwt-middleware'
+//   app.use(jwtAuthMiddleware())
+//   app.use(jwtAuthMiddleware(['admin', 'user']))
+//   app.use(jwtAuthMiddleware({ allowedRoles: ['admin'], expectedAudience: 'my-mcp-server' }))
+
 import type { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import type { JwtPayload } from 'jsonwebtoken'
@@ -8,15 +21,12 @@ const SECRET = process.env.JWT_SECRET || 'changeme'
 /**
  * JWT authentication middleware for DyneMCP servers.
  *
- * Usage:
- *   import jwtAuthMiddleware from '@dynemcp/dynemcp/auth/jwt-middleware'
- *   app.use(jwtAuthMiddleware())
+ * @param allowedRolesOrOptions - Array of allowed roles, or options object { allowedRoles, expectedAudience }
+ * @returns Express middleware function for JWT authentication
  *
- * Optionally, pass an array of allowed roles:
- *   app.use(jwtAuthMiddleware(['admin', 'user']))
- *
- * Optionally, pass options: { allowedRoles, expectedAudience }
- *   app.use(jwtAuthMiddleware({ allowedRoles: ['admin'], expectedAudience: 'my-mcp-server' }))
+ * - In production, expectedAudience is strongly recommended for security.
+ * - Sets req.user to the decoded JWT payload if valid.
+ * - Responds with 401/403 on invalid or insufficient tokens.
  */
 export default function jwtAuthMiddleware(
   allowedRolesOrOptions?:

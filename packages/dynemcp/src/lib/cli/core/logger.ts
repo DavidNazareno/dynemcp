@@ -1,4 +1,9 @@
 import chalk from 'chalk'
+
+// Logger utilities for DyneMCP CLI
+// Provides ConsoleLogger and StderrLogger for colored and error stream logging.
+
+// Logger interface for consistent logging methods
 export interface Logger {
   log(message: string): void
   warn(message: string): void
@@ -7,6 +12,8 @@ export interface Logger {
   success(message: string): void
   debug(message: string): void
 }
+
+// ConsoleLogger: logs to stdout with colors
 export class ConsoleLogger implements Logger {
   log(message: string) {
     console.log(message)
@@ -27,6 +34,8 @@ export class ConsoleLogger implements Logger {
     console.debug(chalk.gray(message))
   }
 }
+
+// StderrLogger: logs to stderr with colors
 export class StderrLogger implements Logger {
   log(message: string) {
     console.error(message)

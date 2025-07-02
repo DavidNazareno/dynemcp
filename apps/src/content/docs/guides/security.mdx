@@ -1,201 +1,197 @@
 ---
-title: Security Guide
-description: Best practices for securing your DyneMCP server
+title: Security Best Practices
+description: Learn about DyneMCP's security features and best practices for secure deployment.
 ---
 
-# Security Guide
+# Security Best Practices
 
-This guide covers essential security practices and features for DyneMCP servers.
+DyneMCP is built with security in mind, providing robust security features and best practices out of the box. This guide will help you understand and implement these security measures in your DyneMCP applications.
 
-## Security Features
+## JWT Authentication
 
-DyneMCP includes several built-in security features:
+### Required in Production
 
-1. Input Validation
-2. Basic Rate Limiting
-3. CORS Protection
-4. Authentication Support (via middleware)
-
-## Input Validation
-
-DyneMCP uses Zod for strict input validation:
+JWT authentication is a mandatory requirement for production deployments. This ensures secure communication between clients and your DyneMCP server.
 
 ```typescript
-import { z } from 'zod'
-import type { ToolDefinition } from '@dynemcp/dynemcp'
+// Example JWT middleware configuration
+import { jwtMiddleware } from 'dynemcp/server';
 
-const secureGreetTool: ToolDefinition = {
-  name: 'secure-greet',
-  description: 'Secure greeting with input validation',
-  schema: z.object({
-    name: z
-      .string()
-      .min(1)
-      .max(50)
-      .regex(/^[a-zA-Z\s]+$/)
-      .describe('Name (letters and spaces only)'),
-  }),
-  handler: async ({ name }) => {
-    // Additional sanitization
-    const sanitizedName = name.trim().replace(/\s+/g, ' ')
-    return { message: `Hello ${sanitizedName}!` }
-  },
-}
+app.use(jwtMiddleware({
+  expectedAudience: 'your-server-id', // Required
+  // Other JWT options...
+}));
 ```
 
-## Rate Limiting
+### Best Practices for JWT
 
-Configure rate limiting in your `dynemcp.config.json`:
+1. **Always Set Expected Audience**
+   - Prevents token passthrough attacks
+   - Ensures tokens are intended for your server
+   - Mitigates confused deputy attacks
 
-```json
-{
-  "security": {
-    "rateLimit": {
-      "enabled": true,
-      "maxRequests": 100,
-      "windowMs": 900000 // 15 minutes
-    }
-  }
-}
-```
-
-## CORS Protection
-
-Control cross-origin access in your transport configuration:
-
-```json
-{
-  "transport": {
-    "type": "http-stream",
-    "options": {
-      "cors": {
-        "allowOrigin": "*",
-        "allowMethods": "GET, POST, OPTIONS",
-        "allowHeaders": "Content-Type, Authorization, x-api-key",
-        "exposeHeaders": "Content-Type, Authorization, x-api-key",
-        "maxAge": 86400
-      }
-    }
-  }
-}
-```
-
-## Authentication
-
-DyneMCP supports custom authentication through middleware:
-
-```typescript
-// src/auth.ts
-import { Request, Response, NextFunction } from 'express'
-
-export default function apiKeyAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const apiKey = req.headers['x-api-key']
-
-  if (!apiKey) {
-    return res.status(401).json({ error: 'API key required' })
-  }
-
-  if (apiKey !== process.env.API_KEY) {
-    return res.status(401).json({ error: 'Invalid API key' })
-  }
-
-  next()
-}
-```
-
-Enable authentication in your transport configuration:
-
-```json
-{
-  "transport": {
-    "type": "http-stream",
-    "options": {
-      "authentication": {
-        "path": "./src/auth.ts"
-      }
-    }
-  }
-}
-```
+2. **Token Validation**
+   - Verify token signatures
+   - Check expiration times
+   - Validate issuer claims
 
 ## Environment Variables
 
-Store sensitive data in environment variables:
+DyneMCP automatically checks critical environment variables at server startup to ensure security.
 
-```bash
-# .env
-API_KEY=your-secret-key
+### Required Variables
+
+```env
+JWT_SECRET=your-secure-secret
+EXPECTED_AUDIENCE=your-server-id
+NODE_ENV=production
 ```
 
-## Security Checklist
+### Validation Checks
 
-### Development
+The server performs automatic checks for:
+- Presence of required variables
+- Secure values (minimum length, complexity)
+- Production-specific requirements
+- Sensitive data protection
 
-- [ ] Enable input validation
-- [ ] Use environment variables for secrets
-- [ ] Implement proper error handling
-- [ ] Set up CORS restrictions
-- [ ] Configure rate limiting
-- [ ] Use HTTPS in production
+### Error Handling
 
-### Production
+If security requirements are not met:
+- Server will not start
+- Clear error messages are displayed
+- Guidance for fixing issues is provided
 
-- [ ] Use strong API keys
-- [ ] Enable all security features
-- [ ] Configure proper CORS
-- [ ] Set appropriate rate limits
-- [ ] Use HTTPS only
-- [ ] Monitor for attacks
+## HTTP Security Headers
+
+When using HTTP transport, DyneMCP automatically configures security headers:
+
+### CORS Configuration
+
+```typescript
+// Example CORS configuration
+{
+  origin: ['https://trusted-domain.com'],
+  methods: ['GET', 'POST'],
+  credentials: true
+}
+```
+
+### Security Headers
+
+```typescript
+// Automatically applied headers
+{
+  'Content-Security-Policy': 'default-src "self"',
+  'X-XSS-Protection': '1; mode=block',
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff'
+}
+```
+
+## Secure Communication
+
+### Transport Security
+
+1. **HTTPS in Production**
+   - Always use HTTPS in production
+   - Configure SSL/TLS properly
+   - Keep certificates up to date
+
+2. **Secure WebSocket**
+   - Use WSS protocol
+   - Implement heartbeat checks
+   - Handle disconnections gracefully
+
+### Data Protection
+
+1. **Input Validation**
+   - Validate all incoming data
+   - Use type-safe schemas
+   - Implement rate limiting
+
+2. **Output Sanitization**
+   - Sanitize response data
+   - Prevent information leakage
+   - Use proper content types
+
+## Audit Logging
+
+DyneMCP provides built-in audit logging capabilities:
+
+```typescript
+// Example audit log configuration
+{
+  level: 'info',
+  format: 'json',
+  securityEvents: true
+}
+```
+
+### Logged Events
+
+- Authentication attempts
+- Authorization failures
+- Security-related configuration changes
+- Critical operations
+- Error conditions
+
+## Production Checklist
+
+Before deploying to production:
+
+1. **Authentication**
+   - [ ] JWT authentication enabled
+   - [ ] Expected audience configured
+   - [ ] Token validation implemented
+
+2. **Environment**
+   - [ ] Secure secrets configured
+   - [ ] Production variables set
+   - [ ] Validation checks passing
+
+3. **Headers**
+   - [ ] CORS properly configured
+   - [ ] Security headers enabled
+   - [ ] Content security policy set
+
+4. **Logging**
+   - [ ] Audit logging enabled
+   - [ ] Log rotation configured
+   - [ ] Sensitive data masked
+
+5. **Transport**
+   - [ ] HTTPS configured
+   - [ ] Certificates valid
+   - [ ] WSS enabled if needed
 
 ## Best Practices
 
-1. Always validate and sanitize inputs using Zod schemas
-2. Store sensitive information in environment variables
-3. Use HTTPS in production
-4. Implement proper error handling
-5. Keep dependencies updated
-6. Follow the principle of least privilege
-7. Regularly audit your code and dependencies
+1. **Regular Updates**
+   - Keep DyneMCP updated
+   - Monitor security advisories
+   - Update dependencies
 
-## Example Secure Server
+2. **Access Control**
+   - Implement least privilege
+   - Use role-based access
+   - Regular access reviews
 
-Here's an example of a secure DyneMCP server configuration:
+3. **Monitoring**
+   - Enable security logging
+   - Monitor for attacks
+   - Set up alerts
 
-```json
-{
-  "server": {
-    "name": "secure-mcp-server",
-    "version": "1.0.0"
-  },
-  "transport": {
-    "type": "http-stream",
-    "options": {
-      "port": 443,
-      "endpoint": "/mcp",
-      "authentication": {
-        "path": "./src/auth.ts"
-      },
-      "cors": {
-        "allowOrigin": "https://yourdomain.com",
-        "allowMethods": "POST, OPTIONS",
-        "allowHeaders": "Content-Type, X-API-Key",
-        "maxAge": 86400
-      }
-    }
-  },
-  "security": {
-    "enableValidation": true,
-    "strictMode": true,
-    "allowedOrigins": ["https://yourdomain.com"],
-    "rateLimit": {
-      "enabled": true,
-      "maxRequests": 100,
-      "windowMs": 900000
-    }
-  }
-}
-```
+4. **Compliance**
+   - Document security measures
+   - Regular security reviews
+   - Maintain compliance records
+
+## Next Steps
+
+To further enhance your application's security:
+
+1. [Production Deployment Guide](/guides/deployment)
+2. [Configuration Reference](/reference/configuration)
+3. [Monitoring Guide](/guides/monitoring)
+4. [Compliance Documentation](/guides/compliance) 

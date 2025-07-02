@@ -1,3 +1,6 @@
+// Interfaces and types for DyneMCP transport and JSON-RPC communication
+// Defines JSON-RPC message types and the Transport interface for custom transports.
+
 // JSON-RPC 2.0 message types as per MCP specification
 export interface JSONRPCRequest {
   jsonrpc: '2.0'
@@ -29,8 +32,13 @@ export type JSONRPCMessage =
   | JSONRPCNotification
 
 /**
- * Transport interface for MCP communication.
+ * Transport: Interface for MCP communication transports (stdio, HTTP, etc).
  * All custom transports must implement this interface.
+ *
+ * - start(): Begin processing messages (should be called once).
+ * - send(): Send a JSON-RPC message to the remote peer.
+ * - close(): Close the transport connection.
+ * - onclose/onerror/onmessage: Optional event handlers for lifecycle and message events.
  */
 export interface Transport {
   /** Start processing messages */
@@ -47,14 +55,14 @@ export interface Transport {
   onmessage?: (message: JSONRPCMessage) => void
 }
 
-// Configuration for stdio transport
+// StdioTransportConfig: Configuration for stdio transport
 export interface StdioTransportConfig {
   type: 'stdio'
   command?: string
   args?: string[]
 }
 
-// Configuration for streamable HTTP transport
+// HTTPTransportConfig: Configuration for streamable HTTP transport
 export interface HTTPTransportConfig {
   type: 'streamable-http'
   url: string

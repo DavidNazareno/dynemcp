@@ -1,3 +1,6 @@
+// Type guards and validation utilities for JSON-RPC messages in DyneMCP
+// Provides helpers to identify and validate JSON-RPC requests, responses, and notifications.
+
 import type {
   JSONRPCRequest,
   JSONRPCResponse,
@@ -5,7 +8,7 @@ import type {
 } from './interfaces'
 
 /**
- * Type guard for JSON-RPC request messages.
+ * isJSONRPCRequest: Type guard for JSON-RPC request messages.
  */
 export function isJSONRPCRequest(msg: any): msg is JSONRPCRequest {
   return (
@@ -17,7 +20,7 @@ export function isJSONRPCRequest(msg: any): msg is JSONRPCRequest {
 }
 
 /**
- * Type guard for JSON-RPC response messages.
+ * isJSONRPCResponse: Type guard for JSON-RPC response messages.
  */
 export function isJSONRPCResponse(msg: any): msg is JSONRPCResponse {
   return (
@@ -30,7 +33,7 @@ export function isJSONRPCResponse(msg: any): msg is JSONRPCResponse {
 }
 
 /**
- * Type guard for JSON-RPC notification messages.
+ * isJSONRPCNotification: Type guard for JSON-RPC notification messages.
  */
 export function isJSONRPCNotification(msg: any): msg is JSONRPCNotification {
   return (
@@ -42,8 +45,7 @@ export function isJSONRPCNotification(msg: any): msg is JSONRPCNotification {
 }
 
 /**
- * Validates a JSON-RPC message structure.
- * Throws an error if the message is invalid.
+ * validateJSONRPCMessage: Validates a JSON-RPC message structure. Throws if invalid.
  */
 export function validateJSONRPCMessage(msg: any): void {
   if (!msg || typeof msg !== 'object') {

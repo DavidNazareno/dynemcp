@@ -1,6 +1,10 @@
 // prompt.ts
 // Functional API for DyneMCP Prompts
 // -----------------------------------
+//
+// - Provides a type-safe, functional API for defining prompt templates and workflows.
+// - Prompts can accept arguments, validate input, generate dynamic messages, and support argument completion.
+// - Used by prompt modules to register MCP-compatible prompts.
 
 import type { LoadedPrompt, PromptArgument, PromptMessage } from './interfaces'
 import { z } from 'zod'

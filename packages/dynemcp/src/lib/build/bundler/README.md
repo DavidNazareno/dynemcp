@@ -2,7 +2,13 @@
 
 The `bundler` module provides the core logic for compiling, optimizing, and analyzing DyneMCP projects. It is designed for modularity, extensibility, and best practices, following the same architecture as the main server and build modules.
 
-## Architecture Overview
+## Overview
+
+- **Purpose:** Centralizes all bundling, optimization, and analysis logic for DyneMCP builds.
+- **Production-ready:** Uses esbuild for fast, reliable, and minified builds.
+- **Extensible:** Each concern is isolated in its own submodule for easy extension.
+
+## Architecture
 
 The bundler module is composed of several focused core submodules:
 
@@ -10,15 +16,9 @@ The bundler module is composed of several focused core submodules:
 - **core/analyzer.ts**: Dependency analysis logic and reporting.
 - **core/manifest.ts**: Manifest and HTML report generation from esbuild metafiles.
 - **core/optimizer.ts**: Bundle optimization and statistics helpers.
+- **core/utils.ts**: Shared logging and utility helpers for the bundler.
 
-## Key Features
-
-- **Production-ready bundling**: Uses esbuild for fast, reliable, and minified builds.
-- **Dependency analysis**: Generates detailed reports on dependencies, modules, and bundle size.
-- **Manifest and reporting**: Produces machine-readable and human-friendly build reports.
-- **Extensible**: Each concern is isolated and can be extended or replaced as needed.
-
-## High-Level Usage Example
+## Usage Example
 
 ```ts
 import {
@@ -38,13 +38,14 @@ const result = await bundle({
 })
 ```
 
-## Core Submodules
+## Submodules
 
 - See each core submodule for detailed usage and API:
-  - [`core/bundle.ts`](./core/bundle.ts)
-  - [`core/analyzer.ts`](./core/analyzer.ts)
-  - [`core/manifest.ts`](./core/manifest.ts)
-  - [`core/optimizer.ts`](./core/optimizer.ts)
+  - [`core/bundle.ts`](./core/bundle.ts): Main bundling logic and entrypoints.
+  - [`core/analyzer.ts`](./core/analyzer.ts): Dependency analysis and reporting.
+  - [`core/manifest.ts`](./core/manifest.ts): Manifest and HTML report generation.
+  - [`core/optimizer.ts`](./core/optimizer.ts): Bundle optimization and statistics.
+  - [`core/utils.ts`](./core/utils.ts): Shared logging and helpers.
 
 ## Best Practices
 

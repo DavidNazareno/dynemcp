@@ -2,18 +2,20 @@
 
 The DyneMCP build system is a modular, zero-config, production-ready solution for building, bundling, and managing DyneMCP projects.
 
+## Overview
+
+- **Purpose:** Provides all build, bundling, and analysis logic for DyneMCP projects.
+- **Zero-config:** Always uses a default, production-optimized configuration. No user overrides.
+- **Type-safe:** All types and interfaces are exported for external use.
+- **Modular:** Split into focused modules for main build, bundling, config, and CLI.
+
 ## Architecture
 
-- **Modular:** The build system is split into focused modules:
-
-  - `main/` — Main build API (build, watch, clean, analyze, CLI build)
-  - `bundler/` — Advanced bundling and analysis (esbuild-based)
-  - `config/` — Zero-config, type-safe configuration utilities
-  - `bin/` — CLI entrypoint and helpers
-
-- **Zero-config:** Always uses a default, production-optimized configuration. No user overrides.
-
-- **Type-safe:** All types and interfaces are exported for external use.
+- **main/** — Main build API (build, watch, clean, analyze, CLI build)
+- **bundler/** — Advanced bundling, optimization, manifest/report generation, and analysis (esbuild-based)
+- **config/** — Zero-config, type-safe configuration utilities
+- **bin/** — CLI entrypoint and helpers
+- **index.ts** — Central export for all build APIs and types
 
 ## Public API
 

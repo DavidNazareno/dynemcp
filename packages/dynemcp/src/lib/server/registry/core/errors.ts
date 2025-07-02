@@ -1,5 +1,6 @@
 // errors.ts
 // Custom error classes for the DyneMCP Registry module
+// Defines specific error types for registry operations (not found, load failure).
 // ---------------------------------------------------
 
 /**

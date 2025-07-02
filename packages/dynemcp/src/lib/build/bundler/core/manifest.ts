@@ -1,6 +1,10 @@
 // manifest.ts
 // Build manifest and HTML report logic for DyneMCP projects
 // --------------------------------------------------------
+//
+// - Generates a build manifest (JSON) from esbuild metafile for DyneMCP projects.
+// - Optionally generates a human-friendly HTML build report for visualization.
+// - Summarizes outputs, dependencies, and build statistics.
 
 import { promises as fs } from 'fs'
 import { join } from 'path'
@@ -24,7 +28,10 @@ export interface BuildManifest {
 }
 
 /**
- * Generate build manifest from esbuild metafile
+ * Generate build manifest from esbuild metafile.
+ *
+ * @param metafile esbuild metafile
+ * @param outDir Output directory for manifest
  */
 export async function generateManifest(
   metafile: Metafile,
@@ -88,7 +95,10 @@ export async function generateManifest(
 }
 
 /**
- * Generate HTML report from build manifest
+ * Generate HTML report from build manifest.
+ *
+ * @param manifest BuildManifest object
+ * @param outDir Output directory for report
  */
 export async function generateHTMLReport(
   manifest: BuildManifest,

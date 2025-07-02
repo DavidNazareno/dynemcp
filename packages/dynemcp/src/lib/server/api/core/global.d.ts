@@ -1,3 +1,10 @@
+// global.d.ts
+// Global type declarations for DyneMCP API
+// -----------------------------------------
+//
+// - Extends and adapts types from the MCP SDK for use in the DyneMCP workspace.
+// - Ensures type compatibility and extension for all MCP-related entities.
+
 declare module '@modelcontextprotocol/sdk' {
   export * from '@modelcontextprotocol/sdk/dist/esm/types'
   export * from '@modelcontextprotocol/sdk/dist/esm/server/mcp'

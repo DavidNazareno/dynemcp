@@ -4,48 +4,20 @@
 
 ---
 
-## Features
+## What is DyneMCP?
 
-- **Unified CLI**: One command-line tool for development, build, analysis, and server management.
-- **Modular Build System**: Type-safe, zero-config, and production-focused. Supports build, watch, clean, analyze, and CLI tool bundling.
-- **Extensible Server Runtime**: Fast, robust, and ready for custom tools, resources, and prompts.
-- **Professional Project Structure**: Each concern (build, server, config, CLI) is isolated and documented.
-- **Best Practices**: Minimal public API, async/await everywhere, and clear separation of concerns.
+DyneMCP is a professional, batteries-included framework for MCP server development. It brings together:
+- **Unified CLI** for all developer and ops tasks
+- **Zero-config, type-safe build system**
+- **Extensible, robust server runtime**
+- **Best-in-class security and production defaults**
+- **Clear, modular architecture for easy onboarding and extension**
 
----
-
-## Core MCP Architecture
-
-DyneMCP is fully aligned with the Model Context Protocol (MCP) architecture. MCP follows a client-server model where:
-
-- **Hosts** are LLM applications (e.g., Claude Desktop, IDEs) that initiate connections
-- **Clients** maintain 1:1 connections with servers, inside the host application
-- **Servers** (your DyneMCP instance) provide context, tools, and prompts to clients
-
-```mermaid
-flowchart LR
-    subgraph "Host"
-        client1[MCP Client]
-        client2[MCP Client]
-    end
-    subgraph "Server Process"
-        server1[MCP Server]
-    end
-    subgraph "Server Process"
-        server2[MCP Server]
-    end
-
-    client1 <-->|Transport Layer| server1
-    client2 <-->|Transport Layer| server2
-```
-
-**Transport Layer:** DyneMCP supports both `stdio` (default, for local) and `http-stream` (for remote/web) transports, using the official MCP SDK for all protocol handling, message framing, and lifecycle management.
-
-**Protocol Layer:** All requests, responses, notifications, and errors follow the JSON-RPC 2.0 format and are handled by the SDK, ensuring full compatibility with MCP clients and hosts.
+Whether you are building a custom LLM server, integrating tools/resources, or deploying at scale, DyneMCP gives you a solid, maintainable foundation.
 
 ---
 
-## Directory Structure
+## Architecture Overview
 
 ```
 dynemcp/
@@ -61,33 +33,77 @@ dynemcp/
 
 ---
 
-## Main Modules
+## Main Modules (with links to details)
 
-### 1. CLI (`src/cli/`)
-
+### 1. CLI ([src/cli/](./src/cli/README.md))
 - Unified entrypoint for all developer commands: `dev`, `build`, `start`, `clean`, `analyze`.
 - Modular, type-safe, and easy to extend.
-- See [`src/cli/README.md`](./src/cli/README.md) for details.
+- See [`src/cli/README.md`](./src/cli/README.md) for commands, options, and extension.
 
-### 2. Build System (`src/build/`)
-
+### 2. Build System ([src/build/](./src/build/README.md))
 - Handles all build, watch, clean, analyze, and CLI bundling tasks.
-- Zero-config: always uses a default, production-ready config.
-- See [`src/build/README.md`](./src/build/README.md) for details.
+- **Zero-config:** always uses a default, production-ready config.
+- Modular: includes `main/`, `bundler/`, `config/`, and `bin/` submodules.
+- See [`src/build/README.md`](./src/build/README.md) for API, CLI, and best practices.
 
-### 3. Server (`src/server/`)
-
+### 3. Server ([src/server/](./src/server/README.md))
 - The DyneMCP server runtime: fast, extensible, and robust.
 - Supports custom tools, resources, and prompts.
-- See [`src/server/README.md`](./src/server/README.md) for details.
+- Modular: includes `main/`, `api/`, `registry/`, `config/`, `communication/` submodules.
+- See [`src/server/README.md`](./src/server/README.md) for extension points and architecture.
 
-### 4. Global Config (`src/global/config-all-contants.ts`)
-
+### 4. Global Config ([src/global/config-all-contants.ts](./src/global/config-all-contants.ts))
 - Centralized, minimal set of constants and helpers shared across modules.
+
+### 5. Shared Utilities ([src/shared/](./src/shared/))
+- (Optional) Place for cross-cutting helpers and utilities.
 
 ---
 
-## Usage
+## Submodule Summaries
+
+### CLI
+- **Purpose:** Unified command-line interface for all dev/build/ops tasks.
+- **Highlights:** Modular, type-safe, extensible, robust error handling.
+
+### Build System
+- **Purpose:** Zero-config, type-safe, production-optimized build and bundling.
+- **Highlights:** Modular (`main`, `bundler`, `config`, `bin`), esbuild-based, manifest/report generation, CLI tool support.
+
+### Bundler
+- **Purpose:** Core logic for compiling, optimizing, and analyzing DyneMCP projects.
+- **Highlights:** Dependency analysis, manifest/HTML report, bundle optimization, shared logging.
+
+### Config
+- **Purpose:** Centralizes all configuration logic for DyneMCP builds and runtime.
+- **Highlights:** Zod-based schema, strict validation, zero-config philosophy.
+
+### Server
+- **Purpose:** Fast, extensible MCP server runtime.
+- **Highlights:** Modular (main, api, registry, config, communication), supports custom tools/resources/prompts, robust protocol compliance.
+
+---
+
+## Security Best Practices
+
+- **JWT authentication is required in production.**
+- Always set the `expectedAudience` option in your JWT middleware to ensure only tokens intended for your DyneMCP server are accepted. This prevents token passthrough and confused deputy attacks.
+- DyneMCP includes an **automatic check of critical environment variables** at server startup. If a required variable is missing or insecure, the server will not start and will display a clear error.
+- See [`src/server/api/auth/jwt-middleware.ts`](./src/server/api/auth/jwt-middleware.ts) for details and usage.
+
+---
+
+## Best Practices
+
+- Expose only the minimal public API at the top level.
+- Use async/await for all I/O and process management.
+- Keep command handlers and entrypoints minimal; delegate logic to helpers or submodules.
+- Document new commands, options, and modules in their respective READMEs.
+- Keep all implementation logic in `core/` folders; only re-export from `index.ts`.
+
+---
+
+## Quickstart
 
 ### Install
 
@@ -123,65 +139,13 @@ dynemcp analyze
 
 ---
 
-## Extending DyneMCP
+## Why DyneMCP?
 
-- Add new CLI commands in `src/cli/core/cli.ts`.
-- Add new build tasks in `src/build/main/core/`.
-- Add new server features in `src/server/main/core/`.
-- Use the global config for shared constants only.
-- Keep all implementation logic in `core/` folders; only re-export from `index.ts`.
-
----
-
-## Best Practices
-
-- Expose only the minimal public API at the top level.
-- Use async/await for all I/O and process management.
-- Keep command handlers and entrypoints minimal; delegate logic to helpers or submodules.
-- Document new commands, options, and modules in their respective READMEs.
-
----
-
-## Security Best Practices
-
-- Always use JWT authentication in production.
-- **Set the `expectedAudience` option in your JWT middleware** to ensure only tokens intended for your DyneMCP server are accepted. This prevents token passthrough and confused deputy attacks.
-- Example:
-
-```ts
-app.use(
-  jwtAuthMiddleware({
-    allowedRoles: ['admin'],
-    expectedAudience: 'my-mcp-server',
-  })
-)
-```
-
-- If `expectedAudience` is not set in production, a warning will be printed.
-
----
-
-## Seguridad: Check Automático de Variables de Entorno Críticas
-
-DyneMCP incluye un **check automático de variables de entorno críticas** al arrancar el servidor. Si alguna variable esencial falta o es insegura, el servidor no arranca y muestra un error claro. Esto te protege contra despliegues inseguros por error humano, algo que la mayoría de frameworks (incluyendo Next.js y Astro) no hacen por defecto.
-
-### Variables chequeadas:
-
-- `JWT_SECRET`: Debe estar definida, no ser `changeme` y tener al menos 32 caracteres.
-- `NODE_ENV`: Debe ser `production` en producción.
-- `EXPECTED_AUDIENCE`: (si se usa) Debe estar definida y no ser un valor genérico como `changeme`, `test`, `default` o vacío.
-- Claves de API externas (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`): Si faltan, se muestra un warning pero no se detiene el arranque.
-
-### ¿Qué ocurre si falta alguna?
-
-- Si falta o es insegura una variable crítica, el proceso falla inmediatamente y muestra un error explicativo.
-- Si falta una clave de API externa, solo se muestra un warning.
-
-### ¿Por qué es importante?
-
-- Evita que tu servidor arranque en modo inseguro por accidente.
-- Te diferencia de otros frameworks y plantillas populares.
-- Es una defensa extra para tus usuarios y para ti mismo.
+- **Zero-config, production-ready:** No need to tweak endless configs—just build and deploy.
+- **Professional, modular architecture:** Easy to extend, maintain, and onboard new developers.
+- **Security-first:** Built-in checks and best practices to keep your deployments safe.
+- **Full MCP protocol compliance:** Works out of the box with all MCP clients and hosts.
+- **Clear documentation:** Every module and submodule is documented for clarity and maintainability.
 
 ---
 

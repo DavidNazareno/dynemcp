@@ -17,8 +17,12 @@ import { logMsg } from './utils'
 import { registerComponents } from './initializer'
 import { setCurrentDyneMCPInstance } from './server-instance'
 
+// Main server class and logic for DyneMCP main module
+// Handles server initialization, component loading, transport setup, and lifecycle management.
+
 /**
- * Clase principal para el servidor DyneMCP
+ * DyneMCP: Main server class for the DyneMCP framework.
+ * Use DyneMCP.create() to instantiate and manage the server lifecycle.
  */
 export class DyneMCP {
   private server: McpServer
@@ -47,8 +51,7 @@ export class DyneMCP {
   }
 
   /**
-   * Fábrica asíncrona para crear una instancia de DyneMCP.
-   * Permite pasar un objeto de configuración o una ruta.
+   * Asynchronous factory to create a DyneMCP instance from config or path.
    */
   static async create(config?: DyneMCPConfig | string): Promise<DyneMCP> {
     const resolvedConfig: DyneMCPConfig =
@@ -59,18 +62,18 @@ export class DyneMCP {
   }
 
   // =====================
-  // Métodos públicos
+  // Public methods
   // =====================
 
   /**
-   * Devuelve la configuración actual del servidor
+   * Returns the current server config.
    */
   getConfig(): DyneMCPConfig {
     return this.config
   }
 
   /**
-   * Inicializa el servidor y carga todos los componentes
+   * Initializes the server and loads all components.
    */
   async init(): Promise<void> {
     if (this.isInitialized) return
@@ -94,7 +97,7 @@ export class DyneMCP {
   }
 
   /**
-   * Arranca el servidor MCP
+   * Starts the MCP server and transport.
    */
   async start(): Promise<void> {
     await this.init()
@@ -104,7 +107,7 @@ export class DyneMCP {
   }
 
   /**
-   * Detiene el servidor MCP
+   * Stops the MCP server and transport.
    */
   async stop(): Promise<void> {
     if (this.transport?.close) {
@@ -116,7 +119,7 @@ export class DyneMCP {
   }
 
   /**
-   * Estadísticas del servidor
+   * Returns server statistics.
    */
   get stats() {
     return {
@@ -130,21 +133,21 @@ export class DyneMCP {
   }
 
   /**
-   * Herramientas registradas
+   * Returns registered tools.
    */
   get tools(): ToolDefinition[] {
     return registry.getAllTools().map((item) => item.module as ToolDefinition)
   }
 
   /**
-   * Registered resources
+   * Returns registered resources.
    */
   get resources() {
     return registry.getAllResources()
   }
 
   /**
-   * Prompts registrados
+   * Returns registered prompts.
    */
   get prompts(): PromptDefinition[] {
     return registry
@@ -152,6 +155,9 @@ export class DyneMCP {
       .map((item) => item.module as PromptDefinition)
   }
 
+  /**
+   * Sends a sampling request to the server.
+   */
   async sample(request: SamplingRequest): Promise<SamplingResult> {
     if (typeof (this.server as any).send !== 'function') {
       throw new Error('McpServer does not support send method')
@@ -159,11 +165,12 @@ export class DyneMCP {
     return await (this.server as any).send('sampling/createMessage', request)
   }
 
-  // Métodos privados
+  // =====================
+  // Private methods
   // =====================
 
   /**
-   * Log de debug si DYNE_MCP_DEBUG=1
+   * Debug log if DYNE_MCP_DEBUG=1
    */
   private debugLog(msg: string): void {
     if (process.env.DYNE_MCP_DEBUG) {
@@ -172,7 +179,7 @@ export class DyneMCP {
   }
 
   /**
-   * Log estándar si no está silenciado
+   * Standard log if not silenced
    */
   private log(msg: string): void {
     if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
@@ -180,9 +187,6 @@ export class DyneMCP {
     }
   }
 
-  /**
-   * Muestra por log los componentes cargados
-   */
   /**
    * Logs all loaded components, filtering out invalid ones and warning if any are found.
    */
@@ -236,8 +240,9 @@ export class DyneMCP {
       )
     }
   }
+
   /**
-   * Inicializa el transporte según la configuración
+   * Initializes the transport based on config.
    */
   private setupTransport(): void {
     const transportConfig = this.config.transport || {
@@ -247,7 +252,7 @@ export class DyneMCP {
   }
 
   /**
-   * Conecta el transporte al servidor MCP
+   * Connects the transport to the MCP server.
    */
   private async connectTransport(): Promise<void> {
     if (
@@ -268,7 +273,7 @@ export class DyneMCP {
   }
 
   /**
-   * Muestra información del transporte si no es stdio
+   * Logs transport info after startup.
    */
   private logTransportInfo(): void {
     const transportConfig = this.config.transport || {
@@ -289,7 +294,7 @@ export class DyneMCP {
   }
 
   /**
-   * Indica si el transporte es distinto de stdio
+   * Checks if a custom transport is used.
    */
   private isCustomTransport(): boolean {
     return (
@@ -300,7 +305,7 @@ export class DyneMCP {
 }
 
 /**
- * Fábrica asíncrona para instancia de DyneMCP
+ * Factory function to create a DyneMCP server instance (async).
  */
 export async function createMCPServer(
   config?: DyneMCPConfig | string

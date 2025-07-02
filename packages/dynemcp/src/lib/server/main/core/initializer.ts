@@ -11,8 +11,11 @@ import type { ServerInitializationOptions } from './interfaces'
 import { createTextResponse, createErrorResponse } from '../../api'
 import { registry } from '../../registry/core/registry'
 
+// Server initializer logic for DyneMCP main module
+// Handles registration of tools, resources, and prompts with the MCP server instance.
+
 /**
- * Crea una instancia de McpServer con las opciones dadas.
+ * Creates a new MCP server instance with the provided options.
  */
 export function createMCPServerInstance(
   options: ServerInitializationOptions
@@ -25,7 +28,7 @@ export function createMCPServerInstance(
 }
 
 /**
- * Registra un conjunto de herramientas (tools) en el servidor MCP.
+ * Registers all tools with the MCP server.
  */
 export function registerTools(
   server: McpServer,
@@ -82,7 +85,7 @@ export function registerTools(
 }
 
 /**
- * Registra un conjunto de recursos (resources) en el servidor MCP.
+ * Registers all resources with the MCP server.
  */
 export function registerResources(
   server: McpServer,
@@ -126,7 +129,7 @@ export function registerResources(
 }
 
 /**
- * Registra un conjunto de prompts en el servidor MCP.
+ * Registers all prompts with the MCP server.
  */
 export function registerPrompts(
   server: McpServer,
@@ -223,7 +226,7 @@ export function registerPrompts(
 }
 
 /**
- * Registra tools, resources y prompts en el servidor MCP.
+ * Registers tools, resources, and prompts with the MCP server (main entrypoint).
  */
 export function registerComponents(
   server: McpServer,

@@ -1,6 +1,10 @@
 // resource.ts
 // Functional API for DyneMCP Resources
 // -------------------------------------
+//
+// - Provides a type-safe, functional API for defining static and dynamic resources.
+// - Exposes helpers for resource creation and metadata extraction.
+// - Used by resource modules to register MCP-compatible resources.
 
 import type { ResourceDefinition } from './interfaces'
 import type { ZodSchema } from 'zod'

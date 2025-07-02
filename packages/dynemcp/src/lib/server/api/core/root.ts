@@ -1,25 +1,28 @@
 // root.ts
-// Helpers para trabajar con Roots en MCP
+// Helpers for working with Roots in MCP
 // --------------------------------------
+//
+// - Provides utilities for validating, parsing, and normalizing root objects and root lists.
+// - Used throughout the API for root-related operations.
 
 import type { Root, RootList } from './interfaces'
 
 /**
- * Valida si un objeto es un Root válido.
+ * Checks if an object is a valid Root.
  */
 export function isRoot(obj: any): obj is Root {
   return obj && typeof obj === 'object' && typeof obj.uri === 'string'
 }
 
 /**
- * Valida si un objeto es una lista de Roots válida.
+ * Checks if an object is a valid list of Roots.
  */
 export function isRootList(obj: any): obj is RootList {
   return Array.isArray(obj) && obj.every(isRoot)
 }
 
 /**
- * Parsea y normaliza una lista de roots desde cualquier entrada.
+ * Parses and normalizes a list of roots from any input.
  */
 export function parseRootList(input: any): RootList {
   if (isRootList(input)) return input

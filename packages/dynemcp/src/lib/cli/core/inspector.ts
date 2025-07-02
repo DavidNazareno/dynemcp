@@ -13,6 +13,9 @@ import {
   getInspectorSpawnOptions,
 } from '../../../global/config-all-contants'
 
+// Inspector launcher for DyneMCP CLI
+// Handles launching the MCP Inspector in HTTP or stdio mode, including server startup and process management.
+
 function waitForProcess(
   process: ReturnType<typeof spawnProcess>
 ): Promise<void> {

@@ -1,6 +1,10 @@
 // interfaces.ts
 // Public types and interfaces for the DyneMCP API module
 // ------------------------------------------------------
+//
+// - Defines contracts for tools, prompts, resources, sampling, and roots.
+// - Exposes both SDK-compatible types and internal types for loaded/executable logic.
+// - Used throughout the API module for type safety and extension.
 
 import { z, ZodObject } from 'zod'
 import type { ZodRawShape, ZodTypeAny } from 'zod'

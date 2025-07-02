@@ -1,6 +1,10 @@
 // core/schema.ts
 // Zod schema for DyneMCP configuration
 // ------------------------------------
+//
+// - Defines the Zod schema for validating DyneMCP configuration files.
+// - Ensures type safety and default values for all config options.
+// - Used by config loader to validate user and default configs.
 
 import { z } from 'zod'
 

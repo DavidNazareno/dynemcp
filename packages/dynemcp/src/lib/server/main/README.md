@@ -10,6 +10,36 @@ This module provides the main entry point and core utilities for running a DyneM
 - **Custom error classes**: For robust error handling during server initialization.
 - **Utility functions**: For logging and debugging.
 
+---
+
+## Directory Structure
+
+```
+main/
+  README.md             # This documentation
+  index.ts              # Entrypoint for consuming the main server module
+  core/
+    server.ts           # Main DyneMCP server class and async factory
+    initializer.ts      # Registration and initialization helpers
+    interfaces.ts       # Public types and interfaces for server initialization
+    errors.ts           # Custom error classes for server initialization failures
+    utils.ts            # Logging and utility functions
+    server-instance.ts  # Singleton instance management for DyneMCP server
+```
+
+---
+
+## Main Files (core/)
+
+- **server.ts**: Main server class (`DyneMCP`) and async factory (`createMCPServer`). Handles server initialization, component loading, transport setup, and lifecycle management.
+- **initializer.ts**: Registration helpers for tools, resources, and prompts. Ensures strict type safety and SDK compliance.
+- **interfaces.ts**: Options for initializing the main server instance.
+- **errors.ts**: Custom error classes for server initialization failures.
+- **utils.ts**: Logging helpers for debug and standard output.
+- **server-instance.ts**: Singleton instance management for the DyneMCP server.
+
+---
+
 ## Public API
 
 ```ts
@@ -60,19 +90,16 @@ import { registerComponents } from '@dynemcp/dynemcp/server/main'
 registerComponents(serverInstance, tools, resources, prompts)
 ```
 
+---
+
 ## Extensibility & Best Practices
 
 - All handlers and registration utilities are strictly typed and validated against the MCP SDK.
 - The module is designed for modularity: you can extend or replace any part (tools, transports, etc.) as needed.
 - Error handling is robust and explicit, with custom error classes for initialization failures.
+- Use high-level comments in code to clarify the purpose of each main block.
 
-## Directory Structure
-
-- `core/server.ts` — Main server class and async factory
-- `core/initializer.ts` — Registration and initialization helpers
-- `core/interfaces.ts` — Public types and interfaces
-- `core/errors.ts` — Custom error classes
-- `core/utils.ts` — Logging and utility functions
+---
 
 ## License
 

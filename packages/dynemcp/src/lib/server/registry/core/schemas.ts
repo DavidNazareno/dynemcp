@@ -1,11 +1,12 @@
 // schemas.ts
 // Zod schemas and validation logic for the DyneMCP Registry module
+// Provides schemas for validating registry item configuration and lists.
 // ---------------------------------------------------------------
 
 import { z } from 'zod'
 
 /**
- * Schema for validating registry item configuration.
+ * RegistryItemSchema: Zod schema for a single registry item.
  */
 export const RegistryItemSchema = z.object({
   id: z.string(),
@@ -14,6 +15,6 @@ export const RegistryItemSchema = z.object({
 })
 
 /**
- * Schema for validating a list of registry items.
+ * RegistryItemsSchema: Zod schema for a list of registry items.
  */
 export const RegistryItemsSchema = z.array(RegistryItemSchema)

@@ -1,11 +1,13 @@
 // storage.ts
 // Storage backend logic for the DyneMCP Registry module
+// Provides an in-memory storage implementation for registry items.
 // -----------------------------------------------------
 
 import type { RegistryItem, RegistryStorage } from './interfaces'
 
 /**
- * In-memory implementation of the RegistryStorage interface.
+ * InMemoryRegistryStorage: Stores registry items in memory using a Map.
+ * Supports adding, retrieving, and clearing tools, resources, prompts, and samples.
  */
 export class InMemoryRegistryStorage implements RegistryStorage {
   private items: Map<string, RegistryItem> = new Map()

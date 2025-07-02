@@ -1,5 +1,6 @@
 // component-loader.ts
 // DyneMCP Component Loader: Orchestrates loading of tools, resources, and prompts
+// Provides generic and specialized loaders for plug-and-play component discovery.
 // -----------------------------------------------------------------------------
 
 import type {
@@ -38,7 +39,7 @@ export interface LoadResult<T> {
 }
 
 /**
- * Generic loader for components (tools, resources, prompts) from a directory.
+ * loadComponentsFromDirectory: Generic loader for components (tools, resources, prompts) from a directory.
  * Uses a type guard validator to ensure only valid components are loaded.
  *
  * @param options - LoadOptions specifying directory and enablement
@@ -93,7 +94,7 @@ export async function loadComponentsFromDirectory<T>(
 }
 
 /**
- * Loads all tools from a directory using the standard tool validator.
+ * loadToolsFromDirectory: Loads all tools from a directory using the standard tool validator.
  * @param options - LoadOptions for tools
  * @returns LoadResult<ToolDefinition>
  */
@@ -104,7 +105,7 @@ export async function loadToolsFromDirectory(
 }
 
 /**
- * Loads all resources from a directory using the standard resource validator.
+ * loadResourcesFromDirectory: Loads all resources from a directory using the standard resource validator.
  * @param options - LoadOptions for resources
  * @returns LoadResult<ResourceDefinition>
  */
@@ -115,7 +116,7 @@ export async function loadResourcesFromDirectory(
 }
 
 /**
- * Loads all prompts from a directory using the standard prompt validator.
+ * loadPromptsFromDirectory: Loads all prompts from a directory using the standard prompt validator.
  * @param options - LoadOptions for prompts
  * @returns LoadResult<PromptDefinition>
  */

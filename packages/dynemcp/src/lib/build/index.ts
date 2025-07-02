@@ -1,6 +1,9 @@
 /**
  * Build system exports for DyneMCP
  * Exposes all main build entrypoints, types, config, and bundler helpers
+ *
+ * - Centralizes all public exports for the DyneMCP build system.
+ * - Re-export main build APIs, types, config utilities, and advanced bundler helpers.
  */
 
 // Main build entrypoints (build, watch, buildCli, clean, analyze)

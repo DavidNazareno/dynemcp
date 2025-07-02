@@ -1,6 +1,10 @@
 // bundle.ts
 // Core bundling logic for DyneMCP projects (production, watch, CLI)
 // ---------------------------------------------------------------
+//
+// - Provides the main bundling entrypoints for DyneMCP projects using esbuild.
+// - Handles production builds, watch mode, CLI builds, and output directory cleanup.
+// - Integrates dependency analysis, optimizations, and manifest generation.
 
 import {
   build,
@@ -41,7 +45,10 @@ function shouldLog() {
 }
 
 /**
- * Bundle a DyneMCP project for production
+ * Bundle a DyneMCP project for production.
+ *
+ * @param options BundleOptions for the build
+ * @returns BundleResult with stats, errors, and output info
  */
 export async function bundle(options: BundleOptions): Promise<BundleResult> {
   const startTime = Date.now()
@@ -167,7 +174,10 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
 }
 
 /**
- * Bundle a DyneMCP project in watch mode
+ * Bundle a DyneMCP project in watch mode.
+ *
+ * @param options BundleOptions for the build
+ * @returns BuildContext from esbuild
  */
 export async function bundleWatch(
   options: BundleOptions
@@ -216,7 +226,10 @@ export async function bundleWatch(
 }
 
 /**
- * Bundle a DyneMCP CLI tool
+ * Bundle a DyneMCP CLI tool.
+ *
+ * @param options BundleOptions for the CLI build
+ * @returns BundleResult for the CLI build
  */
 export async function bundleCli(options: BundleOptions): Promise<BundleResult> {
   const cliOptions: BundleOptions = {
@@ -248,7 +261,9 @@ export async function bundleCli(options: BundleOptions): Promise<BundleResult> {
 }
 
 /**
- * Clean build directory
+ * Clean the build output directory.
+ *
+ * @param outDir Output directory to remove
  */
 export async function cleanBuildDir(outDir: string): Promise<void> {
   const fs = await import('fs-extra')

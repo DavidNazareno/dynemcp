@@ -1,3 +1,6 @@
+// Default development mode runner for DyneMCP CLI
+// Handles hot-reload, server startup, and graceful shutdown in dev mode.
+
 import { watch } from '../../build'
 import { createMCPServer } from '../../server'
 import { ConsoleLogger, StderrLogger } from './logger'

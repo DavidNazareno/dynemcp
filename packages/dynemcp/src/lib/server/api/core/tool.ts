@@ -1,12 +1,16 @@
 // tool.ts
 // Functional API for DyneMCP Tools
 // -----------------------------------
+//
+// - Provides a type-safe, functional API for defining and executing MCP tools.
+// - Normalizes tool results to MCP protocol format and handles errors robustly.
+// - Used by tool modules to register MCP-compatible tools.
 
 import { z } from 'zod'
 import type { LoadedTool, CallToolResult } from './interfaces'
 
 /**
- * Tipo MCP para un item de content de tool
+ * MCP type for a tool content item (text, image, embedded resource, etc.)
  */
 export type ContentItem =
   | { type: 'text'; text: string }
@@ -15,13 +19,8 @@ export type ContentItem =
   | { type: string; [key: string]: any }
 
 /**
- * Normaliza el resultado de una tool para cumplir el protocolo MCP.
- * - Si es string: lo convierte a content:text
- * - Si es objeto MCP válido: lo respeta
- * - Si es ContentItem: lo envuelve
- * - Si es objeto simple { text: ... }: lo convierte a content:text
- * - Si es array: normaliza cada elemento
- * - Si es objeto no válido: retorna error MCP
+ * Normalizes the result of a tool to MCP protocol format.
+ * Handles strings, objects, arrays, and error cases.
  */
 function normalizeToolResult(result: any) {
   // String simple
@@ -85,7 +84,7 @@ function normalizeToolResult(result: any) {
 }
 
 /**
- * Wrapper para manejo de errores y normalización de retorno MCP
+ * Wrapper for error handling and MCP result normalization.
  */
 function withErrorHandling<T extends (...args: any[]) => any>(fn: T): T {
   return (async (...args: any[]) => {
@@ -104,7 +103,7 @@ function withErrorHandling<T extends (...args: any[]) => any>(fn: T): T {
 }
 
 /**
- * Simplified typed tool creator function
+ * Simplified typed tool creator function.
  */
 export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
   name: string
@@ -135,17 +134,8 @@ export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
 }
 
 /**
- * Nueva API funcional para definir herramientas (tools) de DyneMCP.
- * Permite una sintaxis simple y flexible:
- *
- * export default tool(schema, handler, options)
- *
- * El handler puede retornar:
- *   - string (se normaliza a content:text)
- *   - ContentItem
- *   - ContentItem[]
- *   - { content: ContentItem[] }
- *   - { isError: true, content: ContentItem[] }
+ * Functional API for defining DyneMCP tools.
+ * Allows simple and flexible syntax for tool definition and execution.
  */
 export function tool<
   T extends z.ZodObject<z.ZodRawShape>,

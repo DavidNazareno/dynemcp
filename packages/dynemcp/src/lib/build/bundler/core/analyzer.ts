@@ -1,6 +1,9 @@
 // analyzer.ts
 // Dependency analysis logic for DyneMCP projects
 // ---------------------------------------------
+//
+// - Provides utilities for analyzing project dependencies using esbuild metafiles.
+// - Returns dependency lists, size, module/chunk counts, and generates human-readable reports.
 
 import { build } from 'esbuild'
 import type { Metafile } from 'esbuild'
@@ -13,7 +16,10 @@ export interface DependencyAnalysis {
 }
 
 /**
- * Analyze project dependencies using esbuild metafile
+ * Analyze project dependencies using esbuild metafile.
+ *
+ * @param entryPoint Entry file to analyze
+ * @returns DependencyAnalysis with dependencies, size, modules, and chunks
  */
 export async function analyzeDependencies(
   entryPoint: string
@@ -69,7 +75,10 @@ export async function analyzeDependencies(
 }
 
 /**
- * Generate dependency report
+ * Generate a human-readable dependency report from analysis results.
+ *
+ * @param analysis DependencyAnalysis object
+ * @returns String report
  */
 export function generateDependencyReport(analysis: DependencyAnalysis): string {
   const sizeKB = (analysis.size / 1024).toFixed(2)

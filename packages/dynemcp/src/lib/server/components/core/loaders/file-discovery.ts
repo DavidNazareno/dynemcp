@@ -1,13 +1,13 @@
 // file-discovery.ts
 // Utility for recursively discovering component files in a directory structure
-// Used by the DyneMCP framework to enable plug-and-play loading of tools, resources, and prompts
+// Enables plug-and-play loading of tools, resources, and prompts for DyneMCP.
 
 import fs from 'fs'
 import path from 'path'
 
 /**
- * Recursively finds all files matching the naming convention for tools, resources, and prompts.
- * This enables dynamic discovery of components for modular and extensible MCP servers.
+ * findFilesRecursively: Recursively finds all component files (tool, resource, prompt, sample) in a directory.
+ * Returns absolute file paths for dynamic loading.
  *
  * @param dir - The root directory to start searching from
  * @returns An array of absolute file paths for discovered component files

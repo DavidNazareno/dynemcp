@@ -1,0 +1,163 @@
+---
+title: Project Templates
+description: Explore the available templates for DyneMCP projects and choose the best starting point for your use case.
+---
+
+# Project Templates
+
+DyneMCP provides several specialized templates to help you get started quickly with different types of MCP servers. Each template is designed for specific use cases and comes with pre-configured features and best practices.
+
+## Available Templates
+
+### Default Template
+
+The default template is perfect for learning MCP basics and simple automation tasks.
+
+```bash
+create-dynemcp my-project --template default
+```
+
+**Features included:**
+- Basic MCP server setup with stdio transport
+- Example tool for text manipulation
+- Sample resource with static content
+- Simple prompt for AI assistance
+- TypeScript configuration
+- Build scripts and hot reload
+
+**Best for:**
+- First-time MCP developers
+- Prototyping new ideas
+- Educational purposes
+
+### Calculator Template
+
+Specialized for mathematical computations and educational tools.
+
+```bash
+create-dynemcp my-calculator --template calculator
+```
+
+**Features included:**
+- Basic arithmetic operations (add, subtract, multiply, divide)
+- Advanced mathematical functions (trigonometry, logarithms)
+- Mathematical constants and formulas resource
+- Specialized prompts for mathematical problem solving
+- Error handling for mathematical edge cases
+
+**Best for:**
+- Educational math tools
+- Scientific calculations
+- Engineering applications
+- Math tutoring systems
+
+### HTTP Server Template
+
+Ideal for web integration and API endpoints.
+
+```bash
+create-dynemcp my-server --template http-server
+```
+
+**Features included:**
+- Express.js HTTP server setup
+- RESTful endpoint configuration
+- CORS middleware
+- HTTP transport for MCP
+- Basic greeting and server info tools
+- Health check endpoints
+
+**Best for:**
+- Web application integration
+- REST API development
+- Microservices architecture
+- Browser-based clients
+
+### Secure Agent Template
+
+Designed for enterprise applications and production environments.
+
+```bash
+create-dynemcp my-secure-agent --template secure-agent
+```
+
+**Features included:**
+- API key authentication middleware
+- Streamable HTTP transport with sessions
+- Rate limiting and CORS configuration
+- Security headers and input validation
+- Audit logging capabilities
+- Production-ready configuration
+
+**Best for:**
+- Enterprise applications
+- Production deployments
+- Multi-tenant systems
+- Regulated environments
+
+### Dynamic Agent Template
+
+Perfect for AI research and adaptive systems.
+
+```bash
+create-dynemcp my-dynamic-agent --template dynamic-agent
+```
+
+**Features included:**
+- Dynamic tool registration system
+- Model sampling capabilities
+- Memory persistence and learning
+- Adaptive behavior patterns
+- Experimental AI features
+
+**Best for:**
+- AI research projects
+- Self-learning systems
+- Adaptive automation
+- Experimental applications
+
+## Using Templates
+
+### Interactive Mode
+
+The easiest way to use templates is through interactive mode:
+
+```bash
+create-dynemcp my-project
+```
+
+This will prompt you to choose a template and guide you through the setup process.
+
+### Non-Interactive Mode
+
+You can also use templates in non-interactive mode with the `--yes` flag:
+
+```bash
+# Use default template
+create-dynemcp my-agent --yes
+
+# Specify template
+create-dynemcp my-calculator --template calculator --yes
+
+# Skip dependency installation
+create-dynemcp my-agent --template secure-agent --yes --skip-install
+```
+
+## CLI Options
+
+When using templates, you have several options available:
+
+| Option              | Alias | Description                    | Default   |
+| ------------------- | ----- | ------------------------------ | --------- |
+| `--template <n>`    | `-t`  | Template to use                | `default` |
+| `--skip-install`    |       | Skip dependency installation   | `false`   |
+| `--yes`             | `-y`  | Skip all prompts, use defaults | `false`   |
+| `--version`         | `-v`  | Show version number            |           |
+| `--help`            | `-h`  | Show help message              |           |
+
+## Next Steps
+
+After choosing a template:
+1. [Learn about the server architecture](/reference/server) to understand how your template works
+2. [Check the security best practices](/guides/security) if you're planning for production
+3. [Explore the build system](/reference/build-system) to optimize your development workflow 

@@ -2,9 +2,10 @@
 
 This module provides configuration utilities for the DyneMCP build system. It is designed to be zero-config, production-ready, and robust.
 
-## Philosophy
+## Overview
 
-- **Zero-config:** The build system always uses a default, production-optimized configuration. Users cannot override build options, ensuring consistency and reliability.
+- **Purpose:** Centralizes all configuration logic for DyneMCP builds.
+- **Zero-config:** Always uses a default, production-optimized configuration. Users cannot override build options, ensuring consistency and reliability.
 - **Type-safe:** The configuration schema is defined with Zod and strictly validated.
 - **Minimal API:** Only two functions are exported: `loadConfig` (for general config) and `getBuildConfig` (for the build system).
 
@@ -38,8 +39,9 @@ import {
 ```
 config/
   core/
+    config.ts
+    default.ts
     schema.ts
-  default.ts
   index.ts
   README.md
 ```

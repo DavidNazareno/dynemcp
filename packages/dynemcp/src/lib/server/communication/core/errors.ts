@@ -1,5 +1,6 @@
 /**
  * Custom error class for transport-related errors in DyneMCP.
+ * Provides static helpers for connection and message handling errors.
  */
 export class TransportError extends Error {
   constructor(

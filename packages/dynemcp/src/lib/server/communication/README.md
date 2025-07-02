@@ -1,54 +1,73 @@
-# Communication Module
+# DyneMCP Communication Module
 
-Este módulo centraliza toda la lógica de comunicación y protocolos de DyneMCP, siguiendo estrictamente el SDK MCP y las mejores prácticas de arquitectura profesional.
+This module centralizes all communication logic and protocols for DyneMCP, strictly following the MCP SDK and professional architecture best practices.
 
-## Estructura
+## Directory Structure
 
 ```
 communication/
   core/
-    interfaces.ts      # Contratos base: Transport, JSONRPCMessage, etc.
-    types.ts           # Tipos y enums auxiliares
-    errors.ts          # Errores personalizados
-    defaults.ts        # Valores por defecto
-    schemas.ts         # Validaciones Zod
-    factory.ts         # Fábrica de transports
+    interfaces.ts      # Base contracts: Transport, JSONRPCMessage, etc.
+    errors.ts          # Custom error classes for transports
+    defaults.ts        # Default values for transports
+    schemas.ts         # Zod schemas for transport config validation
+    factory.ts         # Transport factory and public entrypoint
+    jsonrpc.ts         # Type guards and validation for JSON-RPC
   http/
-    server.ts          # Implementación Streamable HTTP server
-    client.ts          # (futuro) HTTP client
-    sse-legacy.ts      # (opcional) SSE legacy
+    server.ts          # Streamable HTTP server implementation
+    client.ts          # (future) HTTP client
+    sse-legacy.ts      # (optional) SSE legacy
   stdio/
     server.ts          # STDIO server
-    client.ts          # (futuro) STDIO client
-  utils.ts             # Utilidades comunes (futuro)
-  index.ts             # Exports centralizados
+    client.ts          # (future) STDIO client
+  utils.ts             # Common utilities (future)
+  index.ts             # Centralized exports
 ```
 
-## Filosofía
+---
 
-- **Fidelidad al SDK:** Todas las implementaciones siguen el contrato y los formatos del SDK MCP.
-- **Modularidad:** Cada protocolo y utilidad está en su propio archivo/carpeta.
-- **Extensibilidad:** Es fácil agregar nuevos protocolos (WebSocket, gRPC, etc.) en el futuro.
-- **Seguridad:** Incluye recomendaciones de seguridad del SDK (validación de origen, TLS, etc.).
-- **Tipado fuerte:** TypeScript y Zod para robustez y mantenibilidad.
+## Main Files (core/)
 
-## Implementaciones actuales
+- **interfaces.ts**: Contracts for Transport, JSON-RPC messages, and transport configs.
+- **errors.ts**: Custom error classes for transport-related errors.
+- **defaults.ts**: Default values and supported types for transports.
+- **schemas.ts**: Zod schemas for validating transport config options.
+- **factory.ts**: Public entrypoint, re-exports, and transport factory function.
+- **jsonrpc.ts**: Type guards and validation utilities for JSON-RPC messages.
 
-- **STDIO:** Comunicación por streams estándar (ideal para CLI y procesos locales).
-- **Streamable HTTP:** Comunicación HTTP con soporte para SSE y sesiones.
-- **SSE Legacy:** (opcional) Para compatibilidad con versiones anteriores.
+---
 
-## Extensión
+## Philosophy
 
-Puedes agregar nuevos transports implementando la interfaz `Transport` y registrándolos en la fábrica.
+- **SDK Fidelity:** All implementations follow the MCP SDK contract and formats.
+- **Modularity:** Each protocol and utility is in its own file/folder.
+- **Extensibility:** Easy to add new protocols (WebSocket, gRPC, etc.) in the future.
+- **Security:** Includes SDK security recommendations (origin validation, TLS, etc.).
+- **Strong Typing:** TypeScript and Zod for robustness and maintainability.
 
-## Ejemplo de uso
+---
+
+## Current Implementations
+
+- **STDIO:** Communication via standard streams (ideal for CLI and local processes).
+- **Streamable HTTP:** HTTP communication with support for SSE and sessions.
+- **SSE Legacy:** (optional) For backward compatibility.
+
+---
+
+## Extending
+
+You can add new transports by implementing the `Transport` interface and registering them in the factory.
+
+---
+
+## Usage Example
 
 ```typescript
 import { createTransport, TRANSPORT_TYPES } from './communication/core/factory'
 
 const transport = createTransport({
-  type: TRANSPORT_TYPES.HTTP_SERVER,
+  type: TRANSPORT_TYPES[1], // 'streamable-http'
   options: {
     /* ... */
   },
@@ -57,4 +76,4 @@ const transport = createTransport({
 
 ---
 
-Para detalles de cada implementación, revisa los README y comentarios en cada subcarpeta.
+For details on each implementation, see the README and comments in each subfolder.
