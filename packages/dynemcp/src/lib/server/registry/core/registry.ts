@@ -271,6 +271,15 @@ export class DyneMCPRegistry implements Registry {
     const all = this.getAllResources().map((item) => item.module)
     return paginateWithCursor(all, cursor, pageSize)
   }
+
+  /**
+   * Get all registered resource objects (originals, no metadatos)
+   */
+  getAllResourceObjects(): any[] {
+    return Array.from(this.storage['items'].values())
+      .filter((item) => (item as any).type === 'resource')
+      .map((item) => (item as any).module)
+  }
 }
 
 /**

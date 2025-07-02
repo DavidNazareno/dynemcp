@@ -233,7 +233,8 @@ export function registerComponents(
   resourceTemplates: ResourceTemplateDefinition[] = []
 ): void {
   registerTools(server, tools)
-  registerResources(server, resources)
+  const realResources = registry.getAllResourceObjects()
+  registerResources(server, realResources)
   registerPrompts(server, prompts)
 }
 
