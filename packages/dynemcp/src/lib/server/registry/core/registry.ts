@@ -22,6 +22,7 @@ import { validateTool } from '../../components/core/loaders/validators'
 import path from 'path'
 import fs from 'fs'
 import { paginateWithCursor } from '../../api/core/utils'
+import { getResourceMeta } from '../../api/core/resource'
 
 /**
  * DyneMCP Registry - Main Registry Class
@@ -116,35 +117,7 @@ export class DyneMCPRegistry implements Registry {
     }
     this.isLoaded = true
 
-    // Buscar y cargar resource-template.ts en cada subcarpeta de resources
-    this.resourceTemplates = []
-    const resourcesRoot = Array.isArray(options.resources)
-      ? options.resources[0]
-      : options.resources
-    if (resourcesRoot && fs.existsSync(resourcesRoot)) {
-      const subdirs = fs
-        .readdirSync(resourcesRoot, { withFileTypes: true })
-        .filter((dirent) => dirent.isDirectory())
-        .map((dirent) => dirent.name)
-      for (const subdir of subdirs) {
-        const resourceTemplatePath = path.join(
-          resourcesRoot,
-          subdir,
-          'resource-template.ts'
-        )
-        if (fs.existsSync(resourceTemplatePath)) {
-          // Dynamic import (ESM):
-          const mod = await import(resourceTemplatePath)
-          if (mod && mod.default) {
-            this.resourceTemplates.push({
-              id: mod.default.uriTemplate || `${subdir}-template`,
-              type: 'resource',
-              module: mod.default,
-            })
-          }
-        }
-      }
-    }
+    // TODO: Resource template logic removed for production release. Re-implement in a future version if needed.
 
     // Discover src/middleware.ts for authentication
     const projectRoot = process.cwd()
@@ -169,10 +142,10 @@ export class DyneMCPRegistry implements Registry {
   /**
    * Get all registered resources.
    */
-  getAllResources(): RegistryItem[] {
-    return Array.from(this.storage['items'].values()).filter(
-      (item) => (item as RegistryItem).type === 'resource'
-    ) as RegistryItem[]
+  getAllResources(): any[] {
+    return Array.from(this.storage['items'].values())
+      .filter((item) => (item as RegistryItem).type === 'resource')
+      .map((item) => getResourceMeta(item.module))
   }
 
   /**
@@ -251,13 +224,6 @@ export class DyneMCPRegistry implements Registry {
    */
   async preloadAll(): Promise<void> {
     // Optionally implement preloading logic here
-  }
-
-  /**
-   * Get all resource templates.
-   */
-  getAllResourceTemplates(): any[] {
-    return this.resourceTemplates.map((item) => item.module)
   }
 
   /**

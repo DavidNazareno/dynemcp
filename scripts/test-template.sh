@@ -45,22 +45,23 @@ detect_os_and_sed() {
 }
 
 # Function to display template selection menu
-select_template() {
-    echo "📋 Available templates:"
-    echo "----------------------------------------"
-    PS3="Please select a template (1-5): "
-    templates=("default" "calculator" "dynamic-agent" "http-server" "secure-agent")
-    select template in "${templates[@]}"; do
-        if [ -n "$template" ]; then
-            echo "Selected template: $template"
-            TEMPLATE_NAME=$template
-            break
-        else
-            echo "Invalid selection. Please try again."
-        fi
-    done
-    echo "----------------------------------------"
-}
+# (Comentado porque solo hay una plantilla 'default')
+# select_template() {
+#     echo "📋 Available templates:"
+#     echo "----------------------------------------"
+#     PS3="Please select a template (1-5): "
+#     templates=("default" "calculator" "dynamic-agent" "http-server" "secure-agent")
+#     select template in "${templates[@]}"; do
+#         if [ -n "$template" ]; then
+#             echo "Selected template: $template"
+#             TEMPLATE_NAME=$template
+#             break
+#         else
+#             echo "Invalid selection. Please try again."
+#         fi
+#     done
+#     echo "----------------------------------------"
+# }
 
 # --- Go to project root ---
 # This ensures the script can be run from anywhere in the project.
@@ -72,12 +73,14 @@ echo "🚀 Starting the template test script..."
 echo "----------------------------------------"
 
 # --- Configuration ---
-# If no template is provided as argument, show selection menu
-if [ -z "$1" ]; then
-    select_template
-else
-    TEMPLATE_NAME=$1
-fi
+# Siempre usar la plantilla 'default'
+TEMPLATE_NAME="default"
+# Código de selección de plantilla comentado porque solo hay una
+# if [ -z "$1" ]; then
+#     select_template
+# else
+#     TEMPLATE_NAME=$1
+# fi
 
 # Now that TEMPLATE_NAME is defined, we can set up the app names
 APP_NAME="my-test-mcp-server-$TEMPLATE_NAME"

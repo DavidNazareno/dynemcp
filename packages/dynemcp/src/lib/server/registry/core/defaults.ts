@@ -9,7 +9,6 @@ export const DEFAULT_REGISTRY_TYPES = [
   'tool',
   'prompt',
   'resource',
-  'resource-template',
   'sample',
 ] as const
 
@@ -17,3 +16,5 @@ export const DEFAULT_REGISTRY_TYPES = [
  * Default registry storage backend (in-memory).
  */
 export const DEFAULT_STORAGE_BACKEND = 'memory'
+
+// TODO: Resource template defaults removed for production release. Re-implement in a future version if needed.

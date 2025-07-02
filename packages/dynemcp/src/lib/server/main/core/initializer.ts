@@ -9,6 +9,7 @@ import type {
 } from '../../api'
 import type { ServerInitializationOptions } from './interfaces'
 import { createTextResponse, createErrorResponse } from '../../api'
+import { registry } from '../../registry/core/registry'
 
 /**
  * Crea una instancia de McpServer con las opciones dadas.
@@ -89,17 +90,24 @@ export function registerResources(
 ): void {
   for (const resource of resources) {
     const handler = async () => {
-      const content =
+      let content =
         typeof resource.content === 'function'
           ? await resource.content()
           : resource.content
+
+      if (content === undefined || content === null) {
+        content = ''
+      }
 
       return {
         contents: [
           {
             uri: resource.uri,
             text: content,
-            mimeType: resource.contentType || 'text/plain',
+            mimeType:
+              (resource as any).mimeType ||
+              resource.contentType ||
+              'text/plain',
           },
         ],
       }
@@ -215,19 +223,6 @@ export function registerPrompts(
 }
 
 /**
- * Registers a set of resource templates in the MCP server.
- */
-export function registerResourceTemplates(
-  server: McpServer,
-  resourceTemplates: ResourceTemplateDefinition[]
-): void {
-  for (const tpl of resourceTemplates) {
-    // TODO: Replace with the correct SDK method when available
-    // server.registerResourceTemplate(...)
-  }
-}
-
-/**
  * Registra tools, resources y prompts en el servidor MCP.
  */
 export function registerComponents(
@@ -240,5 +235,6 @@ export function registerComponents(
   registerTools(server, tools)
   registerResources(server, resources)
   registerPrompts(server, prompts)
-  registerResourceTemplates(server, resourceTemplates)
 }
+
+// TODO: Resource template initializer logic removed for production release. Re-implement in a future version if needed.

@@ -2,7 +2,6 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { DyneMCPConfig } from '../../config/'
 import type {
   ToolDefinition,
-  ResourceDefinition,
   PromptDefinition,
   SamplingRequest,
   SamplingResult,
@@ -88,13 +87,7 @@ export class DyneMCP {
     this.logLoadedComponents()
 
     // Registrar componentes en el servidor MCP
-    registerComponents(
-      this.server,
-      this.tools,
-      this.resources,
-      this.prompts,
-      this.resourceTemplates
-    )
+    registerComponents(this.server, this.tools, this.resources, this.prompts)
 
     this.isInitialized = true
     this.log('✅ DyneMCP server inicializado correctamente')
@@ -144,12 +137,10 @@ export class DyneMCP {
   }
 
   /**
-   * Recursos registrados
+   * Registered resources
    */
-  get resources(): ResourceDefinition[] {
-    return registry
-      .getAllResources()
-      .map((item) => item.module as ResourceDefinition)
+  get resources() {
+    return registry.getAllResources()
   }
 
   /**
@@ -159,10 +150,6 @@ export class DyneMCP {
     return registry
       .getAllPrompts()
       .map((item) => item.module as PromptDefinition)
-  }
-
-  get resourceTemplates() {
-    return registry.getAllResourceTemplates()
   }
 
   async sample(request: SamplingRequest): Promise<SamplingResult> {
@@ -196,26 +183,59 @@ export class DyneMCP {
   /**
    * Muestra por log los componentes cargados
    */
+  /**
+   * Logs all loaded components, filtering out invalid ones and warning if any are found.
+   */
   private logLoadedComponents(): void {
     const tools = this.tools
     const resources = this.resources
     const prompts = this.prompts
-    logMsg(`Loaded tools: ${tools.length}`, this.debugLog.bind(this))
-    tools.forEach((t) =>
+
+    const validTools = tools.filter((t) => t && typeof t.name === 'string')
+    const invalidTools = tools.length - validTools.length
+    const validResources = resources.filter(
+      (r) => r && typeof r.name === 'string'
+    )
+    const invalidResources = resources.length - validResources.length
+    const validPrompts = prompts.filter((p) => p && typeof p.name === 'string')
+    const invalidPrompts = prompts.length - validPrompts.length
+
+    logMsg(`Loaded tools: ${validTools.length}`, this.debugLog.bind(this))
+    validTools.forEach((t) =>
       logMsg(`  - Tool: ${t.name}`, this.debugLog.bind(this))
     )
+    if (invalidTools > 0) {
+      logMsg(
+        `⚠️ ${invalidTools} invalid tool(s) were skipped (missing or invalid 'name')`,
+        this.debugLog.bind(this)
+      )
+    }
 
-    logMsg(`Loaded resources: ${resources.length}`, this.debugLog.bind(this))
-    resources.forEach((r) =>
+    logMsg(
+      `Loaded resources: ${validResources.length}`,
+      this.debugLog.bind(this)
+    )
+    validResources.forEach((r) =>
       logMsg(`  - Resource: ${r.name}`, this.debugLog.bind(this))
     )
+    if (invalidResources > 0) {
+      logMsg(
+        `⚠️ ${invalidResources} invalid resource(s) were skipped (missing or invalid 'name')`,
+        this.debugLog.bind(this)
+      )
+    }
 
-    logMsg(`Loaded prompts: ${prompts.length}`, this.debugLog.bind(this))
-    prompts.forEach((p) =>
+    logMsg(`Loaded prompts: ${validPrompts.length}`, this.debugLog.bind(this))
+    validPrompts.forEach((p) =>
       logMsg(`  - Prompt: ${p.name}`, this.debugLog.bind(this))
     )
+    if (invalidPrompts > 0) {
+      logMsg(
+        `⚠️ ${invalidPrompts} invalid prompt(s) were skipped (missing or invalid 'name')`,
+        this.debugLog.bind(this)
+      )
+    }
   }
-
   /**
    * Inicializa el transporte según la configuración
    */
@@ -232,9 +252,17 @@ export class DyneMCP {
   private async connectTransport(): Promise<void> {
     if (
       this.transport &&
-      'start' in this.transport &&
-      typeof this.transport.start === 'function'
+      'connect' in this.transport &&
+      typeof (this.transport as any).connect === 'function'
     ) {
+      // Para StdioTransport
+      await (this.transport as any).connect(this.server)
+    } else if (
+      this.transport &&
+      'start' in this.transport &&
+      typeof (this.transport as any).start === 'function'
+    ) {
+      // Para HTTP u otros
       await this.server.connect(this.transport)
     }
   }

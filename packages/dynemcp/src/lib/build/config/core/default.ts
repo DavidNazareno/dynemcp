@@ -3,21 +3,37 @@
 // ------------------------------------------------------------------------------
 
 /**
- * This configuration is used by the DyneMCP build system for all projects.
- * Users cannot override these options. The build is always fast, minified, and scalable.
+ * DyneMCP build system configuration.
+ *
+ * ⚠️ NO MODIFICAR: Este archivo es parte del framework y no debe ser editado por el usuario final.
+ * El build está 100% preconfigurado para funcionar de forma óptima y segura.
+ * Si necesitas personalización avanzada, contacta a los mantenedores del framework.
  */
 export const DEFAULT_BUILD_CONFIG = {
   entryPoint: './src/index.ts',
   outDir: './dist',
   outFile: 'server.js',
-  format: 'cjs', // Use 'esm' if your runtime supports it
-  minify: true,
-  sourcemap: false, // Set to true if you want to allow debugging
+  format: 'cjs', // 'esm' o 'cjs' según el runtime soportado
+  minify: false, // true para producción, false para debug
+  sourcemap: true, // true para debug, false para producción
   bundle: true,
-  external: [], // Only bundle what is needed
+  external: [
+    // Paquetes core y de infraestructura que siempre deben ser externos para optimizar el bundle
+    '@modelcontextprotocol/sdk',
+    'express',
+    'cors',
+    'jsonwebtoken',
+    'zod',
+    'zod-to-json-schema',
+    'chalk',
+    'esbuild',
+    'express-rate-limit',
+    'tslib',
+    'yargs',
+  ],
   define: {},
   platform: 'node',
-  target: 'node16',
+  target: 'node18',
   treeShaking: true,
   splitting: false,
   metafile: false,

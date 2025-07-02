@@ -5,6 +5,7 @@
 import type { DyneMCPBuildOptions, BuildResult } from './interfaces'
 import { getBuildConfig } from '../../config'
 import { bundleCli, type BundleOptions } from '../../bundler'
+import { build } from './build'
 
 /**
  * Build a DyneMCP CLI tool.
@@ -13,53 +14,17 @@ import { bundleCli, type BundleOptions } from '../../bundler'
 export async function buildCli(
   options: DyneMCPBuildOptions = {}
 ): Promise<BuildResult> {
-  try {
-    if (process.env.DYNE_MCP_STDIO_LOG_SILENT !== 'true')
-      console.log('🔧 Building DyneMCP CLI tool...')
-    const buildConfig = getBuildConfig()
-    const finalOptions = {
-      ...buildConfig,
-      ...options,
-      cli: true,
-      watch: options.watch || false,
-    } as BundleOptions & { outDir: string; outFile: string }
-    const fs = await import('fs-extra')
-    await fs.ensureDir(finalOptions.outDir)
-    const bundleResult = await bundleCli(finalOptions)
-    const result: BuildResult = {
-      ...bundleResult,
-      config: {
-        ...buildConfig,
-        format: buildConfig.format as 'cjs' | 'esm' | 'iife',
-        platform: buildConfig.platform as 'node' | 'browser',
-      },
-    }
-    if (bundleResult.success) {
-      if (process.env.DYNE_MCP_STDIO_LOG_SILENT !== 'true')
-        console.log('✅ CLI build completed successfully')
-      if (process.env.DYNE_MCP_STDIO_LOG_SILENT !== 'true')
-        console.log(`📁 Output directory: ${finalOptions.outDir}`)
-    } else {
-      if (process.env.DYNE_MCP_STDIO_LOG_SILENT !== 'true')
-        console.log('❌ CLI build failed')
-    }
-    return result
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    if (process.env.DYNE_MCP_STDIO_LOG_SILENT !== 'true')
-      console.log(`❌ CLI build failed: ${errorMessage}`)
-    return {
-      success: false,
-      errors: [errorMessage],
-      stats: {
-        startTime: Date.now(),
-        endTime: Date.now(),
-        duration: 0,
-        entryPoints: [],
-        outputSize: 0,
-        dependencies: 0,
-      },
-      config: {} as any,
-    }
+  // buildCli solo ajusta el outFile y define, y delega en build
+  const cliOptions = {
+    ...options,
+    outFile: options.outFile
+      ? options.outFile.replace('.js', '-cli.js')
+      : undefined,
+    define: {
+      ...options.define,
+      'process.env.CLI_MODE': 'true',
+    },
+    cli: true,
   }
+  return build(cliOptions)
 }

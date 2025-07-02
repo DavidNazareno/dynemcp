@@ -75,7 +75,6 @@ export const ConfigSchema = z.object({
   tools: AutoloadConfigSchema,
   resources: AutoloadConfigSchema,
   prompts: AutoloadConfigSchema,
-  resourcesTemplates: AutoloadConfigSchema,
   transport: TransportSchema,
   description: z.string().optional(),
   logging: LoggingConfigSchema.optional(),
@@ -89,3 +88,5 @@ export type BaseConfig = z.infer<typeof BaseConfigSchema>
 export type AutoloadConfig = z.infer<typeof AutoloadConfigSchema>
 export type ServerConfig = z.infer<typeof ServerConfigSchema>
 export type Config = z.infer<typeof ConfigSchema>
+
+// TODO: Resource template schemas removed for production release. Re-implement in a future version if needed.

@@ -25,3 +25,5 @@ export class DefaultRegistryLoader implements RegistryLoader {
     }
   }
 }
+
+// TODO: Resource template loader logic removed for production release. Re-implement in a future version if needed.

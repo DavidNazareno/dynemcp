@@ -1,15 +1,32 @@
 // resource.ts
-// API funcional para DyneMCP Resources
+// Functional API for DyneMCP Resources
 // -------------------------------------
 
 import type { ResourceDefinition } from './interfaces'
 import type { ZodSchema } from 'zod'
 
 /**
- * Nueva API funcional para definir recursos (resources) de DyneMCP.
- * Permite una sintaxis simple y flexible:
+ * Defines a DyneMCP resource (static or dynamic) in a simple, type-safe way.
  *
- * export default resource({ uri, name, description, mimeType, paramsSchema, getContent })
+ * Usage example:
+ *
+ * export default resource({
+ *   uri: 'resource://my-resource',
+ *   name: 'My Resource',
+ *   description: 'A sample resource',
+ *   mimeType: 'application/json',
+ *   getContent: () => '{ "hello": "world" }',
+ * })
+ *
+ * @param config - Resource configuration object
+ *   - uri: Unique resource URI (required)
+ *   - name: Human-readable name (required)
+ *   - description: Optional description
+ *   - mimeType: Optional MIME type (e.g. 'application/json')
+ *   - paramsSchema: Optional Zod schema for validating params
+ *   - getContent: Function to return the resource content (string or Promise<string>)
+ *   - complete: (Advanced) Optional completion function for argument suggestions
+ * @returns ResourceDefinition (MCP-compatible)
  */
 export function resource(config: {
   uri: string
@@ -40,6 +57,22 @@ export function resource(config: {
       }
       return config.getContent(params)
     },
-    // complete: config.complete, // No permitido por el tipo ResourceDefinition del SDK
+    // complete: config.complete, // Not allowed by ResourceDefinition type in SDK
   }
+}
+
+/**
+ * Extracts all MCP-required metadata from a resource for listing.
+ * Includes uri, name, description, mimeType, size, and any params/parameters if present.
+ * @param resource ResourceDefinition (MCP plain object)
+ */
+export function getResourceMeta(resource: ResourceDefinition) {
+  // Omit internal functions, but include all metadata
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { content, getContent, paramsSchema, complete, ...meta } =
+    resource as any
+  // If params/parameters exist, include them
+  if ('params' in resource) meta.params = (resource as any).params
+  if ('parameters' in resource) meta.parameters = (resource as any).parameters
+  return meta
 }

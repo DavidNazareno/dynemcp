@@ -1,6 +1,6 @@
 // utils.ts
-// Utility functions for the DyneMCP API module
-// ---------------------------------------------
+// Utility functions for DyneMCP API
+// -----------------------------------
 
 import { z } from 'zod'
 import type { CallToolResult } from './interfaces'

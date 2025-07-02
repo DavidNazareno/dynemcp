@@ -127,3 +127,5 @@ export interface StreamableHTTPTransportConfig {
 export type TransportConfig =
   | StdioTransportConfig
   | StreamableHTTPTransportConfig
+
+// TODO: Resource template interfaces removed for production release. Re-implement in a future version if needed.

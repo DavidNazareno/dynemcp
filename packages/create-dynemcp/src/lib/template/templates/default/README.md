@@ -245,34 +245,7 @@ export default {
 
 ## 🧩 Dynamic Resource Templates
 
-You can create dynamic resources by adding a `resource-template.ts` file inside any subfolder of `src/resources/`.
-
-- Use the `resourceTemplate` API to define a resource with a URI template and a dynamic content generator.
-- The framework will automatically discover and register all such templates.
-
-### Example
-
-```
-src/resources/user-data/resource-template.ts
-```
-
-```ts
-import { resourceTemplate } from '@dynemcp/dynemcp'
-
-export default resourceTemplate({
-  uriTemplate: '/user-data/{id}',
-  name: 'User Data Dynamic Resource',
-  description: 'Dynamic resource for user data, generated on demand.',
-  mimeType: 'text/plain',
-  async getContent(params: { id: string }) {
-    // Example: fetch or generate content dynamically based on params.id
-    return `Dynamic content for user with id: ${params.id}`
-  },
-})
-```
-
-- The framework will automatically discover and register all `resource-template.ts` files in subfolders of `resources/`.
-- The resource will be available to MCP clients using the defined URI template.
+// TODO: Resource template documentation removed for production release. Re-implement in a future version if needed.
 
 ## 🔒 Authentication Middleware (JWT)
 

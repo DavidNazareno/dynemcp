@@ -100,10 +100,6 @@ export function createDefaultConfig(): DyneMCPConfig {
       ...DEFAULT_AUTOLOAD_CONFIG,
       directory: DEFAULT_PROMPTS_DIR,
     },
-    resourcesTemplates: {
-      ...DEFAULT_AUTOLOAD_CONFIG,
-      directory: DEFAULT_RESOURCES_TEMPLATE_DIR,
-    },
     transport: {
       type: DEFAULT_TRANSPORT_TYPE,
       options: DEFAULT_TRANSPORT_OPTIONS,
@@ -115,3 +111,5 @@ export function createDefaultConfig(): DyneMCPConfig {
     config: DEFAULT_ENV_CONFIG,
   }
 }
+
+// TODO: Resource template defaults removed for production release. Re-implement in a future version if needed.

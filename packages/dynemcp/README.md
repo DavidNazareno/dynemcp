@@ -14,6 +14,37 @@
 
 ---
 
+## Core MCP Architecture
+
+DyneMCP is fully aligned with the Model Context Protocol (MCP) architecture. MCP follows a client-server model where:
+
+- **Hosts** are LLM applications (e.g., Claude Desktop, IDEs) that initiate connections
+- **Clients** maintain 1:1 connections with servers, inside the host application
+- **Servers** (your DyneMCP instance) provide context, tools, and prompts to clients
+
+```mermaid
+flowchart LR
+    subgraph "Host"
+        client1[MCP Client]
+        client2[MCP Client]
+    end
+    subgraph "Server Process"
+        server1[MCP Server]
+    end
+    subgraph "Server Process"
+        server2[MCP Server]
+    end
+
+    client1 <-->|Transport Layer| server1
+    client2 <-->|Transport Layer| server2
+```
+
+**Transport Layer:** DyneMCP supports both `stdio` (default, for local) and `http-stream` (for remote/web) transports, using the official MCP SDK for all protocol handling, message framing, and lifecycle management.
+
+**Protocol Layer:** All requests, responses, notifications, and errors follow the JSON-RPC 2.0 format and are handled by the SDK, ensuring full compatibility with MCP clients and hosts.
+
+---
+
 ## Directory Structure
 
 ```

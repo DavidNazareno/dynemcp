@@ -120,29 +120,7 @@ Use the provided utilities for consistent error and response handling. Handler f
 
 ## Dynamic Resource Templates
 
-Dynamically expose resources using URI templates (RFC 6570) with the `resourceTemplate` API. This allows you to define resources whose content is generated on demand, and whose URI can include parameters.
-
-### Usage
-
-Create a `resource-template.ts` file inside any resource folder (e.g., `src/resources/user-data/resource-template.ts`).
-
-```ts
-import { resourceTemplate } from '@dynemcp/dynemcp'
-
-export default resourceTemplate({
-  uriTemplate: '/user-data/{id}',
-  name: 'User Data Dynamic Resource',
-  description: 'Dynamic resource for user data',
-  mimeType: 'text/plain',
-  async getContent(params) {
-    // params.id will be available
-    return `Dynamic content for user with id: ${params.id}`
-  },
-})
-```
-
-- The framework will automatically discover and register all `resource-template.ts` files in subfolders of `resources/`.
-- The resource will be available to MCP clients using the defined URI template.
+// TODO: Resource template documentation removed for production release. Re-implement in a future version if needed.
 
 ## 🔒 Built-in JWT Authentication Middleware
 

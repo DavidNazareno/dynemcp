@@ -49,4 +49,4 @@ export { sample } from './core/sampling'
 
 export * from './core/root'
 
-export { resourceTemplate } from './core/resource-template'
+// TODO: Resource template exports removed for production release. Re-implement in a future version if needed.

@@ -25,10 +25,38 @@ export async function build(
   try {
     if (shouldLog()) logger.info('🚀 Starting DyneMCP build process...')
     const buildConfig = getBuildConfig()
-    // Only the main build logic, no analysis or CLI helpers here
+    // Merge de opciones: usuario > env > defaults
     const finalOptions = {
       ...buildConfig,
       ...options,
+      // Las siguientes opciones pueden venir de env o del usuario
+      external: options.external ?? buildConfig.external,
+      minify:
+        typeof options.minify === 'boolean'
+          ? options.minify
+          : buildConfig.minify,
+      sourcemap:
+        typeof options.sourcemap === 'boolean'
+          ? options.sourcemap
+          : buildConfig.sourcemap,
+      target: options.target || buildConfig.target,
+      format: options.format || buildConfig.format,
+      bundle:
+        typeof options.bundle === 'boolean'
+          ? options.bundle
+          : buildConfig.bundle,
+      treeShaking:
+        typeof options.treeShaking === 'boolean'
+          ? options.treeShaking
+          : buildConfig.treeShaking,
+      splitting:
+        typeof options.splitting === 'boolean'
+          ? options.splitting
+          : buildConfig.splitting,
+      metafile:
+        typeof options.metafile === 'boolean'
+          ? options.metafile
+          : buildConfig.metafile,
       watch: options.watch || false,
     } as BundleOptions & { outDir: string; outFile: string }
     const bundleResult = await bundle(finalOptions)
@@ -36,7 +64,7 @@ export async function build(
       ...bundleResult,
       config: {
         ...buildConfig,
-        format: buildConfig.format as 'cjs' | 'esm' | 'iife',
+        format: finalOptions.format as 'cjs' | 'esm' | 'iife',
         platform: buildConfig.platform as 'node' | 'browser',
       },
     }

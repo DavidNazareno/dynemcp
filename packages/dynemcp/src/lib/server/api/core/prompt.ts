@@ -1,15 +1,33 @@
 // prompt.ts
-// API funcional para DyneMCP Prompts
+// Functional API for DyneMCP Prompts
 // -----------------------------------
 
 import type { LoadedPrompt, PromptArgument, PromptMessage } from './interfaces'
 import { z } from 'zod'
 
 /**
- * Nueva API funcional para definir prompts (prompts) de DyneMCP.
- * Permite una sintaxis simple y flexible:
+ * Defines a DyneMCP prompt (prompt template or workflow) in a simple, type-safe way.
+ * Prompts can accept arguments, generate dynamic messages, and optionally provide argument completion.
  *
- * export default prompt({ name, description, arguments, getMessages })
+ * Usage example:
+ *
+ * export default prompt({
+ *   name: 'my-prompt',
+ *   description: 'A sample prompt',
+ *   arguments: [
+ *     { name: 'topic', description: 'Topic to discuss', required: true },
+ *   ],
+ *   getMessages: async (args) => [...],
+ * })
+ *
+ * @param config - Prompt configuration object
+ *   - name: Unique prompt name (required)
+ *   - description: Optional description
+ *   - arguments: Optional list of argument definitions
+ *   - argsSchema: Optional Zod schema for argument validation
+ *   - getMessages: Function to generate prompt messages (required)
+ *   - complete: (Advanced) Optional completion function for argument suggestions
+ * @returns LoadedPrompt (MCP-compatible)
  */
 export function prompt(config: {
   name: string
