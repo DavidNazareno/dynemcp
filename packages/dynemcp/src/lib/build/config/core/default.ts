@@ -18,8 +18,8 @@ export const DEFAULT_BUILD_CONFIG = {
   outDir: './dist',
   outFile: 'server.js',
   format: 'cjs', // 'esm' o 'cjs' según el runtime soportado
-  minify: false, // true para producción, false para debug
-  sourcemap: true, // true para debug, false para producción
+  minify: true, // true para producción, false para debug
+  sourcemap: false, // true para debug, false para producción
   bundle: true,
   external: [
     // Paquetes core y de infraestructura que siempre deben ser externos para optimizar el bundle
@@ -41,5 +41,5 @@ export const DEFAULT_BUILD_CONFIG = {
   treeShaking: true,
   splitting: false,
   metafile: false,
-  watch: false,
+  watch: true,
 }

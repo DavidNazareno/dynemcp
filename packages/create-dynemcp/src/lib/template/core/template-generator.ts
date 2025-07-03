@@ -1,14 +1,17 @@
-import { installDependencies, copy, getPackageVersion } from '../../project'
+import {
+  installDependencies,
+  copy,
+  getPackageVersion,
+  getTemplatesDir,
+} from '../../shared'
 
 import fastGlob from 'fast-glob'
 import os from 'os'
 import fs from 'fs/promises'
-import { existsSync } from 'fs'
 import path from 'path'
 import { Sema } from 'async-sema'
 
 import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces'
-import { getTemplatesDir } from './helpers'
 import {
   LOGGING,
   PATHS,
@@ -192,15 +195,16 @@ export const installTemplate = async (
       private: true,
       scripts: generateScripts(),
       dependencies: {
-        '@modelcontextprotocol/sdk': `^${SDK_VERSION}`,
         '@dynemcp/dynemcp': `^${version}`,
-        zod: '^3.22.4',
+        '@modelcontextprotocol/sdk': `^${SDK_VERSION}`,
+        zod: '^3.25.71',
       },
       devDependencies: {
+        '@dynemcp/dynemcp': `^${version}`,
         prettier: '^3.2.5',
       },
     }
-
+    /* 
     if (args.template === 'http-server' || args.template === 'secure-agent') {
       packageJson.dependencies['express'] = '^4.19.2'
       packageJson.dependencies['cors'] = '^2.8.5'
@@ -223,15 +227,6 @@ export const installTemplate = async (
       }
     }
 
-    if (args.tailwind) {
-      packageJson.devDependencies = {
-        ...packageJson.devDependencies,
-        tailwindcss: '^3.4.0',
-        postcss: '^8.4.31',
-        autoprefixer: '^10.4.16',
-      }
-    }
-
     if (args.eslint) {
       packageJson.devDependencies = {
         ...packageJson.devDependencies,
@@ -244,10 +239,10 @@ export const installTemplate = async (
     packageJson.devDependencies = {
       ...packageJson.devDependencies,
       vitest: '^1.4.0',
-    }
+    } */
 
     packageJson.engines = {
-      node: '>=16.0.0',
+      node: '>=20.0.0',
     }
 
     packageJson.packageManager = 'pnpm@10.9.0'

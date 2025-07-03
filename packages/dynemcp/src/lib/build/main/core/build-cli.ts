@@ -7,8 +7,6 @@
 // - Delegates to the main build function with CLI options.
 
 import type { DyneMCPBuildOptions, BuildResult } from './interfaces'
-import { getBuildConfig } from '../../config'
-import { bundleCli, type BundleOptions } from '../../bundler'
 import { build } from './build'
 
 /**

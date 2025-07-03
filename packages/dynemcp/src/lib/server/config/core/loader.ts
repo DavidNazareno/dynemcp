@@ -4,6 +4,7 @@
 import { promises as fsPromises } from 'fs'
 import path from 'path'
 import { spawn } from 'child_process'
+import type { ChildProcess } from 'child_process'
 import { ConfigSchema, BaseConfigSchema, type BaseConfig } from './schemas'
 import type { DyneMCPConfig } from './interfaces'
 import { ConfigError } from './errors'

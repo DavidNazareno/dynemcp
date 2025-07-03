@@ -55,24 +55,19 @@ export interface SecurityConfig {
   }
 }
 
-// Config (env) configuration
-export interface EnvConfig {
-  env: boolean
-}
-
 // Main configuration interface for DyneMCP
 export interface DyneMCPConfig {
   server: ServerConfig
   tools: AutoloadConfig
   resources: AutoloadConfig
   prompts: AutoloadConfig
+  roots: AutoloadConfig
   transport: TransportConfig
   description?: string
   logging?: LoggingConfig
   debug?: DebugConfig
   performance?: PerformanceConfig
   security?: SecurityConfig
-  config?: EnvConfig
 }
 
 // Type definition for Stdio transport configuration

@@ -11,6 +11,13 @@ export {
   validateTemplate,
   type ValidationResult,
 } from './core/validate'
-export * from './core/copy'
-export * from './core/package-info'
-export * from './core/package-manager'
+// Re-export shared utilities for backwards compatibility
+export { copy } from '../shared/core/file-operations'
+export { getPackageVersion } from '../shared/core/path-operations'
+export {
+  installDependencies,
+  getPkgManager,
+  getInstallCommand,
+  getRunCommand,
+  type PackageManager,
+} from '../shared/core/package-operations'

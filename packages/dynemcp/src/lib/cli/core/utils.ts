@@ -1,4 +1,5 @@
-import { spawn, ChildProcess } from 'child_process'
+import { spawn } from 'child_process'
+import type { ChildProcess } from 'child_process'
 import chalk from 'chalk'
 import { loadConfig } from '../../server/config'
 import { DYNEMCP_CLI, CLI } from '../../../global/config-all-contants'

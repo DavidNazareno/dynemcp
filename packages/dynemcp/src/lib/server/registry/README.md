@@ -5,6 +5,7 @@
 The DyneMCP Registry module provides a robust, modular system for dynamically loading, caching, and managing tools, prompts, and resources within the DyneMCP framework. It is designed for extensibility, type safety, and maintainability.
 
 **Key features:**
+
 - Batch loading of all components (tools, resources, prompts) from the filesystem
 - Tool validation and error/warning logging
 - Helpers for querying: `getAllTools`, `getTool`, `getAllResources`, `getResource`, `getAllPrompts`, `getPrompt`

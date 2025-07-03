@@ -24,6 +24,7 @@ build/
 ### Main Build System
 
 The main build module handles:
+
 - Build process orchestration
 - File watching and rebuilding
 - Error reporting
@@ -32,6 +33,7 @@ The main build module handles:
 ### Bundler
 
 The bundler module provides:
+
 - Dependency analysis
 - Code optimization
 - Bundle size optimization
@@ -42,6 +44,7 @@ The bundler module provides:
 ### Configuration
 
 The config module manages:
+
 - Build settings
 - Environment-specific configs
 - Zod-based schema validation
@@ -50,6 +53,7 @@ The config module manages:
 ### Binary Tools
 
 The bin module includes:
+
 - CLI tool compilation
 - Binary optimization
 - Platform-specific builds
@@ -79,6 +83,7 @@ While DyneMCP follows a zero-config philosophy, you can customize the build proc
 ### Default Configuration
 
 The default configuration is production-ready and includes:
+
 - TypeScript support
 - ESBuild-based bundling
 - Automatic optimization
@@ -91,11 +96,11 @@ If needed, you can extend the default configuration:
 
 ```typescript
 // dynemcp.config.ts
-import { defineConfig } from 'dynemcp';
+import { defineConfig } from 'dynemcp'
 
 export default defineConfig({
   // Your custom config here
-});
+})
 ```
 
 ## Build Features
@@ -103,6 +108,7 @@ export default defineConfig({
 ### Zero Configuration
 
 DyneMCP's build system works out of the box:
+
 - Sensible defaults
 - Production-ready settings
 - Automatic optimizations
@@ -111,6 +117,7 @@ DyneMCP's build system works out of the box:
 ### Type Safety
 
 The build system is fully type-safe:
+
 - TypeScript integration
 - Type checking during build
 - Type-safe configuration
@@ -119,6 +126,7 @@ The build system is fully type-safe:
 ### Build Analysis
 
 The analyze command provides detailed insights:
+
 - Dependency graph
 - Bundle sizes
 - Import analysis
@@ -127,6 +135,7 @@ The analyze command provides detailed insights:
 ### Development Mode
 
 Development mode includes:
+
 - Hot reload
 - Fast rebuilds
 - Detailed error messages
@@ -137,18 +146,21 @@ Development mode includes:
 When working with the build system:
 
 1. **Performance**
+
    - Use the clean flag for fresh builds
    - Leverage the analyze command
    - Monitor bundle sizes
    - Use code splitting when appropriate
 
 2. **Configuration**
+
    - Start with zero config
    - Only add custom config when needed
    - Use type-safe configuration
    - Document any customizations
 
 3. **Development**
+
    - Use dev mode during development
    - Keep the build directory clean
    - Monitor build times
@@ -167,4 +179,4 @@ To learn more about building with DyneMCP:
 1. [Production Deployment](/guides/deployment)
 2. [Performance Optimization](/guides/performance)
 3. [Custom Configuration](/reference/configuration)
-4. [CLI Reference](/reference/cli) 
+4. [CLI Reference](/reference/cli)

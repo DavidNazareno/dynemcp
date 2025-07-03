@@ -260,15 +260,29 @@ export class DyneMCP {
       'connect' in this.transport &&
       typeof (this.transport as any).connect === 'function'
     ) {
-      // Para StdioTransport
       await (this.transport as any).connect(this.server)
     } else if (
       this.transport &&
       'start' in this.transport &&
       typeof (this.transport as any).start === 'function'
     ) {
-      // Para HTTP u otros
       await this.server.connect(this.transport)
+    }
+    const roots = registry.getAllRoots()
+    if (
+      roots &&
+      roots.length > 0 &&
+      this.transport &&
+      typeof this.transport.send === 'function'
+    ) {
+      await this.transport.send({
+        jsonrpc: '2.0',
+        method: 'roots/didChange',
+        params: { roots },
+      })
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+        console.log(`\n🌱 Notified roots/didChange (${roots.length})`)
+      }
     }
   }
 

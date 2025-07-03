@@ -7,7 +7,7 @@
 // - Used by prompt modules to register MCP-compatible prompts.
 
 import type { LoadedPrompt, PromptArgument, PromptMessage } from './interfaces'
-import { z } from 'zod'
+import type { ZodRawShape, ZodTypeAny } from 'zod'
 
 /**
  * Defines a DyneMCP prompt (prompt template or workflow) in a simple, type-safe way.
@@ -37,7 +37,7 @@ export function prompt(config: {
   name: string
   description?: string
   arguments?: PromptArgument[]
-  argsSchema?: z.ZodRawShape | Record<string, z.ZodTypeAny>
+  argsSchema?: ZodRawShape | Record<string, ZodTypeAny>
   getMessages: (args?: Record<string, string>) => Promise<PromptMessage[]>
   complete?: (params: {
     argument: string

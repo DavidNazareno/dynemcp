@@ -12,7 +12,7 @@ async function runHelloSample(): Promise<SamplingResult> {
     ],
     maxTokens: 32,
   }
-  // Solo necesitas llamar a sample(request), el framework se encarga del resto
+  // You only need to call sample(request), the framework handles the rest
   return await sample(request)
 }
 

@@ -9,7 +9,8 @@ import { isJSONRPCNotification } from '../core/jsonrpc'
 import { parseRootList } from '../../api/core/root'
 import { registry } from '../../registry/core/registry'
 import rateLimit from 'express-rate-limit'
-import { createDefaultConfig } from '../../config'
+import { createDefaultConfig } from '../../config/core/defaults'
+import { oauth2JwtMiddleware } from '../../api/auth/oauth2-middleware'
 
 /**
  * StreamableHTTPTransport provides HTTP POST and optional SSE streaming for MCP communication.
@@ -68,7 +69,6 @@ export class StreamableHTTPTransport {
       }
     }
     if (!rateLimitOptions) {
-      // Fallback hardcodeado
       rateLimitOptions = {
         windowMs: 15 * 60 * 1000,
         max: 100,
@@ -80,7 +80,6 @@ export class StreamableHTTPTransport {
         },
       }
     }
-    // Mitigación: Forzar rate limiting en producción
     if (
       isProduction &&
       (rateLimitOptions.max === 0 || rateLimitOptions.enabled === false)
@@ -291,23 +290,43 @@ export class StreamableHTTPTransport {
    */
   async connect(server: McpServer): Promise<void> {
     try {
+      // Obtener configuración de OAuth2 desde transport.options o defaults
+      const config = this.options || {}
+      const defaultConfig = createDefaultConfig()
+      // Cast config to any to allow custom fields (oauth2Issuer, oauth2Audience)
+      const userOptions = config as any
+      const oauth2Issuer =
+        (userOptions as { oauth2Issuer?: string }).oauth2Issuer ||
+        (defaultConfig.transport.options as { oauth2Issuer?: string })
+          ?.oauth2Issuer ||
+        'https://your-auth-server'
+      const oauth2Audience =
+        (userOptions as { oauth2Audience?: string }).oauth2Audience ||
+        (defaultConfig.transport.options as { oauth2Audience?: string })
+          ?.oauth2Audience ||
+        `https://${this.host}:${this.port}${this.endpoint}`
+      // Expose OAuth2 Protected Resource Metadata endpoint
+      this.app.get('/.well-known/oauth-protected-resource', (req, res) => {
+        res.json({
+          authorization_servers: [
+            oauth2Issuer + '/.well-known/oauth-authorization-server',
+          ],
+          resource: oauth2Audience,
+        })
+      })
       // Load authentication middleware
-      const authMiddleware = await this.loadAuthenticationMiddleware()
-      // Mitigación: Forzar autenticación en producción
-      if (
-        process.env.NODE_ENV === 'production' &&
-        !this.options?.authentication?.path
-      ) {
-        throw new Error(
-          '[SECURITY] Authentication middleware is required in production. Set transport.options.authentication.path or create src/middleware.ts.'
-        )
-      } else if (
-        process.env.NODE_ENV !== 'production' &&
-        !this.options?.authentication?.path
-      ) {
-        console.warn(
-          '[SECURITY] WARNING: Authentication is disabled. This is unsafe for production.'
-        )
+      let authMiddleware: express.RequestHandler
+      if (process.env.NODE_ENV === 'production') {
+        authMiddleware = oauth2JwtMiddleware({
+          issuerBaseURL: oauth2Issuer,
+          audience: oauth2Audience,
+        })
+      } else {
+        const jwtMiddleware = (await import('../../api/auth/jwt-middleware'))
+          .default
+        authMiddleware = (req, res, next) => {
+          jwtMiddleware()(req, res, next)
+        }
       }
       // Connect to MCP server
       await server.connect(this.transport)
@@ -319,6 +338,8 @@ export class StreamableHTTPTransport {
       // Setup main MCP endpoint for both POST and GET
       this.app.post(this.endpoint, authMiddleware, async (req, res) => {
         try {
+          if (res.headersSent) return // Auth middleware already responded
+
           // Handle session management
           const sessionId = this.handleSessionManagement(req, res)
           if (res.headersSent) return // Session validation failed
@@ -346,14 +367,14 @@ export class StreamableHTTPTransport {
           // --- END ROOTS HANDLER ---
 
           // Process the request through StreamableHTTPServerTransport
-          await this.transport.handleRequest(req, res, req.body)
-        } catch {
-          console.error('Error handling MCP request')
+          await this.transport.handleRequest(req as any, res as any, req.body)
+        } catch (err) {
           if (!res.headersSent) {
-            res.status(500).json({
-              error: 'Internal server error',
-              code: 'INTERNAL_ERROR',
-            })
+            res.set(
+              'WWW-Authenticate',
+              `Bearer resource_metadata="https://${this.host}:${this.port}/.well-known/oauth-protected-resource"`
+            )
+            res.status(401).json({ error: 'Unauthorized' })
           }
         }
       })

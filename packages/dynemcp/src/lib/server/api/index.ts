@@ -41,10 +41,6 @@ export { createTypedTool, tool } from './core/tool'
 export { resource } from './core/resource'
 export { prompt } from './core/prompt'
 
-/**
- * Solicita un completion LLM vía MCP sampling/createMessage.
- * El usuario debe pasar una función de transporte que envíe el request MCP y devuelva la respuesta.
- */
 export { sample } from './core/sampling'
 
 export * from './core/root'

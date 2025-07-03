@@ -31,3 +31,12 @@ export function parseRootList(input: any): RootList {
   }
   return []
 }
+
+/**
+ * Helper to declare a list of roots in a simple and type-safe way.
+ * @param roots Array of objects { uri, name? }
+ * @returns Validated RootList
+ */
+export function root(roots: Array<{ uri: string; name?: string }>): RootList {
+  return parseRootList(roots)
+}

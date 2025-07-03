@@ -62,9 +62,14 @@ import { z } from 'zod'
 export default prompt({
   name: 'simple-prompt',
   description: 'Answers a question',
-  arguments: [{ name: 'question', description: 'Question to answer', required: true }],
+  arguments: [
+    { name: 'question', description: 'Question to answer', required: true },
+  ],
   getMessages: async (args) => [
-    { role: 'user', content: { type: 'text', text: `You asked: ${args?.question}` } },
+    {
+      role: 'user',
+      content: { type: 'text', text: `You asked: ${args?.question}` },
+    },
   ],
 })
 ```
@@ -110,6 +115,7 @@ Resource templates are not included in the production release. For advanced dyna
 The DyneMCP API provides a ready-to-use JWT authentication middleware for Express-based servers, located at `auth/jwt-middleware.ts`.
 
 ### Features
+
 - **Role-based access control:** Restrict endpoints to specific roles by passing an array of allowed roles.
 - **Audience validation:** Strongly recommended in production. Prevents token passthrough and confused deputy attacks by ensuring the JWT `aud` claim matches your server.
 - **Standard Express middleware:** Plug-and-play for any Express app.
@@ -139,6 +145,7 @@ app.use(
 - Responds with 401/403 on invalid, expired, or insufficient tokens.
 
 ### Security Best Practices
+
 - **Always set `expectedAudience` in production** to prevent token passthrough attacks.
 - Never forward client tokens to upstream APIs. Only accept tokens intended for your DyneMCP server.
 - Use role-based checks to restrict sensitive endpoints.

@@ -25,6 +25,7 @@ server/
 ### Main Server
 
 The main server module provides the core functionality for running an MCP server. It handles:
+
 - Server lifecycle management
 - Request routing
 - Error handling
@@ -33,6 +34,7 @@ The main server module provides the core functionality for running an MCP server
 ### API Layer
 
 The API module manages all server endpoints and request handling:
+
 - RESTful API endpoints
 - Authentication middleware
 - Request validation
@@ -41,6 +43,7 @@ The API module manages all server endpoints and request handling:
 ### Registry
 
 The registry module handles tool and resource management:
+
 - Tool registration and discovery
 - Resource management
 - Prompt handling
@@ -49,6 +52,7 @@ The registry module handles tool and resource management:
 ### Configuration
 
 The config module centralizes all server configuration:
+
 - Environment variables
 - Security settings
 - Transport options
@@ -57,6 +61,7 @@ The config module centralizes all server configuration:
 ### Communication
 
 The communication module handles all transport-related functionality:
+
 - Protocol implementation
 - Transport adapters (stdio, HTTP, streaming)
 - Message formatting
@@ -81,6 +86,7 @@ JWT authentication is required in production:
 ### Environment Validation
 
 The server automatically checks critical environment variables at startup:
+
 - Required variables are present
 - Security-sensitive values are properly set
 - Configuration is production-ready
@@ -88,6 +94,7 @@ The server automatically checks critical environment variables at startup:
 ### Security Headers
 
 When using HTTP transport, security headers are automatically configured:
+
 - CORS settings
 - Content Security Policy
 - XSS Protection
@@ -103,9 +110,9 @@ Add new tools by implementing the Tool interface:
 
 ```typescript
 interface Tool {
-  name: string;
-  description: string;
-  execute(params: any): Promise<any>;
+  name: string
+  description: string
+  execute(params: any): Promise<any>
 }
 ```
 
@@ -127,9 +134,9 @@ Define custom prompts for specialized use cases:
 
 ```typescript
 interface Prompt {
-  name: string;
-  content: string;
-  variables?: Record<string, any>;
+  name: string
+  content: string
+  variables?: Record<string, any>
 }
 ```
 
@@ -138,16 +145,19 @@ interface Prompt {
 When working with the server:
 
 1. **Async Operations**
+
    - Use async/await for all I/O operations
    - Handle errors properly with try/catch
    - Implement proper cleanup in finally blocks
 
 2. **Error Handling**
+
    - Use typed errors for different scenarios
    - Include helpful error messages
    - Log errors appropriately
 
 3. **Configuration**
+
    - Keep sensitive data in environment variables
    - Validate all configuration at startup
    - Use type-safe configuration objects
@@ -164,4 +174,4 @@ To learn more about specific aspects of the server:
 1. [Security Best Practices](/guides/security)
 2. [API Reference](/reference/api)
 3. [Configuration Guide](/reference/configuration)
-4. [Transport Options](/reference/transport) 
+4. [Transport Options](/reference/transport)

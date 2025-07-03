@@ -1,6 +1,6 @@
 import { prompt as systemPrompt } from '@dynemcp/dynemcp'
 
-// --- Argumentos --- //
+// --- Arguments --- //
 const SystemContextArguments = [
   {
     name: 'user_role',
@@ -14,7 +14,7 @@ const SystemContextArguments = [
   },
 ]
 
-// --- Lógica --- //
+// --- Logic --- //
 async function getMessages(args: Record<string, any> = {}) {
   const userRole = args.user_role || 'user'
   const taskContext = args.task_context || 'general assistance'
@@ -32,7 +32,7 @@ async function getMessages(args: Record<string, any> = {}) {
   ]
 }
 
-// --- Export funcional --- //
+// --- Functional Export --- //
 export default systemPrompt({
   name: 'system_context',
   description: 'Provides system context and instructions for the AI assistant',

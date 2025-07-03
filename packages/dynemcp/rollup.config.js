@@ -47,6 +47,7 @@ export default [
       format: 'cjs',
       banner: '#!/usr/bin/env node',
       sourcemap: true,
+      inlineDynamicImports: true,
     },
     plugins: [typescript({ tsconfig: './tsconfig.rollup.json' })],
     external: [

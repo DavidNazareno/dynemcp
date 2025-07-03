@@ -17,7 +17,7 @@ export const DEFAULT_CONFIG = 'dynemcp.config.ts'
 export const DEFAULT_TOOLS_DIR = './src/tools'
 export const DEFAULT_RESOURCES_DIR = './src/resources'
 export const DEFAULT_PROMPTS_DIR = './src/prompts'
-export const DEFAULT_RESOURCES_TEMPLATE_DIR = './src/resources/templates'
+export const DEFAULT_ROOTS_DIR = './src/roots'
 
 // Default autoload configuration
 export const DEFAULT_AUTOLOAD_CONFIG = {
@@ -30,6 +30,8 @@ export const DEFAULT_AUTOLOAD_CONFIG = {
 export const DEFAULT_TRANSPORT_OPTIONS = {
   port: NETWORK.DEFAULT_HTTP_PORT,
   endpoint: NETWORK.DEFAULT_MCP_ENDPOINT,
+  oauth2Issuer: 'https://your-auth-server',
+  oauth2Audience: 'https://your-mcp-server',
 }
 
 // Default logging configuration
@@ -69,11 +71,6 @@ export const DEFAULT_SECURITY_CONFIG = {
   },
 }
 
-// Default env config
-export const DEFAULT_ENV_CONFIG = {
-  env: true,
-}
-
 /**
  * createDefaultConfig: Creates a default DyneMCP configuration object.
  * @returns {DyneMCPConfig} The default configuration.
@@ -103,6 +100,10 @@ export function createDefaultConfig(): DyneMCPConfig {
       ...DEFAULT_AUTOLOAD_CONFIG,
       directory: DEFAULT_PROMPTS_DIR,
     },
+    roots: {
+      ...DEFAULT_AUTOLOAD_CONFIG,
+      directory: DEFAULT_ROOTS_DIR,
+    },
     transport: {
       type: DEFAULT_TRANSPORT_TYPE,
       options: DEFAULT_TRANSPORT_OPTIONS,
@@ -111,7 +112,6 @@ export function createDefaultConfig(): DyneMCPConfig {
     debug: DEFAULT_DEBUG_CONFIG,
     performance: DEFAULT_PERFORMANCE_CONFIG,
     security: DEFAULT_SECURITY_CONFIG,
-    config: DEFAULT_ENV_CONFIG,
   }
 }
 

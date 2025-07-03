@@ -67,24 +67,19 @@ export const SecurityConfigSchema = z.object({
   }),
 })
 
-// EnvConfigSchema: Validation for env config
-export const EnvConfigSchema = z.object({
-  env: z.boolean(),
-})
-
 // ConfigSchema: Main schema for full DyneMCP configuration
 export const ConfigSchema = z.object({
   server: ServerConfigSchema,
   tools: AutoloadConfigSchema,
   resources: AutoloadConfigSchema,
   prompts: AutoloadConfigSchema,
+  roots: AutoloadConfigSchema,
   transport: TransportSchema,
   description: z.string().optional(),
   logging: LoggingConfigSchema.optional(),
   debug: DebugConfigSchema.optional(),
   performance: PerformanceConfigSchema.optional(),
   security: SecurityConfigSchema.optional(),
-  config: EnvConfigSchema.optional(),
 })
 
 export type BaseConfig = z.infer<typeof BaseConfigSchema>

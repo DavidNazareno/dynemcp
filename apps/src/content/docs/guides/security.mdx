@@ -15,17 +15,20 @@ JWT authentication is a mandatory requirement for production deployments. This e
 
 ```typescript
 // Example JWT middleware configuration
-import { jwtMiddleware } from 'dynemcp/server';
+import { jwtMiddleware } from 'dynemcp/server'
 
-app.use(jwtMiddleware({
-  expectedAudience: 'your-server-id', // Required
-  // Other JWT options...
-}));
+app.use(
+  jwtMiddleware({
+    expectedAudience: 'your-server-id', // Required
+    // Other JWT options...
+  })
+)
 ```
 
 ### Best Practices for JWT
 
 1. **Always Set Expected Audience**
+
    - Prevents token passthrough attacks
    - Ensures tokens are intended for your server
    - Mitigates confused deputy attacks
@@ -50,6 +53,7 @@ NODE_ENV=production
 ### Validation Checks
 
 The server performs automatic checks for:
+
 - Presence of required variables
 - Secure values (minimum length, complexity)
 - Production-specific requirements
@@ -58,6 +62,7 @@ The server performs automatic checks for:
 ### Error Handling
 
 If security requirements are not met:
+
 - Server will not start
 - Clear error messages are displayed
 - Guidance for fixing issues is provided
@@ -94,6 +99,7 @@ When using HTTP transport, DyneMCP automatically configures security headers:
 ### Transport Security
 
 1. **HTTPS in Production**
+
    - Always use HTTPS in production
    - Configure SSL/TLS properly
    - Keep certificates up to date
@@ -106,6 +112,7 @@ When using HTTP transport, DyneMCP automatically configures security headers:
 ### Data Protection
 
 1. **Input Validation**
+
    - Validate all incoming data
    - Use type-safe schemas
    - Implement rate limiting
@@ -141,21 +148,25 @@ DyneMCP provides built-in audit logging capabilities:
 Before deploying to production:
 
 1. **Authentication**
+
    - [ ] JWT authentication enabled
    - [ ] Expected audience configured
    - [ ] Token validation implemented
 
 2. **Environment**
+
    - [ ] Secure secrets configured
    - [ ] Production variables set
    - [ ] Validation checks passing
 
 3. **Headers**
+
    - [ ] CORS properly configured
    - [ ] Security headers enabled
    - [ ] Content security policy set
 
 4. **Logging**
+
    - [ ] Audit logging enabled
    - [ ] Log rotation configured
    - [ ] Sensitive data masked
@@ -168,16 +179,19 @@ Before deploying to production:
 ## Best Practices
 
 1. **Regular Updates**
+
    - Keep DyneMCP updated
    - Monitor security advisories
    - Update dependencies
 
 2. **Access Control**
+
    - Implement least privilege
    - Use role-based access
    - Regular access reviews
 
 3. **Monitoring**
+
    - Enable security logging
    - Monitor for attacks
    - Set up alerts
@@ -194,4 +208,4 @@ To further enhance your application's security:
 1. [Production Deployment Guide](/guides/deployment)
 2. [Configuration Reference](/reference/configuration)
 3. [Monitoring Guide](/guides/monitoring)
-4. [Compliance Documentation](/guides/compliance) 
+4. [Compliance Documentation](/guides/compliance)

@@ -9,7 +9,8 @@
 // GLOBAL CONFIGURATION (imported inline to avoid path issues)
 // =============================================================================
 
-const SDK_VERSION = '1.13.2'
+const SDK_VERSION = '1.13.3'
+const INSPECTOR_VERSION = '0.15.0'
 
 // Network Configuration
 const NETWORK = {
@@ -27,13 +28,7 @@ const PATHS = {
 // Template Configuration
 const TEMPLATES = {
   DEFAULT_TEMPLATE: 'default',
-  AVAILABLE_TEMPLATES: [
-    'default',
-    'calculator',
-    'dynamic-agent',
-    'http-server',
-    'secure-agent',
-  ] as const,
+  AVAILABLE_TEMPLATES: ['default-stdio', 'default-http'] as const,
   TEMPLATES_DIR: 'src/templates',
   TEMPLATE_CONFIG: 'dynemcp.config.json',
 } as const
@@ -154,58 +149,28 @@ export const CREATE_DYNEMCP_TEMPLATES = {
 
   /** Template metadata */
   METADATA: {
-    default: {
-      name: 'Default',
+    'default-stdio': {
+      name: 'Default STDIO',
       description: 'Basic MCP server with tools, resources, and prompts',
       transport: 'stdio',
-      features: ['tools', 'resources', 'prompts'],
+      features: ['tools', 'resources', 'prompts', 'roots', 'samples'],
     },
-    calculator: {
-      name: 'Calculator',
-      description: 'Mathematical MCP server with calculation tools',
+    'default-http': {
+      name: 'Default HTTP',
+      description: 'Basic MCP server with tools, resources, and prompts',
       transport: 'streamable-http',
-      features: ['tools', 'prompts'],
-    },
-    'dynamic-agent': {
-      name: 'Dynamic Agent',
-      description: 'Self-learning MCP agent with memory capabilities',
-      transport: 'stdio',
-      features: ['tools', 'resources', 'memory'],
-    },
-    'http-server': {
-      name: 'HTTP Server',
-      description: 'HTTP-based MCP server for web integrations',
-      transport: 'streamable-http',
-      features: ['tools', 'resources', 'http'],
-    },
-    'secure-agent': {
-      name: 'Secure Agent',
-      description: 'Security-focused MCP server with authentication',
-      transport: 'streamable-http',
-      features: ['tools', 'resources', 'auth', 'security'],
+      features: ['tools', 'resources', 'prompts', 'roots', 'samples'],
     },
   },
 
   /** Template default configurations */
   DEFAULTS: {
-    default: {
+    'default-stdio': {
       port: NETWORK.DEFAULT_HTTP_PORT,
       transport: 'stdio',
     },
-    calculator: {
+    'default-http': {
       port: NETWORK.DEFAULT_HTTP_PORT,
-      transport: 'streamable-http',
-    },
-    'dynamic-agent': {
-      port: NETWORK.DEFAULT_HTTP_PORT,
-      transport: 'stdio',
-    },
-    'http-server': {
-      port: NETWORK.DEFAULT_HTTP_PORT,
-      transport: 'streamable-http',
-    },
-    'secure-agent': {
-      port: NETWORK.DEFAULT_HTTP_PORT + 1, // 3002 to avoid conflicts
       transport: 'streamable-http',
     },
   },
@@ -336,7 +301,7 @@ export function validateProjectName(name: string): {
 export function getTemplateMetadata(template: TemplateName) {
   return (
     CREATE_DYNEMCP_TEMPLATES.METADATA[template] ||
-    CREATE_DYNEMCP_TEMPLATES.METADATA.default
+    CREATE_DYNEMCP_TEMPLATES.METADATA['default-stdio']
   )
 }
 
@@ -346,7 +311,7 @@ export function getTemplateMetadata(template: TemplateName) {
 export function getTemplateDefaults(template: TemplateName) {
   return (
     CREATE_DYNEMCP_TEMPLATES.DEFAULTS[template] ||
-    CREATE_DYNEMCP_TEMPLATES.DEFAULTS.default
+    CREATE_DYNEMCP_TEMPLATES.DEFAULTS['default-stdio']
   )
 }
 
@@ -391,4 +356,12 @@ export function createProjectPaths(projectName: string) {
 // EXPORTS
 // =============================================================================
 
-export { NETWORK, PATHS, TEMPLATES, LOGGING, PACKAGE_MANAGER, SDK_VERSION }
+export {
+  NETWORK,
+  PATHS,
+  TEMPLATES,
+  LOGGING,
+  PACKAGE_MANAGER,
+  SDK_VERSION,
+  INSPECTOR_VERSION,
+}

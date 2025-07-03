@@ -74,7 +74,7 @@ echo "----------------------------------------"
 
 # --- Configuration ---
 # Siempre usar la plantilla 'default'
-TEMPLATE_NAME="default"
+TEMPLATE_NAME="default-stdio"
 # Código de selección de plantilla comentado porque solo hay una
 # if [ -z "$1" ]; then
 #     select_template

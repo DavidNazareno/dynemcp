@@ -9,17 +9,17 @@ const GreeterSchema = z.object({
 })
 
 // --- Export --- //
-// Esta tool demuestra la nueva DX: puedes retornar string, objeto simple, array, o MCP completo
+// This tool demonstrates the new DX: you can return a string, simple object, array, or full MCP object
 export default tool(
   GreeterSchema,
   async ({ name, image }: { name: string; image?: string }) => {
     if (!name?.trim()) {
-      // Retornar string simple (se normaliza a content:text)
+      // Return a simple string (normalized to content:text)
       return 'Name cannot be empty'
     }
-    // Retornar string simple
+    // Return a simple string
     if (!image) return `Hello, ${name}!`
-    // Retornar array de strings y objetos avanzados
+    // Return an array of strings and advanced objects
     return [
       `Hello, ${name}!`,
       { type: 'image', url: image, alt: `Avatar for ${name}` },
@@ -35,14 +35,3 @@ export default tool(
     },
   }
 )
-
-// Ejemplo de uso avanzado:
-// Puedes retornar directamente un objeto content personalizado:
-// return { type: 'image', url: 'https://...', alt: 'desc' }
-// O un array de content items:
-// return [
-//   'Hola',
-//   { type: 'image', url: 'https://...', alt: 'desc' }
-// ]
-// O el objeto MCP completo:
-// return { content: [...], isError: true }

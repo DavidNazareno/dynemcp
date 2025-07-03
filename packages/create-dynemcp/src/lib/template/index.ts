@@ -5,4 +5,7 @@
  * All exports are re-exported from their respective core implementations.
  */
 export { installTemplate, getTemplateFile } from './core/template-generator'
-export { getAvailableTemplates, getTemplatesDir } from './core/helpers'
+export {
+  getAvailableTemplates,
+  getTemplatesDir,
+} from '../shared/core/path-operations'
