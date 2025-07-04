@@ -5,7 +5,6 @@ import type {
   ResourceDefinition,
   PromptDefinition,
   PromptMessage,
-  ResourceTemplateDefinition,
 } from '../../api'
 import type { ServerInitializationOptions } from './interfaces'
 import { createTextResponse, createErrorResponse } from '../../api'
@@ -232,8 +231,7 @@ export function registerComponents(
   server: McpServer,
   tools: ToolDefinition[],
   resources: ResourceDefinition[],
-  prompts: PromptDefinition[],
-  resourceTemplates: ResourceTemplateDefinition[] = []
+  prompts: PromptDefinition[]
 ): void {
   registerTools(server, tools)
   const realResources = registry.getAllResourceObjects()

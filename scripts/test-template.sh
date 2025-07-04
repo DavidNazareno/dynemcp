@@ -50,7 +50,7 @@ detect_os_and_sed() {
 #     echo "📋 Available templates:"
 #     echo "----------------------------------------"
 #     PS3="Please select a template (1-5): "
-#     templates=("default" "calculator" "dynamic-agent" "http-server" "secure-agent")
+#     templates=("default-stdio" "default-http")
 #     select template in "${templates[@]}"; do
 #         if [ -n "$template" ]; then
 #             echo "Selected template: $template"
@@ -74,7 +74,7 @@ echo "----------------------------------------"
 
 # --- Configuration ---
 # Siempre usar la plantilla 'default'
-TEMPLATE_NAME="default-stdio"
+TEMPLATE_NAME="default-http"
 # Código de selección de plantilla comentado porque solo hay una
 # if [ -z "$1" ]; then
 #     select_template

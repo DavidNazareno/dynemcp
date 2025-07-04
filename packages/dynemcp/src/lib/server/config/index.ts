@@ -19,6 +19,8 @@ export type {
   ServerConfig,
   AutoloadConfig,
   TransportConfig,
+  StdioTransportConfig,
+  StreamableHTTPTransportConfig,
 } from './core/interfaces'
 
 // Utilities for loading and validating configuration
@@ -34,8 +36,6 @@ export {
   DEFAULT_RESOURCES_DIR,
   DEFAULT_PROMPTS_DIR,
   DEFAULT_AUTOLOAD_CONFIG,
-  DEFAULT_TRANSPORT_TYPE,
-  DEFAULT_TRANSPORT_OPTIONS,
 } from './core/defaults.js'
 
 // Error handling utilities for configuration errors

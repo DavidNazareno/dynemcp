@@ -57,8 +57,8 @@ declare module '@modelcontextprotocol/sdk/dist/esm/types' {
   }
 
   export interface Root {
-    path: string
-    type: string
+    uri: string
+    name: string
   }
 
   export interface RootsListChangedNotification {

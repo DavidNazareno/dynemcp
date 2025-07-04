@@ -6,7 +6,12 @@
 /**
  * RegistryItemType: Supported component types in the registry.
  */
-export type RegistryItemType = 'tool' | 'prompt' | 'resource' | 'sample'
+export type RegistryItemType =
+  | 'tool'
+  | 'prompt'
+  | 'resource'
+  | 'sample'
+  | 'root'
 
 export interface RegistryItem {
   id: string
@@ -39,7 +44,6 @@ export interface RegistryStorage {
  */
 export interface Registry {
   get(type: RegistryItemType, id: string): Promise<RegistryItem>
-  preloadAll(): Promise<void>
 }
 
 /**
@@ -49,6 +53,7 @@ export interface RegistryStats {
   tools: number
   resources: number
   prompts: number
+  roots: number
   total: number
 }
 
@@ -59,5 +64,6 @@ export interface LoadAllOptions {
   tools: { enabled: boolean; directory: string }
   resources: { enabled: boolean; directory: string }
   prompts: { enabled: boolean; directory: string }
+  roots: { enabled: boolean; directory: string }
   samples?: { enabled: boolean; directory: string }
 }

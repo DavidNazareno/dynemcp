@@ -1,10 +1,5 @@
 // core/cli.ts
 // DyneBuild CLI core logic for DyneMCP
-// ------------------------------------
-//
-// - Implements the main CLI for building, cleaning, and analyzing DyneMCP projects.
-// - Supports commands: build, watch, cli, clean, analyze, help, version.
-// - Handles argument parsing, help/version output, and command dispatch.
 
 import chalk from 'chalk'
 import path from 'path'
@@ -24,9 +19,6 @@ export interface CliOptions {
   version?: boolean
 }
 
-/**
- * Show CLI help message.
- */
 export function showHelp(): void {
   console.log(`
 ${chalk.bold.blue('🚀 DyneBuild CLI')} - Advanced MCP Server Builder
@@ -66,19 +58,12 @@ ${chalk.bold('Configuration:')}
 `)
 }
 
-/**
- * Show CLI version.
- */
 export function showVersion(): void {
-  const packageJson = JSON.parse(
-    fs.readFileSync(path.join(__dirname, '../../package.json'), 'utf-8')
-  )
-  console.log(`DyneBuild CLI v${packageJson.version}`)
+  const pkgPath = path.join(__dirname, '../../package.json')
+  const { version } = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+  console.log(`DyneBuild CLI v${version}`)
 }
 
-/**
- * Parse CLI arguments into command and options.
- */
 export function parseArgs(args: string[]): {
   command: string
   options: CliOptions
@@ -86,64 +71,58 @@ export function parseArgs(args: string[]): {
   const options: CliOptions = {}
   let command = 'build'
 
+  const flags: Record<string, keyof CliOptions> = {
+    '--clean': 'clean',
+    '--analyze': 'analyze',
+    '--manifest': 'manifest',
+    '--html': 'html',
+    '--watch': 'watch',
+    '--cli': 'cli',
+    '--help': 'help',
+    '-h': 'help',
+    '--version': 'version',
+    '-v': 'version',
+  }
+
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
-    switch (arg) {
-      case 'build':
-      case 'watch':
-      case 'cli':
-      case 'clean':
-      case 'analyze':
-        command = arg
-        break
-      case '-c':
-      case '--config':
-        options.config = args[++i]
-        break
-      case '--clean':
-        options.clean = true
-        break
-      case '--analyze':
-        options.analyze = true
-        break
-      case '--manifest':
-        options.manifest = true
-        break
-      case '--html':
-        options.html = true
-        break
-      case '--watch':
-        options.watch = true
-        break
-      case '--cli':
-        options.cli = true
-        break
-      case '-h':
-      case '--help':
-        options.help = true
-        break
-      case '-v':
-      case '--version':
-        options.version = true
-        break
-      default:
-        if (arg.startsWith('-')) {
-          console.warn(chalk.yellow(`⚠️  Unknown option: ${arg}`))
-        }
+    if (['build', 'watch', 'cli', 'clean', 'analyze'].includes(arg)) {
+      command = arg
+    } else if (arg === '-c' || arg === '--config') {
+      options.config = args[++i]
+    } else if (flags[arg]) {
+      options[flags[arg]] = true
+    } else if (arg.startsWith('-')) {
+      console.warn(chalk.yellow(`⚠️  Unknown option: ${arg}`))
     }
   }
+
   return { command, options }
 }
 
-/**
- * Main CLI entrypoint. Parses args, dispatches commands, and handles errors.
- */
+function resolveConfigPath(config?: string): string {
+  const configPath = config || PATHS.DEFAULT_CONFIG
+  const cwd = process.cwd()
+  return path.isAbsolute(configPath) ? configPath : path.join(cwd, configPath)
+}
+
+function ensureConfigExists(configPath: string): void {
+  if (!fs.existsSync(configPath)) {
+    console.error(chalk.red(`❌ Configuration file not found: ${configPath}`))
+    console.log(
+      chalk.yellow(
+        '💡 Make sure you are in a DyneMCP project directory or specify a config file with --config'
+      )
+    )
+    process.exit(1)
+  }
+}
+
 export async function run(): Promise<void> {
   try {
     const args = process.argv.slice(2)
     const { command, options } = parseArgs(args)
 
-    // Show help or version
     if (options.help) {
       showHelp()
       return
@@ -153,38 +132,22 @@ export async function run(): Promise<void> {
       return
     }
 
-    // Get the current working directory
-    const cwd = process.cwd()
-    console.log(chalk.blue(`📁 Working directory: ${cwd}`))
+    const configPath = resolveConfigPath(options.config)
+    console.log(chalk.blue(`📁 Working directory: ${process.cwd()}`))
+    console.log(chalk.blue(`📋 Using config: ${configPath}`))
+    ensureConfigExists(configPath)
 
-    // Check if we're in a DyneMCP project
-    const configPath = options.config || PATHS.DEFAULT_CONFIG
-    const absoluteConfigPath = path.isAbsolute(configPath)
-      ? configPath
-      : path.join(cwd, configPath)
-
-    if (!fs.existsSync(absoluteConfigPath)) {
-      console.error(
-        chalk.red(`❌ Configuration file not found: ${absoluteConfigPath}`)
-      )
-      console.log(
-        chalk.yellow(
-          '💡 Make sure you are in a DyneMCP project directory or specify a config file with --config'
-        )
-      )
-      process.exit(1)
+    const sharedOptions = {
+      configPath,
+      clean: options.clean,
+      analyze: options.analyze,
     }
 
-    console.log(chalk.blue(`📋 Using config: ${absoluteConfigPath}`))
-
-    // Execute command
     switch (command) {
       case 'build': {
         console.log(chalk.green('🔨 Building DyneMCP project...'))
         const result = await build({
-          configPath: absoluteConfigPath,
-          clean: options.clean,
-          analyze: options.analyze,
+          ...sharedOptions,
           manifest: options.manifest,
           html: options.html,
         })
@@ -198,11 +161,7 @@ export async function run(): Promise<void> {
       }
       case 'watch': {
         console.log(chalk.green('👀 Starting watch mode...'))
-        const ctx = await watch({
-          configPath: absoluteConfigPath,
-          clean: options.clean,
-        })
-        // Keep the process running
+        const ctx = await watch(sharedOptions)
         process.on('SIGINT', async () => {
           console.log(chalk.yellow('\n🛑 Stopping watch mode...'))
           await ctx.dispose()
@@ -212,12 +171,8 @@ export async function run(): Promise<void> {
       }
       case 'cli': {
         console.log(chalk.green('🔧 Building CLI tool...'))
-        const cliResult = await buildCli({
-          configPath: absoluteConfigPath,
-          clean: options.clean,
-          analyze: options.analyze,
-        })
-        if (cliResult.success) {
+        const result = await buildCli(sharedOptions)
+        if (result.success) {
           console.log(chalk.green('✅ CLI build completed successfully!'))
         } else {
           console.error(chalk.red('❌ CLI build failed!'))
@@ -227,19 +182,20 @@ export async function run(): Promise<void> {
       }
       case 'clean': {
         console.log(chalk.green('🧹 Cleaning build directory...'))
-        await clean({ configPath: absoluteConfigPath })
+        await clean({ configPath })
         console.log(chalk.green('✅ Clean completed!'))
         break
       }
       case 'analyze': {
         console.log(chalk.green('📊 Analyzing dependencies...'))
-        await analyze({ configPath: absoluteConfigPath })
+        await analyze({ configPath })
         break
       }
-      default:
+      default: {
         console.error(chalk.red(`❌ Unknown command: ${command}`))
         showHelp()
         process.exit(1)
+      }
     }
   } catch (error) {
     console.error(

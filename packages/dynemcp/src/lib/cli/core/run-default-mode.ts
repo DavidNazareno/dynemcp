@@ -1,83 +1,67 @@
-// Default development mode runner for DyneMCP CLI
+// DyneMCP CLI - Default development mode runner
 // Handles hot-reload, server startup, and graceful shutdown in dev mode.
 
 import { watch } from '../../build'
 import { createMCPServer } from '../../server'
 import { ConsoleLogger, StderrLogger } from './logger'
-import {
-  setStdioLogSilent,
-  isStdioLogSilent,
-} from '../../../global/config-all-contants'
+import { TRANSPORT, DYNEMCP_SERVER } from '../../../global/config-all-contants'
 import { getEffectiveTransport } from './utils'
-import {
-  DYNEMCP_SERVER,
-  DYNEMCP_CLI,
-  CLI,
-} from '../../../global/config-all-contants'
 import type { DevOptions } from './types'
 
-export async function runDefaultMode(argv: DevOptions): Promise<void> {
-  const {
-    transport: effectiveTransport,
-    port,
-    host,
-  } = await getEffectiveTransport(argv)
-
-  const isSilent = effectiveTransport === CLI.TRANSPORT_TYPES[0]
-  if (isSilent) setStdioLogSilent(true)
-
+export async function runDefaultMode(options: DevOptions): Promise<void> {
+  const { transport, port, host } = await getEffectiveTransport(options)
+  const silentMode = transport === TRANSPORT.TRANSPORT_TYPES.STDIO
   const logger =
-    argv.internalRun || isSilent ? new StderrLogger() : new ConsoleLogger()
+    options.internalRun || silentMode ? new StderrLogger() : new ConsoleLogger()
 
-  if (!isStdioLogSilent()) {
-    logger.success(DYNEMCP_SERVER.MESSAGES.STARTING)
-  }
+  if (!silentMode) logger.success(DYNEMCP_SERVER.MESSAGES.STARTING)
 
   const ctx = await watch({
-    configPath: argv.config,
-    clean: argv.clean,
+    configPath: options.config,
+    clean: options.clean,
     logger,
   })
 
-  const server = await createMCPServer(argv.config)
+  const server = await createMCPServer(options.config)
   await server.start()
 
-  logServerRunningInfo(logger, effectiveTransport, host, port)
+  if (!silentMode) {
+    printServerInfo(logger, transport, host, port)
+  }
 
-  setupGracefulShutdown(logger, server, ctx)
+  handleGracefulShutdown(server, ctx, logger, silentMode)
 }
 
-function logServerRunningInfo(
+function printServerInfo(
   logger: ConsoleLogger | StderrLogger,
   transport: string,
   host?: string,
   port?: number
 ) {
-  if (isStdioLogSilent()) return
-
   logger.info(DYNEMCP_SERVER.MESSAGES.WATCHING)
 
-  if (transport === CLI.TRANSPORT_TYPES[1]) {
-    logger.info(
-      DYNEMCP_SERVER.MESSAGES.SERVER_RUNNING(
-        host || DYNEMCP_CLI.DEFAULTS.host,
-        port || DYNEMCP_CLI.DEFAULTS.port
-      )
-    )
+  if (transport === TRANSPORT.TRANSPORT_TYPES.STREAMABLE_HTTP) {
+    const finalHost = host || TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.host
+    const finalPort = port || TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.port
+
+    logger.info(DYNEMCP_SERVER.MESSAGES.SERVER_RUNNING(finalHost, finalPort))
   }
 }
 
-function setupGracefulShutdown(
-  logger: ConsoleLogger | StderrLogger,
+function handleGracefulShutdown(
   server: Awaited<ReturnType<typeof createMCPServer>>,
-  ctx: Awaited<ReturnType<typeof watch>>
+  ctx: Awaited<ReturnType<typeof watch>>,
+  logger: ConsoleLogger | StderrLogger,
+  silent: boolean
 ) {
   process.on('SIGINT', async () => {
-    if (!isStdioLogSilent()) {
+    if (!silent) {
       logger.warn(`\n${DYNEMCP_SERVER.MESSAGES.SHUTDOWN}`)
     }
+
     await server.stop()
     await ctx.dispose()
+
     process.exit(0)
   })
 }

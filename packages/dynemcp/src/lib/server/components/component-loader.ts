@@ -7,6 +7,7 @@ import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
+  Root,
 } from '../api'
 import { findFilesRecursively } from './core/loaders/file-discovery'
 import { loadComponentFromFile } from './core/loaders/dynamic-loader'
@@ -14,6 +15,7 @@ import {
   validateTool,
   validateResource,
   validatePrompt,
+  validateRoot,
 } from './core/loaders/validators'
 
 /**
@@ -124,4 +126,15 @@ export async function loadPromptsFromDirectory(
   options: LoadOptions
 ): Promise<LoadResult<PromptDefinition>> {
   return loadComponentsFromDirectory(options, validatePrompt)
+}
+
+/**
+ * loadRootsFromDirectory: Loads all roots from a directory using the standard root validator.
+ * @param options - LoadOptions for roots
+ * @returns LoadResult<Root>
+ */
+export async function loadRootsFromDirectory(
+  options: LoadOptions
+): Promise<LoadResult<Root>> {
+  return loadComponentsFromDirectory(options, validateRoot)
 }

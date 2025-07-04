@@ -73,7 +73,6 @@ export interface DyneMCPConfig {
 // Type definition for Stdio transport configuration
 export interface StdioTransportConfig {
   type: 'stdio'
-  options?: Record<string, unknown>
 }
 
 // Type definition for Streamable HTTP transport configuration
@@ -105,11 +104,6 @@ export interface StreamableHTTPTransportConfig {
     authentication?: {
       path: string
     }
-    /**
-     * Rate limiting options (see express-rate-limit)
-     * Example:
-     *   rateLimit: { windowMs: 900000, max: 100 }
-     */
     rateLimit?: {
       windowMs?: number
       max?: number

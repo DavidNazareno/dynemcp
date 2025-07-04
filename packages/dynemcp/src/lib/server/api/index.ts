@@ -26,6 +26,8 @@ export type {
   SamplingRequest,
   SamplingResult,
   ResourceTemplateDefinition,
+  Root,
+  RootList,
 } from './core/interfaces'
 
 // Utility functions

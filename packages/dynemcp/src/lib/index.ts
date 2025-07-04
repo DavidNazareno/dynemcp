@@ -4,19 +4,19 @@
  */
 
 // Export server functionality (incluye DyneMCPConfig)
-export * from './server/index.js'
+export * from './server'
 
 // Export build functionality (main entrypoints, types, bundler)
-export * from './build/main/index.js'
-export * from './build/bundler/index.js'
+export * from './build/main'
+export * from './build/bundler'
 
 // Export CLI functionality (only public API)
-export { cli, dev } from './cli/index.js'
-export { ConsoleLogger, StderrLogger } from './cli/core/logger.js'
-export type { Logger } from './cli/core/logger.js'
+export { ConsoleLogger, StderrLogger, cli, dev } from './cli'
+export type { Logger } from './cli'
 
 // Main framework exports (legacy/compat)
-export { createMCPServer } from './server/index.js'
-export { tool } from './server/api/index.js'
-export { resource, prompt } from './server/api/index.js'
-export { sample } from './server/api/index.js'
+export { createMCPServer } from './server'
+export { tool } from './server/api'
+export { resource, prompt } from './server/api'
+export { sample } from './server/api'
+export * from './server/api/auth'

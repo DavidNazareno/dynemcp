@@ -22,8 +22,9 @@ export async function dev(argv: DevOptions): Promise<void> {
     if (mode === 'inspector') {
       console.log(DYNEMCP_SERVER.MESSAGES.STARTING_INSPECTOR)
 
-      const { transport, port, host } = await getEffectiveTransport(argv)
-      await launchInspector(transport, argv.config, port, host)
+      const { transport, port, host, endpoint } =
+        await getEffectiveTransport(argv)
+      await launchInspector(transport, argv.config, port, host, endpoint)
     } else {
       console.log(DYNEMCP_SERVER.MESSAGES.STARTING)
       await runDefaultMode(argv)

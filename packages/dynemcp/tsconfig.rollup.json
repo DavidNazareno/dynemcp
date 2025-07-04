@@ -4,6 +4,8 @@
     "composite": false,
     "declaration": false,
     "declarationMap": false,
-    "emitDeclarationOnly": false
+    "emitDeclarationOnly": false,
+    "importsNotUsedAsValues": "remove",
+    "preserveValueImports": false
   }
 }

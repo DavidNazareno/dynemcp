@@ -1,10 +1,9 @@
 // bundle.ts
 // Core bundling logic for DyneMCP projects (production, watch, CLI)
-// ---------------------------------------------------------------
+// ------------------------------------------------------------------
 //
-// - Provides the main bundling entrypoints for DyneMCP projects using esbuild.
-// - Handles production builds, watch mode, CLI builds, and output directory cleanup.
-// - Integrates dependency analysis, optimizations, and manifest generation.
+// - Handles builds, watch mode, CLI bundling, and output cleanup.
+// - Integrates esbuild, dependency analysis, optimizations, and manifest generation.
 
 import {
   build,
@@ -16,6 +15,7 @@ import { analyzeDependencies } from './analyzer'
 import { optimizeBundle } from './optimizer'
 import { generateManifest } from './manifest'
 import type { BuildConfig } from '../../main'
+import { BUILD } from '../../../../global/config-all-contants'
 
 export interface BundleResult {
   success: boolean
@@ -40,15 +40,64 @@ export interface BundleOptions extends BuildConfig {
   cli?: boolean
 }
 
-function shouldLog() {
+function shouldLog(): boolean {
   return !process.env.DYNE_MCP_STDIO_LOG_SILENT
+}
+
+function getEsbuildOptions(
+  options: BundleOptions,
+  isWatch = false
+): EsbuildBuildOptions {
+  const baseDefines = {
+    'process.env.NODE_ENV': JSON.stringify(
+      process.env.NODE_ENV ||
+        (isWatch ? BUILD.ENVIRONMENT.DEV : BUILD.ENVIRONMENT.PROD)
+    ),
+    ...options.define,
+  }
+
+  return {
+    entryPoints: [options.entryPoint],
+    outfile: `${options.outDir}/${options.outFile}`,
+    bundle: options.bundle,
+    minify: options.minify,
+    sourcemap: isWatch || options.sourcemap,
+    format: options.format,
+    platform: options.platform,
+    target: options.target,
+    external: options.external,
+    define: baseDefines,
+    treeShaking: options.treeShaking,
+    splitting: options.splitting,
+    metafile: !isWatch && options.metafile,
+    write: true,
+    logLevel: 'info',
+    color: true,
+  }
+}
+
+/**
+ * Clean the build output directory.
+ */
+export async function cleanBuildDir(outDir: string): Promise<void> {
+  const fs = await import('fs-extra')
+  const path = await import('path')
+
+  const absoluteOutDir = path.isAbsolute(outDir)
+    ? outDir
+    : path.join(process.cwd(), outDir)
+
+  try {
+    await fs.remove(absoluteOutDir)
+    if (shouldLog())
+      console.log(`🧹 Cleaned build directory: ${absoluteOutDir}`)
+  } catch (error) {
+    if (shouldLog()) console.warn('⚠️  Could not clean build directory:', error)
+  }
 }
 
 /**
  * Bundle a DyneMCP project for production.
- *
- * @param options BundleOptions for the build
- * @returns BundleResult with stats, errors, and output info
  */
 export async function bundle(options: BundleOptions): Promise<BundleResult> {
   const startTime = Date.now()
@@ -67,7 +116,7 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
   try {
     if (shouldLog()) console.log('🔨 Starting DyneMCP build...')
 
-    // Analyze dependencies
+    // Optional: Analyze dependencies
     if (options.analyze) {
       if (shouldLog()) console.log('📊 Analyzing dependencies...')
       const analysis = await analyzeDependencies(options.entryPoint)
@@ -76,96 +125,63 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
         console.log(`📦 Found ${analysis.dependencies.length} dependencies`)
     }
 
-    // Prepare esbuild options
-    const buildOptions: EsbuildBuildOptions = {
-      entryPoints: [options.entryPoint],
-      outfile: `${options.outDir}/${options.outFile}`,
-      bundle: options.bundle,
-      minify: options.minify,
-      sourcemap: options.sourcemap,
-      format: options.format as 'esm' | 'cjs' | 'iife',
-      platform: options.platform,
-      target: options.target,
-      external: options.external,
-      define: {
-        'process.env.NODE_ENV': JSON.stringify(
-          process.env.NODE_ENV || 'production'
-        ),
-        ...options.define,
-      },
-      treeShaking: options.treeShaking,
-      splitting: options.splitting,
-      metafile: options.metafile,
-      write: true,
-      logLevel: 'info',
-      color: true,
-    }
-
-    // Add MCP-specific optimizations
-    if (options.bundle) {
-      buildOptions.define = {
-        ...buildOptions.define,
-        // Optimize for MCP server environment
-        'process.env.MCP_SERVER': 'true',
-        // Disable debug features in production
-        'process.env.DEBUG': 'false',
-      }
-    }
-
-    // Build the project
+    // Build project
+    const buildOptions = getEsbuildOptions(options)
     const buildResult = await build(buildOptions)
 
-    // Process results
-    if (buildResult.errors.length > 0) {
+    // Errors
+    if (buildResult.errors.length) {
       result.errors = buildResult.errors.map((e) => e.text)
-      if (shouldLog()) console.error('❌ Build failed with errors:')
-      buildResult.errors.forEach((error) => {
-        if (shouldLog()) console.error(`  ${error.text}`)
-      })
+      if (shouldLog()) {
+        console.error('❌ Build failed with errors:')
+        result.errors.forEach((e) => console.error(`  ${e}`))
+      }
       return result
     }
 
-    if (buildResult.warnings.length > 0) {
+    // Warnings
+    if (buildResult.warnings.length) {
       result.warnings = buildResult.warnings.map((w) => w.text)
-      if (shouldLog()) console.warn('⚠️  Build completed with warnings:')
-      buildResult.warnings.forEach((warning) => {
-        if (shouldLog()) console.warn(`  ${warning.text}`)
-      })
+      if (shouldLog()) {
+        console.warn('⚠️  Build completed with warnings:')
+        result.warnings.forEach((w) => console.warn(`  ${w}`))
+      }
     }
 
-    // Optimize the bundle
+    // Optional: Optimize bundle
     if (options.bundle && options.minify) {
       if (shouldLog()) console.log('⚡ Optimizing bundle...')
       await optimizeBundle(`${options.outDir}/${options.outFile}`)
     }
 
-    // Generate manifest if requested
+    // Optional: Generate manifest
     if (options.manifest && buildResult.metafile) {
       if (shouldLog()) console.log('📋 Generating manifest...')
       await generateManifest(buildResult.metafile, options.outDir)
     }
 
-    // Calculate stats
     const endTime = Date.now()
-    result.stats.endTime = endTime
-    result.stats.duration = endTime - startTime
-    result.stats.entryPoints = [options.entryPoint]
+    result.stats = {
+      ...result.stats,
+      endTime,
+      duration: endTime - startTime,
+      entryPoints: [options.entryPoint],
+    }
     result.outputFiles = buildResult.outputFiles?.map((f) => f.path) || []
     result.metafile = buildResult.metafile
     result.success = true
 
-    if (shouldLog())
+    if (shouldLog()) {
       console.log(
         `✅ Build completed successfully in ${result.stats.duration}ms`
       )
-    if (shouldLog())
       console.log(`📁 Output: ${options.outDir}/${options.outFile}`)
+    }
 
     return result
   } catch (error) {
-    const endTime = Date.now()
-    result.stats.endTime = endTime
-    result.stats.duration = endTime - startTime
+    result.stats.endTime = Date.now()
+    result.stats.duration = result.stats.endTime - startTime
     result.errors = [error instanceof Error ? error.message : String(error)]
 
     if (shouldLog()) console.error('❌ Build failed:', error)
@@ -175,61 +191,25 @@ export async function bundle(options: BundleOptions): Promise<BundleResult> {
 
 /**
  * Bundle a DyneMCP project in watch mode.
- *
- * @param options BundleOptions for the build
- * @returns BuildContext from esbuild
  */
 export async function bundleWatch(
   options: BundleOptions
 ): Promise<BuildContext> {
   if (shouldLog()) console.log('👀 Starting DyneMCP build in watch mode...')
 
-  const buildOptions: EsbuildBuildOptions = {
-    entryPoints: [options.entryPoint],
-    outfile: `${options.outDir}/${options.outFile}`,
-    bundle: options.bundle,
-    minify: options.minify,
-    sourcemap: true, // Always enable sourcemap in watch mode
-    format: options.format,
-    platform: options.platform,
-    target: options.target,
-    external: options.external,
-    define: {
-      'process.env.NODE_ENV': JSON.stringify(
-        process.env.NODE_ENV || 'development'
-      ),
-      ...options.define,
-    },
-    treeShaking: options.treeShaking,
-    splitting: options.splitting,
-    metafile: false, // Disable metafile in watch mode for performance
-    write: true,
-    logLevel: 'info',
-    color: true,
+  const ctx = await context(getEsbuildOptions(options, true))
+  await ctx.watch()
+
+  if (shouldLog()) {
+    console.log('👀 Watching for changes...')
+    console.log(`📁 Output: ${options.outDir}/${options.outFile}`)
   }
 
-  try {
-    const ctx = await context(buildOptions)
-
-    // Start watching
-    await ctx.watch()
-
-    if (shouldLog()) console.log('👀 Watching for changes...')
-    if (shouldLog())
-      console.log(`📁 Output: ${options.outDir}/${options.outFile}`)
-
-    return ctx
-  } catch (error) {
-    if (shouldLog()) console.error('❌ Watch build failed:', error)
-    throw error
-  }
+  return ctx
 }
 
 /**
  * Bundle a DyneMCP CLI tool.
- *
- * @param options BundleOptions for the CLI build
- * @returns BundleResult for the CLI build
  */
 export async function bundleCli(options: BundleOptions): Promise<BundleResult> {
   const cliOptions: BundleOptions = {
@@ -244,7 +224,6 @@ export async function bundleCli(options: BundleOptions): Promise<BundleResult> {
   const result = await bundle(cliOptions)
 
   if (result.success) {
-    // Make the CLI executable
     const fs = await import('fs')
     const path = await import('path')
     const cliPath = path.join(options.outDir, cliOptions.outFile)
@@ -258,26 +237,4 @@ export async function bundleCli(options: BundleOptions): Promise<BundleResult> {
   }
 
   return result
-}
-
-/**
- * Clean the build output directory.
- *
- * @param outDir Output directory to remove
- */
-export async function cleanBuildDir(outDir: string): Promise<void> {
-  const fs = await import('fs-extra')
-  const path = await import('path')
-
-  const absoluteOutDir = path.isAbsolute(outDir)
-    ? outDir
-    : path.join(process.cwd(), outDir)
-
-  try {
-    await fs.remove(absoluteOutDir)
-    if (shouldLog())
-      console.log(`🧹 Cleaned build directory: ${absoluteOutDir}`)
-  } catch (error) {
-    if (shouldLog()) console.warn('⚠️  Could not clean build directory:', error)
-  }
 }

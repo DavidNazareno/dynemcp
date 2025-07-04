@@ -2,7 +2,13 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@create-dynemcp-config-all": [
+        "packages/create-dynemcp/src/config-all-contants.ts"
+      ],
       "@create-dynemcp/*": ["packages/create-dynemcp/src/*"],
+      "@dynemcp-config-all": [
+        "packages/dynemcp/src/global/config-all-contants.ts"
+      ],
       "@dynemcp-framework/*": ["packages/dynemcp/src/*"]
     },
     "composite": true,

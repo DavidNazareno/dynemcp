@@ -49,11 +49,4 @@ export class StdioTransport {
   getRoots() {
     return this.roots || []
   }
-
-  /**
-   * Disconnects the stdio transport (no-op for stdio).
-   */
-  async disconnect(): Promise<void> {
-    // Stdio transport doesn't need explicit cleanup
-  }
 }

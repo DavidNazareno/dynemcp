@@ -1,7 +1,7 @@
 // Default values and settings for DyneMCP server configuration
 // Provides defaults for server, transport, logging, performance, security, and autoloaded components.
 
-import { NETWORK, CLI, PATHS } from '../../../../global/config-all-contants'
+import { PATHS, TRANSPORT } from '../../../../global/config-all-contants'
 import type { DyneMCPConfig, LoggingConfig } from './interfaces'
 
 // Default server name for DyneMCP
@@ -9,7 +9,6 @@ export const DEFAULT_SERVER_NAME = 'dynemcp-server'
 // Default server version for DyneMCP
 export const DEFAULT_SERVER_VERSION = '1.0.0'
 // Default transport type for DyneMCP
-export const DEFAULT_TRANSPORT_TYPE = CLI.TRANSPORT_TYPES[1] // 'streamable-http'
 // Default config file name
 export const DEFAULT_CONFIG = 'dynemcp.config.ts'
 
@@ -24,14 +23,6 @@ export const DEFAULT_AUTOLOAD_CONFIG = {
   enabled: true,
   directory: '',
   pattern: PATHS.FILE_PATTERNS.TYPESCRIPT,
-}
-
-// Default transport options
-export const DEFAULT_TRANSPORT_OPTIONS = {
-  port: NETWORK.DEFAULT_HTTP_PORT,
-  endpoint: NETWORK.DEFAULT_MCP_ENDPOINT,
-  oauth2Issuer: 'https://your-auth-server',
-  oauth2Audience: 'https://your-mcp-server',
 }
 
 // Default logging configuration
@@ -105,8 +96,7 @@ export function createDefaultConfig(): DyneMCPConfig {
       directory: DEFAULT_ROOTS_DIR,
     },
     transport: {
-      type: DEFAULT_TRANSPORT_TYPE,
-      options: DEFAULT_TRANSPORT_OPTIONS,
+      type: TRANSPORT.DEFAULT_TRANSPORT,
     },
     logging: DEFAULT_LOGGING_CONFIG,
     debug: DEFAULT_DEBUG_CONFIG,

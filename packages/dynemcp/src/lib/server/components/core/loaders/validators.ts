@@ -7,6 +7,7 @@ import type {
   ResourceDefinition,
   PromptDefinition,
 } from '../../../api'
+import { isRoot } from '../../../api/core/root'
 
 /**
  * validateTool: Checks if a value is a valid ToolDefinition.
@@ -63,4 +64,14 @@ export function validatePrompt(
     'getMessages' in component &&
     typeof (component as any).getMessages === 'function'
   )
+}
+
+/**
+ * validateRoot: Checks if a value is a valid Root.
+ * Used to ensure dynamically loaded modules conform to the expected root contract.
+ */
+export function validateRoot(
+  component: unknown
+): component is import('../../../api').Root {
+  return isRoot(component)
 }

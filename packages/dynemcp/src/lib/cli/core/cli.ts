@@ -5,7 +5,7 @@
 import yargs, { type Argv } from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { DYNEMCP_CLI } from '../../../global/config-all-contants'
+import { DYNEMCP_CLI, TRANSPORT } from '../../../global/config-all-contants'
 import { dev } from './dev'
 import { buildHandler } from './handler/build'
 import { startHandler } from './handler/start'
@@ -48,13 +48,13 @@ const cli = yargs(hideBin(process.argv))
         })
         .option('port', {
           type: 'number',
-          describe: `Port for HTTP server (default: ${DYNEMCP_CLI.DEFAULTS.port})`,
-          default: DYNEMCP_CLI.DEFAULTS.port,
+          describe: `Port for HTTP server (default: ${TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.port})`,
+          default: TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.port,
         })
         .option('host', {
           type: 'string',
-          describe: `Host for HTTP server (default: ${DYNEMCP_CLI.DEFAULTS.host})`,
-          default: DYNEMCP_CLI.DEFAULTS.host,
+          describe: `Host for HTTP server (default: ${TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.host})`,
+          default: TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.host,
         })
         .example(DYNEMCP_CLI.EXAMPLES.DEV, 'Start development server')
         .example(

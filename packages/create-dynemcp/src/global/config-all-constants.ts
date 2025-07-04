@@ -28,7 +28,7 @@ const PATHS = {
 // Template Configuration
 const TEMPLATES = {
   DEFAULT_TEMPLATE: 'default',
-  AVAILABLE_TEMPLATES: ['default-stdio', 'default-http'] as const,
+  AVAILABLE_TEMPLATES: ['default-stdio', 'default-http'],
   TEMPLATES_DIR: 'src/templates',
   TEMPLATE_CONFIG: 'dynemcp.config.json',
 } as const

@@ -298,11 +298,7 @@ export class DyneMCP {
         console.log(
           `🎯 MCP server "${this.config.server.name}" started successfully`
         )
-        console.log(`📡 Transport: ${transportConfig.type}`)
-        const options = (transportConfig as any).options
-        if (options?.port) {
-          console.log(`🌐 Server listening on port ${options.port}`)
-        }
+        // Detalles de puerto y endpoint se muestran en el transport HTTP
       }
     }
   }

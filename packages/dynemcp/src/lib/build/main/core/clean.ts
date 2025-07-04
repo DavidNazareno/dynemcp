@@ -6,8 +6,10 @@
 // - Removes the build output directory before a new build.
 // - Ensures a fresh build environment.
 
-import { loadConfig, getBuildConfig } from '../../config'
+import { PATHS } from '../../../../global/config-all-contants'
+import { loadConfig } from '../../../server/config'
 import { cleanBuildDir } from '../../bundler'
+import { DEFAULT_BUILD_CONFIG } from '../../config/core/default'
 
 /**
  * Clean the build output directory.
@@ -21,6 +23,8 @@ export async function clean(
   const config = options.configPath
     ? await loadConfig(options.configPath)
     : undefined
-  const outDir = options.outDir || (config ? getBuildConfig().outDir : 'dist')
+  const outDir =
+    options.outDir ||
+    (config ? DEFAULT_BUILD_CONFIG.outDir : PATHS.BUILD_OUTPUT_DIR)
   await cleanBuildDir(outDir)
 }

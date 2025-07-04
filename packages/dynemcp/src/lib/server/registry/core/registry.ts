@@ -17,13 +17,13 @@ import {
   loadToolsFromDirectory,
   loadResourcesFromDirectory,
   loadPromptsFromDirectory,
+  loadRootsFromDirectory,
 } from '../../components/component-loader'
 import { validateTool } from '../../components/core/loaders/validators'
 import path from 'path'
 import fs from 'fs'
 import { paginateWithCursor } from '../../api/core/utils'
 import { getResourceMeta } from '../../api/core/resource'
-import { isRootList } from '../../api/core/root'
 
 /**
  * DyneMCP Registry - Main Registry Class
@@ -38,8 +38,6 @@ export class DyneMCPRegistry implements Registry {
   private loader: RegistryLoader
   private isLoaded = false
   private authenticationMiddlewarePath: string | null = null
-  private userRoots: RegistryItem[] = []
-  private roots: any[] = []
 
   constructor(
     loader: RegistryLoader = new DefaultRegistryLoader(),
@@ -59,7 +57,7 @@ export class DyneMCPRegistry implements Registry {
       roots?: {
         enabled: boolean
         directory: string
-        file?: string
+        pattern?: string
       }
     }
   ): Promise<void> {
@@ -73,11 +71,13 @@ export class DyneMCPRegistry implements Registry {
       console.log('🔄 Loading components...')
     }
 
-    const [toolsResult, resourcesResult, promptsResult] = await Promise.all([
-      loadToolsFromDirectory(options.tools),
-      loadResourcesFromDirectory(options.resources),
-      loadPromptsFromDirectory(options.prompts),
-    ])
+    const [toolsResult, resourcesResult, promptsResult, rootsResult] =
+      await Promise.all([
+        loadToolsFromDirectory(options.tools),
+        loadResourcesFromDirectory(options.resources),
+        loadPromptsFromDirectory(options.prompts),
+        loadRootsFromDirectory(options.roots),
+      ])
     this.storage.clear()
     this.storage.addTools(
       toolsResult.components.map((tool) => ({
@@ -100,6 +100,14 @@ export class DyneMCPRegistry implements Registry {
         module: prompt,
       }))
     )
+
+    this.storage.addRoots(
+      rootsResult.components.map((root) => ({
+        id: root.uri,
+        type: 'root',
+        module: root,
+      }))
+    )
     // Validate tools
     try {
       validateTool(toolsResult.components)
@@ -115,13 +123,14 @@ export class DyneMCPRegistry implements Registry {
     const stats = this.stats
     if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
       console.log(
-        `✅ Loaded ${stats.tools} tools, ${stats.resources} resources, ${stats.prompts} prompts`
+        `✅ Loaded ${stats.tools} tools, ${stats.resources} resources, ${stats.prompts} prompts, ${rootsResult.components.length} roots`
       )
     }
     const allErrors = [
       ...toolsResult.errors,
       ...resourcesResult.errors,
       ...promptsResult.errors,
+      ...rootsResult.errors,
     ]
     if (allErrors.length > 0 && !process.env.DYNE_MCP_STDIO_LOG_SILENT) {
       console.warn('⚠️ Loading errors:', allErrors)
@@ -132,6 +141,7 @@ export class DyneMCPRegistry implements Registry {
 
     // Discover src/middleware.ts for authentication
     const projectRoot = process.cwd()
+
     const candidate = path.join(projectRoot, 'src', 'middleware.ts')
     if (fs.existsSync(candidate)) {
       this.authenticationMiddlewarePath = candidate
@@ -139,46 +149,15 @@ export class DyneMCPRegistry implements Registry {
       this.authenticationMiddlewarePath = null
     }
 
-    // Discover roots config
-    const rootsConfig = options.roots || {
-      enabled: true,
-      directory: './src/roots',
-      file: 'roots.ts',
-    }
-    if (rootsConfig.enabled) {
-      try {
-        const rootsPath = path.join(
-          process.cwd(),
-          rootsConfig.directory,
-          rootsConfig.file || 'roots.ts'
-        )
-        if (fs.existsSync(rootsPath)) {
-          const imported = await import(rootsPath)
-          const roots = imported.default || imported
-          if (isRootList(roots)) {
-            this.roots = roots
-            if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-              console.log(
-                `\n🌱 Loaded roots from ${rootsConfig.directory}/${rootsConfig.file || 'roots.ts'} (${roots.length})`
-              )
-            }
-          } else {
-            if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-              console.warn(
-                `\n⚠️ ${rootsConfig.directory}/${rootsConfig.file || 'roots.ts'} does not export a valid RootList`
-              )
-            }
-          }
-        }
-      } catch (error) {
-        if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-          console.warn(
-            `\n⚠️ Failed to load roots from ${rootsConfig.directory}/${rootsConfig.file || 'roots.ts'}:`,
-            error
-          )
-        }
-      }
-    }
+    /*  // Roots: store loaded roots
+    this.roots = rootsResult.components
+    this.storage.addRoots(
+      rootsResult.components.map((root) => ({
+        id: root.uri,
+        type: 'root',
+        module: root,
+      }))
+    ) */
   }
 
   /**
@@ -210,6 +189,15 @@ export class DyneMCPRegistry implements Registry {
   }
 
   /**
+   * Get all registered roots.
+   */
+  getAllRoots(): RegistryItem[] {
+    return Array.from(this.storage['items'].values()).filter(
+      (item) => (item as RegistryItem).type === 'root'
+    ) as RegistryItem[]
+  }
+
+  /**
    * Get a specific tool by id.
    */
   getTool(id: string): RegistryItem | undefined {
@@ -231,6 +219,13 @@ export class DyneMCPRegistry implements Registry {
   }
 
   /**
+   * Get a specific root by id.
+   */
+  getRoot(id: string): RegistryItem | undefined {
+    return this.storage.getItem('root', id)
+  }
+
+  /**
    * Get registry statistics.
    */
   get stats(): RegistryStats {
@@ -239,6 +234,7 @@ export class DyneMCPRegistry implements Registry {
       tools: all.filter((i) => i.type === 'tool').length,
       resources: all.filter((i) => i.type === 'resource').length,
       prompts: all.filter((i) => i.type === 'prompt').length,
+      roots: all.filter((i) => i.type === 'root').length,
       total: all.length,
     }
   }
@@ -269,13 +265,6 @@ export class DyneMCPRegistry implements Registry {
       this.storage.setItem(item)
     }
     return item
-  }
-
-  /**
-   * Preloads all registry items (optional, implementation can be extended).
-   */
-  async preloadAll(): Promise<void> {
-    // Optionally implement preloading logic here
   }
 
   /**
@@ -331,20 +320,6 @@ export class DyneMCPRegistry implements Registry {
     return Array.from(this.storage['items'].values())
       .filter((item) => (item as any).type === 'resource')
       .map((item) => (item as any).module)
-  }
-
-  /**
-   * Get user roots loaded from src/roots/roots.ts
-   */
-  getUserRoots(): any[] {
-    return this.userRoots
-  }
-
-  /**
-   * Get all loaded roots (user roots from src/roots/roots.ts)
-   */
-  getAllRoots(): any[] {
-    return this.roots
   }
 }
 

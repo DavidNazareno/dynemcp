@@ -3,7 +3,8 @@
 
 import { readFileSync, existsSync } from 'fs'
 import { isAbsolute, resolve, basename } from 'path'
-import { z, type ZodRawShape, type ZodTypeAny, ZodObject } from 'zod'
+import { type ZodRawShape, type ZodTypeAny } from 'zod'
+import type { ZodObject } from 'zod'
 import type {
   LoadedTool,
   LoadedPrompt,

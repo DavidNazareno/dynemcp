@@ -8,9 +8,9 @@
 
 import { ConsoleLogger } from '../../../cli/core/logger'
 import type { DyneMCPBuildOptions, BuildResult } from './interfaces'
-import { getBuildConfig } from '../../config'
 import { bundle } from '../../bundler'
 import type { BundleOptions } from '../../bundler/core/bundle'
+import { DEFAULT_BUILD_CONFIG } from '../../config/core/default'
 
 function shouldLog() {
   return !process.env.DYNE_MCP_STDIO_LOG_SILENT
@@ -31,7 +31,7 @@ export async function build(
 
   try {
     if (shouldLog()) logger.info('🚀 Starting DyneMCP build process...')
-    const buildConfig = getBuildConfig()
+    const buildConfig = DEFAULT_BUILD_CONFIG
     // Merge de opciones: usuario > env > defaults
     const finalOptions = {
       ...buildConfig,

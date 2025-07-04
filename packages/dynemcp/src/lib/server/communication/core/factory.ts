@@ -18,7 +18,6 @@ export * from './interfaces'
 export * from './schemas'
 
 // Default config values for transports
-export * from './defaults'
 
 // Custom transport errors
 export * from './errors'
@@ -32,8 +31,8 @@ export { StreamableHTTPTransport } from '../http/server'
 
 import { StdioTransport } from '../stdio/server'
 import { StreamableHTTPTransport } from '../http/server'
-import { TRANSPORT_TYPES } from './defaults'
 import type { Transport } from './interfaces'
+import { TRANSPORT } from '../../../../global/config-all-contants'
 
 /**
  * createTransport: Factory function to create the appropriate transport based on config.
@@ -47,13 +46,11 @@ export function createTransport(config: {
   options?: any
 }): Transport {
   switch (config.type) {
-    case TRANSPORT_TYPES[0]: // 'stdio'
+    case TRANSPORT.TRANSPORT_TYPES.STDIO: // 'stdio'
       return new StdioTransport() as unknown as Transport
-    case TRANSPORT_TYPES[1]: // 'streamable-http'
+    case TRANSPORT.TRANSPORT_TYPES.STREAMABLE_HTTP: // 'streamable-http'
       return new StreamableHTTPTransport(config.options) as unknown as Transport
     default:
       throw new Error(`Unknown transport type: ${config.type}`)
   }
 }
-
-export { TRANSPORT_TYPES }

@@ -1,6 +1,32 @@
 import typescript from '@rollup/plugin-typescript'
 import copy from 'rollup-plugin-copy'
 
+// Common external dependencies for both bundles
+const commonExternals = [
+  'fs',
+  'path',
+  'os',
+  'chalk',
+  'yargs',
+  'yargs/helpers',
+  'express',
+  'cors',
+  'zod',
+  'esbuild',
+  'tslib',
+  'tsx',
+  'fs-extra',
+  '@modelcontextprotocol/sdk/server/mcp.js',
+  '@modelcontextprotocol/sdk/server/stdio.js',
+  '@modelcontextprotocol/sdk/server/streamableHttp.js',
+  'crypto',
+  'express-rate-limit',
+  'child_process',
+  'url',
+  'express-oauth2-jwt-bearer',
+  'jsonwebtoken',
+]
+
 export default [
   // Bundle for the main library
   {
@@ -25,19 +51,7 @@ export default [
         targets: [{ src: 'package.json', dest: 'dist' }],
       }),
     ],
-    external: [
-      'fs',
-      'path',
-      'os',
-      'chalk',
-      'yargs',
-      'express',
-      'cors',
-      'zod',
-      'esbuild',
-      'tslib',
-      'tsx',
-    ],
+    external: commonExternals,
   },
   // Bundle for the CLI binary (CommonJS)
   {
@@ -50,18 +64,8 @@ export default [
       inlineDynamicImports: true,
     },
     plugins: [typescript({ tsconfig: './tsconfig.rollup.json' })],
-    external: [
-      'fs',
-      'path',
-      'os',
-      'chalk',
-      'yargs',
-      'express',
-      'cors',
-      'zod',
-      'esbuild',
-      'tslib',
-      'tsx',
-    ],
+    external: commonExternals,
+    // Silence all warnings
+    onwarn() {},
   },
 ]

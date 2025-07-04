@@ -4,13 +4,10 @@ import { createMCPServer } from '../../server'
 import { StderrLogger } from './logger'
 import { spawnProcess } from './utils'
 import {
-  DYNEMCP_CLI,
   DYNEMCP_SERVER,
   DYNEMCP_INSPECTOR,
-  CLI,
-  getMcpEndpointUrl,
   getInspectorArgs,
-  getInspectorSpawnOptions,
+  TRANSPORT,
 } from '../../../global/config-all-contants'
 
 // Inspector launcher for DyneMCP CLI
@@ -36,11 +33,12 @@ function waitForProcess(
 async function launchHttpTransport(
   config?: string,
   port?: number,
-  host?: string
+  host?: string,
+  endpoint?: string
 ) {
-  const serverPort = port || DYNEMCP_CLI.DEFAULTS.port
-  const serverHost = host || DYNEMCP_CLI.DEFAULTS.host
-  const mcpEndpoint = getMcpEndpointUrl(serverHost, serverPort)
+  const serverPort = port ?? TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.port
+  const serverHost = host ?? TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.host
+  const mcpEndpoint = `http://${serverHost}:${serverPort}${endpoint ?? TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.endpoint}`
 
   console.log(DYNEMCP_SERVER.MESSAGES.STARTING_HTTP)
   const logger = new StderrLogger()
@@ -66,11 +64,13 @@ async function launchHttpTransport(
   console.log(DYNEMCP_SERVER.MESSAGES.SERVER_READY)
 
   console.log(chalk.blue('🔍 Launching MCP Inspector...'))
-  const inspectorArgs = getInspectorArgs(CLI.TRANSPORT_TYPES[1], mcpEndpoint)
+  const inspectorArgs = getInspectorArgs(
+    TRANSPORT.TRANSPORT_TYPES.STREAMABLE_HTTP,
+    mcpEndpoint
+  )
   const inspectorProcess = spawnProcess(
     DYNEMCP_INSPECTOR.COMMANDS.PACKAGE_MANAGER,
-    inspectorArgs,
-    { stdio: 'inherit' }
+    inspectorArgs
   )
 
   const cleanup = async () => {
@@ -107,12 +107,10 @@ async function launchStdioTransport(config?: string) {
     serverCmd,
     ...serverArgs,
   ]
-  const inspectorOptions = getInspectorSpawnOptions(CLI.TRANSPORT_TYPES[0])
 
   const inspectorProcess = spawnProcess(
     DYNEMCP_INSPECTOR.COMMANDS.PACKAGE_MANAGER,
-    inspectorArgs,
-    inspectorOptions
+    inspectorArgs
   )
 
   await waitForProcess(inspectorProcess)
@@ -122,10 +120,11 @@ export async function launchInspector(
   transportType: string,
   config?: string,
   port?: number,
-  host?: string
+  host?: string,
+  endpoint?: string
 ): Promise<void> {
-  if (transportType === CLI.TRANSPORT_TYPES[1]) {
-    await launchHttpTransport(config, port, host)
+  if (transportType === TRANSPORT.TRANSPORT_TYPES.STREAMABLE_HTTP) {
+    await launchHttpTransport(config, port, host, endpoint)
   } else {
     await launchStdioTransport(config)
   }

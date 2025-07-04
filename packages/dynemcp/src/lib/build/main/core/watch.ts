@@ -8,10 +8,10 @@
 
 import { type BuildContext } from 'esbuild'
 import type { DyneMCPBuildOptions } from './interfaces'
-import { getBuildConfig } from '../../config'
 import { bundleWatch } from '../../bundler'
 import type { BundleOptions } from '../../bundler/'
 import { ConsoleLogger } from '../../../cli/core/logger'
+import { DEFAULT_BUILD_CONFIG } from '../../config/core/default'
 
 function shouldLog() {
   return !process.env.DYNE_MCP_STDIO_LOG_SILENT
@@ -30,7 +30,7 @@ export async function watch(
   const logger = options.logger ?? new ConsoleLogger()
   if (shouldLog()) logger.info('👀 Starting watch mode...')
   try {
-    const buildConfig = getBuildConfig()
+    const buildConfig = DEFAULT_BUILD_CONFIG
     const finalOptions = {
       ...buildConfig,
       ...options,
