@@ -18,11 +18,6 @@ export default {
     directory: './src/prompts',
     pattern: '**/*.{ts,js}',
   },
-  roots: {
-    enabled: true,
-    directory: './src/roots',
-    pattern: '**/*.{ts,js}',
-  },
   transport: {
     type: 'stdio',
   },

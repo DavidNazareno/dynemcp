@@ -32,9 +32,6 @@ export const PATHS = {
   /** Default prompts directory */
   PROMPTS_DIR: './src/prompts',
 
-  /** Default roots directory */
-  ROOTS_DIR: './src/roots',
-
   /** Default file patterns */
   FILE_PATTERNS: {
     TYPESCRIPT: '**/*.{ts,js}',
@@ -47,7 +44,7 @@ export const TRANSPORT = {
   DEFAULT_TRANSPORT: 'stdio',
   TRANSPORT_TYPES: {
     STDIO: 'stdio',
-    STREAMABLE_HTTP: 'streamable-http',
+    HTTP: 'http',
   },
 
   DEFAULT_TRANSPORT_HTTP_OPTIONS: {
@@ -59,23 +56,6 @@ export const TRANSPORT = {
   },
 }
 
-/* // Inspector Configuration
-export const INSPECTOR = {
-  /** MCP Inspector package name *
-  PACKAGE_NAME: '@modelcontextprotocol/inspector',
-
-  /** Inspector command arguments for stdio *
-  STDIO_ARGS: ['node'],
-
-  /** Inspector command arguments for HTTP *
-  HTTP_ARGS: [],
-
-  /** Inspector process spawn options *
-  SPAWN_OPTIONS: {
-    stdio: 'inherit' ,
-  },
-} 
- */
 // Build Configuration
 export const BUILD = {
   /** Default clean before build */
@@ -281,39 +261,4 @@ export const DYNEMCP_INSPECTOR = {
     SERVER_DELAY: 2000,
     READY_TIMEOUT: 10000,
   },
-}
-
-// =============================================================================
-// DYNEMCP HELPER FUNCTIONS
-// =============================================================================
-
-/**
- * Get Inspector command arguments for a transport type
- */
-export function getInspectorArgs(
-  transportType: TransportType,
-  endpoint?: string
-): string[] {
-  const baseArgs = [DYNEMCP_INSPECTOR.COMMANDS.PACKAGE_NAME]
-
-  if (transportType === 'streamable-http' && endpoint) {
-    return [...baseArgs, endpoint]
-  } else if (transportType === 'stdio') {
-    return [
-      ...baseArgs,
-      ...DYNEMCP_INSPECTOR.COMMANDS.STDIO_ARGS,
-      PATHS.BUILD_OUTPUT_FILE,
-    ]
-  }
-
-  return baseArgs
-}
-
-/**
- * Get spawn options for Inspector process
- */
-export function getInspectorSpawnOptions(transportType: TransportType) {
-  const baseOptions = { stdio: 'inherit' }
-
-  return baseOptions
 }

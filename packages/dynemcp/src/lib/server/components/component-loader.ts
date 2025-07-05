@@ -7,7 +7,6 @@ import type {
   ToolDefinition,
   ResourceDefinition,
   PromptDefinition,
-  Root,
 } from '../api'
 import { findFilesRecursively } from './core/loaders/file-discovery'
 import { loadComponentFromFile } from './core/loaders/dynamic-loader'
@@ -15,8 +14,8 @@ import {
   validateTool,
   validateResource,
   validatePrompt,
-  validateRoot,
 } from './core/loaders/validators'
+import path from 'path'
 
 /**
  * Options for loading components from a directory.
@@ -129,12 +128,51 @@ export async function loadPromptsFromDirectory(
 }
 
 /**
- * loadRootsFromDirectory: Loads all roots from a directory using the standard root validator.
- * @param options - LoadOptions for roots
- * @returns LoadResult<Root>
+ * loadMiddlewareFromDirectory: Loads the middleware.ts file from the src directory.
+ * Uses the same robust loading and validation logic as other components.
+ * @param directory - The root directory where src/middleware.ts should be located
+ * @returns The path to the middleware file if found and valid, null otherwise
  */
-export async function loadRootsFromDirectory(
-  options: LoadOptions
-): Promise<LoadResult<Root>> {
-  return loadComponentsFromDirectory(options, validateRoot)
+export async function loadMiddlewareFromDirectory(
+  directory: string
+): Promise<string | null> {
+  try {
+    // Check if the directory exists
+    if (!(await import('fs').then((fs) => fs.existsSync(directory)))) {
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+        console.warn(
+          `Directory ${directory} does not exist, skipping middleware loading`
+        )
+      }
+      return null
+    }
+
+    const middlewarePath = path.join(directory, 'src', 'middleware.ts')
+
+    // Check if the middleware file exists
+    if (!(await import('fs').then((fs) => fs.existsSync(middlewarePath)))) {
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+        console.warn(`Middleware file not found at ${middlewarePath}`)
+      }
+      return null
+    }
+
+    // Try to load the file to verify it's a valid TypeScript/JavaScript file
+    try {
+      await import(middlewarePath)
+      return middlewarePath
+    } catch (error) {
+      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+        console.warn(
+          `Failed to load middleware from ${middlewarePath}: ${error}`
+        )
+      }
+      return null
+    }
+  } catch (error) {
+    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
+      console.warn(`Error loading middleware: ${error}`)
+    }
+    return null
+  }
 }

@@ -68,17 +68,6 @@ export class InMemoryRegistryStorage implements RegistryStorage {
     })
   }
 
-  /**
-   * Add multiple roots to the storage.
-   */
-  addRoots(roots: RegistryItem[]): void {
-    roots.forEach((root) => {
-      if (root.type === 'root') {
-        this.setItem(root)
-      }
-    })
-  }
-
   private key(type: string, id: string): string {
     return `${type}:${id}`
   }

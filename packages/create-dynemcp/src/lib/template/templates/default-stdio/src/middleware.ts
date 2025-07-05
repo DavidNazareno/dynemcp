@@ -1,21 +1,53 @@
 // If you use TypeScript, install types: pnpm add -D @types/jsonwebtoken
-import jwtAuthMiddleware from '@dynemcp/dynemcp/auth/jwt-middleware'
+import {
+  dynemcpMiddleware,
+  type DynemcpMiddlewareConfig,
+} from '@dynemcp/dynemcp/server/api/auth/dynemcp-middleware'
 
 /**
- * JWT authentication middleware for DyneMCP servers.
+ * DyneMCP authentication middleware.
  *
  * Usage:
- *   // Allow any user with a valid JWT (default):
- *   export default jwtAuthMiddleware()
+ *   // Simple JWT authentication:
+ *   export default dynemcpMiddleware({
+ *     type: 'jwt',
+ *     jwt: {
+ *       secret: process.env.JWT_SECRET!,
+ *       allowedRoles: ['admin', 'user'], // optional
+ *       expectedAudience: 'your-api'     // optional but recommended
+ *     }
+ *   })
  *
- *   // Restrict to users with specific roles:
- *   export default jwtAuthMiddleware(['admin', 'user'])
+ *   // OAuth2/OIDC authentication:
+ *   export default dynemcpMiddleware({
+ *     type: 'oauth2',
+ *     oauth2: {
+ *       issuerBaseURL: process.env.AUTH0_ISSUER_URL!,
+ *       audience: process.env.AUTH0_AUDIENCE!
+ *     }
+ *   })
  *
- * Behavior:
- *   - If you pass an array of roles, only users whose JWT contains at least one of those roles are allowed (403 if not).
- *   - If you do not pass roles, any user with a valid JWT is allowed.
- *   - If the JWT is missing, invalid, or expired, the request is rejected with 401.
+ *   // Both JWT and OAuth2 (OAuth2 first, JWT as fallback):
+ *   export default dynemcpMiddleware({
+ *     type: 'both',
+ *     jwt: {
+ *       secret: process.env.JWT_SECRET!,
+ *       allowedRoles: ['admin']
+ *     },
+ *     oauth2: {
+ *       issuerBaseURL: process.env.AUTH0_ISSUER_URL!,
+ *       audience: process.env.AUTH0_AUDIENCE!
+ *     }
+ *   })
  */
 
-// By default, allows any user with a valid JWT:
-export default jwtAuthMiddleware()
+// Default configuration using JWT authentication
+const config: DynemcpMiddlewareConfig = {
+  type: 'jwt',
+  jwt: {
+    secret: process.env.JWT_SECRET!,
+    expectedAudience: process.env.JWT_AUDIENCE, // recommended for security
+  },
+}
+
+export default dynemcpMiddleware(config)

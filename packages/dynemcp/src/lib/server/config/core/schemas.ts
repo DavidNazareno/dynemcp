@@ -73,7 +73,6 @@ export const ConfigSchema = z.object({
   tools: AutoloadConfigSchema,
   resources: AutoloadConfigSchema,
   prompts: AutoloadConfigSchema,
-  roots: AutoloadConfigSchema,
   transport: TransportSchema,
   description: z.string().optional(),
   logging: LoggingConfigSchema.optional(),

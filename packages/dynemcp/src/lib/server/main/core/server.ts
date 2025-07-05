@@ -8,14 +8,11 @@ import type {
 } from '../../api'
 import { registry } from '../../registry/core/registry'
 import { loadConfig } from '../../config/core/loader'
-import {
-  createTransport,
-  TRANSPORT_TYPES,
-  type Transport,
-} from '../../communication'
+import { createTransport, type Transport } from '../../communication'
 import { logMsg } from './utils'
 import { registerComponents } from './initializer'
 import { setCurrentDyneMCPInstance } from './server-instance'
+import { TRANSPORT } from '../../../../global/config-all-contants'
 
 // Main server class and logic for DyneMCP main module
 // Handles server initialization, component loading, transport setup, and lifecycle management.
@@ -128,7 +125,7 @@ export class DyneMCP {
         name: this.config.server.name,
         version: this.config.server.version,
       },
-      transport: this.config.transport?.type || TRANSPORT_TYPES[0],
+      transport: this.config.transport?.type || TRANSPORT.DEFAULT_TRANSPORT,
     }
   }
 
@@ -246,7 +243,7 @@ export class DyneMCP {
    */
   private setupTransport(): void {
     const transportConfig = this.config.transport || {
-      type: TRANSPORT_TYPES[0],
+      type: TRANSPORT.DEFAULT_TRANSPORT,
     }
     this.transport = createTransport(transportConfig) as Transport
   }
@@ -268,22 +265,6 @@ export class DyneMCP {
     ) {
       await this.server.connect(this.transport)
     }
-    const roots = registry.getAllRoots()
-    if (
-      roots &&
-      roots.length > 0 &&
-      this.transport &&
-      typeof this.transport.send === 'function'
-    ) {
-      await this.transport.send({
-        jsonrpc: '2.0',
-        method: 'roots/didChange',
-        params: { roots },
-      })
-      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-        console.log(`\n🌱 Notified roots/didChange (${roots.length})`)
-      }
-    }
   }
 
   /**
@@ -291,7 +272,7 @@ export class DyneMCP {
    */
   private logTransportInfo(): void {
     const transportConfig = this.config.transport || {
-      type: TRANSPORT_TYPES[0],
+      type: TRANSPORT.DEFAULT_TRANSPORT,
     }
     if (String(transportConfig.type) !== 'stdio') {
       if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {

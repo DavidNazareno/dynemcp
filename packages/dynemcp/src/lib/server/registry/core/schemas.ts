@@ -10,7 +10,7 @@ import { z } from 'zod'
  */
 export const RegistryItemSchema = z.object({
   id: z.string(),
-  type: z.enum(['tool', 'prompt', 'resource', 'resourceTemplate']),
+  type: z.enum(['tool', 'prompt', 'resource']),
   module: z.any(),
 })
 

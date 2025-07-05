@@ -151,7 +151,7 @@ export function registerPrompts(
         description: prompt.description || `Prompt: ${prompt.name}`,
         argsSchema,
       },
-      async (args: Record<string, string | undefined>, _extra: unknown) => {
+      async (args: Record<string, string | undefined>) => {
         // Filtra los argumentos undefined
         const filteredArgs = Object.fromEntries(
           Object.entries(args).filter(([, value]) => value !== undefined)

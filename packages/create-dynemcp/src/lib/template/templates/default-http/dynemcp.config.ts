@@ -18,15 +18,11 @@ export default {
     directory: './src/prompts',
     pattern: '**/*.{ts,js}',
   },
-  roots: {
-    enabled: true,
-    directory: './src/roots',
-    pattern: '**/*.{ts,js}',
-  },
   transport: {
-    type: 'streamable-http',
+    type: 'http',
     options: {
-      port: 8081,
+      mode: 'streamable-http',
+      port: 3001,
       endpoint: '/mcp',
       oauth2Issuer: 'https://your-auth-server',
       oauth2Audience: 'https://your-mcp-server',

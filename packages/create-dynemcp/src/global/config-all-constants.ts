@@ -153,13 +153,13 @@ export const CREATE_DYNEMCP_TEMPLATES = {
       name: 'Default STDIO',
       description: 'Basic MCP server with tools, resources, and prompts',
       transport: 'stdio',
-      features: ['tools', 'resources', 'prompts', 'roots', 'samples'],
+      features: ['tools', 'resources', 'prompts', 'samples'],
     },
     'default-http': {
       name: 'Default HTTP',
       description: 'Basic MCP server with tools, resources, and prompts',
       transport: 'streamable-http',
-      features: ['tools', 'resources', 'prompts', 'roots', 'samples'],
+      features: ['tools', 'resources', 'prompts', 'samples'],
     },
   },
 

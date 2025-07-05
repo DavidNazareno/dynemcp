@@ -5,7 +5,7 @@ import type {
   JSONRPCRequest,
   JSONRPCResponse,
   JSONRPCNotification,
-} from './interfaces'
+} from '@modelcontextprotocol/sdk/types.js'
 
 /**
  * isJSONRPCRequest: Type guard for JSON-RPC request messages.

@@ -9,14 +9,14 @@ import { PATHS } from '../../../../global/config-all-contants'
 
 export interface CliOptions {
   config?: string
-  clean?: boolean
-  analyze?: boolean
-  manifest?: boolean
-  html?: boolean
-  watch?: boolean
-  cli?: boolean
-  help?: boolean
-  version?: boolean
+  clean: boolean
+  analyze: boolean
+  manifest: boolean
+  html: boolean
+  watch: boolean
+  cli: boolean
+  help: boolean
+  version: boolean
 }
 
 export function showHelp(): void {
@@ -68,10 +68,20 @@ export function parseArgs(args: string[]): {
   command: string
   options: CliOptions
 } {
-  const options: CliOptions = {}
+  const options: CliOptions = {
+    clean: false,
+    analyze: false,
+    manifest: false,
+    html: false,
+    watch: false,
+    cli: false,
+    help: false,
+    version: false,
+  }
   let command = 'build'
 
-  const flags: Record<string, keyof CliOptions> = {
+  type BooleanFlags = Exclude<keyof CliOptions, 'config'>
+  const flags: Record<string, BooleanFlags> = {
     '--clean': 'clean',
     '--analyze': 'analyze',
     '--manifest': 'manifest',

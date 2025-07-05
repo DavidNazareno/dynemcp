@@ -27,12 +27,16 @@ export * from './jsonrpc'
 
 // Transport implementations
 export { StdioTransport } from '../stdio/server'
-export { StreamableHTTPTransport } from '../http/server'
+export { HTTPServers } from '../http/server'
 
 import { StdioTransport } from '../stdio/server'
-import { StreamableHTTPTransport } from '../http/server'
-import type { Transport } from './interfaces'
+import { HTTPServers } from '../http/server'
 import { TRANSPORT } from '../../../../global/config-all-contants'
+import type {
+  StdioTransportOptions,
+  StreamableHTTPTransportOptions,
+} from '../../config/core/transport'
+import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
 
 /**
  * createTransport: Factory function to create the appropriate transport based on config.
@@ -43,14 +47,14 @@ import { TRANSPORT } from '../../../../global/config-all-contants'
  */
 export function createTransport(config: {
   type: string
-  options?: any
+  options?: StreamableHTTPTransportOptions | StdioTransportOptions
 }): Transport {
   switch (config.type) {
     case TRANSPORT.TRANSPORT_TYPES.STDIO: // 'stdio'
-      return new StdioTransport() as unknown as Transport
-    case TRANSPORT.TRANSPORT_TYPES.STREAMABLE_HTTP: // 'streamable-http'
-      return new StreamableHTTPTransport(config.options) as unknown as Transport
+      return new StdioTransport()
+    case TRANSPORT.TRANSPORT_TYPES.HTTP: // 'http'
+      return new HTTPServers(config.options)
     default:
-      throw new Error(`Unknown transport type: ${config.type}`)
+      return new StdioTransport()
   }
 }

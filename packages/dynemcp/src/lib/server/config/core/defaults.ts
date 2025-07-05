@@ -16,7 +16,6 @@ export const DEFAULT_CONFIG = 'dynemcp.config.ts'
 export const DEFAULT_TOOLS_DIR = './src/tools'
 export const DEFAULT_RESOURCES_DIR = './src/resources'
 export const DEFAULT_PROMPTS_DIR = './src/prompts'
-export const DEFAULT_ROOTS_DIR = './src/roots'
 
 // Default autoload configuration
 export const DEFAULT_AUTOLOAD_CONFIG = {
@@ -91,12 +90,8 @@ export function createDefaultConfig(): DyneMCPConfig {
       ...DEFAULT_AUTOLOAD_CONFIG,
       directory: DEFAULT_PROMPTS_DIR,
     },
-    roots: {
-      ...DEFAULT_AUTOLOAD_CONFIG,
-      directory: DEFAULT_ROOTS_DIR,
-    },
     transport: {
-      type: TRANSPORT.DEFAULT_TRANSPORT,
+      type: TRANSPORT.DEFAULT_TRANSPORT as 'stdio' | 'streamable-http',
     },
     logging: DEFAULT_LOGGING_CONFIG,
     debug: DEFAULT_DEBUG_CONFIG,

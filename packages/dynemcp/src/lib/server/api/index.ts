@@ -46,5 +46,6 @@ export { prompt } from './core/prompt'
 export { sample } from './core/sampling'
 
 export * from './core/root'
+export * from './auth'
 
 // TODO: Resource template exports removed for production release. Re-implement in a future version if needed.

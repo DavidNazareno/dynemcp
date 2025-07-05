@@ -1,35 +1,7 @@
 // Interfaces and types for DyneMCP transport and JSON-RPC communication
 // Defines JSON-RPC message types and the Transport interface for custom transports.
 
-// JSON-RPC 2.0 message types as per MCP specification
-export interface JSONRPCRequest {
-  jsonrpc: '2.0'
-  id: number | string
-  method: string
-  params?: object
-}
-
-export interface JSONRPCResponse {
-  jsonrpc: '2.0'
-  id: number | string
-  result?: object
-  error?: {
-    code: number
-    message: string
-    data?: unknown
-  }
-}
-
-export interface JSONRPCNotification {
-  jsonrpc: '2.0'
-  method: string
-  params?: object
-}
-
-export type JSONRPCMessage =
-  | JSONRPCRequest
-  | JSONRPCResponse
-  | JSONRPCNotification
+import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js'
 
 /**
  * Transport: Interface for MCP communication transports (stdio, HTTP, etc).

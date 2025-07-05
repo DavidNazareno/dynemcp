@@ -28,7 +28,7 @@ const cli = yargs(hideBin(process.argv))
     'dev [mode]',
     DYNEMCP_CLI.DESCRIPTIONS.DEV,
     (y) =>
-      addConfigOption(y)
+      y
         .positional('mode', {
           describe: DYNEMCP_CLI.DESCRIPTIONS.DEV_MODE,
           type: 'string',
@@ -37,30 +37,7 @@ const cli = yargs(hideBin(process.argv))
         .option('internal-run', {
           type: 'boolean',
           hidden: true,
-        })
-        .option('clean', {
-          type: 'boolean',
-          describe: 'Clean before building',
-        })
-        .option('transport', {
-          type: 'string',
-          describe: 'Transport type (stdio, streamable-http, console)',
-        })
-        .option('port', {
-          type: 'number',
-          describe: `Port for HTTP server (default: ${TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.port})`,
-          default: TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.port,
-        })
-        .option('host', {
-          type: 'string',
-          describe: `Host for HTTP server (default: ${TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.host})`,
-          default: TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.host,
-        })
-        .example(DYNEMCP_CLI.EXAMPLES.DEV, 'Start development server')
-        .example(
-          DYNEMCP_CLI.EXAMPLES.DEV_INSPECTOR,
-          DYNEMCP_CLI.DESCRIPTIONS.INSPECTOR
-        ),
+        }),
     dev
   )
 

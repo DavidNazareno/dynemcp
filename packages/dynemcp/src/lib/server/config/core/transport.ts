@@ -1,8 +1,8 @@
 // Zod schemas for DyneMCP transport configuration
 // Provides schemas for stdio, HTTP, SSE, and related transport options.
 
+import { TRANSPORT } from '../../../../global/config-all-contants'
 import { z } from 'zod'
-import { NETWORK } from '../../../../global/config-all-contants'
 
 // CorsSchema: CORS options for HTTP/SSE transports
 export const CorsSchema = z.object({
@@ -42,9 +42,22 @@ export const StdioTransportOptionsSchema = z.object({})
 
 // StreamableHTTPTransportOptionsSchema: Options for HTTP transport
 export const StreamableHTTPTransportOptionsSchema = z.object({
-  port: z.number().optional().default(NETWORK.DEFAULT_HTTP_PORT),
-  host: z.string().optional().default(NETWORK.DEFAULT_HTTP_HOST),
-  endpoint: z.string().optional().default(NETWORK.DEFAULT_MCP_ENDPOINT),
+  mode: z
+    .enum(['streamable-http', 'sse'])
+    .optional()
+    .default('streamable-http'),
+  port: z
+    .number()
+    .optional()
+    .default(TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.port),
+  host: z
+    .string()
+    .optional()
+    .default(TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.host),
+  endpoint: z
+    .string()
+    .optional()
+    .default(TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.endpoint),
   responseMode: z.enum(['batch', 'stream']).optional().default('batch'),
   batchTimeout: z.number().optional().default(30000),
   maxMessageSize: z.string().optional().default('4mb'),
@@ -54,14 +67,6 @@ export const StreamableHTTPTransportOptionsSchema = z.object({
   authentication: AuthMiddlewareSchema.optional(),
 })
 
-// SSETransportOptionsSchema: Options for SSE transport
-export const SSETransportOptionsSchema = z.object({
-  port: z.number().optional().default(NETWORK.DEFAULT_HTTP_PORT),
-  endpoint: z.string().optional().default(NETWORK.DEFAULT_MCP_ENDPOINT),
-  messageEndpoint: z.string().optional().default('/message'),
-  cors: CorsSchema.optional(),
-})
-
 // TransportSchema: Discriminated union for all supported transport types
 export const TransportSchema = z.discriminatedUnion('type', [
   z.object({
@@ -69,7 +74,7 @@ export const TransportSchema = z.discriminatedUnion('type', [
     options: StdioTransportOptionsSchema.optional(),
   }),
   z.object({
-    type: z.literal('streamable-http'),
+    type: z.literal('http'),
     options: StreamableHTTPTransportOptionsSchema.optional(),
   }),
 ])
@@ -82,6 +87,5 @@ export type Resumability = z.infer<typeof ResumabilitySchema>
 export type StreamableHTTPTransportOptions = z.infer<
   typeof StreamableHTTPTransportOptionsSchema
 >
-export type SSETransportOptions = z.infer<typeof SSETransportOptionsSchema>
 export type StdioTransportOptions = z.infer<typeof StdioTransportOptionsSchema>
 export type TransportConfig = z.infer<typeof TransportSchema>

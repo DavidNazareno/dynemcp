@@ -1,14 +1,10 @@
 import express, { type Express, type RequestHandler } from 'express'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
+import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js'
 import { TransportError } from '../core/errors'
 import { isJSONRPCNotification } from '../core/jsonrpc'
 import { parseRootList } from '../../api/core/root'
-
-import {
-  createDefaultConfig,
-  type StreamableHTTPTransportConfig,
-} from '../../config'
 import {
   handleSessionManagement,
   handleSessionTermination,
@@ -20,8 +16,10 @@ import {
   DYNEMCP_SERVER,
   TRANSPORT,
 } from '../../../../global/config-all-contants'
+import type { MessageExtraInfo } from '@modelcontextprotocol/sdk/types.js'
+import type { TransportSendOptions } from '@modelcontextprotocol/sdk/shared/transport.js'
 
-export class StreamableHTTPTransport {
+export class HTTPServers {
   private app: Express
   private port: number
   private endpoint: string
@@ -34,6 +32,16 @@ export class StreamableHTTPTransport {
     { id: string; created: Date; lastAccess: Date }
   >()
   private sessionRoots = new Map<string, any>()
+  // Solo para modo SSE
+  private sseClients: Set<{ res: express.Response; sessionId: string | null }> =
+    new Set()
+
+  // Eventos Transport
+  onclose?: () => void
+  onerror?: (error: Error) => void
+  onmessage?: (message: JSONRPCMessage, extra?: MessageExtraInfo) => void
+  setProtocolVersion?: (version: string) => void
+  sessionId?: string // Opcional, para cumplir con Transport
 
   constructor(options: any = {}) {
     this.options = options
@@ -46,22 +54,36 @@ export class StreamableHTTPTransport {
       this.options.host ?? TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.host
     this.endpoint =
       this.options.endpoint ?? TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS.endpoint
+    this.options.mode = this.options.mode ?? 'streamable-http'
 
     this.transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => generateSecureSessionId(),
     })
   }
 
+  /**
+   * Método estándar de Transport. Inicializa el servidor Express y endpoints.
+   * Alias de connect(), pero sin argumentos (no requiere McpServer).
+   */
+  async start(): Promise<void> {
+    // Si ya está corriendo, no hagas nada
+    if (this.server) return
+    // Por compatibilidad, inicializa endpoints con un dummy McpServer si es necesario
+    // O simplemente inicializa los endpoints y el server Express
+    await this.connect(
+      new McpServer({ name: 'dynemcp-server', version: '1.0.0' })
+    )
+  }
+
   async connect(server: McpServer): Promise<void> {
     try {
-      // 1. Get the user middleware path from the registry
+      // Middleware de autenticación
       const middlewarePath = registry.getAuthenticationMiddlewarePath()
       let userAuthMiddleware: RequestHandler
       if (!middlewarePath) {
         console.warn(DYNEMCP_SERVER.ERRORS.MIDDLEWARE_NOT_FOUND)
         userAuthMiddleware = (req, res, next) => next()
       } else {
-        // 2. Dynamically import the user's middleware
         userAuthMiddleware = (await import(middlewarePath)).default
         if (typeof userAuthMiddleware !== 'function') {
           console.warn(DYNEMCP_SERVER.ERRORS.MIDDLEWARE_NOT_FOUND)
@@ -70,15 +92,23 @@ export class StreamableHTTPTransport {
       }
 
       await server.connect(this.transport)
-      this.setupEndpoints(userAuthMiddleware)
+
+      // Selección de endpoints según el modo
+      if (this.options.mode === 'sse') {
+        this.setupSseEndpoints(userAuthMiddleware)
+      } else {
+        this.setupMcpEndpoints(userAuthMiddleware)
+      }
 
       this.server = this.app.listen(this.port, this.host, () => {
-        console.log(
-          `📡 Streamable HTTP transport listening on ${this.host}:${this.port}`
-        )
-        console.log(
-          `🌐 MCP endpoint: http://${this.host}:${this.port}${this.endpoint}`
-        )
+        console.log(`📡 HTTPServers listening on ${this.host}:${this.port}`)
+        if (this.options.mode === 'sse') {
+          console.log('🌐 SSE MCP endpoints enabled: /sse, /messages')
+        } else {
+          console.log(
+            `🌐 MCP endpoint: http://${this.host}:${this.port}${this.endpoint}`
+          )
+        }
         if (this.options?.session?.enabled)
           console.log('🔐 Session management enabled')
         if (this.options?.authentication?.path)
@@ -91,12 +121,13 @@ export class StreamableHTTPTransport {
       process.on('SIGINT', () => this.disconnect())
     } catch (error) {
       throw TransportError.connectionError(
-        `Failed to start Streamable HTTP transport: ${error}`
+        `Failed to start HTTPServers: ${error}`
       )
     }
   }
 
-  private setupEndpoints(authMiddleware: RequestHandler) {
+  // --- MODO HTTP MCP ---
+  private setupMcpEndpoints(authMiddleware: RequestHandler) {
     // Session termination endpoint
     this.app.delete(this.endpoint, (req, res) => {
       if (
@@ -150,7 +181,7 @@ export class StreamableHTTPTransport {
       }
     })
 
-    // SSE GET endpoint for server-initiated events
+    // MCP GET endpoint (SSE-like, no Inspector)
     this.app.get(this.endpoint, authMiddleware, async (req, res) => {
       try {
         res.setHeader('Content-Type', 'text/event-stream')
@@ -202,18 +233,125 @@ export class StreamableHTTPTransport {
     })
   }
 
+  // --- MODO SSE/INSPECTOR ---
+  private setupSseEndpoints(authMiddleware: RequestHandler) {
+    // SSE endpoint for MCP Inspector
+    this.app.get('/sse', authMiddleware, (req, res) => {
+      res.setHeader('Content-Type', 'text/event-stream')
+      res.setHeader('Cache-Control', 'no-cache')
+      res.setHeader('Connection', 'keep-alive')
+      res.flushHeaders?.()
+
+      // Session management (opcional)
+      let sessionId: string | null = null
+      try {
+        sessionId = handleSessionManagement(
+          req,
+          res,
+          this.options,
+          this.sessionStore,
+          generateSecureSessionId
+        )
+      } catch {
+        // Ignore session errors for SSE
+      }
+
+      const client = { res, sessionId }
+      this.sseClients.add(client)
+      console.log(
+        `🔗 SSE client connected (${this.sseClients.size} total)${sessionId ? `, session: ${sessionId}` : ''}`
+      )
+
+      // Keepalive
+      const keepAlive = setInterval(() => {
+        if (!res.writableEnded) {
+          res.write(':\n\n')
+        } else {
+          clearInterval(keepAlive)
+        }
+      }, 30000)
+
+      // Cleanup
+      const cleanup = () => {
+        clearInterval(keepAlive)
+        this.sseClients.delete(client)
+        console.log('🔌 SSE client disconnected')
+      }
+      req.on('close', cleanup)
+      req.on('aborted', cleanup)
+      res.on('close', cleanup)
+      res.on('finish', cleanup)
+    })
+
+    // Messages endpoint for MCP Inspector (JSON-RPC over HTTP POST)
+    this.app.post('/messages', authMiddleware, express.json(), (req, res) => {
+      const message = req.body
+      let sent = 0
+      for (const client of this.sseClients) {
+        try {
+          client.res.write(`data: ${JSON.stringify(message)}\n\n`)
+          sent++
+        } catch {
+          // Ignore errors, cleanup will handle dead connections
+        }
+      }
+      res.status(200).json({ ok: true, sent })
+    })
+
+    // Health check endpoint
+    this.app.get('/health', (_req, res) => {
+      res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        transport: 'sse',
+        sessions: this.sessionStore.size,
+        uptime: process.uptime(),
+      })
+    })
+  }
+
+  // --- Métodos Transport ---
+  async send(
+    message: JSONRPCMessage,
+    options?: TransportSendOptions
+  ): Promise<void> {
+    if (this.options.mode === 'sse') {
+      // Broadcast a todos los clientes SSE
+      let sent = 0
+      for (const client of this.sseClients) {
+        try {
+          client.res.write(`data: ${JSON.stringify(message)}\n\n`)
+          sent++
+        } catch {
+          // Ignore errors, cleanup will handle dead connections
+        }
+      }
+      if (sent === 0) {
+        console.warn('No SSE clients connected to send message')
+      }
+    } else {
+      // HTTP MCP: delega a StreamableHTTPServerTransport
+      await this.transport.send(message, options)
+    }
+  }
+
   async disconnect(): Promise<void> {
     if (this.server) {
-      console.log('🛑 Shutting down Streamable HTTP transport...')
+      console.log('🛑 Shutting down HTTPServers...')
       return new Promise((resolve) => {
         this.server?.close(() => {
-          console.log('✅ Streamable HTTP transport stopped')
-          resolve()
+          console.log('✅ HTTPServers stopped')
+          resolve(undefined)
         })
       })
     }
   }
 
+  async close(): Promise<void> {
+    await this.disconnect()
+  }
+
+  // Helpers
   getRootsForSession(sessionId: string) {
     return this.sessionRoots.get(sessionId) || []
   }

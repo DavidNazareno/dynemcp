@@ -53,7 +53,6 @@ export interface RegistryStats {
   tools: number
   resources: number
   prompts: number
-  roots: number
   total: number
 }
 
@@ -64,6 +63,5 @@ export interface LoadAllOptions {
   tools: { enabled: boolean; directory: string }
   resources: { enabled: boolean; directory: string }
   prompts: { enabled: boolean; directory: string }
-  roots: { enabled: boolean; directory: string }
   samples?: { enabled: boolean; directory: string }
 }

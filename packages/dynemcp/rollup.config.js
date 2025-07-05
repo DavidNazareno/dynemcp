@@ -65,7 +65,5 @@ export default [
     },
     plugins: [typescript({ tsconfig: './tsconfig.rollup.json' })],
     external: commonExternals,
-    // Silence all warnings
-    onwarn() {},
   },
 ]
