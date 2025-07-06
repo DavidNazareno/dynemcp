@@ -48,7 +48,14 @@ export function prompt(config: {
   return {
     name: config.name,
     description: config.description ?? '',
-    arguments: config.arguments,
+    arguments: config.arguments as unknown as
+      | {
+          [x: string]: unknown
+          name: string
+          description?: string
+          required?: boolean
+        }[]
+      | undefined,
     argsSchema: config.argsSchema,
     getMessages: config.getMessages,
     complete: config.complete,

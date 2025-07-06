@@ -18,5 +18,5 @@ export type { Logger } from './cli'
 export { createMCPServer } from './server'
 export { tool } from './server/api'
 export { resource, prompt } from './server/api'
-export { sample } from './server/api'
+// export { sample } from './server/api' // sample no existe
 export * from './server/api/auth'

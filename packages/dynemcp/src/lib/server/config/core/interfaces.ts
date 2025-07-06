@@ -1,62 +1,29 @@
 // Type definitions and interfaces for DyneMCP server configuration
 // Defines all config sections: autoload, server, logging, debug, performance, security, transport, and main config.
 
-// Type definition for autoloaded configuration sections
-export interface AutoloadConfig {
-  enabled: boolean
-  directory: string
-  pattern?: string // Glob pattern for file matching
-  exclude?: string | string[] // Files or patterns to exclude
-}
+import type {
+  AutoloadConfig,
+  ServerConfig,
+  LoggingConfig,
+  DebugConfig,
+  PerformanceConfig,
+  SecurityConfig,
+} from './schemas'
+import type {
+  StreamableHTTPTransportOptions,
+  TransportConfig as ZodTransportConfig,
+} from './transport'
 
-// Type definition for the server configuration
-export interface ServerConfig {
-  name: string
-  version: string
-  description?: string
-  documentationUrl?: string
-  capabilities?: Record<string, any>
+export type StdioTransportConfig = {
+  type: 'stdio'
 }
-
-// Logging configuration
-export interface LoggingConfig {
-  enabled: boolean
-  level: 'info' | 'warn' | 'error' | 'debug'
-  format: 'text' | 'json'
-  timestamp: boolean
-  colors: boolean
+export type StreamableHTTPTransportConfig = {
+  type: 'http'
+  options?: StreamableHTTPTransportOptions
 }
+export type TransportConfig = ZodTransportConfig
 
-// Debug configuration
-export interface DebugConfig {
-  enabled: boolean
-  verbose: boolean
-  showComponentDetails: boolean
-  showTransportDetails: boolean
-}
-
-// Performance configuration
-export interface PerformanceConfig {
-  maxConcurrentRequests: number
-  requestTimeout: number
-  memoryLimit: string
-  enableMetrics: boolean
-}
-
-// Security configuration
-export interface SecurityConfig {
-  enableValidation: boolean
-  strictMode: boolean
-  allowedOrigins: string[]
-  rateLimit: {
-    enabled: boolean
-    maxRequests: number
-    windowMs: number
-  }
-}
-
-// Main configuration interface for DyneMCP
-export interface DyneMCPConfig {
+export type DyneMCPConfig = {
   server: ServerConfig
   tools: AutoloadConfig
   resources: AutoloadConfig
@@ -68,54 +35,5 @@ export interface DyneMCPConfig {
   performance?: PerformanceConfig
   security?: SecurityConfig
 }
-
-// Type definition for Stdio transport configuration
-export interface StdioTransportConfig {
-  type: 'stdio'
-}
-
-// Type definition for Streamable HTTP transport configuration
-export interface StreamableHTTPTransportConfig {
-  type: 'streamable-http'
-  options?: {
-    port?: number
-    host?: string
-    endpoint?: string
-    responseMode?: 'batch' | 'stream'
-    batchTimeout?: number
-    maxMessageSize?: string
-    session?: {
-      enabled?: boolean
-      headerName?: string
-      allowClientTermination?: boolean
-    }
-    resumability?: {
-      enabled?: boolean
-      historyDuration?: number
-    }
-    cors?: {
-      allowOrigin?: string | string[]
-      allowMethods?: string
-      allowHeaders?: string
-      exposeHeaders?: string
-      maxAge?: number
-    }
-    authentication?: {
-      path: string
-    }
-    rateLimit?: {
-      windowMs?: number
-      max?: number
-      standardHeaders?: boolean
-      legacyHeaders?: boolean
-      message?: string | object
-    }
-  }
-}
-
-// Union type for all supported transport configurations
-export type TransportConfig =
-  | StdioTransportConfig
-  | StreamableHTTPTransportConfig
 
 // TODO: Resource template interfaces removed for production release. Re-implement in a future version if needed.

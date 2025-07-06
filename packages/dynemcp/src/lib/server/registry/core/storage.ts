@@ -57,17 +57,6 @@ export class InMemoryRegistryStorage implements RegistryStorage {
     })
   }
 
-  /**
-   * Add multiple samples to the storage.
-   */
-  addSamples(samples: RegistryItem[]): void {
-    samples.forEach((sample) => {
-      if (sample.type === 'sample') {
-        this.setItem(sample)
-      }
-    })
-  }
-
   private key(type: string, id: string): string {
     return `${type}:${id}`
   }

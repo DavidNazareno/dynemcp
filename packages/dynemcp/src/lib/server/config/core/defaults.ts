@@ -1,8 +1,9 @@
 // Default values and settings for DyneMCP server configuration
 // Provides defaults for server, transport, logging, performance, security, and autoloaded components.
 
-import { PATHS, TRANSPORT } from '../../../../global/config-all-contants'
-import type { DyneMCPConfig, LoggingConfig } from './interfaces'
+import { PATHS } from '../../../../global/config-all-contants'
+import type { DyneMCPConfig } from './interfaces'
+import type { LoggingConfig } from './schemas'
 
 // Default server name for DyneMCP
 export const DEFAULT_SERVER_NAME = 'dynemcp-server'
@@ -70,11 +71,8 @@ export function createDefaultConfig(): DyneMCPConfig {
     server: {
       name: DEFAULT_SERVER_NAME,
       version: DEFAULT_SERVER_VERSION,
+      // MCP capabilities: completions es obligatorio según el protocolo y el SDK
       capabilities: {
-        logging: {},
-        prompts: { listChanged: true },
-        resources: { subscribe: true, listChanged: true },
-        tools: { listChanged: true },
         completions: {},
       },
     },
@@ -91,7 +89,7 @@ export function createDefaultConfig(): DyneMCPConfig {
       directory: DEFAULT_PROMPTS_DIR,
     },
     transport: {
-      type: TRANSPORT.DEFAULT_TRANSPORT as 'stdio' | 'streamable-http',
+      type: 'stdio',
     },
     logging: DEFAULT_LOGGING_CONFIG,
     debug: DEFAULT_DEBUG_CONFIG,

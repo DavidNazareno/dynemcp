@@ -28,6 +28,12 @@ export const ServerConfigSchema = z.object({
   version: z.string().default(DEFAULT_SERVER_VERSION),
   documentationUrl: z.string().url().optional(),
   description: z.string().optional(),
+  // Agrego capabilities para cumplir con MCP y el SDK
+  capabilities: z
+    .object({
+      completions: z.record(z.unknown()).default({}),
+    })
+    .default({ completions: {} }),
 })
 
 // LoggingConfigSchema: Validation for logging config
@@ -84,6 +90,10 @@ export const ConfigSchema = z.object({
 export type BaseConfig = z.infer<typeof BaseConfigSchema>
 export type AutoloadConfig = z.infer<typeof AutoloadConfigSchema>
 export type ServerConfig = z.infer<typeof ServerConfigSchema>
+export type LoggingConfig = z.infer<typeof LoggingConfigSchema>
+export type DebugConfig = z.infer<typeof DebugConfigSchema>
+export type PerformanceConfig = z.infer<typeof PerformanceConfigSchema>
+export type SecurityConfig = z.infer<typeof SecurityConfigSchema>
 export type Config = z.infer<typeof ConfigSchema>
 
 // TODO: Resource template schemas removed for production release. Re-implement in a future version if needed.

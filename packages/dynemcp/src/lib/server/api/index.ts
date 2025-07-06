@@ -43,8 +43,6 @@ export { createTypedTool, tool } from './core/tool'
 export { resource } from './core/resource'
 export { prompt } from './core/prompt'
 
-export { sample } from './core/sampling'
-
 export * from './core/root'
 export * from './auth'
 

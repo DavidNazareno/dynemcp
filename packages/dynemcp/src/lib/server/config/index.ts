@@ -14,14 +14,8 @@
  */
 
 // Main TypeScript types for framework-wide configuration
-export type {
-  DyneMCPConfig,
-  ServerConfig,
-  AutoloadConfig,
-  TransportConfig,
-  StdioTransportConfig,
-  StreamableHTTPTransportConfig,
-} from './core/interfaces'
+export type { DyneMCPConfig } from './core/interfaces'
+export type { ServerConfig, AutoloadConfig } from './core/schemas'
 
 // Utilities for loading and validating configuration
 export { loadConfig, loadBaseConfig } from './core/loader'

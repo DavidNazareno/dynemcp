@@ -2,6 +2,12 @@
 // Defines JSON-RPC message types and the Transport interface for custom transports.
 
 import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js'
+import type { z } from 'zod'
+import {
+  StdioTransportConfigSchema,
+  HTTPTransportConfigSchema,
+  TransportConfigSchema,
+} from './schemas'
 
 /**
  * Transport: Interface for MCP communication transports (stdio, HTTP, etc).
@@ -27,19 +33,6 @@ export interface Transport {
   onmessage?: (message: JSONRPCMessage) => void
 }
 
-// StdioTransportConfig: Configuration for stdio transport
-export interface StdioTransportConfig {
-  type: 'stdio'
-  command?: string
-  args?: string[]
-}
-
-// HTTPTransportConfig: Configuration for streamable HTTP transport
-export interface HTTPTransportConfig {
-  type: 'streamable-http'
-  url: string
-  sessionId?: string
-  headers?: Record<string, string>
-}
-
-export type TransportConfig = StdioTransportConfig | HTTPTransportConfig
+export type StdioTransportConfig = z.infer<typeof StdioTransportConfigSchema>
+export type HTTPTransportConfig = z.infer<typeof HTTPTransportConfigSchema>
+export type TransportConfig = z.infer<typeof TransportConfigSchema>

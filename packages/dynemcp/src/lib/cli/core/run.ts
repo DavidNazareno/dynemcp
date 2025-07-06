@@ -12,8 +12,8 @@ import {
   DEFAULT_CONFIG,
   loadConfig,
   type DyneMCPConfig,
-  type StreamableHTTPTransportConfig,
 } from '../../server/config'
+import type { StreamableHTTPTransportConfig } from '../../server/config/core/interfaces'
 import type { DevOptions } from './types'
 
 interface ServerContext {

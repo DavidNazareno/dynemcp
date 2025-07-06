@@ -17,7 +17,7 @@ import type {
   CallToolResult as SDKCallToolResult,
   Root as SDKRoot,
   RootsListChangedNotification as SDKRootsListChangedNotification,
-} from '@modelcontextprotocol/sdk'
+} from '@modelcontextprotocol/sdk/types.js'
 
 /**
  * Tool argument definition for prompts.
@@ -49,16 +49,14 @@ export type ResourceDefinition = SDKResource
 export type PromptDefinition = SDKPrompt
 
 // Internal types for loaded/executable logic
+// Ajuste: inputSchema nunca debe ser undefined y debe ser un objeto compatible con el SDK
 export interface LoadedTool extends ToolDefinition {
-  inputSchema?: ZodRawShape | ZodObject<any, any, any>
-  outputSchema?: ZodRawShape | ZodObject<any, any, any>
-  annotations?: Record<string, unknown>
-  execute: (args: Record<string, unknown>) => Promise<CallToolResult>
-  complete?: (params: {
-    argument: string
-    partialInput: string
-    context?: Record<string, unknown>
-  }) => Promise<string[]> | string[]
+  inputSchema: {
+    [x: string]: unknown
+    type: 'object'
+    properties?: { [x: string]: unknown }
+    required?: string[]
+  }
 }
 
 export interface LoadedPrompt extends PromptDefinition {
