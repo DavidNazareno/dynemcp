@@ -1,8 +1,33 @@
 {
   "name": "@dynemcp/source",
   "version": "0.0.20-canary.20250626T18090",
-  "type": "module",
+  "description": "Official DyneMCP monorepo: framework, CLI, and documentation for creating secure and scalable MCP servers.",
+  "author": "David Nazareno <dnnzareno@gmail.com>",
+  "homepage": "https://dynemcp.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidNazareno/dynemcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DavidNazareno/dynemcp/issues"
+  },
   "license": "MIT",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "monorepo",
+    "framework",
+    "cli",
+    "typescript",
+    "server",
+    "dyne",
+    "dyne-mcp",
+    "documentation",
+    "astro",
+    "secure",
+    "production"
+  ],
+  "type": "module",
   "scripts": {
     "build": "nx run-many --target=build --all",
     "clean": "nx run-many --target=clean --all",

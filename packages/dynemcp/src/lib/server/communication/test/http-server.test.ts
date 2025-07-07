@@ -32,7 +32,6 @@ vi.mock('express', () => {
 
 // Mock SDK classes
 vi.mock('@modelcontextprotocol/sdk/server/streamableHttp.js', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   StreamableHTTPServerTransport: class {
     async handleRequest() {
       return undefined
@@ -43,7 +42,6 @@ vi.mock('@modelcontextprotocol/sdk/server/streamableHttp.js', () => ({
   },
 }))
 vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   McpServer: class {
     async connect() {
       return undefined

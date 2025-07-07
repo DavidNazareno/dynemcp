@@ -9,6 +9,30 @@
   "bin": {
     "create-dynemcp": "./dist/bin.js"
   },
+  "description": "Official CLI for creating DyneMCP projects. Generates production-ready MCP servers with secure and modern templates.",
+  "author": "David Nazareno <dnnzareno@gmail.com>",
+  "homepage": "https://dynemcp.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidNazareno/dynemcp.git",
+    "directory": "packages/create-dynemcp"
+  },
+  "bugs": {
+    "url": "https://github.com/DavidNazareno/dynemcp/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "cli",
+    "scaffolding",
+    "typescript",
+    "server",
+    "framework",
+    "project-generator",
+    "dyne",
+    "dyne-mcp"
+  ],
   "scripts": {
     "build": "rm -rf dist && rollup -c && tsc --emitDeclarationOnly --outDir dist",
     "clean": "rm -rf dist",

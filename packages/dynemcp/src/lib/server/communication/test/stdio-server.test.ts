@@ -13,7 +13,6 @@ let onerrorHandler: any = undefined
 let setProtocolVersionHandler: any = undefined
 
 vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   StdioServerTransport: class {
     start = startMock
     send = sendMock
