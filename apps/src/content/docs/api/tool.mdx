@@ -2,7 +2,6 @@
 title: Tool API
 ---
 
-
 The DyneMCP tool API provides a type-safe, functional way to define and execute tools for your MCP server. Tools can validate input, normalize results, and support argument completion.
 
 ## Usage Example
@@ -36,6 +35,7 @@ export default tool(
 - `complete` (function, optional): Argument completion for suggestions.
 
 ## Notes
+
 - Use Zod schemas for strong input validation.
 - The returned object is MCP-compatible and can be auto-discovered by the registry.
-- See the templates for real-world tool examples. 
+- See the templates for real-world tool examples.

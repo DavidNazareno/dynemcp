@@ -2,7 +2,6 @@
 title: Prompt API
 ---
 
-
 The DyneMCP prompt API provides a type-safe, functional way to define prompt templates and workflows for your MCP server. Prompts can accept arguments, validate input, generate dynamic messages, and support argument completion.
 
 ## Usage Example
@@ -32,6 +31,7 @@ export default prompt({
 - `complete` (function, optional): Argument completion for suggestions.
 
 ## Notes
+
 - Use `argsSchema` for strong argument validation.
 - The returned object is MCP-compatible and can be auto-discovered by the registry.
-- See the templates for real-world prompt examples. 
+- See the templates for real-world prompt examples.

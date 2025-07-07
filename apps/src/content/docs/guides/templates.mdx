@@ -3,7 +3,6 @@ title: Project Templates
 description: Explore the available templates for DyneMCP projects and choose the best starting point for your use case.
 ---
 
-
 DyneMCP provides two official templates to help you get started quickly with MCP servers. Each template is designed for a specific transport (STDIO or HTTP) and comes with pre-configured features, best practices, and real code examples.
 
 ## Available Templates
@@ -17,6 +16,7 @@ pnpx create-dynemcp@latest my-project --template default-stdio
 ```
 
 #### Features
+
 - File-based auto-loading for tools, resources, prompts, and roots
 - TypeScript-first: full type safety and IntelliSense
 - JWT authentication middleware (ready to use)
@@ -24,6 +24,7 @@ pnpx create-dynemcp@latest my-project --template default-stdio
 - Clean, extensible project structure
 
 #### Project Structure
+
 ```
 src/
 ├── index.ts                    # Server entry point
@@ -45,6 +46,7 @@ src/
 ```
 
 #### Example: Creating a Tool
+
 ```typescript
 // src/tools/greeter/tool.ts
 import { tool } from '@dynemcp/dynemcp'
@@ -73,6 +75,7 @@ export default tool(
 ```
 
 #### Example: Creating a Resource
+
 ```typescript
 // src/resources/framework-info/resource.ts
 import { resource } from '@dynemcp/dynemcp'
@@ -91,6 +94,7 @@ export default resource({
 ```
 
 #### Example: Creating a Prompt
+
 ```typescript
 // src/prompts/system-context/prompt.ts
 import { prompt as systemPrompt } from '@dynemcp/dynemcp'
@@ -127,6 +131,7 @@ export default systemPrompt({
 ```
 
 #### Example: Creating a Sample (LLM Completion)
+
 ```typescript
 // src/samples/hello-sample/sample.ts
 import { sample, SamplingRequest } from '@dynemcp/dynemcp'
@@ -152,6 +157,7 @@ export default {
 ```
 
 #### Declaring Roots
+
 ```typescript
 import { root } from '@dynemcp/dynemcp/server/api/core/root'
 
@@ -164,6 +170,7 @@ export default root([
 ```
 
 #### Authentication Middleware (JWT)
+
 - The template includes a ready-to-use JWT authentication middleware in `src/middleware.ts`.
 - The server will refuse to start in production if you do not create `src/middleware.ts`.
 - In development, all requests are allowed by default, but a warning will be logged.
@@ -179,6 +186,7 @@ pnpx create-dynemcp@latest my-server --template default-http
 ```
 
 #### Features
+
 - File-based auto-loading for tools, resources, prompts, and roots
 - TypeScript-first: full type safety and IntelliSense
 - JWT authentication middleware (ready to use)
@@ -187,6 +195,7 @@ pnpx create-dynemcp@latest my-server --template default-http
 - HTTP transport with CORS and security middleware
 
 #### Project Structure
+
 ```
 src/
 ├── index.ts                    # Server entry point
@@ -210,6 +219,7 @@ src/
 #### Example code for tools, resources, prompts, samples, roots, and middleware is identical to the STDIO template above.
 
 #### Authentication Middleware (JWT)
+
 - The template includes a ready-to-use JWT authentication middleware in `src/middleware.ts`.
 - The server will refuse to start in production if you do not create `src/middleware.ts`.
 - In development, all requests are allowed by default, but a warning will be logged.
@@ -217,12 +227,14 @@ src/
 ---
 
 ## Conventions
+
 - Only files named `tool.ts`, `resource.ts`, `prompt.ts`, or `roots.ts` in their respective folders are auto-loaded.
 - Any other files (e.g., `utils.ts`) are ignored by the loader and can be used for utilities.
 
 ---
 
 ## Next Steps
+
 - [Learn about the server architecture](/reference/server)
 - [Check the security best practices](/guides/security)
 - [Explore the build system](/reference/build-system)

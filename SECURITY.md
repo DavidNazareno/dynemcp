@@ -19,8 +19,8 @@ Please **DO NOT** disclose the vulnerability publicly on GitHub Issues, Discussi
 
 ### How to Report
 
-Send an email to [security@example.com](mailto:security@example.com) with the following information:
-
+- Create a new issue
+- Provide detailed information including:
 - Description of the vulnerability
 - Steps to reproduce the issue
 - Potential impact

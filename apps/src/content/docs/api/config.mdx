@@ -103,6 +103,7 @@ export {
 ## Configuration Sections
 
 ### `server`
+
 - `name` (string, default: `"dynemcp-server"`): Server name.
 - `version` (string, default: `"1.0.0"`): Server version.
 - `documentationUrl` (string, optional): Link to your server's documentation.
@@ -110,12 +111,14 @@ export {
 - `capabilities` (object, default: `{ completions: {} }`): Reserved for protocol extensions.
 
 ### `tools`, `resources`, `prompts`
+
 - `enabled` (boolean, default: `true`): Enable autoloading for this type.
 - `directory` (string): Directory to load from.
 - `pattern` (string, default: `"*.ts"`): Glob pattern for files.
 - `exclude` (array of strings, optional): Patterns to exclude.
 
 ### `transport`
+
 - `type` (`'stdio'` | `'http'`): Transport type.
 - `options` (object, optional for `stdio`, required for `http`):
   - `mode` (`'streamable-http'` | `'sse'`, default: `'streamable-http'`)
@@ -142,9 +145,11 @@ export {
     - `path` (string): Path for authentication middleware
 
 ### `description`
+
 - (string, optional): Global description for your project.
 
 ### `logging` (optional)
+
 - `enabled` (boolean, default: `true`)
 - `level` (`'info'`, `'warn'`, `'error'`, `'debug'`, default: `'info'`)
 - `format` (`'text'`, `'json'`, default: `'json'`)
@@ -152,18 +157,21 @@ export {
 - `colors` (boolean, default: `true`)
 
 ### `debug` (optional)
+
 - `enabled` (boolean, default: `false`)
 - `verbose` (boolean, default: `false`)
 - `showComponentDetails` (boolean, default: `false`)
 - `showTransportDetails` (boolean, default: `false`)
 
 ### `performance` (optional)
+
 - `maxConcurrentRequests` (number, default: `100`)
 - `requestTimeout` (number, default: `30000`)
 - `memoryLimit` (string, default: `'512mb'`)
 - `enableMetrics` (boolean, default: `false`)
 
 ### `security` (optional)
+
 - `enableValidation` (boolean, default: `true`)
 - `strictMode` (boolean, default: `false`)
 - `allowedOrigins` (array of strings, default: `['*']`)

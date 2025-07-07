@@ -25,11 +25,7 @@ src/
 ├── prompts/                    # Prompts directory
 │   └── system-context/         # System context prompt folder
 │       └── prompt.ts           # Main prompt file (auto-loaded)
-├── samples/                    # LLM sample directory
-│   └── hello-sample/           # Example LLM completion sample
-│       └── sample.ts           # Main sample file
-└── roots/                      # Roots helpers and examples
-    └── roots.ts                # Example and helpers for roots
+└──
 ```
 
 ## 🔑 Conventions
@@ -37,7 +33,6 @@ src/
 - **Tools**: Only files named `tool.ts` or `tool.js` in `src/tools/**/` are auto-loaded as tools.
 - **Resources**: Only files named `resource.ts` or `resource.js` in `src/resources/**/` are auto-loaded as resources.
 - **Prompts**: Only files named `prompt.ts` or `prompt.js` in `src/prompts/**/` are auto-loaded as prompts.
-- **Roots**: Only files named `roots.ts` in `src/roots/` are auto-loaded as roots.
 - **Helpers**: Any other files (e.g., `utils.ts`) are ignored by the loader and can be freely used for utilities.
 
 ## ⚙️ Configuration
@@ -63,11 +58,6 @@ export default {
   prompts: {
     enabled: true,
     directory: './src/prompts',
-    pattern: '**/*.{ts,js}',
-  },
-  roots: {
-    enabled: true,
-    directory: './src/roots',
     pattern: '**/*.{ts,js}',
   },
   transport: {
@@ -161,46 +151,6 @@ export default systemPrompt({
 })
 ```
 
-## 🧪 Example: Creating a Sample (LLM Completion)
-
-```typescript
-// src/samples/hello-sample/sample.ts
-import { sample, SamplingRequest } from '@dynemcp/dynemcp'
-
-async function runHelloSample() {
-  const request: SamplingRequest = {
-    messages: [
-      {
-        role: 'user',
-        content: { type: 'text', text: 'Say hello to the world!' },
-      },
-    ],
-    maxTokens: 32,
-  }
-  return await sample(request)
-}
-
-export default {
-  name: 'hello-sample',
-  description: 'Requests a sample LLM completion',
-  run: runHelloSample,
-}
-```
-
-## 🌳 Declaring Roots
-
-To define the workspace boundaries for your project, declare your roots in `src/roots/roots.ts` using the `root` helper:
-
-```typescript
-import { root } from '@dynemcp/dynemcp/server/api/core/root'
-
-export default root([
-  {
-    uri: 'file:///home/user/projects/myapp',
-    name: 'My Project',
-  },
-])
-```
 
 ## 🔒 Authentication Middleware (JWT)
 

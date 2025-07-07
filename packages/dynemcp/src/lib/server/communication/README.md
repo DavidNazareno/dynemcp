@@ -72,6 +72,7 @@ communication/
 ## Extending
 
 To add a new transport:
+
 1. Implement the `Transport` interface in a new file (e.g., `websocket/server.ts`).
 2. Add a Zod schema for its configuration in `core/schemas.ts`.
 3. Register the new transport in the `createTransport` factory (`core/factory.ts`).
@@ -108,7 +109,13 @@ const httpTransport = createTransport({
 All public types, errors, schemas, and transport implementations are re-exported from `index.ts` for easy import:
 
 ```typescript
-import { Transport, StdioTransport, HTTPServers, TransportConfigSchema, createTransport } from '@/server/communication'
+import {
+  Transport,
+  StdioTransport,
+  HTTPServers,
+  TransportConfigSchema,
+  createTransport,
+} from '@/server/communication'
 ```
 
 ---

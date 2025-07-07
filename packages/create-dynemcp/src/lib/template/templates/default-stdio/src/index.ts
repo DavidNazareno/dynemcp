@@ -1,6 +1,6 @@
 import { createMCPServer } from '@dynemcp/dynemcp'
 
-// Create MCP server instance (puedes pasar './dynemcp.config.json' si quieres config explícito)
+// Create MCP server
 const serverPromise = createMCPServer()
 
 async function main() {

@@ -10,7 +10,9 @@ export function detectPackageManager(): string {
   try {
     execa.commandSync('pnpm --version')
     return 'pnpm'
-  } catch {}
+  } catch {
+    /* empty */
+  }
   throw new Error('No supported package manager found')
 }
 

@@ -2,7 +2,6 @@
 title: Security & Authentication Middleware
 ---
 
-
 DyneMCP provides a unified authentication middleware for securing your MCP server. This middleware supports JWT, OAuth2/OIDC, or both, and is designed to be easy to configure and production-ready.
 
 ## How to Use the Middleware
@@ -23,7 +22,7 @@ export default dynemcpMiddleware({
   jwt: {
     secret: process.env.JWT_SECRET!,
     allowedRoles: ['admin', 'user'], // optional
-    expectedAudience: 'your-api',    // optional but recommended
+    expectedAudience: 'your-api', // optional but recommended
   },
 })
 ```
@@ -56,8 +55,8 @@ export default dynemcpMiddleware({
 })
 ```
 
-
 ## Notes
+
 - **JWT:** Use a strong secret and set `expectedAudience` for production security.
 - **OAuth2:** Use your provider's issuer URL and audience.
 - **Both:** The middleware will try OAuth2 first, then fallback to JWT.

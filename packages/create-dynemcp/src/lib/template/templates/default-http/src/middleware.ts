@@ -45,7 +45,7 @@ import {
 const config: DynemcpMiddlewareConfig = {
   type: 'jwt',
   jwt: {
-    secret: process.env.JWT_SECRET!,
+    secret: process.env.JWT_SECRET,
     expectedAudience: process.env.JWT_AUDIENCE, // recommended for security
   },
 }
