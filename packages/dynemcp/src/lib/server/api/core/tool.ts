@@ -27,7 +27,7 @@ function normalizeToolResult(result: any) {
   if (typeof result === 'string') {
     return { content: [{ type: 'text', text: result }] }
   }
-  // Objeto MCP válido
+  // Valid MCP object
   if (result && typeof result === 'object' && Array.isArray(result.content)) {
     return result
   }
@@ -40,7 +40,7 @@ function normalizeToolResult(result: any) {
   ) {
     return { content: [result] }
   }
-  // Objeto simple { text: ... }
+  // Simple object { text: ... }
   if (
     result &&
     typeof result === 'object' &&
@@ -49,7 +49,7 @@ function normalizeToolResult(result: any) {
   ) {
     return { content: [{ type: 'text', text: result.text }] }
   }
-  // Array de strings u objetos
+  // Array of strings or objects
   if (Array.isArray(result)) {
     const content = result.map((item) => {
       if (typeof item === 'string') {
@@ -66,12 +66,12 @@ function normalizeToolResult(result: any) {
       ) {
         return item
       }
-      // Si no es válido, lo stringifica
+      // If not valid, stringify it
       return { type: 'text', text: JSON.stringify(item) }
     })
     return { content }
   }
-  // Si es un objeto no válido, retorna error MCP
+  // If it is not a valid object, return MCP error
   return {
     isError: true,
     content: [

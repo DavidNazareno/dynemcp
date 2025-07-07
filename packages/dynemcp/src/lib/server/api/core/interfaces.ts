@@ -76,9 +76,9 @@ export type InferSchema<T> = T extends z.ZodType ? z.infer<T> : never
 
 // Sampling types (MCP)
 export type SamplingMessage = SDKSamplingMessage
-// (No hay SamplingRequest/SamplingResult explícitos en el SDK)
+// (There are no explicit SamplingRequest/SamplingResult in the SDK)
 
-// SamplingRequest y SamplingResult según la documentación oficial MCP
+// SamplingRequest and SamplingResult according to the official MCP documentation
 export interface SamplingRequest {
   messages: Array<{
     role: 'user' | 'assistant'
@@ -114,7 +114,7 @@ export type Root = SDKRoot
 export type RootList = Root[]
 export type RootChangeNotification = SDKRootsListChangedNotification
 
-// No additional interfaces are needed aquí, los tipos principales vienen del SDK.
+// No additional interfaces are needed here, the main types come from the SDK.
 
 // Resource template definition for dynamic resources
 export interface ResourceTemplateDefinition {

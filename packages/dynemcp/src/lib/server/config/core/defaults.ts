@@ -71,7 +71,7 @@ export function createDefaultConfig(): DyneMCPConfig {
     server: {
       name: DEFAULT_SERVER_NAME,
       version: DEFAULT_SERVER_VERSION,
-      // MCP capabilities: completions es obligatorio según el protocolo y el SDK
+      // MCP capabilities: completions is mandatory according to the protocol and the SDK
       capabilities: {
         completions: {},
       },

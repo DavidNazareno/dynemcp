@@ -3,172 +3,226 @@ title: Project Templates
 description: Explore the available templates for DyneMCP projects and choose the best starting point for your use case.
 ---
 
-# Project Templates
 
-DyneMCP provides several specialized templates to help you get started quickly with different types of MCP servers. Each template is designed for specific use cases and comes with pre-configured features and best practices.
+DyneMCP provides two official templates to help you get started quickly with MCP servers. Each template is designed for a specific transport (STDIO or HTTP) and comes with pre-configured features, best practices, and real code examples.
 
 ## Available Templates
 
-### Default Template
+### Default STDIO Template
 
-The default template is perfect for learning MCP basics and simple automation tasks.
-
-```bash
-create-dynemcp my-project --template default
-```
-
-**Features included:**
-
-- Basic MCP server setup with stdio transport
-- Example tool for text manipulation
-- Sample resource with static content
-- Simple prompt for AI assistance
-- TypeScript configuration
-- Build scripts and hot reload
-
-**Best for:**
-
-- First-time MCP developers
-- Prototyping new ideas
-- Educational purposes
-
-### Calculator Template
-
-Specialized for mathematical computations and educational tools.
+A minimal, type-safe setup for MCP servers using the STDIO transport.
 
 ```bash
-create-dynemcp my-calculator --template calculator
+pnpx create-dynemcp@latest my-project --template default-stdio
 ```
 
-**Features included:**
+#### Features
+- File-based auto-loading for tools, resources, prompts, and roots
+- TypeScript-first: full type safety and IntelliSense
+- JWT authentication middleware (ready to use)
+- Example tool, resource, prompt, and LLM sample
+- Clean, extensible project structure
 
-- Basic arithmetic operations (add, subtract, multiply, divide)
-- Advanced mathematical functions (trigonometry, logarithms)
-- Mathematical constants and formulas resource
-- Specialized prompts for mathematical problem solving
-- Error handling for mathematical edge cases
+#### Project Structure
+```
+src/
+├── index.ts                    # Server entry point
+├── middleware.ts               # JWT authentication middleware
+├── tools/                      # Tools directory
+│   └── greeter/                # Greeter tool folder
+│       └── tool.ts             # Main tool file (auto-loaded)
+├── resources/                  # Resources directory
+│   └── framework-info/         # Framework info resource folder
+│       └── resource.ts         # Main resource file (auto-loaded)
+├── prompts/                    # Prompts directory
+│   └── system-context/         # System context prompt folder
+│       └── prompt.ts           # Main prompt file (auto-loaded)
+├── samples/                    # LLM sample directory
+│   └── hello-sample/           # Example LLM completion sample
+│       └── sample.ts           # Main sample file
+└── roots/                      # Roots helpers and examples
+    └── roots.ts                # Example and helpers for roots
+```
 
-**Best for:**
+#### Example: Creating a Tool
+```typescript
+// src/tools/greeter/tool.ts
+import { tool } from '@dynemcp/dynemcp'
+import { z } from 'zod'
 
-- Educational math tools
-- Scientific calculations
-- Engineering applications
-- Math tutoring systems
+const GreeterSchema = z.object({
+  name: z.string().describe('The name to greet'),
+  image: z.string().url().optional().describe('Optional image URL'),
+})
 
-### HTTP Server Template
+export default tool(
+  GreeterSchema,
+  async ({ name, image }) => {
+    if (!name?.trim()) return 'Name cannot be empty'
+    if (!image) return `Hello, ${name}!`
+    return [
+      `Hello, ${name}!`,
+      { type: 'image', url: image, alt: `Avatar for ${name}` },
+    ]
+  },
+  {
+    name: 'greeter',
+    description: 'A simple tool that greets the user and can return an image',
+  }
+)
+```
 
-Ideal for web integration and API endpoints.
+#### Example: Creating a Resource
+```typescript
+// src/resources/framework-info/resource.ts
+import { resource } from '@dynemcp/dynemcp'
+
+function getFrameworkInfo() {
+  return `# DyneMCP Framework\n\nThis is a TypeScript-first framework for building MCP servers.`
+}
+
+export default resource({
+  uri: 'info://framework',
+  name: 'Framework Information',
+  description: 'Information about the DyneMCP framework',
+  mimeType: 'text/markdown',
+  getContent: getFrameworkInfo,
+})
+```
+
+#### Example: Creating a Prompt
+```typescript
+// src/prompts/system-context/prompt.ts
+import { prompt as systemPrompt } from '@dynemcp/dynemcp'
+
+const SystemContextArguments = [
+  { name: 'user_role', description: 'The role of the user', required: false },
+  {
+    name: 'task_context',
+    description: 'The current task or context',
+    required: false,
+  },
+]
+
+async function getMessages(args = {}) {
+  const userRole = args.user_role || 'user'
+  const taskContext = args.task_context || 'general assistance'
+  return [
+    {
+      role: 'user',
+      content: {
+        type: 'text',
+        text: `You are an AI assistant for the DyneMCP framework.\nCurrent context: ${taskContext}`,
+      },
+    },
+  ]
+}
+
+export default systemPrompt({
+  name: 'system_context',
+  description: 'Provides system context and instructions for the AI assistant',
+  arguments: SystemContextArguments,
+  getMessages,
+})
+```
+
+#### Example: Creating a Sample (LLM Completion)
+```typescript
+// src/samples/hello-sample/sample.ts
+import { sample, SamplingRequest } from '@dynemcp/dynemcp'
+
+async function runHelloSample() {
+  const request: SamplingRequest = {
+    messages: [
+      {
+        role: 'user',
+        content: { type: 'text', text: 'Say hello to the world!' },
+      },
+    ],
+    maxTokens: 32,
+  }
+  return await sample(request)
+}
+
+export default {
+  name: 'hello-sample',
+  description: 'Requests a sample LLM completion',
+  run: runHelloSample,
+}
+```
+
+#### Declaring Roots
+```typescript
+import { root } from '@dynemcp/dynemcp/server/api/core/root'
+
+export default root([
+  {
+    uri: 'file:///home/user/projects/myapp',
+    name: 'My Project',
+  },
+])
+```
+
+#### Authentication Middleware (JWT)
+- The template includes a ready-to-use JWT authentication middleware in `src/middleware.ts`.
+- The server will refuse to start in production if you do not create `src/middleware.ts`.
+- In development, all requests are allowed by default, but a warning will be logged.
+
+---
+
+### Default HTTP Template
+
+A minimal, type-safe setup for MCP servers using the streamable HTTP transport.
 
 ```bash
-create-dynemcp my-server --template http-server
+pnpx create-dynemcp@latest my-server --template default-http
 ```
 
-**Features included:**
+#### Features
+- File-based auto-loading for tools, resources, prompts, and roots
+- TypeScript-first: full type safety and IntelliSense
+- JWT authentication middleware (ready to use)
+- Example tool, resource, prompt, and LLM sample
+- Clean, extensible project structure
+- HTTP transport with CORS and security middleware
 
-- Express.js HTTP server setup
-- RESTful endpoint configuration
-- CORS middleware
-- HTTP transport for MCP
-- Basic greeting and server info tools
-- Health check endpoints
-
-**Best for:**
-
-- Web application integration
-- REST API development
-- Microservices architecture
-- Browser-based clients
-
-### Secure Agent Template
-
-Designed for enterprise applications and production environments.
-
-```bash
-create-dynemcp my-secure-agent --template secure-agent
+#### Project Structure
+```
+src/
+├── index.ts                    # Server entry point
+├── middleware.ts               # JWT authentication middleware
+├── tools/                      # Tools directory
+│   └── greeter/                # Greeter tool folder
+│       └── tool.ts             # Main tool file (auto-loaded)
+├── resources/                  # Resources directory
+│   └── framework-info/         # Framework info resource folder
+│       └── resource.ts         # Main resource file (auto-loaded)
+├── prompts/                    # Prompts directory
+│   └── system-context/         # System context prompt folder
+│       └── prompt.ts           # Main prompt file (auto-loaded)
+├── samples/                    # LLM sample directory
+│   └── hello-sample/           # Example LLM completion sample
+│       └── sample.ts           # Main sample file
+└── roots/                      # Roots helpers and examples
+    └── roots.ts                # Example and helpers for roots
 ```
 
-**Features included:**
+#### Example code for tools, resources, prompts, samples, roots, and middleware is identical to the STDIO template above.
 
-- API key authentication middleware
-- Streamable HTTP transport with sessions
-- Rate limiting and CORS configuration
-- Security headers and input validation
-- Audit logging capabilities
-- Production-ready configuration
+#### Authentication Middleware (JWT)
+- The template includes a ready-to-use JWT authentication middleware in `src/middleware.ts`.
+- The server will refuse to start in production if you do not create `src/middleware.ts`.
+- In development, all requests are allowed by default, but a warning will be logged.
 
-**Best for:**
+---
 
-- Enterprise applications
-- Production deployments
-- Multi-tenant systems
-- Regulated environments
+## Conventions
+- Only files named `tool.ts`, `resource.ts`, `prompt.ts`, or `roots.ts` in their respective folders are auto-loaded.
+- Any other files (e.g., `utils.ts`) are ignored by the loader and can be used for utilities.
 
-### Dynamic Agent Template
-
-Perfect for AI research and adaptive systems.
-
-```bash
-create-dynemcp my-dynamic-agent --template dynamic-agent
-```
-
-**Features included:**
-
-- Dynamic tool registration system
-- Model sampling capabilities
-- Memory persistence and learning
-- Adaptive behavior patterns
-- Experimental AI features
-
-**Best for:**
-
-- AI research projects
-- Self-learning systems
-- Adaptive automation
-- Experimental applications
-
-## Using Templates
-
-### Interactive Mode
-
-The easiest way to use templates is through interactive mode:
-
-```bash
-create-dynemcp my-project
-```
-
-This will prompt you to choose a template and guide you through the setup process.
-
-### Non-Interactive Mode
-
-You can also use templates in non-interactive mode with the `--yes` flag:
-
-```bash
-# Use default template
-create-dynemcp my-agent --yes
-
-# Specify template
-create-dynemcp my-calculator --template calculator --yes
-
-# Skip dependency installation
-create-dynemcp my-agent --template secure-agent --yes --skip-install
-```
-
-## CLI Options
-
-When using templates, you have several options available:
-
-| Option           | Alias | Description                    | Default   |
-| ---------------- | ----- | ------------------------------ | --------- |
-| `--template <n>` | `-t`  | Template to use                | `default` |
-| `--skip-install` |       | Skip dependency installation   | `false`   |
-| `--yes`          | `-y`  | Skip all prompts, use defaults | `false`   |
-| `--version`      | `-v`  | Show version number            |           |
-| `--help`         | `-h`  | Show help message              |           |
+---
 
 ## Next Steps
-
-After choosing a template:
-
-1. [Learn about the server architecture](/reference/server) to understand how your template works
-2. [Check the security best practices](/guides/security) if you're planning for production
-3. [Explore the build system](/reference/build-system) to optimize your development workflow
+- [Learn about the server architecture](/reference/server)
+- [Check the security best practices](/guides/security)
+- [Explore the build system](/reference/build-system)

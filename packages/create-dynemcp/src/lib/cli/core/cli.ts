@@ -36,7 +36,7 @@ const program = new Command('create-dynemcp')
   .allowUnknownOption()
   .parse(process.argv)
 
-async function promptForProjectName(): Promise<string> {
+export async function promptForProjectName(): Promise<string> {
   const res = await inquirer.prompt({
     type: 'input',
     name: 'path',
@@ -53,34 +53,22 @@ async function promptForProjectName(): Promise<string> {
   return typeof res.path === 'string' ? res.path.trim() : 'my-mcp-project'
 }
 
-async function promptForTemplate(): Promise<string> {
+export async function promptForTemplate(): Promise<string> {
   const res = await inquirer.prompt({
     type: 'list',
     name: 'template',
-    message: '🧩 Select a project template:',
+    message: 'Select a project template:',
     choices: [
       {
-        name: 'Default - A minimal setup with basic examples. (Recommended) Transport: STUDIO',
-        value: 'default',
+        name: 'Default - Studio - A minimal setup with basic examples Transport: STUDIO',
+        value: 'default-stdio',
       },
       {
-        name: 'Calculator - An agent with mathematical tools. Transport: STREAMABLE HTTP',
-        value: 'calculator',
-      },
-      {
-        name: 'HTTP Server - A basic server using the HTTP transport. Transport: STREAMABLE HTTP',
-        value: 'http-server',
-      },
-      {
-        name: 'Secure Agent - A production-ready agent with authentication. Transport: STREAMABLE HTTP',
-        value: 'secure-agent',
-      },
-      {
-        name: 'Dynamic Agent - An agent that learns skills and uses sampling. Transport: STREAMABLE HTTP',
-        value: 'dynamic-agent',
+        name: 'Default - HTTP - A minimal setup with basic examples Transport: STREAMABLE HTTP',
+        value: 'default-http',
       },
     ],
-    default: 'default',
+    default: 'default-stdio',
   })
   return res.template
 }

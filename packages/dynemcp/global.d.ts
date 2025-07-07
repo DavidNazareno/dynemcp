@@ -22,7 +22,7 @@ declare module '@modelcontextprotocol/sdk/dist/esm/types.js' {
         params?: object
       }
 
-  export type MessageExtraInfo = any // Puedes mejorar esto si tienes la definición real
+  export type MessageExtraInfo = any // You can improve this if you have the actual definition
 }
 
 declare module '@modelcontextprotocol/sdk/dist/esm/shared/transport.js' {

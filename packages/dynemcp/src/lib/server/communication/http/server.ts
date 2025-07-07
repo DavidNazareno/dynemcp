@@ -62,14 +62,14 @@ export class HTTPServers {
   }
 
   /**
-   * Método estándar de Transport. Inicializa el servidor Express y endpoints.
-   * Alias de connect(), pero sin argumentos (no requiere McpServer).
+   * Standard Transport method. Initializes the Express server and endpoints.
+   * Alias of connect(), but without arguments (does not require McpServer).
    */
   async start(): Promise<void> {
-    // Si ya está corriendo, no hagas nada
+    // If already running, do nothing
     if (this.server) return
-    // Por compatibilidad, inicializa endpoints con un dummy McpServer si es necesario
-    // O simplemente inicializa los endpoints y el server Express
+    // For compatibility, initialize endpoints with a dummy McpServer if necessary
+    // Or simply initialize the endpoints and the Express server
     await this.connect(
       new McpServer({ name: 'dynemcp-server', version: '1.0.0' })
     )
@@ -77,7 +77,7 @@ export class HTTPServers {
 
   async connect(server: McpServer): Promise<void> {
     try {
-      // Middleware de autenticación
+      // Authentication middleware
       const middlewarePath = registry.getAuthenticationMiddlewarePath()
       let userAuthMiddleware: RequestHandler
       if (!middlewarePath) {
@@ -93,7 +93,7 @@ export class HTTPServers {
 
       await server.connect(this.transport)
 
-      // Selección de endpoints según el modo
+      // Endpoint selection according to mode
       if (this.options.mode === 'sse') {
         this.setupSseEndpoints(userAuthMiddleware)
       } else {
@@ -126,7 +126,7 @@ export class HTTPServers {
     }
   }
 
-  // --- MODO HTTP MCP ---
+  // --- HTTP MCP MODE ---
   private setupMcpEndpoints(authMiddleware: RequestHandler) {
     // Session termination endpoint
     this.app.delete(this.endpoint, (req, res) => {
@@ -233,7 +233,7 @@ export class HTTPServers {
     })
   }
 
-  // --- MODO SSE/INSPECTOR ---
+  // --- SSE/INSPECTOR MODE ---
   private setupSseEndpoints(authMiddleware: RequestHandler) {
     // SSE endpoint for MCP Inspector
     this.app.get('/sse', authMiddleware, (req, res) => {
@@ -242,7 +242,7 @@ export class HTTPServers {
       res.setHeader('Connection', 'keep-alive')
       res.flushHeaders?.()
 
-      // Session management (opcional)
+      // Session management (optional)
       let sessionId: string | null = null
       try {
         sessionId = handleSessionManagement(
@@ -310,7 +310,7 @@ export class HTTPServers {
     })
   }
 
-  // --- Métodos Transport ---
+  // --- Transport Methods ---
   async send(
     message: JSONRPCMessage,
     options?: TransportSendOptions

@@ -4,19 +4,177 @@ title: Configuration API
 
 # Configuration API
 
-Configure DyneMCP by creating a `dynemcp.config.json` (or `.ts`) file in your project root. This file controls the server name, version, and where to find your tools, resources y prompts.
+Configure DyneMCP by creating a `dynemcp.config.ts` file in your project root. This file controls all aspects of the server: name, version, autoloaded directories, transport, logging, debugging, performance, security, and more.
 
-## Minimal Example
+> **Note:** Only TypeScript config files (`dynemcp.config.ts`) are supported. JSON is not supported.
 
-```jsonc
-{
-  "server": { "name": "my-server", "version": "1.0.0" },
-  "tools": { "enabled": true, "directory": "./src/tools" },
-  "resources": { "enabled": true, "directory": "./src/resources" },
-  "prompts": { "enabled": true, "directory": "./src/prompts" },
+## Example: Full Configuration
+
+```ts
+
+export {
+  server: {
+    name: 'my-server',
+    version: '1.0.0',
+    documentationUrl: 'https://example.com/docs',
+    description: 'My DyneMCP server',
+    capabilities: {
+      completions: {}
+    }
+  },
+  tools: {
+    enabled: true,
+    directory: './src/tools',
+    pattern: '*.ts',
+    exclude: ['**/*.test.ts']
+  },
+  resources: {
+    enabled: true,
+    directory: './src/resources'
+  },
+  prompts: {
+    enabled: true,
+    directory: './src/prompts'
+  },
+  transport: {
+    type: 'http',
+    options: {
+      mode: 'streamable-http',
+      port: 3000,
+      host: 'localhost',
+      endpoint: '/api',
+      responseMode: 'batch',
+      batchTimeout: 30000,
+      maxMessageSize: '4mb',
+      session: {
+        enabled: true,
+        headerName: 'Mcp-Session-Id',
+        allowClientTermination: true
+      },
+      resumability: {
+        enabled: false,
+        historyDuration: 300000
+      },
+      cors: {
+        allowOrigin: '*',
+        allowMethods: 'GET, POST, OPTIONS',
+        allowHeaders: 'Content-Type, Authorization, Mcp-Session-Id, Last-Event-ID',
+        exposeHeaders: 'Content-Type, Mcp-Session-Id',
+        maxAge: 86400
+      },
+      authentication: {
+        path: '/auth'
+      }
+    }
+  },
+  description: 'Optional global description',
+  logging: {
+    enabled: true,
+    level: 'info',
+    format: 'json',
+    timestamp: true,
+    colors: true
+  },
+  debug: {
+    enabled: false,
+    verbose: false,
+    showComponentDetails: false,
+    showTransportDetails: false
+  },
+  performance: {
+    maxConcurrentRequests: 100,
+    requestTimeout: 30000,
+    memoryLimit: '512mb',
+    enableMetrics: false
+  },
+  security: {
+    enableValidation: true,
+    strictMode: false,
+    allowedOrigins: ['*'],
+    rateLimit: {
+      enabled: false,
+      maxRequests: 100,
+      windowMs: 900000
+    }
+  }
 }
 ```
 
-- Only include fields you need. Defaults are production-ready.
+## Configuration Sections
+
+### `server`
+- `name` (string, default: `"dynemcp-server"`): Server name.
+- `version` (string, default: `"1.0.0"`): Server version.
+- `documentationUrl` (string, optional): Link to your server's documentation.
+- `description` (string, optional): Description of your server.
+- `capabilities` (object, default: `{ completions: {} }`): Reserved for protocol extensions.
+
+### `tools`, `resources`, `prompts`
+- `enabled` (boolean, default: `true`): Enable autoloading for this type.
+- `directory` (string): Directory to load from.
+- `pattern` (string, default: `"*.ts"`): Glob pattern for files.
+- `exclude` (array of strings, optional): Patterns to exclude.
+
+### `transport`
+- `type` (`'stdio'` | `'http'`): Transport type.
+- `options` (object, optional for `stdio`, required for `http`):
+  - `mode` (`'streamable-http'` | `'sse'`, default: `'streamable-http'`)
+  - `port` (number, default: `3000`)
+  - `host` (string, default: `'localhost'`)
+  - `endpoint` (string, default: `'/api'`)
+  - `responseMode` (`'batch'` | `'stream'`, default: `'batch'`)
+  - `batchTimeout` (number, default: `30000`)
+  - `maxMessageSize` (string, default: `'4mb'`)
+  - `session` (object): Session options
+    - `enabled` (boolean, default: `true`)
+    - `headerName` (string, default: `'Mcp-Session-Id'`)
+    - `allowClientTermination` (boolean, default: `true`)
+  - `resumability` (object): Resumability options
+    - `enabled` (boolean, default: `false`)
+    - `historyDuration` (number, default: `300000`)
+  - `cors` (object): CORS options
+    - `allowOrigin` (string or array, default: `'*'`)
+    - `allowMethods` (string, default: `'GET, POST, OPTIONS'`)
+    - `allowHeaders` (string, default: `'Content-Type, Authorization, Mcp-Session-Id, Last-Event-ID'`)
+    - `exposeHeaders` (string, default: `'Content-Type, Mcp-Session-Id'`)
+    - `maxAge` (number, default: `86400`)
+  - `authentication` (object): Auth middleware options
+    - `path` (string): Path for authentication middleware
+
+### `description`
+- (string, optional): Global description for your project.
+
+### `logging` (optional)
+- `enabled` (boolean, default: `true`)
+- `level` (`'info'`, `'warn'`, `'error'`, `'debug'`, default: `'info'`)
+- `format` (`'text'`, `'json'`, default: `'json'`)
+- `timestamp` (boolean, default: `true`)
+- `colors` (boolean, default: `true`)
+
+### `debug` (optional)
+- `enabled` (boolean, default: `false`)
+- `verbose` (boolean, default: `false`)
+- `showComponentDetails` (boolean, default: `false`)
+- `showTransportDetails` (boolean, default: `false`)
+
+### `performance` (optional)
+- `maxConcurrentRequests` (number, default: `100`)
+- `requestTimeout` (number, default: `30000`)
+- `memoryLimit` (string, default: `'512mb'`)
+- `enableMetrics` (boolean, default: `false`)
+
+### `security` (optional)
+- `enableValidation` (boolean, default: `true`)
+- `strictMode` (boolean, default: `false`)
+- `allowedOrigins` (array of strings, default: `['*']`)
+- `rateLimit` (object):
+  - `enabled` (boolean, default: `false`)
+  - `maxRequests` (number, default: `100`)
+  - `windowMs` (number, default: `900000`)
+
+---
+
+- All sections are optional except `server`, `tools`, `resources`, `prompts`, and `transport`.
+- Defaults are production-ready.
 - Never expose secrets in config files.
-- See the main guide for all options.
+- Errors in your config will be reported clearly at startup.

@@ -6,6 +6,14 @@ import {
 
 export type { PackageManager }
 
+export function detectPackageManager(): string {
+  try {
+    execa.commandSync('pnpm --version')
+    return 'pnpm'
+  } catch {}
+  throw new Error('No supported package manager found')
+}
+
 /**
  * Returns the package manager used in the project based on user preference
  * or available package managers on the system.

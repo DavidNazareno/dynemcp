@@ -1,4 +1,4 @@
-// Helpers de validación para StreamableHTTPTransport
+// Validation helpers for StreamableHTTPTransport
 
 export function validateJSONRPCMessage(message: unknown): void {
   if (!message || typeof message !== 'object') {

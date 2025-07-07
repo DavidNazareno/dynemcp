@@ -1,7 +1,11 @@
 // Dynamic loading logic for the DyneMCP Registry module
 // Provides the default RegistryLoader for dynamic module imports.
 
-import type { RegistryItem, RegistryLoader } from './interfaces'
+import type {
+  RegistryItem,
+  RegistryItemType,
+  RegistryLoader,
+} from './interfaces'
 import { RegistryItemLoadError } from './errors'
 
 /**
@@ -9,10 +13,7 @@ import { RegistryItemLoadError } from './errors'
  * Can be extended or replaced for custom loading strategies.
  */
 export class DefaultRegistryLoader implements RegistryLoader {
-  async loadItem(
-    type: 'tool' | 'prompt' | 'resource' | 'sample',
-    id: string
-  ): Promise<RegistryItem> {
+  async loadItem(type: RegistryItemType, id: string): Promise<RegistryItem> {
     try {
       // Example dynamic import path logic (customize as needed)
       const modulePath = `../${type}s/${id}`

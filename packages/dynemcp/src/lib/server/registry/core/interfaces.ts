@@ -6,12 +6,7 @@
 /**
  * RegistryItemType: Supported component types in the registry.
  */
-export type RegistryItemType =
-  | 'tool'
-  | 'prompt'
-  | 'resource'
-  | 'sample'
-  | 'root'
+export type RegistryItemType = 'tool' | 'prompt' | 'resource'
 
 export interface RegistryItem {
   id: string

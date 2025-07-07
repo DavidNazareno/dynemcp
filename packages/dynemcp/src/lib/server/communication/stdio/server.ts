@@ -76,7 +76,7 @@ export class StdioTransport {
     message: JSONRPCMessage,
     options?: TransportSendOptions
   ): Promise<void> {
-    // Si el SDK acepta options, pásalos; si no, solo el mensaje
+    // If the SDK accepts options, pass them; if not, just the message
     if (this.transport.send.length === 2) {
       await (this.transport as any).send(message, options)
     } else {

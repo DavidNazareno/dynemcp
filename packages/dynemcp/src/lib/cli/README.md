@@ -11,15 +11,14 @@ The DyneMCP CLI provides a unified, extensible command-line interface for the Dy
 ```
 cli/
   README.md         # This documentation
-  index.ts          # Public re-export: { cli, dev }
+  index.ts          # Public re-export: { cli, dev, ConsoleLogger, StderrLogger }
   core/
     cli.ts          # Main CLI entry point: command registration and handlers
     dev.ts          # Handler for 'dev' command (inspector/default mode)
     logger.ts       # Logger interface and implementations (console, stderr)
-    run-default-mode.ts # Default dev server runner (hot-reload, shutdown)
+    run.ts          # Main dev server runner (hot-reload, shutdown, inspector integration)
     types.ts        # CLI-specific types (DevOptions, etc.)
     utils.ts        # Helpers (spawnProcess, transport/host/port resolution)
-    inspector.ts    # Inspector launcher (HTTP or stdio mode)
     handler/        # Command-specific handlers (build, start, clean, analyze)
 ```
 
@@ -30,10 +29,10 @@ cli/
 - **cli.ts**: CLI entry point. Sets up all main commands (`dev`, `build`, `start`, `clean`, `analyze`) using yargs and connects them to their handlers.
 - **dev.ts**: Handler for the `dev` command. Decides between inspector mode and default dev mode.
 - **logger.ts**: Provides `ConsoleLogger` and `StderrLogger` for colored and error stream logging.
-- **run-default-mode.ts**: Handles hot-reload, server startup, and graceful shutdown in dev mode.
+- **run.ts**: Handles dev server logic, hot-reload, server startup, graceful shutdown, and MCP Inspector integration.
 - **types.ts**: Defines types for CLI argument parsing and handler logic.
 - **utils.ts**: Utility functions for process spawning and transport/host/port resolution.
-- **inspector.ts**: Handles launching the MCP Inspector in HTTP or stdio mode, including server startup and process management.
+- **handler/**: Contains command-specific handlers for `build`, `start`, `clean`, and `analyze`.
 
 ---
 
@@ -41,6 +40,7 @@ cli/
 
 - **cli**: The yargs CLI instance, ready to be executed.
 - **dev**: Programmatic entrypoint for dev mode (used by the CLI and tests).
+- **ConsoleLogger, StderrLogger**: Logger implementations for consistent output.
 
 ---
 
@@ -105,7 +105,7 @@ dynemcp analyze
 ## Best Practices
 
 - Keep all implementation logic in `core/` and only re-export from `index.ts`.
-- Only expose the minimal public API (`cli`, `dev`).
+- Only expose the minimal public API (`cli`, `dev`, `ConsoleLogger`, `StderrLogger`).
 - Use async/await for all I/O and process management.
 - Keep command handlers minimal; delegate logic to helpers or submodules.
 - Document new commands and options in this README.

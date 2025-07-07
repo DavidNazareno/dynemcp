@@ -81,16 +81,16 @@ export class DyneMCP {
       tools: this.config.tools,
       resources: this.config.resources,
       prompts: this.config.prompts,
-      // resourceTemplates se cargan automáticamente desde las carpetas de resources
+      // resourceTemplates are automatically loaded from the resources folders
     })
 
     this.logLoadedComponents()
 
-    // Registrar componentes en el servidor MCP
+    // Register components in the MCP server
     registerComponents(this.server, this.tools, this.resources, this.prompts)
 
     this.isInitialized = true
-    this.log('✅ DyneMCP server inicializado correctamente')
+    this.log('✅ DyneMCP server initialized correctly')
   }
 
   /**
@@ -111,7 +111,7 @@ export class DyneMCP {
       await this.transport.close()
     }
     if (this.isCustomTransport()) {
-      this.log('🛑 MCP server detenido')
+      this.log('🛑 MCP server stopped')
     }
   }
 
@@ -279,7 +279,7 @@ export class DyneMCP {
         console.log(
           `🎯 MCP server "${this.config.server.name}" started successfully`
         )
-        // Detalles de puerto y endpoint se muestran en el transport HTTP
+        // Details of port and endpoint are shown in the HTTP transport
       }
     }
   }

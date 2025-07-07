@@ -1,0 +1,37 @@
+---
+title: Prompt API
+---
+
+
+The DyneMCP prompt API provides a type-safe, functional way to define prompt templates and workflows for your MCP server. Prompts can accept arguments, validate input, generate dynamic messages, and support argument completion.
+
+## Usage Example
+
+```typescript
+import { prompt } from '@dynemcp/dynemcp/server/api/core/prompt'
+
+export default prompt({
+  name: 'my-prompt',
+  description: 'A sample prompt',
+  arguments: [
+    { name: 'topic', description: 'Topic to discuss', required: true },
+  ],
+  getMessages: async (args) => [
+    { role: 'user', content: { type: 'text', text: `Topic: ${args?.topic}` } },
+  ],
+})
+```
+
+## Options
+
+- `name` (string, required): Unique prompt name.
+- `description` (string, optional): Description of the prompt.
+- `arguments` (array, optional): List of argument definitions.
+- `argsSchema` (Zod schema, optional): Schema for argument validation.
+- `getMessages` (function, required): Generates prompt messages.
+- `complete` (function, optional): Argument completion for suggestions.
+
+## Notes
+- Use `argsSchema` for strong argument validation.
+- The returned object is MCP-compatible and can be auto-discovered by the registry.
+- See the templates for real-world prompt examples. 

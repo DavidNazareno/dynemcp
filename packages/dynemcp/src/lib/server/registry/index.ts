@@ -25,12 +25,6 @@ export { DefaultRegistryLoader } from './core/loader'
 export { InMemoryRegistryStorage } from './core/storage'
 export { DyneMCPRegistry } from './core/registry'
 
-// Centralized default values for the registry
-export {
-  DEFAULT_REGISTRY_TYPES,
-  DEFAULT_STORAGE_BACKEND,
-} from './core/defaults'
-
 // Error handling utilities for registry errors
 export { RegistryItemNotFoundError, RegistryItemLoadError } from './core/errors'
 

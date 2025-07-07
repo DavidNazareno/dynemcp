@@ -33,42 +33,25 @@ export default defineConfig({
       },
       sidebar: [
         {
-          label: 'Start Here',
-          items: [
-            { label: 'Getting Started', link: '/guides/getting-started' },
-            { label: 'Project Templates', link: '/guides/templates' },
-          ],
-        },
-        {
           label: 'Guides',
           items: [
-            { label: 'Security Best Practices', link: '/guides/security' },
-            { label: 'Production Deployment', link: '/guides/deployment' },
-            { label: 'Performance Optimization', link: '/guides/performance' },
-            { label: 'Monitoring', link: '/guides/monitoring' },
-            { label: 'Compliance', link: '/guides/compliance' },
+            { label: 'Installation', link: '/guides/install' },
+            { label: 'Getting Started', link: '/guides/getting-started' },
+            { label: 'Project Templates', link: '/guides/templates' },
+            { label: 'Security', link: '/guides/security' },
           ],
         },
         {
-          label: 'Reference',
+          label: 'API Reference',
           items: [
-            { label: 'Server Architecture', link: '/reference/server' },
-            { label: 'Build System', link: '/reference/build-system' },
-            { label: 'Configuration', link: '/reference/configuration' },
-            { label: 'API Reference', link: '/reference/api' },
-            { label: 'Transport Options', link: '/reference/transport' },
-            { label: 'CLI Reference', link: '/reference/cli' },
+            { label: 'Configuration', link: '/api/config' },
+            { label: 'Tool API', link: '/api/tool' },
+            { label: 'Resource API', link: '/api/resource' },
+            { label: 'Prompt API', link: '/api/prompt' },
+            { label: 'Root API', link: '/api/root' },
           ],
         },
-        {
-          label: 'API Documentation',
-          items: [
-            { label: 'Tools API', link: '/api/tools' },
-            { label: 'Resources API', link: '/api/resources' },
-            { label: 'Registry API', link: '/api/registry' },
-            { label: 'Communication API', link: '/api/communication' },
-          ],
-        },
+        // Advanced section can be added here in the future
       ],
       /*   customCss: ['./src/styles/custom.css'], */
       head: [

@@ -23,7 +23,11 @@
     "src/**/*.spec.js",
     "src/**/*.test.jsx",
     "src/**/*.spec.jsx",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "src/lib/cli/core/cli.ts",
+    "src/**/*.d.ts",
+    "src/lib/project/**/*.ts",
+    "src/lib/cli/core/**/*.ts"
   ],
   "exclude": ["src/lib/template/templates"]
 }

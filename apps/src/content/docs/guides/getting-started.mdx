@@ -3,35 +3,34 @@ title: Getting Started with DyneMCP
 description: Learn how to create and set up your first DyneMCP project - a modern, modular framework for building MCP servers.
 ---
 
-# Getting Started with DyneMCP
 
 DyneMCP is a modern, modular framework for building, running, and managing Model Context Protocol (MCP) servers and tools. It provides a unified CLI, a robust build system, and a highly extensible server runtime—all designed for zero-config, production-ready workflows.
 
 ## Creating a New Project
 
-The easiest way to create a new DyneMCP project is using pnpm:
+The official way to create a new DyneMCP project is using the project generator:
 
 ```bash
-pnpm dlx @dynemcp/create-dynemcp my-project
+pnpx create-dynemcp@latest my-project
 ```
 
 When you run the create command, you'll be guided through an interactive process that will:
 
-1. Let you choose a template
+1. Let you choose a template (see [Project Templates](/guides/templates))
 2. Confirm your project name
 3. Install all dependencies
 
 You can also use non-interactive mode with various options:
 
 ```bash
-# Use default template
-pnpm dlx @dynemcp/create-dynemcp my-agent --yes
+# Use default-stdio template
+pnpx create-dynemcp@latest my-agent --template default-stdio --yes
 
-# Specify a template
-pnpm dlx @dynemcp/create-dynemcp my-calculator --template calculator --yes
+# Use default-http template
+pnpx create-dynemcp@latest my-server --template default-http --yes
 
 # Skip dependency installation
-pnpm dlx @dynemcp/create-dynemcp my-agent --template secure-agent --yes --skip-install
+pnpx create-dynemcp@latest my-agent --template default-http --yes --skip-install
 ```
 
 ## Project Structure
@@ -48,7 +47,7 @@ my-project/
 │   │   └── *.ts              # Resource definitions
 │   └── prompts/              # MCP prompts directory
 │       └── *.ts              # Prompt definitions
-├── dynemcp.config.json       # DyneMCP configuration
+├── dynemcp.config.ts         # DyneMCP configuration (TypeScript recommended)
 ├── package.json              # Node.js dependencies
 ├── tsconfig.json             # TypeScript configuration
 └── README.md                 # Project documentation
@@ -74,6 +73,18 @@ Now that you have your project set up, you might want to:
 2. [Learn about the server architecture](/reference/server) to understand how DyneMCP works
 3. [Check the security best practices](/guides/security) to ensure your deployment is secure
 4. [Read about the build system](/reference/build-system) to optimize your builds
+
+## Running Your Project
+
+After project creation, run:
+
+```bash
+cd my-project
+pnpm install # if you skipped install
+pnpm run dev
+```
+
+This will start the development server.
 
 ## Why DyneMCP?
 

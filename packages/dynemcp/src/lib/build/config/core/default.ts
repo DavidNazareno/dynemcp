@@ -17,9 +17,9 @@ export const DEFAULT_BUILD_CONFIG = {
   entryPoint: './src/index.ts',
   outDir: './dist',
   outFile: 'server.js',
-  format: 'cjs', // 'esm' o 'cjs' según el runtime soportado
-  minify: true, // true para producción, false para debug
-  sourcemap: false, // true para debug, false para producción
+  format: 'cjs', // 'esm' or 'cjs' depending on the supported runtime
+  minify: true, // true for production, false for debug
+  sourcemap: false, // true for debug, false for production
   bundle: true,
   external: [
     // Paquetes core y de infraestructura que siempre deben ser externos para optimizar el bundle

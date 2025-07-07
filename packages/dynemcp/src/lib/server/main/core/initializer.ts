@@ -65,7 +65,7 @@ export function registerTools(
                   ) {
                     return { type: 'text', text: (item as any).text }
                   }
-                  // Aquí puedes agregar validaciones para otros tipos (image, audio, etc.)
+                  // Here you can add validations for other types (image, audio, etc.)
                 }
                 return { type: 'text', text: JSON.stringify(item) }
               }
@@ -185,7 +185,7 @@ export function registerPrompts(
                     },
                   }
                 }
-                // fallback: siempre retorna un mensaje de texto válido
+                // fallback: always returns a valid text message
                 return {
                   role,
                   content: {

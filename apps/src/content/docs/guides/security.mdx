@@ -1,211 +1,67 @@
 ---
-title: Security Best Practices
-description: Learn about DyneMCP's security features and best practices for secure deployment.
+title: Security & Authentication Middleware
 ---
 
-# Security Best Practices
 
-DyneMCP is built with security in mind, providing robust security features and best practices out of the box. This guide will help you understand and implement these security measures in your DyneMCP applications.
+DyneMCP provides a unified authentication middleware for securing your MCP server. This middleware supports JWT, OAuth2/OIDC, or both, and is designed to be easy to configure and production-ready.
 
-## JWT Authentication
+## How to Use the Middleware
 
-### Required in Production
+The recommended way to secure your DyneMCP server is to use the `dynemcpMiddleware` from `@dynemcp/dynemcp/server/api/auth/dynemcp-middleware`.
 
-JWT authentication is a mandatory requirement for production deployments. This ensures secure communication between clients and your DyneMCP server.
-
-```typescript
-// Example JWT middleware configuration
-import { jwtMiddleware } from 'dynemcp/server'
-
-app.use(
-  jwtMiddleware({
-    expectedAudience: 'your-server-id', // Required
-    // Other JWT options...
-  })
-)
-```
-
-### Best Practices for JWT
-
-1. **Always Set Expected Audience**
-
-   - Prevents token passthrough attacks
-   - Ensures tokens are intended for your server
-   - Mitigates confused deputy attacks
-
-2. **Token Validation**
-   - Verify token signatures
-   - Check expiration times
-   - Validate issuer claims
-
-## Environment Variables
-
-DyneMCP automatically checks critical environment variables at server startup to ensure security.
-
-### Required Variables
-
-```env
-JWT_SECRET=your-secure-secret
-EXPECTED_AUDIENCE=your-server-id
-NODE_ENV=production
-```
-
-### Validation Checks
-
-The server performs automatic checks for:
-
-- Presence of required variables
-- Secure values (minimum length, complexity)
-- Production-specific requirements
-- Sensitive data protection
-
-### Error Handling
-
-If security requirements are not met:
-
-- Server will not start
-- Clear error messages are displayed
-- Guidance for fixing issues is provided
-
-## HTTP Security Headers
-
-When using HTTP transport, DyneMCP automatically configures security headers:
-
-### CORS Configuration
+### Example: Using in `middleware.ts`
 
 ```typescript
-// Example CORS configuration
-{
-  origin: ['https://trusted-domain.com'],
-  methods: ['GET', 'POST'],
-  credentials: true
-}
+import {
+  dynemcpMiddleware,
+  type DynemcpMiddlewareConfig,
+} from '@dynemcp/dynemcp/server/api/auth/dynemcp-middleware'
+
+// JWT authentication (simple)
+export default dynemcpMiddleware({
+  type: 'jwt',
+  jwt: {
+    secret: process.env.JWT_SECRET!,
+    allowedRoles: ['admin', 'user'], // optional
+    expectedAudience: 'your-api',    // optional but recommended
+  },
+})
 ```
 
-### Security Headers
+### Example: OAuth2/OIDC Authentication
 
 ```typescript
-// Automatically applied headers
-{
-  'Content-Security-Policy': 'default-src "self"',
-  'X-XSS-Protection': '1; mode=block',
-  'X-Frame-Options': 'DENY',
-  'X-Content-Type-Options': 'nosniff'
-}
+export default dynemcpMiddleware({
+  type: 'oauth2',
+  oauth2: {
+    issuerBaseURL: process.env.AUTH0_ISSUER_URL!,
+    audience: process.env.AUTH0_AUDIENCE!,
+  },
+})
 ```
 
-## Secure Communication
-
-### Transport Security
-
-1. **HTTPS in Production**
-
-   - Always use HTTPS in production
-   - Configure SSL/TLS properly
-   - Keep certificates up to date
-
-2. **Secure WebSocket**
-   - Use WSS protocol
-   - Implement heartbeat checks
-   - Handle disconnections gracefully
-
-### Data Protection
-
-1. **Input Validation**
-
-   - Validate all incoming data
-   - Use type-safe schemas
-   - Implement rate limiting
-
-2. **Output Sanitization**
-   - Sanitize response data
-   - Prevent information leakage
-   - Use proper content types
-
-## Audit Logging
-
-DyneMCP provides built-in audit logging capabilities:
+### Example: Both JWT and OAuth2 (Composite)
 
 ```typescript
-// Example audit log configuration
-{
-  level: 'info',
-  format: 'json',
-  securityEvents: true
-}
+export default dynemcpMiddleware({
+  type: 'both',
+  jwt: {
+    secret: process.env.JWT_SECRET!,
+    allowedRoles: ['admin'],
+  },
+  oauth2: {
+    issuerBaseURL: process.env.AUTH0_ISSUER_URL!,
+    audience: process.env.AUTH0_AUDIENCE!,
+  },
+})
 ```
 
-### Logged Events
 
-- Authentication attempts
-- Authorization failures
-- Security-related configuration changes
-- Critical operations
-- Error conditions
+## Notes
+- **JWT:** Use a strong secret and set `expectedAudience` for production security.
+- **OAuth2:** Use your provider's issuer URL and audience.
+- **Both:** The middleware will try OAuth2 first, then fallback to JWT.
+- The middleware sets `req.user` to the decoded token payload if valid.
+- If authentication fails, the server responds with 401 or 403 as appropriate.
 
-## Production Checklist
-
-Before deploying to production:
-
-1. **Authentication**
-
-   - [ ] JWT authentication enabled
-   - [ ] Expected audience configured
-   - [ ] Token validation implemented
-
-2. **Environment**
-
-   - [ ] Secure secrets configured
-   - [ ] Production variables set
-   - [ ] Validation checks passing
-
-3. **Headers**
-
-   - [ ] CORS properly configured
-   - [ ] Security headers enabled
-   - [ ] Content security policy set
-
-4. **Logging**
-
-   - [ ] Audit logging enabled
-   - [ ] Log rotation configured
-   - [ ] Sensitive data masked
-
-5. **Transport**
-   - [ ] HTTPS configured
-   - [ ] Certificates valid
-   - [ ] WSS enabled if needed
-
-## Best Practices
-
-1. **Regular Updates**
-
-   - Keep DyneMCP updated
-   - Monitor security advisories
-   - Update dependencies
-
-2. **Access Control**
-
-   - Implement least privilege
-   - Use role-based access
-   - Regular access reviews
-
-3. **Monitoring**
-
-   - Enable security logging
-   - Monitor for attacks
-   - Set up alerts
-
-4. **Compliance**
-   - Document security measures
-   - Regular security reviews
-   - Maintain compliance records
-
-## Next Steps
-
-To further enhance your application's security:
-
-1. [Production Deployment Guide](/guides/deployment)
-2. [Configuration Reference](/reference/configuration)
-3. [Monitoring Guide](/guides/monitoring)
-4. [Compliance Documentation](/guides/compliance)
+See the [default-http template](https://github.com/DavidNazareno/dynemcp/tree/main/packages/create-dynemcp/src/lib/template/templates/default-http/src/middleware.ts) for a real-world example.

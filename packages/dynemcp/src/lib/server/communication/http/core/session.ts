@@ -1,4 +1,4 @@
-// Helpers para manejo de sesión HTTP para StreamableHTTPTransport
+// Helpers for HTTP session management for StreamableHTTPTransport
 import express from 'express'
 
 export function handleSessionManagement(
