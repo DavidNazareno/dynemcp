@@ -1,0 +1,96 @@
+---
+title: Getting Started with DyneMCP
+description: Learn how to create and set up your first DyneMCP project - a modern, modular framework for building MCP servers.
+---
+
+DyneMCP is a modern, modular framework for building, running, and managing Model Context Protocol (MCP) servers and tools. It provides a unified CLI, a robust build system, and a highly extensible server runtime—all designed for zero-config, production-ready workflows.
+
+## Creating a New Project
+
+The official way to create a new DyneMCP project is using the project generator:
+
+```bash
+pnpx create-dynemcp@latest my-project
+```
+
+When you run the create command, you'll be guided through an interactive process that will:
+
+1. Let you choose a template (see [Project Templates](/guides/templates))
+2. Confirm your project name
+3. Install all dependencies
+
+You can also use non-interactive mode with various options:
+
+```bash
+# Use default-stdio template
+pnpx create-dynemcp@latest my-agent --template default-stdio --yes
+
+# Use default-http template
+pnpx create-dynemcp@latest my-server --template default-http --yes
+
+# Skip dependency installation
+pnpx create-dynemcp@latest my-agent --template default-http --yes --skip-install
+```
+
+## Project Structure
+
+After creating a project, you'll have a structure like this:
+
+```
+my-project/
+├── src/
+│   ├── index.ts              # Main entry point
+│   ├── tools/                # MCP tools directory
+│   │   └── *.ts              # Tool implementations
+│   ├── resources/            # MCP resources directory
+│   │   └── *.ts              # Resource definitions
+│   └── prompts/              # MCP prompts directory
+│       └── *.ts              # Prompt definitions
+├── dynemcp.config.ts         # DyneMCP configuration (TypeScript recommended)
+├── package.json              # Node.js dependencies
+├── tsconfig.json             # TypeScript configuration
+└── README.md                 # Project documentation
+```
+
+## Features
+
+DyneMCP comes with several powerful features out of the box:
+
+- 🎯 **Interactive CLI**: Guided project creation with prompts
+- 📋 **Multiple Templates**: Choose from specialized templates for different use cases
+- 📦 **Zero Configuration**: Projects work out of the box
+- 🔧 **Modern Tooling**: TypeScript, ESBuild, and hot reload included
+- 🌐 **Transport Options**: Support for stdio, HTTP, and streaming transports
+- 🛡️ **Security Ready**: Templates with authentication and security features
+- 📚 **Documentation**: Each template includes comprehensive guides
+
+## Next Steps
+
+Now that you have your project set up, you might want to:
+
+1. [Explore available templates](/guides/templates) to find the best starting point for your use case
+2. [Learn about the server architecture](/reference/server) to understand how DyneMCP works
+3. [Check the security best practices](/guides/security) to ensure your deployment is secure
+4. [Read about the build system](/reference/build-system) to optimize your builds
+
+## Running Your Project
+
+After project creation, run:
+
+```bash
+cd my-project
+pnpm install # if you skipped install
+pnpm run dev
+```
+
+This will start the development server.
+
+## Why DyneMCP?
+
+DyneMCP offers several advantages for building MCP servers:
+
+- **Zero-config, production-ready:** No need to tweak endless configs—just build and deploy
+- **Professional, modular architecture:** Easy to extend, maintain, and onboard new developers
+- **Security-first:** Built-in checks and best practices to keep your deployments safe
+- **Full MCP protocol compliance:** Works out of the box with all MCP clients and hosts
+- **Clear documentation:** Every module and submodule is documented for clarity and maintainability

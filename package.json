@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/source",
-  "version": "0.0.17-canary.20250625T20555",
+  "version": "0.0.20-canary.20250626T18090",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -44,6 +44,7 @@
     "@nx/web": "21.2.0",
     "@nxtensions/astro": "^19.0.1",
     "@playwright/test": "^1.36.0",
+    "@rollup/plugin-typescript": "^12.1.4",
     "@swc-node/register": "~1.9.1",
     "@swc/cli": "~0.6.0",
     "@swc/core": "~1.5.7",
@@ -72,9 +73,12 @@
     "jsonc-eslint-parser": "^2.1.0",
     "nx": "21.2.0",
     "prettier": "^3.0.0",
+    "rollup": "^4.44.1",
+    "rollup-plugin-copy": "^3.5.0",
+    "tailwindcss": "^4.1.11",
     "tslib": "^2.3.0",
     "tsx": "^4.20.3",
-    "typescript": "~5.8.2",
+    "typescript": "~5.8.3",
     "typescript-eslint": "^8.34.1",
     "vite": "^6.0.0",
     "vitest": "^3.0.0"

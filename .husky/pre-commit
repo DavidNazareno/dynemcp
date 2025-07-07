@@ -1,5 +1,7 @@
 # Ejecutar beautify (formato y eslint fix)
 pnpm run beautify
 
+pnpm run build
+
 # Ejecutar tests
 pnpm test

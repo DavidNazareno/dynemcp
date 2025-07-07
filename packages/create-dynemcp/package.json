@@ -1,25 +1,18 @@
 {
   "name": "@dynemcp/create-dynemcp",
-  "version": "0.0.17-canary.20250625T20555",
+  "version": "0.0.20-canary.20250626T18090",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "create-dynemcp": "./dist/index.js"
+    "create-dynemcp": "./dist/bin.js"
   },
   "scripts": {
-    "clean": "rm -rf dist && rm -rf node_modules"
-  },
-  "nx": {
-    "targets": {
-      "postbuild": {
-        "command": "cp -r packages/create-dynemcp/src/templates packages/create-dynemcp/dist/ && chmod +x packages/create-dynemcp/dist/index.js",
-        "cwd": "packages/create-dynemcp/dist/lib/index.js",
-        "parallel": false
-      }
-    }
+    "build": "rm -rf dist && rollup -c && tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rm -rf dist",
+    "copy-templates": "cp -r src/lib/template/templates dist/templates"
   },
   "exports": {
     "./package.json": "./package.json",
@@ -33,20 +26,24 @@
   "dependencies": {
     "async-sema": "^3.1.1",
     "chalk": "4.1.2",
+    "commander": "8.3.0",
     "fast-glob": "^3.3.3",
-    "fs-extra": "11.2.0",
+    "fs-extra": "11.3.0",
     "inquirer": "^9.2.16",
     "ora": "5.3.0",
-    "execa": "^9.6.0",
+    "execa": "^5.1.1",
     "tslib": "^2.3.0",
     "zod": "3.25.67",
-    "express": "4.21.2",
-    "@dynemcp/dynemcp": "0.0.17-canary.20250625T20555"
+    "express": "4.21.2"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.8",
     "@types/node": "^20.19.0",
     "@types/validate-npm-package-name": "^4.0.2"
-  }
+  },
+  "files": [
+    "dist",
+    "templates"
+  ]
 }

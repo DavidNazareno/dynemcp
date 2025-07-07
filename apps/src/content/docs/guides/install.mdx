@@ -1,0 +1,160 @@
+---
+title: Installation Guide
+---
+
+# Installation Guide
+
+This guide explains how to create a new DyneMCP project using the recommended CLI tool, as well as how to set up a project manually for advanced users.
+
+## Recommended: Using `create-dynemcp`
+
+The fastest way to start a new DyneMCP project is with the official project generator. This sets up everything for you, including the correct structure, dependencies, and a working template.
+
+### 1. Create a New Project
+
+```sh
+pnpx create-dynemcp@latest
+```
+
+- Follow the interactive prompts to choose your project name and template (`default-stdio` or `default-http`).
+- The CLI will scaffold your project in a new directory.
+
+### 2. Install Dependencies
+
+```sh
+cd your-project-name
+pnpm install
+```
+
+### 3. Start the Development Server
+
+```sh
+pnpm run dev
+```
+
+Your DyneMCP server will start, and you can begin developing your tools, resources, and prompts.
+
+> See the [Getting Started](./getting-started) and [Templates Guide](./templates) for next steps and customization.
+
+---
+
+## Manual Installation (Advanced)
+
+If you want full control or need to integrate DyneMCP into an existing monorepo, you can set up a project manually.
+
+### 1. Create a New Directory
+
+```sh
+mkdir my-dynemcp-project
+cd my-dynemcp-project
+```
+
+### 2. Initialize a `package.json`
+
+```sh
+pnpm init
+```
+
+### 3. Install DyneMCP
+
+```sh
+pnpm add dynemcp
+```
+
+### 4. Create the Required Structure
+
+- Create the following folders:
+  - `src/tools`
+  - `src/resources`
+  - `src/prompts`
+- Create a `dynemcp.config.ts` file in the project root. See the [Configuration API](../api/config) for details.
+- Create a `src/index.ts` file as your server entry point (see example below).
+
+#### Example: Minimal `dynemcp.config.ts`
+
+```ts
+export default {
+  server: {
+    name: 'my-dynemcp-project',
+    version: '1.0.0',
+  },
+  tools: {
+    enabled: true,
+    directory: './src/tools',
+    pattern: '**/*.{ts,js}',
+  },
+  resources: {
+    enabled: true,
+    directory: './src/resources',
+    pattern: '**/*.{ts,js}',
+  },
+  prompts: {
+    enabled: true,
+    directory: './src/prompts',
+    pattern: '**/*.{ts,js}',
+  },
+  transport: {
+    type: 'http',
+    options: {
+      mode: 'streamable-http',
+      port: 3001,
+      endpoint: '/mcp',
+    },
+  },
+}
+```
+
+#### Example: Minimal `src/index.ts`
+
+```ts
+import { createMCPServer } from 'dynemcp'
+
+const serverPromise = createMCPServer()
+
+async function main() {
+  const server = await serverPromise
+  await server.init()
+  await server.start()
+}
+
+process.on('SIGINT', async () => {
+  console.log('\n🛑 Shutting down server...')
+  const server = await serverPromise
+  await server.stop()
+  process.exit(0)
+})
+
+process.on('SIGTERM', async () => {
+  console.log('\n🛑 Shutting down server...')
+  const server = await serverPromise
+  await server.stop()
+  process.exit(0)
+})
+
+main().catch(console.error)
+```
+
+### 5. Add a Start Script
+
+In your `package.json`:
+
+```json
+{
+  "scripts": {
+    "dev": "dynemcp dev"
+  }
+}
+```
+
+### 6. Start the Server
+
+```sh
+pnpm run dev
+```
+
+---
+
+- For most users, the CLI generator is recommended.
+- For custom setups, follow the manual steps and refer to the [API docs](../api/config) for configuration options.
+- See [Getting Started](./getting-started) for a walkthrough of your first project.
+- See [Templates Guide](./templates) for details on project structure and customization.

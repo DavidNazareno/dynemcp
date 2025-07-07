@@ -1,0 +1,22 @@
+{
+  "name": "create-dynemcp",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/create-dynemcp/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run build",
+        "cwd": "packages/create-dynemcp"
+      }
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run clean",
+        "cwd": "packages/create-dynemcp"
+      }
+    }
+  }
+}

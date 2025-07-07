@@ -12,5 +12,6 @@
     {
       "path": "./tsconfig.spec.json"
     }
-  ]
+  ],
+  "exclude": ["src/lib/template/templates"]
 }

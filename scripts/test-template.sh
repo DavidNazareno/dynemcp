@@ -11,26 +11,56 @@
 # 6. Install dependencies using pnpm.
 # 7. Start the development server with the inspector.
 
+
+pnpm run clean
+pnpm install
+pnpm run beautify
+pnpm run build
+
+
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
-# Function to display template selection menu
-select_template() {
-    echo "📋 Available templates:"
-    echo "----------------------------------------"
-    PS3="Please select a template (1-5): "
-    templates=("default" "calculator" "dynamic-agent" "http-server" "secure-agent")
-    select template in "${templates[@]}"; do
-        if [ -n "$template" ]; then
-            echo "Selected template: $template"
-            TEMPLATE_NAME=$template
-            break
-        else
-            echo "Invalid selection. Please try again."
-        fi
-    done
-    echo "----------------------------------------"
+# Function to detect OS and return appropriate sed command
+detect_os_and_sed() {
+    local os=$(uname -s)
+    case "$os" in
+        Darwin*)    # macOS
+            echo "macOS detected"
+            echo "sed -i ''"
+            ;;
+        Linux*)     # Linux
+            echo "Linux detected"
+            echo "sed -i"
+            ;;
+        CYGWIN*|MINGW*|MSYS*)  # Windows with Git Bash, MSYS2, etc.
+            echo "Windows detected"
+            echo "sed -i"
+            ;;
+        *)
+            echo "Unknown OS: $os, defaulting to Linux sed syntax"
+            echo "sed -i"
+            ;;
+    esac
 }
+
+# Function to display template selection menu
+ select_template() {
+     echo "📋 Available templates:"
+     echo "----------------------------------------"
+     PS3="Please select a template (1-5): "
+     templates=("default-stdio" "default-http")
+     select template in "${templates[@]}"; do
+         if [ -n "$template" ]; then
+             echo "Selected template: $template"
+             TEMPLATE_NAME=$template
+             break
+         else
+             echo "Invalid selection. Please try again."
+         fi
+     done
+     echo "----------------------------------------"
+ }
 
 # --- Go to project root ---
 # This ensures the script can be run from anywhere in the project.
@@ -42,7 +72,7 @@ echo "🚀 Starting the template test script..."
 echo "----------------------------------------"
 
 # --- Configuration ---
-# If no template is provided as argument, show selection menu
+
 if [ -z "$1" ]; then
     select_template
 else
@@ -61,7 +91,6 @@ echo "----------------------------------------"
 
 # 1. Build the create-dynemcp package to ensure we're using the latest version
 echo "📦 Building 'create-dynemcp' package..."
-pnpm run build
 echo "✅ Build complete."
 echo "----------------------------------------"
 
@@ -77,7 +106,7 @@ echo "----------------------------------------"
 # 3. Run the create-dynemcp generator from the examples directory
 echo "🌱 Creating new test MCP server from template '$TEMPLATE_NAME'..."
 # We need to call the generator using a relative path from the new CWD
-node ../packages/create-dynemcp/dist/index.js $APP_NAME --template $TEMPLATE_NAME --yes --skip-install
+node ../packages/create-dynemcp/dist/bin.js $APP_NAME --template $TEMPLATE_NAME --yes --skip-install
 echo "✅ MCP server created at '$APP_NAME'."
 echo "----------------------------------------"
 
@@ -87,8 +116,11 @@ cd $APP_NAME
 
 echo "   - Modifying package.json to use workspace dependencies..."
 # This command replaces any version of @dynemcp/dynemcp with "workspace:*"
-# Note: The syntax `sed -i ''` is for macOS. For GNU/Linux, you would use `sed -i`.
-sed -i '' 's/"@dynemcp\/dynemcp": ".*"/"@dynemcp\/dynemcp": "workspace:*"/' package.json
+# Detect OS and use appropriate sed syntax
+OS_INFO=$(detect_os_and_sed)
+SED_CMD=$(echo "$OS_INFO" | tail -n 1)
+echo "   - Using: $SED_CMD"
+$SED_CMD 's/"@dynemcp\/dynemcp": ".*"/"@dynemcp\/dynemcp": "workspace:*"/' package.json
 echo "   - ✅ package.json updated."
 
 # 5. Install dependencies

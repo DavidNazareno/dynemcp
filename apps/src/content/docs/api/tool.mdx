@@ -1,0 +1,41 @@
+---
+title: Tool API
+---
+
+The DyneMCP tool API provides a type-safe, functional way to define and execute tools for your MCP server. Tools can validate input, normalize results, and support argument completion.
+
+## Usage Example
+
+```typescript
+import { tool } from '@dynemcp/dynemcp/server/api/core/tool'
+import { z } from 'zod'
+
+export default tool(
+  z.object({ value: z.string() }),
+  async ({ value }) => {
+    return { result: `Echo: ${value}` }
+  },
+  {
+    name: 'echo',
+    description: 'Echoes the input value',
+  }
+)
+```
+
+## Options
+
+- `schema` (Zod schema, required): Input validation schema.
+- `handler` (function, required): Tool logic, receives validated input.
+- `name` (string, required): Tool name.
+- `description` (string, optional): Tool description.
+- `inputSchema` (Zod schema, optional): Input schema override.
+- `outputSchema` (Zod schema, optional): Output schema.
+- `annotations` (object, optional): Extra metadata.
+- `meta` (object, optional): Extra metadata.
+- `complete` (function, optional): Argument completion for suggestions.
+
+## Notes
+
+- Use Zod schemas for strong input validation.
+- The returned object is MCP-compatible and can be auto-discovered by the registry.
+- See the templates for real-world tool examples.

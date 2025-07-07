@@ -1,201 +1,66 @@
 ---
-title: Security Guide
-description: Best practices for securing your DyneMCP server
+title: Security & Authentication Middleware
 ---
 
-# Security Guide
+DyneMCP provides a unified authentication middleware for securing your MCP server. This middleware supports JWT, OAuth2/OIDC, or both, and is designed to be easy to configure and production-ready.
 
-This guide covers essential security practices and features for DyneMCP servers.
+## How to Use the Middleware
 
-## Security Features
+The recommended way to secure your DyneMCP server is to use the `dynemcpMiddleware` from `@dynemcp/dynemcp/server/api/auth/dynemcp-middleware`.
 
-DyneMCP includes several built-in security features:
-
-1. Input Validation
-2. Basic Rate Limiting
-3. CORS Protection
-4. Authentication Support (via middleware)
-
-## Input Validation
-
-DyneMCP uses Zod for strict input validation:
+### Example: Using in `middleware.ts`
 
 ```typescript
-import { z } from 'zod'
-import type { ToolDefinition } from '@dynemcp/dynemcp'
+import {
+  dynemcpMiddleware,
+  type DynemcpMiddlewareConfig,
+} from '@dynemcp/dynemcp/server/api/auth/dynemcp-middleware'
 
-const secureGreetTool: ToolDefinition = {
-  name: 'secure-greet',
-  description: 'Secure greeting with input validation',
-  schema: z.object({
-    name: z
-      .string()
-      .min(1)
-      .max(50)
-      .regex(/^[a-zA-Z\s]+$/)
-      .describe('Name (letters and spaces only)'),
-  }),
-  handler: async ({ name }) => {
-    // Additional sanitization
-    const sanitizedName = name.trim().replace(/\s+/g, ' ')
-    return { message: `Hello ${sanitizedName}!` }
+// JWT authentication (simple)
+export default dynemcpMiddleware({
+  type: 'jwt',
+  jwt: {
+    secret: process.env.JWT_SECRET!,
+    allowedRoles: ['admin', 'user'], // optional
+    expectedAudience: 'your-api', // optional but recommended
   },
-}
+})
 ```
 
-## Rate Limiting
-
-Configure rate limiting in your `dynemcp.config.json`:
-
-```json
-{
-  "security": {
-    "rateLimit": {
-      "enabled": true,
-      "maxRequests": 100,
-      "windowMs": 900000 // 15 minutes
-    }
-  }
-}
-```
-
-## CORS Protection
-
-Control cross-origin access in your transport configuration:
-
-```json
-{
-  "transport": {
-    "type": "http-stream",
-    "options": {
-      "cors": {
-        "allowOrigin": "*",
-        "allowMethods": "GET, POST, OPTIONS",
-        "allowHeaders": "Content-Type, Authorization, x-api-key",
-        "exposeHeaders": "Content-Type, Authorization, x-api-key",
-        "maxAge": 86400
-      }
-    }
-  }
-}
-```
-
-## Authentication
-
-DyneMCP supports custom authentication through middleware:
+### Example: OAuth2/OIDC Authentication
 
 ```typescript
-// src/auth.ts
-import { Request, Response, NextFunction } from 'express'
-
-export default function apiKeyAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const apiKey = req.headers['x-api-key']
-
-  if (!apiKey) {
-    return res.status(401).json({ error: 'API key required' })
-  }
-
-  if (apiKey !== process.env.API_KEY) {
-    return res.status(401).json({ error: 'Invalid API key' })
-  }
-
-  next()
-}
-```
-
-Enable authentication in your transport configuration:
-
-```json
-{
-  "transport": {
-    "type": "http-stream",
-    "options": {
-      "authentication": {
-        "path": "./src/auth.ts"
-      }
-    }
-  }
-}
-```
-
-## Environment Variables
-
-Store sensitive data in environment variables:
-
-```bash
-# .env
-API_KEY=your-secret-key
-```
-
-## Security Checklist
-
-### Development
-
-- [ ] Enable input validation
-- [ ] Use environment variables for secrets
-- [ ] Implement proper error handling
-- [ ] Set up CORS restrictions
-- [ ] Configure rate limiting
-- [ ] Use HTTPS in production
-
-### Production
-
-- [ ] Use strong API keys
-- [ ] Enable all security features
-- [ ] Configure proper CORS
-- [ ] Set appropriate rate limits
-- [ ] Use HTTPS only
-- [ ] Monitor for attacks
-
-## Best Practices
-
-1. Always validate and sanitize inputs using Zod schemas
-2. Store sensitive information in environment variables
-3. Use HTTPS in production
-4. Implement proper error handling
-5. Keep dependencies updated
-6. Follow the principle of least privilege
-7. Regularly audit your code and dependencies
-
-## Example Secure Server
-
-Here's an example of a secure DyneMCP server configuration:
-
-```json
-{
-  "server": {
-    "name": "secure-mcp-server",
-    "version": "1.0.0"
+export default dynemcpMiddleware({
+  type: 'oauth2',
+  oauth2: {
+    issuerBaseURL: process.env.AUTH0_ISSUER_URL!,
+    audience: process.env.AUTH0_AUDIENCE!,
   },
-  "transport": {
-    "type": "http-stream",
-    "options": {
-      "port": 443,
-      "endpoint": "/mcp",
-      "authentication": {
-        "path": "./src/auth.ts"
-      },
-      "cors": {
-        "allowOrigin": "https://yourdomain.com",
-        "allowMethods": "POST, OPTIONS",
-        "allowHeaders": "Content-Type, X-API-Key",
-        "maxAge": 86400
-      }
-    }
-  },
-  "security": {
-    "enableValidation": true,
-    "strictMode": true,
-    "allowedOrigins": ["https://yourdomain.com"],
-    "rateLimit": {
-      "enabled": true,
-      "maxRequests": 100,
-      "windowMs": 900000
-    }
-  }
-}
+})
 ```
+
+### Example: Both JWT and OAuth2 (Composite)
+
+```typescript
+export default dynemcpMiddleware({
+  type: 'both',
+  jwt: {
+    secret: process.env.JWT_SECRET!,
+    allowedRoles: ['admin'],
+  },
+  oauth2: {
+    issuerBaseURL: process.env.AUTH0_ISSUER_URL!,
+    audience: process.env.AUTH0_AUDIENCE!,
+  },
+})
+```
+
+## Notes
+
+- **JWT:** Use a strong secret and set `expectedAudience` for production security.
+- **OAuth2:** Use your provider's issuer URL and audience.
+- **Both:** The middleware will try OAuth2 first, then fallback to JWT.
+- The middleware sets `req.user` to the decoded token payload if valid.
+- If authentication fails, the server responds with 401 or 403 as appropriate.
+
+See the [default-http template](https://github.com/DavidNazareno/dynemcp/tree/main/packages/create-dynemcp/src/lib/template/templates/default-http/src/middleware.ts) for a real-world example.

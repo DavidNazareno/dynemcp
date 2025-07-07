@@ -1,0 +1,35 @@
+---
+title: Resource API
+---
+
+The DyneMCP resource API provides a type-safe, functional way to define static and dynamic resources for your MCP server. Use this API to expose data, files, or computed content to your tools and prompts.
+
+## Usage Example
+
+```typescript
+import { resource } from '@dynemcp/dynemcp/server/api/core/resource'
+
+export default resource({
+  uri: 'resource://my-resource',
+  name: 'My Resource',
+  description: 'A sample resource',
+  mimeType: 'application/json',
+  getContent: () => '{ "hello": "world" }',
+})
+```
+
+## Options
+
+- `uri` (string, required): Unique resource URI.
+- `name` (string, required): Human-readable name.
+- `description` (string, optional): Description of the resource.
+- `mimeType` (string, optional): MIME type (e.g. 'application/json').
+- `paramsSchema` (Zod schema, optional): Schema for validating parameters.
+- `getContent` (function, required): Returns the resource content.
+- `complete` (function, optional): Argument completion (advanced, not always supported by SDK).
+
+## Notes
+
+- Use `paramsSchema` to validate input parameters for dynamic resources.
+- The returned object is MCP-compatible and can be auto-discovered by the registry.
+- See the templates for real-world resource examples.
