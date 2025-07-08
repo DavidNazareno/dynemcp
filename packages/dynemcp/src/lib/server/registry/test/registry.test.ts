@@ -29,11 +29,6 @@ vi.mock('../../components/component-loader', () => {
   }
 })
 
-// Provide local references for assertions after import
-let fakeTool: any
-// We'll assign after importing registry loader mocks via vi.importActual? simpler assign again
-fakeTool = { name: 'tool1' }
-
 vi.mock('../../components/core/loaders/validators', () => ({
   validateTool: vi.fn(),
 }))

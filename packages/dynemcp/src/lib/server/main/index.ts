@@ -19,6 +19,3 @@ export {
 
 // Custom errors
 export { ServerInitializationError } from './core/errors'
-
-// Utilities
-export { logMsg } from './core/utils'

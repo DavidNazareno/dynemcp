@@ -75,3 +75,14 @@ export function validateRoot(
 ): component is import('../../../api').Root {
   return isRoot(component)
 }
+
+/**
+ * validateMiddleware: Checks if a value is a valid MiddlewareDefinition.
+ * Used to ensure dynamically loaded modules conform to the expected middleware contract.
+ */
+export function validateMiddleware(
+  component: unknown
+): component is Record<string, any> {
+  // You can make this stricter if you have a specific middleware shape
+  return typeof component === 'object' && component !== null
+}

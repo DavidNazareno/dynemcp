@@ -34,7 +34,6 @@ export const installTemplate = async (
   args: InstallTemplateArgs
 ): Promise<void> => {
   try {
-    console.log('[installTemplate] Start', args)
     console.log(`Using ${args.packageManager}.`)
 
     if (templatesDir === undefined) {
@@ -48,9 +47,6 @@ export const installTemplate = async (
     if (!args.eslint) copySource.push('!.eslintrc.js', '!.eslintignore')
     if (!args.tailwind)
       copySource.push('!tailwind.config.js', '!postcss.config.js')
-
-    console.log('[installTemplate] templatePath:', templatePath)
-    console.log('[installTemplate] copySource:', copySource)
 
     await copy(copySource, args.root, {
       parents: true,
@@ -69,7 +65,6 @@ export const installTemplate = async (
         }
       },
     })
-    console.log('[installTemplate] Copy complete')
 
     const tsconfigFile = path.join(
       args.root,
@@ -187,6 +182,7 @@ export const installTemplate = async (
       devDependencies: Record<string, string>
       engines?: Record<string, string>
       packageManager?: string
+      type?: string
     }
 
     const packageJson: PackageJson = {
@@ -194,18 +190,18 @@ export const installTemplate = async (
       version: '0.1.0',
       private: true,
       scripts: generateScripts(),
+      type: 'module',
       dependencies: {
         '@dynemcp/dynemcp': `^${version}`,
         '@modelcontextprotocol/sdk': `^${SDK_VERSION}`,
         zod: '^3.25.71',
       },
       devDependencies: {
-        '@dynemcp/dynemcp': `^${version}`,
         prettier: '^3.2.5',
       },
     }
-    /* 
-    if (args.template === 'http-server' || args.template === 'secure-agent') {
+    
+  /*   if (args.template === 'http-server' || args.template === 'secure-agent') {
       packageJson.dependencies['express'] = '^4.19.2'
       packageJson.dependencies['cors'] = '^2.8.5'
       packageJson.devDependencies['@types/express'] = '^4.17.21'
@@ -215,18 +211,19 @@ export const installTemplate = async (
     if (!packageJson.scripts.lint) {
       delete packageJson.scripts.lint
     }
-
+ */
     if (args.mode === 'ts') {
       packageJson.devDependencies = {
         ...packageJson.devDependencies,
-        '@types/node': '^20.11.30',
-        '@typescript-eslint/eslint-plugin': '^8.33.1',
-        '@typescript-eslint/parser': '^8.33.1',
-        typescript: '^5.4.2',
-        'ts-node': '^10.9.2',
+        //'@types/node': '^20.11.30',
+        'typescript': '^5.4.2',
+        '@types/minimatch': '^6.0.0',
+        //'@typescript-eslint/eslint-plugin': '^8.33.1',
+        //'@typescript-eslint/parser': '^8.33.1',
+      //  'ts-node': '^10.9.2',
       }
     }
-
+/* 
     if (args.eslint) {
       packageJson.devDependencies = {
         ...packageJson.devDependencies,
@@ -289,8 +286,6 @@ export const installTemplate = async (
         )
       }
     }
-
-    console.log('[installTemplate] Finished successfully')
   } catch (error) {
     console.error('[installTemplate] Error:', error)
     throw error

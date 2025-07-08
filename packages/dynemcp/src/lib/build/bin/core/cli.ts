@@ -155,6 +155,7 @@ export async function run(): Promise<void> {
 
     switch (command) {
       case 'build': {
+        process.env.NODE_ENV = 'production'
         console.log(chalk.green('🔨 Building DyneMCP project...'))
         const result = await build({
           ...sharedOptions,
@@ -180,6 +181,7 @@ export async function run(): Promise<void> {
         break
       }
       case 'cli': {
+        process.env.NODE_ENV = 'production'
         console.log(chalk.green('🔧 Building CLI tool...'))
         const result = await buildCli(sharedOptions)
         if (result.success) {

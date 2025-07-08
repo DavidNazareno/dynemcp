@@ -8,6 +8,7 @@ import type {
   MessageExtraInfo,
 } from '@modelcontextprotocol/sdk/types.js'
 import type { TransportSendOptions } from '@modelcontextprotocol/sdk/shared/transport.js'
+import { fileLogger } from '../../../../global/logger'
 /**
  * StdioTransport: STDIO transport for DyneMCP MCP protocol
  * Compatible con la interfaz Transport del SDK
@@ -47,15 +48,12 @@ export class StdioTransport {
     try {
       // Intercepta mensajes para roots/didChange
       const origOnMessage = this.transport.onmessage?.bind(this.transport)
-      this.transport.onmessage = (
-        msg: JSONRPCMessage,
-        extra?: MessageExtraInfo
-      ) => {
+      this.transport.onmessage = (msg: JSONRPCMessage) => {
         if (isJSONRPCNotification(msg) && msg.method === 'roots/didChange') {
           const roots = parseRootList(msg.params)
           this.roots = roots
           // Optionally, emit an event or log
-          console.log('🌱 Roots updated (stdio):', roots)
+          fileLogger.info(`🌱 Roots updated (stdio): ${roots}`)
           return // Do not forward this notification to the MCP server
         }
         if (origOnMessage) origOnMessage(msg)

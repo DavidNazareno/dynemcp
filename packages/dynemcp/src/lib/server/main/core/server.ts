@@ -9,10 +9,10 @@ import type {
 import { registry } from '../../registry/core/registry'
 import { loadConfig } from '../../config/core/loader'
 import { createTransport, type Transport } from '../../communication'
-import { logMsg } from './utils'
 import { registerComponents } from './initializer'
 import { setCurrentDyneMCPInstance } from './server-instance'
 import { TRANSPORT } from '../../../../global/config-all-contants'
+import { fileLogger } from '../../../../global/logger'
 
 // Main server class and logic for DyneMCP main module
 // Handles server initialization, component loading, transport setup, and lifecycle management.
@@ -75,7 +75,7 @@ export class DyneMCP {
   async init(): Promise<void> {
     if (this.isInitialized) return
 
-    this.log('🚀 Inicializando DyneMCP server...')
+    fileLogger.info('🚀 Inicializando DyneMCP server...')
 
     await registry.loadAll({
       tools: this.config.tools,
@@ -90,7 +90,7 @@ export class DyneMCP {
     registerComponents(this.server, this.tools, this.resources, this.prompts)
 
     this.isInitialized = true
-    this.log('✅ DyneMCP server initialized correctly')
+    fileLogger.info('✅ DyneMCP server initialized correctly')
   }
 
   /**
@@ -111,7 +111,7 @@ export class DyneMCP {
       await this.transport.close()
     }
     if (this.isCustomTransport()) {
-      this.log('🛑 MCP server stopped')
+      fileLogger.info('🛑 MCP server stopped')
     }
   }
 
@@ -167,24 +167,6 @@ export class DyneMCP {
   // =====================
 
   /**
-   * Debug log if DYNE_MCP_DEBUG=1
-   */
-  private debugLog(msg: string): void {
-    if (process.env.DYNE_MCP_DEBUG) {
-      console.error(`[DEBUG] ${msg}`)
-    }
-  }
-
-  /**
-   * Standard log if not silenced
-   */
-  private log(msg: string): void {
-    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-      console.log(msg)
-    }
-  }
-
-  /**
    * Logs all loaded components, filtering out invalid ones and warning if any are found.
    */
   private logLoadedComponents(): void {
@@ -201,39 +183,27 @@ export class DyneMCP {
     const validPrompts = prompts.filter((p) => p && typeof p.name === 'string')
     const invalidPrompts = prompts.length - validPrompts.length
 
-    logMsg(`Loaded tools: ${validTools.length}`, this.debugLog.bind(this))
-    validTools.forEach((t) =>
-      logMsg(`  - Tool: ${t.name}`, this.debugLog.bind(this))
-    )
+    fileLogger.info(`Loaded tools: ${validTools.length}`)
+    validTools.forEach((t) => fileLogger.info(`  - Tool: ${t.name}`))
     if (invalidTools > 0) {
-      logMsg(
-        `⚠️ ${invalidTools} invalid tool(s) were skipped (missing or invalid 'name')`,
-        this.debugLog.bind(this)
+      fileLogger.warn(
+        `⚠️ ${invalidTools} invalid tool(s) were skipped (missing or invalid 'name')`
       )
     }
 
-    logMsg(
-      `Loaded resources: ${validResources.length}`,
-      this.debugLog.bind(this)
-    )
-    validResources.forEach((r) =>
-      logMsg(`  - Resource: ${r.name}`, this.debugLog.bind(this))
-    )
+    fileLogger.info(`Loaded resources: ${validResources.length}`)
+    validResources.forEach((r) => fileLogger.info(`  - Resource: ${r.name}`))
     if (invalidResources > 0) {
-      logMsg(
-        `⚠️ ${invalidResources} invalid resource(s) were skipped (missing or invalid 'name')`,
-        this.debugLog.bind(this)
+      fileLogger.warn(
+        `⚠️ ${invalidResources} invalid resource(s) were skipped (missing or invalid 'name')`
       )
     }
 
-    logMsg(`Loaded prompts: ${validPrompts.length}`, this.debugLog.bind(this))
-    validPrompts.forEach((p) =>
-      logMsg(`  - Prompt: ${p.name}`, this.debugLog.bind(this))
-    )
+    fileLogger.info(`Loaded prompts: ${validPrompts.length}`)
+    validPrompts.forEach((p) => fileLogger.info(`  - Prompt: ${p.name}`))
     if (invalidPrompts > 0) {
-      logMsg(
-        `⚠️ ${invalidPrompts} invalid prompt(s) were skipped (missing or invalid 'name')`,
-        this.debugLog.bind(this)
+      fileLogger.warn(
+        `⚠️ ${invalidPrompts} invalid prompt(s) were skipped (missing or invalid 'name')`
       )
     }
   }
@@ -271,16 +241,11 @@ export class DyneMCP {
    * Logs transport info after startup.
    */
   private logTransportInfo(): void {
-    const transportConfig = this.config.transport || {
-      type: TRANSPORT.DEFAULT_TRANSPORT,
-    }
-    if (String(transportConfig.type) !== 'stdio') {
-      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-        console.log(
-          `🎯 MCP server "${this.config.server.name}" started successfully`
-        )
-        // Details of port and endpoint are shown in the HTTP transport
-      }
+    if (this.config.transport?.type !== TRANSPORT.TRANSPORT_TYPES.STDIO) {
+      fileLogger.info(
+        `🎯 MCP server "${this.config.server.name}" started successfully`
+      )
+      // Details of port and endpoint are shown in the HTTP transport
     }
   }
 

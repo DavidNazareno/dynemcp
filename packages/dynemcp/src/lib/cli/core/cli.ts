@@ -5,7 +5,7 @@
 import yargs, { type Argv } from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { DYNEMCP_CLI, TRANSPORT } from '../../../global/config-all-contants'
+import { DYNEMCP_CLI } from '../../../global/config-all-contants'
 import { dev } from './dev'
 import { buildHandler } from './handler/build'
 import { startHandler } from './handler/start'

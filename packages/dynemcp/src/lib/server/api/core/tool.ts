@@ -7,6 +7,7 @@
 // - Used by tool modules to register MCP-compatible tools.
 
 import { z } from 'zod'
+import { zodToJsonSchema } from 'zod-to-json-schema'
 import type { LoadedTool, CallToolResult } from './interfaces'
 
 /**
@@ -121,11 +122,30 @@ export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
     context?: Record<string, unknown>
   }) => Promise<string[]> | string[]
 }): LoadedTool {
+  const inputSchema = config.inputSchema ?? config.schema
   return {
     name: config.name,
     description: config.description,
-    inputSchema: config.inputSchema ?? config.schema.shape,
-    outputSchema: config.outputSchema,
+    inputSchema: {
+      type: 'object',
+      ...(zodToJsonSchema(inputSchema).properties && {
+        properties: zodToJsonSchema(inputSchema).properties,
+      }),
+      ...(zodToJsonSchema(inputSchema).required && {
+        required: zodToJsonSchema(inputSchema).required,
+      }),
+    },
+    outputSchema: config.outputSchema
+      ? {
+          type: 'object',
+          ...(zodToJsonSchema(config.outputSchema).properties && {
+            properties: zodToJsonSchema(config.outputSchema).properties,
+          }),
+          ...(zodToJsonSchema(config.outputSchema).required && {
+            required: zodToJsonSchema(config.outputSchema).required,
+          }),
+        }
+      : undefined,
     annotations: config.annotations,
     execute: withErrorHandling(config.execute as any),
     parameters: {}, // Optionally fill if needed
@@ -157,11 +177,30 @@ export function tool<
     }) => Promise<string[]> | string[]
   }
 ): LoadedTool {
+  const inputSchema = options.inputSchema ?? schema
   return {
     name: options.name,
     description: options.description ?? '',
-    inputSchema: options.inputSchema ?? schema.shape,
-    outputSchema: options.outputSchema,
+    inputSchema: {
+      type: 'object',
+      ...(zodToJsonSchema(inputSchema).properties && {
+        properties: zodToJsonSchema(inputSchema).properties,
+      }),
+      ...(zodToJsonSchema(inputSchema).required && {
+        required: zodToJsonSchema(inputSchema).required,
+      }),
+    },
+    outputSchema: options.outputSchema
+      ? {
+          type: 'object',
+          ...(zodToJsonSchema(options.outputSchema).properties && {
+            properties: zodToJsonSchema(options.outputSchema).properties,
+          }),
+          ...(zodToJsonSchema(options.outputSchema).required && {
+            required: zodToJsonSchema(options.outputSchema).required,
+          }),
+        }
+      : undefined,
     annotations: options.annotations ?? options.meta,
     execute: withErrorHandling(handler as any),
     parameters: {}, // Optionally fill if needed

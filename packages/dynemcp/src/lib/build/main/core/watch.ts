@@ -10,12 +10,8 @@ import { type BuildContext } from 'esbuild'
 import type { DyneMCPBuildOptions } from './interfaces'
 import { bundleWatch } from '../../bundler'
 import type { BundleOptions } from '../../bundler/'
-import { ConsoleLogger } from '../../../cli/core/logger'
+import { ConsoleLogger } from '../../../../global/logger'
 import { DEFAULT_BUILD_CONFIG } from '../../config/core/default'
-
-function shouldLog() {
-  return !process.env.DYNE_MCP_STDIO_LOG_SILENT
-}
 
 /**
  * Build a DyneMCP project in watch mode.
@@ -25,10 +21,11 @@ function shouldLog() {
  * @returns BuildContext from esbuild
  */
 export async function watch(
-  options: DyneMCPBuildOptions = {}
+  options: DyneMCPBuildOptions & { transportType?: string }
 ): Promise<BuildContext> {
   const logger = options.logger ?? new ConsoleLogger()
-  if (shouldLog()) logger.info('👀 Starting watch mode...')
+
+  logger.info('👀 Starting DyneMCP build in watch mode...')
   try {
     const buildConfig = DEFAULT_BUILD_CONFIG
     const finalOptions = {
@@ -37,14 +34,15 @@ export async function watch(
       sourcemap: true,
     } as BundleOptions & { outDir: string; outFile: string }
     const ctx = await bundleWatch(finalOptions)
-    if (shouldLog()) logger.success('👀 Watching for changes...')
-    if (shouldLog())
-      logger.info(`📁 Output: ${finalOptions.outDir}/${finalOptions.outFile}`)
+    logger.success('👀 Watching for changes...')
+
+    logger.info(`📁 Output: ${finalOptions.outDir}/${finalOptions.outFile}`)
     return ctx
   } catch (error) {
     const logger = options.logger ?? new ConsoleLogger()
     const message = error instanceof Error ? error.message : String(error)
-    if (shouldLog()) logger.error(`❌ Watch build failed: ${message}`)
+
+    logger.error(`❌ Watch build failed: ${message}`)
     throw error
   }
 }

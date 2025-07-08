@@ -1,7 +1,8 @@
 import chalk from 'chalk'
 import { analyze } from '../../../build'
+import { fileLogger } from '../../../../global/logger'
 
 export async function analyzeHandler(argv: any) {
-  console.log(chalk.green('📊 Analyzing dependencies...'))
+  fileLogger.info(chalk.green('📊 Analyzing dependencies...'))
   await analyze({ configPath: argv.config })
 }

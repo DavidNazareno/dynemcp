@@ -17,12 +17,11 @@ export const DEFAULT_BUILD_CONFIG = {
   entryPoint: './src/index.ts',
   outDir: './dist',
   outFile: 'server.js',
-  format: 'cjs', // 'esm' or 'cjs' depending on the supported runtime
+  format: 'esm', // 'esm' or 'cjs' depending on the supported runtime
   minify: true, // true for production, false for debug
   sourcemap: false, // true for debug, false for production
   bundle: true,
   external: [
-    // Paquetes core y de infraestructura que siempre deben ser externos para optimizar el bundle
     '@modelcontextprotocol/sdk',
     'express',
     'cors',
@@ -34,6 +33,7 @@ export const DEFAULT_BUILD_CONFIG = {
     'express-rate-limit',
     'tslib',
     'yargs',
+    '@dynemcp/dynemcp',
   ],
   define: {},
   platform: 'node',

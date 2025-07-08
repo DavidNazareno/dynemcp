@@ -12,12 +12,10 @@ import {
 import { setupMiddleware } from './core/middleware'
 import { generateSecureSessionId } from './core/utils'
 import { registry } from '../../registry/core/registry'
-import {
-  DYNEMCP_SERVER,
-  TRANSPORT,
-} from '../../../../global/config-all-contants'
+import { TRANSPORT } from '../../../../global/config-all-contants'
 import type { MessageExtraInfo } from '@modelcontextprotocol/sdk/types.js'
 import type { TransportSendOptions } from '@modelcontextprotocol/sdk/shared/transport.js'
+import { fileLogger } from '../../../../global/logger'
 
 export class HTTPServers {
   private app: Express
@@ -81,14 +79,14 @@ export class HTTPServers {
       const middlewarePath = registry.getAuthenticationMiddlewarePath()
       let userAuthMiddleware: RequestHandler
       if (!middlewarePath) {
-        console.warn(DYNEMCP_SERVER.ERRORS.MIDDLEWARE_NOT_FOUND)
         userAuthMiddleware = (req, res, next) => next()
-      } else {
+      } else if (typeof middlewarePath === 'string') {
         userAuthMiddleware = (await import(middlewarePath)).default
-        if (typeof userAuthMiddleware !== 'function') {
-          console.warn(DYNEMCP_SERVER.ERRORS.MIDDLEWARE_NOT_FOUND)
-          userAuthMiddleware = (req, res, next) => next()
-        }
+      } else if (typeof middlewarePath.middleware === 'function') {
+        userAuthMiddleware = middlewarePath.middleware
+      } else {
+        // Fallback
+        userAuthMiddleware = (req, res, next) => next()
       }
 
       await server.connect(this.transport)
@@ -101,20 +99,20 @@ export class HTTPServers {
       }
 
       this.server = this.app.listen(this.port, this.host, () => {
-        console.log(`📡 HTTPServers listening on ${this.host}:${this.port}`)
+        fileLogger.info(`📡 HTTPServers listening on ${this.host}:${this.port}`)
         if (this.options.mode === 'sse') {
-          console.log('🌐 SSE MCP endpoints enabled: /sse, /messages')
+          fileLogger.info('🌐 SSE MCP endpoints enabled: /sse, /messages')
         } else {
-          console.log(
+          fileLogger.info(
             `🌐 MCP endpoint: http://${this.host}:${this.port}${this.endpoint}`
           )
         }
         if (this.options?.session?.enabled)
-          console.log('🔐 Session management enabled')
+          fileLogger.info('🔐 Session management enabled')
         if (this.options?.authentication?.path)
-          console.log('🔒 Authentication enabled')
+          fileLogger.info('🔒 Authentication enabled')
         if (this.options?.resumability?.enabled)
-          console.log('📡 Resumability enabled')
+          fileLogger.info('📡 Resumability enabled')
       })
 
       process.on('SIGTERM', () => this.disconnect())
@@ -159,7 +157,9 @@ export class HTTPServers {
             const roots = parseRootList(req.body.params)
             this.sessionRoots.set(sessionId, roots)
             res.status(200).json({ result: 'Roots updated', roots })
-            console.log(`🌱 Roots updated for session ${sessionId}:`, roots)
+            fileLogger.info(
+              `🌱 Roots updated for session ${sessionId}: ${roots}`
+            )
           } else {
             res
               .status(400)
@@ -176,7 +176,7 @@ export class HTTPServers {
             'WWW-Authenticate',
             `Bearer resource_metadata="https://${this.host}:${this.port}/.well-known/oauth-protected-resource"`
           )
-          res.status(401).json({ error: 'Unauthorized' })
+          res.status(401).json({ error: 'Unauthorized ' + err })
         }
       }
     })
@@ -190,7 +190,7 @@ export class HTTPServers {
 
         const lastEventId = req.headers['last-event-id'] as string | undefined
         if (lastEventId && this.options?.resumability?.enabled) {
-          console.log(`📡 Resuming from event ID: ${lastEventId}`)
+          fileLogger.info(`📡 Resuming from event ID: ${lastEventId}`)
           // Implement replay logic if needed
         }
 
@@ -204,7 +204,7 @@ export class HTTPServers {
 
         const cleanup = () => {
           clearInterval(keepAlive)
-          console.log('🔌 SSE connection closed')
+          fileLogger.info('🔌 SSE connection closed')
         }
 
         req.on('close', cleanup)
@@ -258,7 +258,7 @@ export class HTTPServers {
 
       const client = { res, sessionId }
       this.sseClients.add(client)
-      console.log(
+      fileLogger.info(
         `🔗 SSE client connected (${this.sseClients.size} total)${sessionId ? `, session: ${sessionId}` : ''}`
       )
 
@@ -275,7 +275,7 @@ export class HTTPServers {
       const cleanup = () => {
         clearInterval(keepAlive)
         this.sseClients.delete(client)
-        console.log('🔌 SSE client disconnected')
+        fileLogger.info('🔌 SSE client disconnected')
       }
       req.on('close', cleanup)
       req.on('aborted', cleanup)
@@ -337,10 +337,10 @@ export class HTTPServers {
 
   async disconnect(): Promise<void> {
     if (this.server) {
-      console.log('🛑 Shutting down HTTPServers...')
+      fileLogger.info('🛑 Shutting down HTTPServers...')
       return new Promise((resolve) => {
         this.server?.close(() => {
-          console.log('✅ HTTPServers stopped')
+          fileLogger.info('✅ HTTPServers stopped')
           resolve(undefined)
         })
       })

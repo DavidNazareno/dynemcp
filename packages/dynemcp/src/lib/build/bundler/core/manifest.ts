@@ -9,7 +9,7 @@
 import { promises as fs } from 'fs'
 import { join } from 'path'
 import type { Metafile } from 'esbuild'
-import { shouldLog } from './utils'
+import { fileLogger } from '../../../../global/logger'
 
 export interface BuildManifest {
   version: string
@@ -87,10 +87,9 @@ export async function generateManifest(
     const manifestPath = join(outDir, 'build-manifest.json')
     await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2))
 
-    if (shouldLog()) console.log(`📋 Build manifest generated: ${manifestPath}`)
+    fileLogger.info(`📋 Build manifest generated: ${manifestPath}`)
   } catch (error) {
-    if (shouldLog())
-      console.warn('⚠️  Could not generate build manifest:', error)
+    fileLogger.warn(`⚠️  Could not generate build manifest: ${error}`)
   }
 }
 
@@ -198,8 +197,8 @@ export async function generateHTMLReport(
     const reportPath = join(outDir, 'build-report.html')
     await fs.writeFile(reportPath, html)
 
-    if (shouldLog()) console.log(`📊 HTML report generated: ${reportPath}`)
+    fileLogger.info(`📊 HTML report generated: ${reportPath}`)
   } catch (error) {
-    if (shouldLog()) console.warn('⚠️  Could not generate HTML report:', error)
+    fileLogger.warn(`⚠️  Could not generate HTML report: ${error}`)
   }
 }

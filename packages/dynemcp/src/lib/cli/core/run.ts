@@ -1,7 +1,12 @@
 import chalk from 'chalk'
 import { watch } from '../../build'
 import { createMCPServer } from '../../server'
-import { ConsoleLogger, StderrLogger, type Logger } from './logger'
+import {
+  ConsoleLogger,
+  fileLogger,
+  StderrLogger,
+  type Logger,
+} from '../../../global/logger'
 import { spawnProcess } from './utils'
 import {
   DYNEMCP_SERVER,
@@ -69,7 +74,7 @@ async function launchInspectorProcess(
   transportType: string,
   endpoint?: string
 ) {
-  console.log(chalk.blue('🔍 Launching MCP Inspector...'))
+  fileLogger.info('🔍 Launching MCP Inspector...')
 
   const packageName = '@modelcontextprotocol/inspector'
 

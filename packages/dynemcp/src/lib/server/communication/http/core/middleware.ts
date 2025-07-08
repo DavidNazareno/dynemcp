@@ -12,7 +12,6 @@ export function setupMiddleware(
   let rateLimitOptions = (options as any).rateLimit
   const isProduction = process.env.NODE_ENV === 'production'
   if (!rateLimitOptions) {
-    // Buscar en la config global de seguridad
     const globalConfig = createDefaultConfig()
     const securityRateLimit = globalConfig.security?.rateLimit
     if (securityRateLimit && securityRateLimit.enabled !== false) {

@@ -8,6 +8,7 @@
 
 import { promises as fs, statSync, readFileSync } from 'fs'
 import { shouldLog } from './utils'
+import { fileLogger } from '../../../../global/logger'
 
 /**
  * Optimize the bundled file for production.
@@ -46,14 +47,13 @@ export async function optimizeBundle(filePath: string): Promise<void> {
     const savings = originalSize - optimizedSize
     const savingsPercent = ((savings / originalSize) * 100).toFixed(2)
 
-    if (shouldLog())
-      console.log(
-        `⚡ Bundle optimized: ${(originalSize / 1024).toFixed(2)}KB → ${(
-          optimizedSize / 1024
-        ).toFixed(2)}KB (${savingsPercent}% reduction)`
-      )
+    fileLogger.info(
+      `⚡ Bundle optimized: ${(originalSize / 1024).toFixed(2)}KB → ${(
+        optimizedSize / 1024
+      ).toFixed(2)}KB (${savingsPercent}% reduction)`
+    )
   } catch (error) {
-    if (shouldLog()) console.warn('⚠️  Could not optimize bundle:', error)
+    fileLogger.warn(`⚠️  Could not optimize bundle: ${error}`)
   }
 }
 

@@ -1,6 +1,6 @@
 packages:
-  - 'packages/*'
-  - 'examples/*'
-  - 'docs'
-  - 'documentation'
-  - 'dynedocs'
+  - packages/*
+  - apps/*
+
+overrides:
+  '@dynemcp/dynemcp': link:../../../.local/share/pnpm/global/5/node_modules/@dynemcp/dynemcp

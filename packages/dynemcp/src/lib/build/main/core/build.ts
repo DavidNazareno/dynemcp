@@ -6,15 +6,14 @@
 // - Merges config, user, and environment options for robust, zero-config builds.
 // - Uses the bundler to produce optimized output and returns build results.
 
-import { ConsoleLogger } from '../../../cli/core/logger'
+import { ConsoleLogger } from '../../../../global/logger'
 import type { DyneMCPBuildOptions, BuildResult } from './interfaces'
 import { bundle } from '../../bundler'
 import type { BundleOptions } from '../../bundler/core/bundle'
 import { DEFAULT_BUILD_CONFIG } from '../../config/core/default'
-
-function shouldLog() {
-  return !process.env.DYNE_MCP_STDIO_LOG_SILENT
-}
+import { generateComponentIndexes } from './generate-component-indexes'
+import { execSync } from 'child_process'
+import path from 'path'
 
 /**
  * Build a DyneMCP project with advanced features.
@@ -30,7 +29,14 @@ export async function build(
   const startTime = Date.now()
 
   try {
-    if (shouldLog()) logger.info('🚀 Starting DyneMCP build process...')
+    logger.info('\uD83D\uDE80 Starting DyneMCP build process...')
+   
+
+    // 2. Generar los index.ts de tools/resources/prompts en dist/
+    await generateComponentIndexes(
+      options.configPath || 'dynemcp.config.ts',
+      options.outDir || 'dist'
+    )
     const buildConfig = DEFAULT_BUILD_CONFIG
     // Merge de opciones: usuario > env > defaults
     const finalOptions = {
@@ -75,14 +81,20 @@ export async function build(
         platform: buildConfig.platform as 'node' | 'browser',
       },
     }
+    logger.info('📊 Analyzing dependencies...')
+
+    logger.info(`📦 Found ${result.stats.dependencies} dependencies`)
+    logger.info('⚡ Optimizing bundle...')
+    logger.info('📋 Generating manifest...')
+
+    logger.info(`✅ Build completed successfully in ${result.stats.duration}ms`)
     return result
   } catch (error) {
-    const logger = options.logger ?? new ConsoleLogger()
     const endTime = Date.now()
     const duration = endTime - startTime
     const errorMessage = error instanceof Error ? error.message : String(error)
-    if (shouldLog())
-      logger.error(`❌ Build failed after ${duration}ms: ${errorMessage}`)
+
+    logger.error(`❌ Build failed after ${duration}ms: ${errorMessage}`)
     return {
       success: false,
       errors: [errorMessage],
