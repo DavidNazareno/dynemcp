@@ -1,5 +1,4 @@
 import chalk from 'chalk'
-import { watch } from '../../build'
 import { createMCPServer } from '../../server'
 import {
   ConsoleLogger,
@@ -22,9 +21,9 @@ import type { StreamableHTTPTransportConfig } from '../../server/config/core/int
 import type { DevOptions } from './types'
 
 interface ServerContext {
-  server: Awaited<ReturnType<typeof createMCPServer>>
-  ctx: Awaited<ReturnType<typeof watch>>
+  server?: Awaited<ReturnType<typeof createMCPServer>>
   logger: Logger
+  childProcess?: ReturnType<typeof spawnProcess>
 }
 
 async function launchServer(
@@ -39,18 +38,18 @@ async function launchServer(
     logger.success(DYNEMCP_SERVER.MESSAGES.STARTING)
   }
 
-  logger.info(DYNEMCP_SERVER.MESSAGES.BUILD_START)
-  const ctx = await watch({
-    configPath: DEFAULT_CONFIG,
-    clean: false,
-    logger,
-  })
-  logger.info(DYNEMCP_SERVER.MESSAGES.BUILD_SUCCESS)
-
-  const server = await createMCPServer(config)
-  await server.start()
-
-  return { server, ctx, logger }
+  if (options.watch) {
+    logger.info('Iniciando servidor en modo watch (hot reload)...')
+    // Usa tsx watch si está disponible, si no nodemon+ts-node
+    const childProcess = spawnProcess('npx', ['tsx', 'watch', 'src/index.ts'])
+    // No iniciar el servidor en este proceso, solo devolver el childProcess
+    return { logger, childProcess }
+  } else {
+    logger.info('Iniciando servidor en modo producción (sin watch)...')
+    const server = await createMCPServer(config)
+    await server.start()
+    return { server, logger }
+  }
 }
 
 function waitForProcess(
@@ -110,8 +109,10 @@ function handleGracefulShutdown(
       inspectorProcess.kill('SIGTERM')
     }
 
-    await serverCtx.server.stop()
-    await serverCtx.ctx.dispose()
+    if (serverCtx.server) {
+      await serverCtx.server.stop()
+    }
+    // await serverCtx.ctx.dispose() // Elimina esta línea, watch retorna void
 
     process.exit(0)
   }

@@ -1,72 +1,39 @@
 // CLI entry point for DyneMCP
-// Sets up all main commands (dev, build, start, clean, analyze) using yargs and connects them to their handlers.
-// Each command is configured with options and examples for developer usability.
+// Elimina cualquier comando relacionado con build, clean, serve, watch, etc. Solo deja los comandos relevantes para modo watch/dev.
 
-import yargs, { type Argv } from 'yargs'
+import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { DYNEMCP_CLI } from '../../../global/config-all-contants'
-import { dev } from './dev'
-import { buildHandler } from './handler/build'
+import { dev } from './handler/dev'
 import { startHandler } from './handler/start'
-import { cleanHandler } from './handler/clean'
-import { analyzeHandler } from './handler/analyze'
-import type { DevOptions } from './types'
-
-const addConfigOption = (y: Argv) =>
-  y.option('config', {
-    alias: 'c',
-    type: 'string',
-    describe: 'Path to dynemcp.config.ts',
-  })
 
 const cli = yargs(hideBin(process.argv))
-  .scriptName(DYNEMCP_CLI.SCRIPT_NAME)
-  .usage(DYNEMCP_CLI.USAGE)
-
-  .command<DevOptions>(
-    'dev [mode]',
-    DYNEMCP_CLI.DESCRIPTIONS.DEV,
-    (y) =>
-      y
-        .positional('mode', {
-          describe: DYNEMCP_CLI.DESCRIPTIONS.DEV_MODE,
-          type: 'string',
-          choices: ['inspector'],
-        })
-        .option('internal-run', {
-          type: 'boolean',
-          hidden: true,
-        }),
-    dev
-  )
-
+  .scriptName('dynemcp')
+  .usage('$0 <cmd> [args]')
   .command(
-    'build',
-    DYNEMCP_CLI.DESCRIPTIONS.BUILD,
+    'dev [mode]',
+    'Start development server (always in watch/hot reload mode)',
     (y) =>
-      addConfigOption(y)
-        .option('clean', {
-          type: 'boolean',
-          describe: 'Clean before building',
-        })
-        .option('analyze', {
-          type: 'boolean',
-          describe: 'Analyze dependencies after build',
-        }),
-    buildHandler
+      y.positional('mode', {
+        describe: 'Development mode (default or inspector)',
+        type: 'string',
+        choices: ['default', 'inspector'],
+        default: 'default',
+      }),
+    (argv) => {
+      // Siempre activa watch
+      argv.watch = true
+      if (argv.mode === 'inspector') argv.mode = 'inspector'
+      else argv.mode = 'default'
+      dev(argv)
+    }
   )
-
   .command(
     'start',
-    'Start the server in production mode',
-    addConfigOption,
+    'Start production server (no watch, no inspector)',
+    (y) => y,
     startHandler
   )
-
-  .command('clean', 'Clean build directory', addConfigOption, cleanHandler)
-
-  .command('analyze', 'Analyze dependencies', addConfigOption, analyzeHandler)
 
   .demandCommand(1, 'You need at least one command before moving on')
   .help()

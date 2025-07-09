@@ -11,7 +11,7 @@ const GreeterSchema = z.object({
 // This tool demonstrates the new DX: you can return a string, simple object, array, or full MCP object
 export default tool(
   GreeterSchema,
-  async ({ name }: { name: string; }) => {
+  async ({ name }: { name: string }) => {
     if (!name?.trim()) {
       // Return a simple string (normalized to content:text)
       return 'Name cannot be empty'

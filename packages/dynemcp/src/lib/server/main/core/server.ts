@@ -32,6 +32,7 @@ export class DyneMCP {
    */
   private constructor(config: DyneMCPConfig) {
     this.config = config
+
     const serverConfig: any = {
       name: config.server.name,
       version: config.server.version,
@@ -81,7 +82,6 @@ export class DyneMCP {
       tools: this.config.tools,
       resources: this.config.resources,
       prompts: this.config.prompts,
-      // resourceTemplates are automatically loaded from the resources folders
     })
 
     this.logLoadedComponents()

@@ -20,11 +20,8 @@ export function zodObjectToRawShape<T extends z.ZodObject<z.ZodRawShape>>(
 /**
  * Helper function to create a simple text response
  */
-export function createTextResponse(text: string) {
+export function createTextResponse(text: string): CallToolResult {
   return {
-    success: true,
-    error: undefined,
-    result: text,
     content: [
       {
         type: 'text',
@@ -37,11 +34,9 @@ export function createTextResponse(text: string) {
 /**
  * Helper function to create an error response
  */
-export function createErrorResponse(error: Error) {
+export function createErrorResponse(error: Error): CallToolResult {
   return {
-    success: false,
-    error: error.message,
-    result: undefined,
+    isError: true,
     content: [
       {
         type: 'text',
@@ -60,10 +55,47 @@ export function withErrorHandling<T extends (...args: unknown[]) => unknown>(
   return async (...args: Parameters<T>) => {
     try {
       const result = await fn(...args)
-      if (result && typeof result === 'object' && 'success' in result) {
-        return result as unknown as CallToolResult
+      // Si ya es un CallToolResult válido, lo devolvemos
+      if (
+        result &&
+        typeof result === 'object' &&
+        Array.isArray((result as any).content)
+      ) {
+        return result as CallToolResult
       }
-      return createTextResponse(String(result))
+      // Si es string, lo normalizamos
+      if (typeof result === 'string') {
+        return createTextResponse(result)
+      }
+      // Si es un objeto con 'text', lo normalizamos
+      if (result && typeof result === 'object' && 'text' in result) {
+        return createTextResponse((result as any).text)
+      }
+      // Si es un array de strings, lo normalizamos
+      if (
+        Array.isArray(result) &&
+        result.every((item) => typeof item === 'string')
+      ) {
+        return {
+          content: (result as string[]).map((text) => ({ type: 'text', text })),
+        }
+      }
+      // Si es un array de objetos con 'text', lo normalizamos
+      if (
+        Array.isArray(result) &&
+        result.every(
+          (item) => item && typeof item === 'object' && 'text' in item
+        )
+      ) {
+        return {
+          content: (result as any[]).map((item) => ({
+            type: 'text',
+            text: item.text,
+          })),
+        }
+      }
+      // Si no, lo serializamos como texto
+      return createTextResponse(JSON.stringify(result))
     } catch (error: unknown) {
       return createErrorResponse(error as Error)
     }

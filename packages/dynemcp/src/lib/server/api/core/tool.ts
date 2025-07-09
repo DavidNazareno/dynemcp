@@ -122,30 +122,50 @@ export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
     context?: Record<string, unknown>
   }) => Promise<string[]> | string[]
 }): LoadedTool {
-  const inputSchema = config.inputSchema ?? config.schema
+  // Asegurarse de que inputSchema es un ZodObject
+  const inputSchema =
+    config.inputSchema instanceof z.ZodType
+      ? config.inputSchema
+      : config.inputSchema && typeof config.inputSchema === 'object'
+        ? z.object(config.inputSchema as z.ZodRawShape)
+        : config.schema
+
+  const inputJsonSchema = zodToJsonSchema(inputSchema)
+
+  function extractPropertiesAndRequired(jsonSchema: any) {
+    const result: any = {}
+    if (jsonSchema && typeof jsonSchema === 'object') {
+      if ('properties' in jsonSchema && jsonSchema.properties) {
+        result.properties = jsonSchema.properties
+      }
+      if ('required' in jsonSchema && jsonSchema.required) {
+        result.required = jsonSchema.required
+      }
+    }
+    return result
+  }
+
+  let outputSchemaObj: any = undefined
+  if (config.outputSchema) {
+    const outputSchema =
+      config.outputSchema instanceof z.ZodType
+        ? config.outputSchema
+        : z.object(config.outputSchema as z.ZodRawShape)
+    const outputJsonSchema = zodToJsonSchema(outputSchema)
+    outputSchemaObj = {
+      type: 'object',
+      ...extractPropertiesAndRequired(outputJsonSchema),
+    }
+  }
+
   return {
     name: config.name,
     description: config.description,
     inputSchema: {
       type: 'object',
-      ...(zodToJsonSchema(inputSchema).properties && {
-        properties: zodToJsonSchema(inputSchema).properties,
-      }),
-      ...(zodToJsonSchema(inputSchema).required && {
-        required: zodToJsonSchema(inputSchema).required,
-      }),
+      ...extractPropertiesAndRequired(inputJsonSchema),
     },
-    outputSchema: config.outputSchema
-      ? {
-          type: 'object',
-          ...(zodToJsonSchema(config.outputSchema).properties && {
-            properties: zodToJsonSchema(config.outputSchema).properties,
-          }),
-          ...(zodToJsonSchema(config.outputSchema).required && {
-            required: zodToJsonSchema(config.outputSchema).required,
-          }),
-        }
-      : undefined,
+    outputSchema: outputSchemaObj,
     annotations: config.annotations,
     execute: withErrorHandling(config.execute as any),
     parameters: {}, // Optionally fill if needed
@@ -177,30 +197,50 @@ export function tool<
     }) => Promise<string[]> | string[]
   }
 ): LoadedTool {
-  const inputSchema = options.inputSchema ?? schema
+  // Asegurarse de que inputSchema es un ZodObject
+  const inputSchema =
+    options.inputSchema instanceof z.ZodType
+      ? options.inputSchema
+      : options.inputSchema && typeof options.inputSchema === 'object'
+        ? z.object(options.inputSchema as z.ZodRawShape)
+        : schema
+
+  const inputJsonSchema = zodToJsonSchema(inputSchema)
+
+  function extractPropertiesAndRequired(jsonSchema: any) {
+    const result: any = {}
+    if (jsonSchema && typeof jsonSchema === 'object') {
+      if ('properties' in jsonSchema && jsonSchema.properties) {
+        result.properties = jsonSchema.properties
+      }
+      if ('required' in jsonSchema && jsonSchema.required) {
+        result.required = jsonSchema.required
+      }
+    }
+    return result
+  }
+
+  let outputSchemaObj: any = undefined
+  if (options.outputSchema) {
+    const outputSchema =
+      options.outputSchema instanceof z.ZodType
+        ? options.outputSchema
+        : z.object(options.outputSchema as z.ZodRawShape)
+    const outputJsonSchema = zodToJsonSchema(outputSchema)
+    outputSchemaObj = {
+      type: 'object',
+      ...extractPropertiesAndRequired(outputJsonSchema),
+    }
+  }
+
   return {
     name: options.name,
     description: options.description ?? '',
     inputSchema: {
       type: 'object',
-      ...(zodToJsonSchema(inputSchema).properties && {
-        properties: zodToJsonSchema(inputSchema).properties,
-      }),
-      ...(zodToJsonSchema(inputSchema).required && {
-        required: zodToJsonSchema(inputSchema).required,
-      }),
+      ...extractPropertiesAndRequired(inputJsonSchema),
     },
-    outputSchema: options.outputSchema
-      ? {
-          type: 'object',
-          ...(zodToJsonSchema(options.outputSchema).properties && {
-            properties: zodToJsonSchema(options.outputSchema).properties,
-          }),
-          ...(zodToJsonSchema(options.outputSchema).required && {
-            required: zodToJsonSchema(options.outputSchema).required,
-          }),
-        }
-      : undefined,
+    outputSchema: outputSchemaObj,
     annotations: options.annotations ?? options.meta,
     execute: withErrorHandling(handler as any),
     parameters: {}, // Optionally fill if needed

@@ -7,8 +7,8 @@
 export * from './server'
 
 // Export build functionality (main entrypoints, types, bundler)
-export * from './build/main'
-export * from './build/bundler'
+/* export * from './build-old/main'
+export * from './build-old/bundler' */
 
 // Export CLI functionality (only public API)
 export { ConsoleLogger, StderrLogger, cli, dev } from './cli'

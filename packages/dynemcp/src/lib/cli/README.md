@@ -2,7 +2,7 @@
 
 ## Overview
 
-The DyneMCP CLI provides a unified, extensible command-line interface for the DyneMCP framework. It covers all developer-facing commands: development server, build, analyze, clean, and production server management. The CLI is modular, type-safe, and designed for maintainability and easy extension.
+The DyneMCP CLI provides a unified, extensible command-line interface for the DyneMCP framework. It cubre los comandos de ciclo de vida del servidor: desarrollo y producción. El CLI es modular, type-safe, y diseñado para mantenibilidad y fácil extensión.
 
 ---
 
@@ -19,20 +19,21 @@ cli/
     run.ts          # Main dev server runner (hot-reload, shutdown, inspector integration)
     types.ts        # CLI-specific types (DevOptions, etc.)
     utils.ts        # Helpers (spawnProcess, transport/host/port resolution)
-    handler/        # Command-specific handlers (build, start, clean, analyze)
+    handler/
+      start.ts      # Handler for 'start' command
 ```
 
 ---
 
 ## Main Files (core/)
 
-- **cli.ts**: CLI entry point. Sets up all main commands (`dev`, `build`, `start`, `clean`, `analyze`) using yargs and connects them to their handlers.
+- **cli.ts**: CLI entry point. Sets up all main commands (`dev`, `start`) using yargs and connects them to their handlers.
 - **dev.ts**: Handler for the `dev` command. Decides between inspector mode and default dev mode.
 - **logger.ts**: Provides `ConsoleLogger` and `StderrLogger` for colored and error stream logging.
 - **run.ts**: Handles dev server logic, hot-reload, server startup, graceful shutdown, and MCP Inspector integration.
 - **types.ts**: Defines types for CLI argument parsing and handler logic.
 - **utils.ts**: Utility functions for process spawning and transport/host/port resolution.
-- **handler/**: Contains command-specific handlers for `build`, `start`, `clean`, and `analyze`.
+- **handler/**: Contains command-specific handler for `start`.
 
 ---
 
@@ -48,20 +49,12 @@ cli/
 
 - `dev [mode]`  
   Starts the development server. Supports `inspector` mode for advanced debugging.
-- `build`  
-  Builds the project for production. Supports `--clean` and `--analyze`.
 - `start`  
   Starts the server in production mode.
-- `clean`  
-  Cleans the build directory.
-- `analyze`  
-  Analyzes project dependencies.
 
 ### Common Options
 
 - `--config, -c` Path to `dynemcp.config.ts` (default: auto-detect)
-- `--clean` Clean before building
-- `--analyze` Analyze dependencies after build
 - `--transport` Transport type (`stdio`, `streamable-http`, `console`)
 - `--port` HTTP server port (default: 3000)
 - `--host` HTTP server host (default: localhost)
@@ -77,17 +70,8 @@ dynemcp dev
 # Start dev server in inspector mode
 dynemcp dev inspector
 
-# Build for production
-dynemcp build --clean
-
 # Start production server
 dynemcp start -c ./myconfig.ts
-
-# Clean build directory
-dynemcp clean
-
-# Analyze dependencies
-dynemcp analyze
 ```
 
 ---

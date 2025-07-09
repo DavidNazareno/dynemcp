@@ -13,6 +13,7 @@ import { Sema } from 'async-sema'
 
 import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces'
 import {
+  INSPECTOR_VERSION,
   LOGGING,
   PATHS,
   SDK_VERSION,
@@ -155,21 +156,15 @@ export const installTemplate = async (
     const version = process.env.DYNEMCP_TEST_VERSION ?? pkgVersion
 
     const generateScripts = () => {
-      const baseScripts = {
-        build: 'dynemcp build',
+      return {
+        dev: 'dynemcp dev',
+        inspector: 'dynemcp dev inspector',
         start: 'dynemcp start',
-        clean: 'dynemcp clean',
-        analyze: 'dynemcp analyze',
         format: 'prettier --write .',
         lint: args.eslint ? 'eslint . --ext .js,.jsx,.ts,.tsx' : undefined,
         'eslint:fix': args.eslint
           ? 'eslint . --ext .js,.jsx,.ts,.tsx --fix'
           : undefined,
-      }
-      return {
-        ...baseScripts,
-        dev: 'dynemcp dev',
-        inspector: 'dynemcp dev inspector',
       }
     }
 
@@ -200,8 +195,8 @@ export const installTemplate = async (
         prettier: '^3.2.5',
       },
     }
-    
-  /*   if (args.template === 'http-server' || args.template === 'secure-agent') {
+
+    /*   if (args.template === 'http-server' || args.template === 'secure-agent') {
       packageJson.dependencies['express'] = '^4.19.2'
       packageJson.dependencies['cors'] = '^2.8.5'
       packageJson.devDependencies['@types/express'] = '^4.17.21'
@@ -216,14 +211,15 @@ export const installTemplate = async (
       packageJson.devDependencies = {
         ...packageJson.devDependencies,
         //'@types/node': '^20.11.30',
-        'typescript': '^5.4.2',
-        '@types/minimatch': '^6.0.0',
+        typescript: '^5.4.2',
+        tsx: '^4.0.0',
+        '@modelcontextprotocol/inspector': `^${INSPECTOR_VERSION}`,
         //'@typescript-eslint/eslint-plugin': '^8.33.1',
         //'@typescript-eslint/parser': '^8.33.1',
-      //  'ts-node': '^10.9.2',
+        //  'ts-node': '^10.9.2',
       }
     }
-/* 
+    /* 
     if (args.eslint) {
       packageJson.devDependencies = {
         ...packageJson.devDependencies,

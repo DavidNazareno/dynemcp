@@ -8,13 +8,7 @@ import type {
 } from '../../api'
 import type { ServerInitializationOptions } from './interfaces'
 import { createTextResponse, createErrorResponse } from '../../api'
-import { registry } from '../../registry/core/registry'
-import {
-  loadAllTools,
-  loadAllResources,
-  loadAllPrompts,
-  loadAllComponents,
-} from '../../components/component-loader'
+import { loadAllComponents } from '../../components/component-loader'
 import type { DyneMCPConfig } from '../../config/core/interfaces'
 import { loadConfig } from '../../config/core/loader'
 

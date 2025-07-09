@@ -16,7 +16,7 @@ import {
   validatePrompt,
   validateMiddleware,
 } from './core/loaders/validators'
-import path from 'path'
+import fs from 'fs'
 
 export interface MiddlewareDefinition {
   // Puedes ajustar esto según la forma esperada de tu middleware
@@ -76,7 +76,7 @@ export async function loadComponentsFromDirectory<T>(
   const errors: string[] = []
   try {
     // Check if the directory exists before searching
-    if (!(await import('fs').then((fs) => fs.existsSync(directory)))) {
+    if (!fs.existsSync(directory)) {
       console.warn(
         `Directory ${directory} does not exist, skipping component loading`
       )
@@ -154,7 +154,6 @@ export async function loadMiddlewareFromDirectory(
 
 /**
  * Centralized function to load all components (tools, resources, prompts) based on environment.
- * Automatically detects production vs development mode and uses appropriate loading strategy.
  *
  * @param options - Configuration for loading components
  * @returns LoadAllComponentsResult with all loaded components and any errors
@@ -164,35 +163,8 @@ export async function loadAllComponents(options: {
   resources: LoadOptions
   prompts: LoadOptions
 }): Promise<LoadAllComponentsResult> {
-  const isProduction = process.env.NODE_ENV === 'production'
-  const errors: string[] = []
-
-  if (isProduction) {
-    // Production mode: load from bundles
-    try {
-      const [toolsBundle, resourcesBundle, promptsBundle] = await Promise.all([
-        import(path.resolve(process.cwd(), 'dist/tools.js')),
-        import(path.resolve(process.cwd(), 'dist/resources.js')),
-        import(path.resolve(process.cwd(), 'dist/prompts.js')),
-      ])
-
-      const tools = Object.values(toolsBundle).filter(validateTool)
-      const resources = Object.values(resourcesBundle).filter(validateResource)
-      const prompts = Object.values(promptsBundle).filter(validatePrompt)
-
-      return { tools, resources, prompts, errors }
-    } catch (error) {
-      const errorMsg = `Failed to load production bundles: ${error}`
-      errors.push(errorMsg)
-      console.warn(errorMsg)
-      // Fallback to development mode if bundles fail
-      console.warn('Falling back to development mode...')
-      return loadAllComponentsDevelopment(options)
-    }
-  } else {
-    // Development mode: load from file system
-    return loadAllComponentsDevelopment(options)
-  }
+  // Solo modo desarrollo
+  return loadAllComponentsDevelopment(options)
 }
 
 /**
