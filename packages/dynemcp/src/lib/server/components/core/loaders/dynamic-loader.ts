@@ -41,6 +41,8 @@ export async function loadComponentFromFile<T>(
       delete normalized.parameters
       exported = normalized
     }
+    // Logging para depuración
+    // console.log('[DyneMCP] Loaded component from', filePath, exported)
     if (validator(exported)) {
       return exported
     }

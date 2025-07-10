@@ -1,7 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import type {
-  ToolDefinition,
+  LoadedTool,
   ResourceDefinition,
   PromptDefinition,
   PromptMessage,
@@ -11,6 +11,7 @@ import { createTextResponse, createErrorResponse } from '../../api'
 import type { DyneMCPConfig } from '../../config/core/interfaces'
 import { loadConfig } from '../../config/core/loader'
 import { registry } from '../../registry/core/registry'
+import { fileLogger } from '../../../../global/logger'
 
 // Server initializer logic for DyneMCP main module
 // Handles registration of tools, resources, and prompts with the MCP server instance.
@@ -39,48 +40,25 @@ function normalizeName(name: string): string {
 /**
  * Registers all tools with the MCP server.
  */
-export function registerTools(
-  server: McpServer,
-  tools: ToolDefinition[]
-): void {
+export function registerTools(server: McpServer, tools: LoadedTool[]): void {
   for (const tool of tools) {
     server.registerTool(
       normalizeName(tool.name),
       {
         title: tool.name,
-        description: tool.description,
-        inputSchema: (tool as any).inputSchema,
-        annotations: (tool as any).annotations,
+        description: tool.description || '',
+        inputSchema: tool.inputSchema, // <-- ZodRawShape, el SDK genera automáticamente el JSON Schema
+        annotations: tool.annotations,
       },
       async (args: Record<string, unknown>) => {
         try {
-          const result = await (tool as any).execute(args || {})
+          const result = await tool.execute(args || {})
           if (
             result &&
             typeof result === 'object' &&
             Array.isArray((result as { content?: unknown[] }).content)
           ) {
-            // Sanitiza el contenido para asegurar que cada item tenga el formato correcto
-            const safeContent = (result as { content: unknown[] }).content.map(
-              (item) => {
-                if (
-                  item &&
-                  typeof item === 'object' &&
-                  'type' in item &&
-                  typeof (item as any).type === 'string'
-                ) {
-                  if (
-                    (item as any).type === 'text' &&
-                    typeof (item as any).text === 'string'
-                  ) {
-                    return { type: 'text', text: (item as any).text }
-                  }
-                  // Here you can add validations for other types (image, audio, etc.)
-                }
-                return { type: 'text', text: JSON.stringify(item) }
-              }
-            )
-            return { ...result, content: safeContent }
+            return result
           }
           return createTextResponse(String(result))
         } catch (error) {

@@ -49,14 +49,27 @@ export type ResourceDefinition = SDKResource
 export type PromptDefinition = SDKPrompt
 
 // Internal types for loaded/executable logic
-// Ajuste: inputSchema nunca debe ser undefined y debe ser un objeto compatible con el SDK
-export interface LoadedTool extends ToolDefinition {
-  inputSchema: {
+// LoadedTool tiene su propia definición con inputSchema como ZodRawShape
+export interface LoadedTool {
+  name: string
+  description?: string
+  inputSchema: z.ZodRawShape // <-- Solo ZodRawShape
+  outputSchema?: {
     [x: string]: unknown
     type: 'object'
     properties?: { [x: string]: unknown }
     required?: string[]
   }
+  annotations?: { [x: string]: unknown }
+  execute: (
+    args: Record<string, unknown>
+  ) => Promise<CallToolResult> | CallToolResult
+  parameters?: Record<string, unknown>
+  complete?: (params: {
+    argument: string
+    partialInput: string
+    context?: Record<string, unknown>
+  }) => Promise<string[]> | string[]
 }
 
 export interface LoadedPrompt extends PromptDefinition {

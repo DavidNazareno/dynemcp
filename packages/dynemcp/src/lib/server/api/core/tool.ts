@@ -161,10 +161,7 @@ export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
   return {
     name: config.name,
     description: config.description,
-    inputSchema: {
-      type: 'object',
-      ...extractPropertiesAndRequired(inputJsonSchema),
-    },
+    inputSchema: inputSchema.shape, // <-- Solo ZodRawShape
     outputSchema: outputSchemaObj,
     annotations: config.annotations,
     execute: withErrorHandling(config.execute as any),
@@ -236,10 +233,7 @@ export function tool<
   return {
     name: options.name,
     description: options.description ?? '',
-    inputSchema: {
-      type: 'object',
-      ...extractPropertiesAndRequired(inputJsonSchema),
-    },
+    inputSchema: inputSchema.shape, // <-- Solo ZodRawShape
     outputSchema: outputSchemaObj,
     annotations: options.annotations ?? options.meta,
     execute: withErrorHandling(handler as any),
