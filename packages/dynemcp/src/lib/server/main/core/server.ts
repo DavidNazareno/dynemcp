@@ -5,6 +5,7 @@ import type {
   PromptDefinition,
   SamplingRequest,
   SamplingResult,
+  ResourceDefinition,
 } from '../../api'
 import { registry } from '../../registry/core/registry'
 import { loadConfig } from '../../config/core/loader'
@@ -13,111 +14,90 @@ import { registerComponents } from './initializer'
 import { setCurrentDyneMCPInstance } from './server-instance'
 import { TRANSPORT } from '../../../../global/config-all-contants'
 import { fileLogger } from '../../../../global/logger'
+import { setupTransport } from './setup-transport'
+import { handleGracefulShutdown } from './handle-shutdown'
 
-// Main server class and logic for DyneMCP main module
-// Handles server initialization, component loading, transport setup, and lifecycle management.
-
-/**
- * DyneMCP: Main server class for the DyneMCP framework.
- * Use DyneMCP.create() to instantiate and manage the server lifecycle.
- */
 export class DyneMCP {
   private server: McpServer
-  private transport: Transport | undefined
+  private transport?: Transport
   private isInitialized = false
-  private config: DyneMCPConfig
 
-  /**
-   * Constructor privado. Usar DyneMCP.create() para instanciar.
-   */
-  private constructor(config: DyneMCPConfig) {
-    this.config = config
-
-    const serverConfig: any = {
+  private constructor(private config: DyneMCPConfig) {
+    this.server = new McpServer({
       name: config.server.name,
       version: config.server.version,
-    }
-    if (
-      'capabilities' in config.server &&
-      (config.server as any).capabilities
-    ) {
-      serverConfig.capabilities = (config.server as any).capabilities
-    }
-    this.server = new McpServer(serverConfig)
+      ...((config.server as any).capabilities && {
+        capabilities: (config.server as any).capabilities,
+      }),
+    })
 
     setCurrentDyneMCPInstance(this)
   }
 
-  /**
-   * Asynchronous factory to create a DyneMCP instance from config or path.
-   */
-  static async create(config?: DyneMCPConfig | string): Promise<DyneMCP> {
-    const resolvedConfig: DyneMCPConfig =
-      typeof config === 'string' || typeof config === 'undefined'
-        ? await loadConfig(config)
-        : config
+  static async create(resolvedConfig: DyneMCPConfig): Promise<DyneMCP> {
     return new DyneMCP(resolvedConfig)
   }
 
-  // =====================
-  // Public methods
-  // =====================
+  static async start(): Promise<DyneMCP> {
+    const config = await loadConfig()
+    const instance = await DyneMCP.create(config)
+    await instance.init()
 
-  /**
-   * Returns the current server config.
-   */
-  getConfig(): DyneMCPConfig {
-    return this.config
+    instance.transport = setupTransport(config)
+    await instance.connectTransport()
+    instance.logTransportInfo()
+    handleGracefulShutdown(instance)
+
+    fileLogger.info('✅ DyneMCP server started (autónomo)')
+
+    if (
+      config.transport?.type === TRANSPORT.TRANSPORT_TYPES.HTTP &&
+      typeof config.transport.options === 'object'
+    ) {
+      const { host, port } = {
+        ...TRANSPORT.DEFAULT_TRANSPORT_HTTP_OPTIONS,
+        ...(config.transport.options as any),
+      }
+      fileLogger.info(`🌐 Server running at http://${host}:${port}`)
+    }
+
+    return instance
   }
 
-  /**
-   * Initializes the server and loads all components.
-   */
   async init(): Promise<void> {
     if (this.isInitialized) return
 
     fileLogger.info('🚀 Inicializando DyneMCP server...')
 
-    await registry.loadAll({
-      tools: this.config.tools,
-      resources: this.config.resources,
-      prompts: this.config.prompts,
-    })
-
+    await registerComponents(this.server, this.config)
     this.logLoadedComponents()
-
-    // Register components in the MCP server
-    registerComponents(this.server, this.tools, this.resources, this.prompts)
 
     this.isInitialized = true
     fileLogger.info('✅ DyneMCP server initialized correctly')
   }
 
-  /**
-   * Starts the MCP server and transport.
-   */
-  async start(): Promise<void> {
-    await this.init()
-    this.setupTransport()
-    await this.connectTransport()
-    this.logTransportInfo()
-  }
-
-  /**
-   * Stops the MCP server and transport.
-   */
   async stop(): Promise<void> {
     if (this.transport?.close) {
       await this.transport.close()
     }
+
     if (this.isCustomTransport()) {
       fileLogger.info('🛑 MCP server stopped')
     }
   }
 
-  /**
-   * Returns server statistics.
-   */
+  async sample(request: SamplingRequest): Promise<SamplingResult> {
+    if (typeof (this.server as any).send !== 'function') {
+      throw new Error('McpServer does not support send method')
+    }
+
+    return await (this.server as any).send('sampling/createMessage', request)
+  }
+
+  getConfig(): DyneMCPConfig {
+    return this.config
+  }
+
   get stats() {
     return {
       ...registry.stats,
@@ -129,142 +109,63 @@ export class DyneMCP {
     }
   }
 
-  /**
-   * Returns registered tools.
-   */
   get tools(): ToolDefinition[] {
-    return registry.getAllTools().map((item) => item.module as ToolDefinition)
+    return registry.getAllTools().map((t) => t.module as ToolDefinition)
   }
 
-  /**
-   * Returns registered resources.
-   */
-  get resources() {
-    return registry.getAllResources()
+  get resources(): ResourceDefinition[] {
+    return registry.getAllResources().map((r) => r.module as ResourceDefinition)
   }
 
-  /**
-   * Returns registered prompts.
-   */
   get prompts(): PromptDefinition[] {
-    return registry
-      .getAllPrompts()
-      .map((item) => item.module as PromptDefinition)
+    return registry.getAllPrompts().map((p) => p.module as PromptDefinition)
   }
 
-  /**
-   * Sends a sampling request to the server.
-   */
-  async sample(request: SamplingRequest): Promise<SamplingResult> {
-    if (typeof (this.server as any).send !== 'function') {
-      throw new Error('McpServer does not support send method')
-    }
-    return await (this.server as any).send('sampling/createMessage', request)
-  }
-
-  // =====================
-  // Private methods
-  // =====================
-
-  /**
-   * Logs all loaded components, filtering out invalid ones and warning if any are found.
-   */
-  private logLoadedComponents(): void {
-    const tools = this.tools
-    const resources = this.resources
-    const prompts = this.prompts
-
-    const validTools = tools.filter((t) => t && typeof t.name === 'string')
-    const invalidTools = tools.length - validTools.length
-    const validResources = resources.filter(
-      (r) => r && typeof r.name === 'string'
-    )
-    const invalidResources = resources.length - validResources.length
-    const validPrompts = prompts.filter((p) => p && typeof p.name === 'string')
-    const invalidPrompts = prompts.length - validPrompts.length
-
-    fileLogger.info(`Loaded tools: ${validTools.length}`)
-    validTools.forEach((t) => fileLogger.info(`  - Tool: ${t.name}`))
-    if (invalidTools > 0) {
-      fileLogger.warn(
-        `⚠️ ${invalidTools} invalid tool(s) were skipped (missing or invalid 'name')`
-      )
-    }
-
-    fileLogger.info(`Loaded resources: ${validResources.length}`)
-    validResources.forEach((r) => fileLogger.info(`  - Resource: ${r.name}`))
-    if (invalidResources > 0) {
-      fileLogger.warn(
-        `⚠️ ${invalidResources} invalid resource(s) were skipped (missing or invalid 'name')`
-      )
-    }
-
-    fileLogger.info(`Loaded prompts: ${validPrompts.length}`)
-    validPrompts.forEach((p) => fileLogger.info(`  - Prompt: ${p.name}`))
-    if (invalidPrompts > 0) {
-      fileLogger.warn(
-        `⚠️ ${invalidPrompts} invalid prompt(s) were skipped (missing or invalid 'name')`
-      )
-    }
-  }
-
-  /**
-   * Initializes the transport based on config.
-   */
-  private setupTransport(): void {
-    const transportConfig = this.config.transport || {
-      type: TRANSPORT.DEFAULT_TRANSPORT,
-    }
-    this.transport = createTransport(transportConfig) as Transport
-  }
-
-  /**
-   * Connects the transport to the MCP server.
-   */
   private async connectTransport(): Promise<void> {
-    if (
-      this.transport &&
-      'connect' in this.transport &&
-      typeof (this.transport as any).connect === 'function'
-    ) {
-      await (this.transport as any).connect(this.server)
-    } else if (
-      this.transport &&
-      'start' in this.transport &&
-      typeof (this.transport as any).start === 'function'
-    ) {
-      await this.server.connect(this.transport)
+    const t = this.transport
+    if (!t) return
+
+    if ('connect' in t && typeof (t as any).connect === 'function') {
+      await (t as any).connect(this.server)
+    } else if ('start' in t && typeof (t as any).start === 'function') {
+      await this.server.connect(t)
     }
   }
 
-  /**
-   * Logs transport info after startup.
-   */
   private logTransportInfo(): void {
     if (this.config.transport?.type !== TRANSPORT.TRANSPORT_TYPES.STDIO) {
       fileLogger.info(
         `🎯 MCP server "${this.config.server.name}" started successfully`
       )
-      // Details of port and endpoint are shown in the HTTP transport
     }
   }
 
-  /**
-   * Checks if a custom transport is used.
-   */
+  private logLoadedComponents(): void {
+    this.logComponentList('tools', this.tools)
+    this.logComponentList('resources', this.resources)
+    this.logComponentList('prompts', this.prompts)
+  }
+
+  private logComponentList(type: string, list: any[]): void {
+    const valid = list.filter((item) => item && typeof item.name === 'string')
+    const invalidCount = list.length - valid.length
+
+    fileLogger.info(`Loaded ${type}: ${valid.length}`)
+    valid.forEach((item) =>
+      fileLogger.info(`  - ${type.slice(0, -1)}: ${item.name}`)
+    )
+
+    if (invalidCount > 0) {
+      fileLogger.warn(
+        `⚠️ ${invalidCount} invalid ${type} were skipped (missing or invalid 'name')`
+      )
+    }
+  }
+
   private isCustomTransport(): boolean {
     return (
       this.config.transport?.type &&
-      String(this.config.transport.type) !== 'stdio'
+      String(this.config.transport.type) !== TRANSPORT.TRANSPORT_TYPES.STDIO
     )
   }
-}
-
-/**
- * Factory function to create a DyneMCP server instance (async).
- */
-export async function createMCPServer(
-  config?: DyneMCPConfig | string
-): Promise<DyneMCP> {
-  return DyneMCP.create(config)
 }

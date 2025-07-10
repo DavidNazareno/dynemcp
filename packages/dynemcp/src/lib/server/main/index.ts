@@ -6,7 +6,10 @@
 export type { ServerInitializationOptions } from './core/interfaces'
 
 // Main server class and factory
-export { DyneMCP, createMCPServer } from './core/server'
+export { DyneMCP } from './core/server'
+
+// Inspector
+export { launchInspectorProcess } from './core/inspector'
 
 // Initialization and registration utilities
 export {

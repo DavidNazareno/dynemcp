@@ -8,9 +8,9 @@ import type {
 } from '../../api'
 import type { ServerInitializationOptions } from './interfaces'
 import { createTextResponse, createErrorResponse } from '../../api'
-import { loadAllComponents } from '../../components/component-loader'
 import type { DyneMCPConfig } from '../../config/core/interfaces'
 import { loadConfig } from '../../config/core/loader'
+import { registry } from '../../registry/core/registry'
 
 // Server initializer logic for DyneMCP main module
 // Handles registration of tools, resources, and prompts with the MCP server instance.
@@ -28,6 +28,14 @@ export function createMCPServerInstance(
   })
 }
 
+// Utility to normalize names (e.g. "greeter Good" -> "greeter_good")
+function normalizeName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_') // replace symbols and spaces with _
+    .replace(/^_+|_+$/g, '') // remove _ at start/end
+}
+
 /**
  * Registers all tools with the MCP server.
  */
@@ -37,7 +45,7 @@ export function registerTools(
 ): void {
   for (const tool of tools) {
     server.registerTool(
-      tool.name,
+      normalizeName(tool.name),
       {
         title: tool.name,
         description: tool.description,
@@ -118,7 +126,7 @@ export function registerResources(
     }
 
     server.registerResource(
-      resource.name,
+      normalizeName(resource.name),
       resource.uri,
       {
         title: resource.name,
@@ -147,7 +155,7 @@ export function registerPrompts(
     )
 
     server.registerPrompt(
-      prompt.name,
+      normalizeName(prompt.name),
       {
         title: prompt.name,
         description: prompt.description || `Prompt: ${prompt.name}`,
@@ -228,34 +236,31 @@ export function registerPrompts(
 
 /**
  * Registers tools, resources, and prompts with the MCP server (main entrypoint).
- * Puede usarse como:
- *   registerComponents(server, tools, resources, prompts)
- *   registerComponents(server, options)
+ * Ahora usa el registry como única fuente de componentes.
  */
 export async function registerComponents(
   server: McpServer,
-  a?: ToolDefinition[] | DyneMCPConfig,
-  b?: ResourceDefinition[],
-  c?: PromptDefinition[]
+  config?: DyneMCPConfig
 ): Promise<void> {
-  if (Array.isArray(a) && Array.isArray(b) && Array.isArray(c)) {
-    // Modo clásico: server, tools, resources, prompts
-    registerTools(server, a)
-    registerResources(server, b)
-    registerPrompts(server, c)
-    return
+  // Siempre usamos el registry para cargar y obtener los componentes
+  if (!registry.loaded) {
+    let resolvedConfig: DyneMCPConfig
+    if (!config) {
+      resolvedConfig = await loadConfig()
+    } else {
+      resolvedConfig = config
+    }
+    await registry.loadAll({
+      tools: resolvedConfig.tools,
+      resources: resolvedConfig.resources,
+      prompts: resolvedConfig.prompts,
+    })
   }
-  let config: DyneMCPConfig
-  if (!a || typeof a !== 'object' || !('tools' in a)) {
-    config = await loadConfig()
-  } else {
-    config = a as DyneMCPConfig
-  }
-  const { tools, resources, prompts } = await loadAllComponents({
-    tools: config.tools,
-    resources: config.resources,
-    prompts: config.prompts,
-  })
+  // Obtenemos los componentes del registry
+  const tools = registry.getAllTools().map((item) => item.module)
+  const resources = registry.getAllResources().map((item) => item.module)
+  const prompts = registry.getAllPrompts().map((item) => item.module)
+
   registerTools(server, tools)
   registerResources(server, resources)
   registerPrompts(server, prompts)

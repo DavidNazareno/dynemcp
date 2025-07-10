@@ -4,15 +4,13 @@
 
 import fs from 'fs'
 import path from 'path'
+// @ts-expect-error: minimatch has no types installed in this project
+import minimatch from 'minimatch'
 
-/**
- * findFilesRecursively: Recursively finds all component files (tool, resource, prompt, sample) in a directory.
- * Returns absolute file paths for dynamic loading.
- *
- * @param dir - The root directory to start searching from
- * @returns An array of absolute file paths for discovered component files
- */
-export async function findFilesRecursively(dir: string): Promise<string[]> {
+export async function findFilesRecursively(
+  dir: string,
+  pattern?: string
+): Promise<string[]> {
   const files: string[] = []
 
   async function scanDirectory(currentDir: string) {
@@ -24,19 +22,9 @@ export async function findFilesRecursively(dir: string): Promise<string[]> {
       if (entry.isDirectory()) {
         await scanDirectory(fullPath)
       } else if (entry.isFile()) {
-        // Only include files that match the expected component file names
-        if (
-          entry.name === 'tool.ts' ||
-          entry.name === 'tool.js' ||
-          entry.name === 'resource.ts' ||
-          entry.name === 'resource.js' ||
-          entry.name === 'prompt.ts' ||
-          entry.name === 'prompt.js' ||
-          entry.name === 'sample.ts' ||
-          entry.name === 'sample.js' ||
-          entry.name === 'resources-template.ts' ||
-          entry.name === 'resources-template.js'
-        ) {
+        // If a pattern is provided, use minimatch to filter relative to the base dir
+        const relPath = path.relative(dir, fullPath)
+        if (!pattern || minimatch(relPath, pattern)) {
           files.push(fullPath)
         }
       }

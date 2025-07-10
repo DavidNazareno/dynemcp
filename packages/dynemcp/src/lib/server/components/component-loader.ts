@@ -84,7 +84,7 @@ export async function loadComponentsFromDirectory<T>(
       return { components: [], errors: [] }
     }
     // Recursively find all matching component files
-    const files = await findFilesRecursively(directory)
+    const files = await findFilesRecursively(directory, options.pattern)
     for (const file of files) {
       try {
         // Dynamically import and validate each component
@@ -154,9 +154,8 @@ export async function loadMiddlewareFromDirectory(
 
 /**
  * Centralized function to load all components (tools, resources, prompts) based on environment.
- *
- * @param options - Configuration for loading components
- * @returns LoadAllComponentsResult with all loaded components and any errors
+ * SOLO debe ser usado por el registry. No lo uses directamente en otros módulos.
+ * @internal
  */
 export async function loadAllComponents(options: {
   tools: LoadOptions

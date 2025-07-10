@@ -4,8 +4,8 @@
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { dev } from './handler/dev'
-import { startHandler } from './handler/start'
+import { launchInspectorProcess } from '../../server/main'
+import { spawnProcess } from './utils'
 
 const cli = yargs(hideBin(process.argv))
   .scriptName('dynemcp')
@@ -20,21 +20,18 @@ const cli = yargs(hideBin(process.argv))
         choices: ['default', 'inspector'],
         default: 'default',
       }),
-    (argv) => {
-      // Siempre activa watch
-      argv.watch = true
-      if (argv.mode === 'inspector') argv.mode = 'inspector'
-      else argv.mode = 'default'
-      dev(argv)
+    async (argv) => {
+      const args = ['tsx', 'src/index.ts']
+      if (argv.mode === 'inspector') {
+        await launchInspectorProcess()
+      } else {
+        spawnProcess('npx', args)
+      }
     }
   )
-  .command(
-    'start',
-    'Start production server (no watch, no inspector)',
-    (y) => y,
-    startHandler
+  .command('start', 'Start production server (no watch, no inspector)', () =>
+    spawnProcess('npx', ['tsx', 'src/index.ts'])
   )
-
   .demandCommand(1, 'You need at least one command before moving on')
   .help()
   .version()
@@ -42,4 +39,4 @@ const cli = yargs(hideBin(process.argv))
   .alias('v', 'version')
   .strict()
 
-export { dev, cli }
+export { cli }

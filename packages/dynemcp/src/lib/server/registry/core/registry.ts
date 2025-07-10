@@ -48,16 +48,15 @@ export class DyneMCPRegistry implements Registry {
 
   /**
    * Load all components from the specified directories (tools, resources, prompts).
-   * Uses helpers to load and validate, with logging and error handling.
+   * Usa helpers para cargar y validar, con logging y error handling.
+   * Este método debe ser la única vía para cargar componentes en el sistema.
    */
   async loadAll(options: LoadAllOptions): Promise<void> {
     if (this.isLoaded) {
       console.warn('Registry already loaded, skipping...')
       return
     }
-
     fileLogger.info('Loading components...')
-
     const { tools, resources, prompts, errors } = await loadAllComponents({
       tools: options.tools,
       resources: options.resources,
@@ -85,8 +84,7 @@ export class DyneMCPRegistry implements Registry {
         module: prompt,
       }))
     )
-
-    // Validate tools
+    // Validación y logging
     try {
       validateTool(tools)
     } catch (error) {
@@ -94,27 +92,20 @@ export class DyneMCPRegistry implements Registry {
         `Tool validation warnings: ${error instanceof Error ? error.message : error}`
       )
     }
-    // Log results
     const stats = this.stats
-
     fileLogger.info(
       `✅ Loaded ${stats.tools} tools, ${stats.resources} resources, ${stats.prompts} prompts`
     )
-
     if (errors.length > 0) {
       fileLogger.warn(`Loading errors: ${errors}`)
     }
     this.isLoaded = true
-
-    // TODO: Resource template logic removed for production release. Re-implement in a future version if needed.
-
-    // Load middleware using the robust component loader
+    // Middleware loading (opcional, puede mejorarse para hot-reload)
     const projectRoot = process.cwd()
     const middlewareResult = await loadMiddlewareFromDirectory({
       enabled: true,
       directory: path.join(projectRoot, 'src'),
     })
-    // Store the first valid middleware found, or null
     this.authenticationMiddlewarePath =
       middlewareResult.components.length > 0
         ? middlewareResult.components[0]
@@ -135,9 +126,9 @@ export class DyneMCPRegistry implements Registry {
    * Get all registered resources.
    */
   getAllResources(): any[] {
-    return Array.from(this.storage['items'].values())
-      .filter((item) => (item as RegistryItem).type === 'resource')
-      .map((item) => getResourceMeta(item.module))
+    return Array.from(this.storage['items'].values()).filter(
+      (item) => (item as RegistryItem).type === 'resource'
+    ) as RegistryItem[]
   }
 
   /**
