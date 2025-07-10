@@ -48,7 +48,7 @@ export class DyneMCP {
     instance.logTransportInfo()
     handleGracefulShutdown(instance)
 
-    fileLogger.info('✅ DyneMCP server started (autónomo)')
+    fileLogger.info('✅ DyneMCP server started')
 
     if (
       config.transport?.type === TRANSPORT.TRANSPORT_TYPES.HTTP &&
@@ -125,9 +125,23 @@ export class DyneMCP {
     const t = this.transport
     if (!t) return
 
-    if ('connect' in t && typeof (t as any).connect === 'function') {
+    fileLogger.info(`🔌 Connecting transport: ${t.constructor.name}`)
+
+    // HTTPServers necesita connect() con el McpServer
+    if (t.constructor.name === 'HTTPServers') {
+      fileLogger.info('🌐 Initializing HTTP transport...')
+      await (t as any).connect(this.server)
+      fileLogger.info('✅ HTTP transport connected successfully')
+    } else if ('connect' in t && typeof (t as any).connect === 'function') {
+      fileLogger.info('🔗 Connecting transport with connect() method...')
       await (t as any).connect(this.server)
     } else if ('start' in t && typeof (t as any).start === 'function') {
+      fileLogger.info('🚀 Connecting transport with start() method...')
+      await this.server.connect(t)
+    } else {
+      fileLogger.warn(
+        '⚠️ Unknown transport type, attempting default connection'
+      )
       await this.server.connect(t)
     }
   }

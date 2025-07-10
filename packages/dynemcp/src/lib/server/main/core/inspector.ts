@@ -17,6 +17,9 @@ export async function launchInspectorProcess() {
     if (!config.transport.options) {
       throw new Error('HTTP transport requires options')
     }
+
+    spawnProcess('npx', ['tsx', 'src/index.ts'])
+
     const httpConfig = config.transport.options as StreamableHTTPTransportConfig
     inspectorArgs = [
       packageName,
