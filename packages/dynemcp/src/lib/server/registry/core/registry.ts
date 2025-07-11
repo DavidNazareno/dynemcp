@@ -14,14 +14,14 @@ import { RegistryItemNotFoundError } from './errors'
 import { InMemoryRegistryStorage } from './storage'
 import { DefaultRegistryLoader } from './loader'
 import {
-  loadToolsFromDirectory,
-  loadResourcesFromDirectory,
-  loadPromptsFromDirectory,
   loadMiddlewareFromDirectory,
+  loadAllComponents,
 } from '../../components/component-loader'
+import type { MiddlewareDefinition } from '../../components/component-loader'
 import { validateTool } from '../../components/core/loaders/validators'
 import { paginateWithCursor } from '../../api/core/utils'
-import { getResourceMeta } from '../../api/core/resource'
+import path from 'path'
+import { fileLogger } from '../../../../global/logger'
 
 /**
  * DyneMCP Registry - Main Registry Class
@@ -35,7 +35,7 @@ export class DyneMCPRegistry implements Registry {
   private storage: InMemoryRegistryStorage
   private loader: RegistryLoader
   private isLoaded = false
-  private authenticationMiddlewarePath: string | null = null
+  private authenticationMiddlewarePath: MiddlewareDefinition | null = null
 
   constructor(
     loader: RegistryLoader = new DefaultRegistryLoader(),
@@ -47,81 +47,68 @@ export class DyneMCPRegistry implements Registry {
 
   /**
    * Load all components from the specified directories (tools, resources, prompts).
-   * Uses helpers to load and validate, with logging and error handling.
+   * Usa helpers para cargar y validar, con logging y error handling.
+   * Este método debe ser la única vía para cargar componentes en el sistema.
    */
   async loadAll(options: LoadAllOptions): Promise<void> {
     if (this.isLoaded) {
-      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-        console.warn('Registry already loaded, skipping...')
-      }
+      console.warn('Registry already loaded, skipping...')
       return
     }
-    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-      console.log('🔄 Loading components...')
-    }
-
-    const [toolsResult, resourcesResult, promptsResult] = await Promise.all([
-      loadToolsFromDirectory(options.tools),
-      loadResourcesFromDirectory(options.resources),
-      loadPromptsFromDirectory(options.prompts),
-    ])
+    fileLogger.info('Loading components...')
+    const { tools, resources, prompts, errors } = await loadAllComponents({
+      tools: options.tools,
+      resources: options.resources,
+      prompts: options.prompts,
+    })
     this.storage.clear()
     this.storage.addTools(
-      toolsResult.components.map((tool) => ({
+      tools.map((tool) => ({
         id: tool.name,
         type: 'tool',
         module: tool,
       }))
     )
     this.storage.addResources(
-      resourcesResult.components.map((resource) => ({
+      resources.map((resource) => ({
         id: resource.uri,
         type: 'resource',
         module: resource,
       }))
     )
     this.storage.addPrompts(
-      promptsResult.components.map((prompt) => ({
+      prompts.map((prompt) => ({
         id: prompt.name,
         type: 'prompt',
         module: prompt,
       }))
     )
-
-    // Validate tools
+    // Validación y logging
     try {
-      validateTool(toolsResult.components)
+      validateTool(tools)
     } catch (error) {
-      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-        console.warn(
-          '⚠️ Tool validation warnings:',
-          error instanceof Error ? error.message : error
-        )
-      }
-    }
-    // Log results
-    const stats = this.stats
-    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-      console.log(
-        `✅ Loaded ${stats.tools} tools, ${stats.resources} resources, ${stats.prompts} prompts`
+      fileLogger.warn(
+        `Tool validation warnings: ${error instanceof Error ? error.message : error}`
       )
     }
-    const allErrors = [
-      ...toolsResult.errors,
-      ...resourcesResult.errors,
-      ...promptsResult.errors,
-    ]
-    if (allErrors.length > 0 && !process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-      console.warn('⚠️ Loading errors:', allErrors)
+    const stats = this.stats
+    fileLogger.info(
+      `✅ Loaded ${stats.tools} tools, ${stats.resources} resources, ${stats.prompts} prompts`
+    )
+    if (errors.length > 0) {
+      fileLogger.warn(`Loading errors: ${errors}`)
     }
     this.isLoaded = true
-
-    // TODO: Resource template logic removed for production release. Re-implement in a future version if needed.
-
-    // Load middleware using the robust component loader
+    // Middleware loading (opcional, puede mejorarse para hot-reload)
     const projectRoot = process.cwd()
+    const middlewareResult = await loadMiddlewareFromDirectory({
+      enabled: true,
+      directory: path.join(projectRoot, 'src'),
+    })
     this.authenticationMiddlewarePath =
-      await loadMiddlewareFromDirectory(projectRoot)
+      middlewareResult.components.length > 0
+        ? middlewareResult.components[0]
+        : null
   }
 
   /**
@@ -138,9 +125,9 @@ export class DyneMCPRegistry implements Registry {
    * Get all registered resources.
    */
   getAllResources(): any[] {
-    return Array.from(this.storage['items'].values())
-      .filter((item) => (item as RegistryItem).type === 'resource')
-      .map((item) => getResourceMeta(item.module))
+    return Array.from(this.storage['items'].values()).filter(
+      (item) => (item as RegistryItem).type === 'resource'
+    ) as RegistryItem[]
   }
 
   /**
@@ -176,9 +163,9 @@ export class DyneMCPRegistry implements Registry {
   /**
    * Get a specific root by id.
    */
-  getRoot(id: string): RegistryItem | undefined {
-    return this.storage.getItem('root', id)
-  }
+  // getRoot(id: string): RegistryItem | undefined {
+  //   return this.storage.getItem('root', id)
+  // }
 
   /**
    * Get registry statistics.
@@ -224,7 +211,7 @@ export class DyneMCPRegistry implements Registry {
   /**
    * Get the resolved path to the authentication middleware, if found.
    */
-  getAuthenticationMiddlewarePath(): string | null {
+  getAuthenticationMiddlewarePath(): MiddlewareDefinition | null {
     return this.authenticationMiddlewarePath
   }
 

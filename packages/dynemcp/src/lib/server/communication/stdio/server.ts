@@ -8,9 +8,10 @@ import type {
   MessageExtraInfo,
 } from '@modelcontextprotocol/sdk/types.js'
 import type { TransportSendOptions } from '@modelcontextprotocol/sdk/shared/transport.js'
+import { fileLogger } from '../../../../global/logger'
 /**
  * StdioTransport: STDIO transport for DyneMCP MCP protocol
- * Compatible con la interfaz Transport del SDK
+ * Compatible with the Transport interface of the SDK
  */
 export class StdioTransport {
   readonly type = 'stdio'
@@ -18,7 +19,7 @@ export class StdioTransport {
   private roots: any = []
   private running = false
 
-  // Eventos Transport
+  // Transport events
   private _onclose?: () => void
   private _onerror?: (error: Error) => void
   private _onmessage?: (
@@ -33,7 +34,7 @@ export class StdioTransport {
   }
 
   /**
-   * Inicializa el transporte (Transport.start)
+   * Initializes the transport (Transport.start)
    */
   async start(): Promise<void> {
     await this.transport.start()
@@ -41,21 +42,18 @@ export class StdioTransport {
   }
 
   /**
-   * Conecta el MCP server usando stdio transport (legacy, para compatibilidad)
+   * Connects the MCP server using stdio transport (legacy, for compatibility)
    */
   async connect(server: McpServer): Promise<void> {
     try {
-      // Intercepta mensajes para roots/didChange
+      // Intercepts messages for roots/didChange
       const origOnMessage = this.transport.onmessage?.bind(this.transport)
-      this.transport.onmessage = (
-        msg: JSONRPCMessage,
-        extra?: MessageExtraInfo
-      ) => {
+      this.transport.onmessage = (msg: JSONRPCMessage) => {
         if (isJSONRPCNotification(msg) && msg.method === 'roots/didChange') {
           const roots = parseRootList(msg.params)
           this.roots = roots
           // Optionally, emit an event or log
-          console.log('🌱 Roots updated (stdio):', roots)
+          fileLogger.info(`🌱 Roots updated (stdio): ${roots}`)
           return // Do not forward this notification to the MCP server
         }
         if (origOnMessage) origOnMessage(msg)
@@ -70,7 +68,7 @@ export class StdioTransport {
   }
 
   /**
-   * Envía un mensaje JSON-RPC (Transport.send)
+   * Sends a JSON-RPC message (Transport.send)
    */
   async send(
     message: JSONRPCMessage,
@@ -85,7 +83,7 @@ export class StdioTransport {
   }
 
   /**
-   * Cierra el transporte (Transport.close)
+   * Closes the transport (Transport.close)
    */
   async close(): Promise<void> {
     await this.transport.close()
@@ -93,14 +91,14 @@ export class StdioTransport {
   }
 
   /**
-   * Devuelve los roots actuales (single-session)
+   * Returns the current roots (single-session)
    */
   getRoots() {
     return this.roots || []
   }
 
   /**
-   * Eventos y propiedades Transport
+   * Transport events and properties
    */
   set onclose(handler: (() => void) | undefined) {
     this._onclose = handler
@@ -132,7 +130,7 @@ export class StdioTransport {
 
   set setProtocolVersion(fn: ((version: string) => void) | undefined) {
     this._setProtocolVersion = fn
-    // Solo asigna si existe en el SDK
+    // Only assign if it exists in the SDK
     if (
       'setProtocolVersion' in this.transport &&
       typeof (this.transport as any).setProtocolVersion === 'function'
@@ -145,7 +143,7 @@ export class StdioTransport {
   }
 
   /**
-   * Indica si el transporte está corriendo
+   * Indicates if the transport is running
    */
   isRunning(): boolean {
     return this.running

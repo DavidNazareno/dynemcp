@@ -8,7 +8,7 @@ import darkLogo from './src/assets/White-Text-Logo-DYNEMCP.svg'
 
 // https://astro.build/config
 export default defineConfig({
-  outDir: '../dist/apps',
+  outDir: './dist',
   site: 'https://github.com/DavidNazareno/dynemcp',
   integrations: [
     starlight({

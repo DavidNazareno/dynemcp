@@ -10,9 +10,8 @@ export function setupMiddleware(
 ): void {
   // Rate limiting (security best practice)
   let rateLimitOptions = (options as any).rateLimit
-  const isProduction = process.env.NODE_ENV === 'production'
+
   if (!rateLimitOptions) {
-    // Buscar en la config global de seguridad
     const globalConfig = createDefaultConfig()
     const securityRateLimit = globalConfig.security?.rateLimit
     if (securityRateLimit && securityRateLimit.enabled !== false) {
@@ -40,17 +39,12 @@ export function setupMiddleware(
       },
     }
   }
-  if (
-    isProduction &&
-    (rateLimitOptions.max === 0 || rateLimitOptions.enabled === false)
-  ) {
+  if (rateLimitOptions.max === 0 || rateLimitOptions.enabled === false) {
     throw new Error(
       '[SECURITY] Rate limiting must be enabled in production. Set security.rateLimit.enabled = true or configure rateLimit in transport options.'
     )
-  } else if (
-    !isProduction &&
-    (rateLimitOptions.max === 0 || rateLimitOptions.enabled === false)
-  ) {
+  }
+  if (rateLimitOptions.max === 0 || rateLimitOptions.enabled === false) {
     console.warn(
       '[SECURITY] WARNING: Rate limiting is disabled. This is unsafe for production.'
     )

@@ -1,4 +1,5 @@
 // Helpers for HTTP session management for StreamableHTTPTransport
+import { fileLogger } from '../../../../../global/logger'
 import express from 'express'
 
 export function handleSessionManagement(
@@ -24,7 +25,7 @@ export function handleSessionManagement(
       lastAccess: new Date(),
     })
 
-    console.log(`🔐 New session created: ${sessionId}`)
+    fileLogger.info(`🔐 New session created: ${sessionId}`)
   }
 
   // Validate existing session
@@ -58,7 +59,7 @@ export function handleSessionTermination(
   if (req.method === 'DELETE' && sessionId) {
     sessionStore.delete(sessionId)
     res.status(204).send()
-    console.log(`🗑️ Session terminated: ${sessionId}`)
+    fileLogger.info(`🗑️ Session terminated: ${sessionId}`)
     return true
   }
   return false

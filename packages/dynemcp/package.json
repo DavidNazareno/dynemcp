@@ -1,7 +1,33 @@
 {
   "name": "@dynemcp/dynemcp",
-  "version": "0.0.20-canary.20250626T18090",
-  "description": "Complete MCP framework with server runtime and build system",
+  "version": "0.0.21-rc.1",
+  "description": "Official DyneMCP framework for creating robust, secure, and scalable MCP servers in TypeScript.",
+  "author": "David Nazareno <dnnzareno@gmail.com>",
+  "homepage": "https://dynemcp.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidNazareno/dynemcp.git",
+    "directory": "packages/dynemcp"
+  },
+  "bugs": {
+    "url": "https://github.com/DavidNazareno/dynemcp/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "framework",
+    "typescript",
+    "server",
+    "dyne",
+    "dyne-mcp",
+    "esbuild",
+    "secure",
+    "production",
+    "authentication",
+    "jwt",
+    "oauth2"
+  ],
   "private": false,
   "type": "module",
   "main": "./dist/lib/index.js",
@@ -40,10 +66,14 @@
     "chalk": "4.1.2",
     "cors": "^2.8.5",
     "esbuild": "0.25.5",
+    "execa": "^5.1.1",
     "express": "5.1.0",
     "express-oauth2-jwt-bearer": "^1.6.1",
     "express-rate-limit": "7.5.1",
+    "fast-glob": "^3.3.3",
+    "glob": "^10.4.5",
     "jsonwebtoken": "^9.0.2",
+    "pino": "^9.7.0",
     "tslib": "^2.8.1",
     "yargs": "18.0.0",
     "zod": "^3.25.71",
@@ -57,15 +87,5 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.10",
     "tsx": "^4.20.3"
-  },
-  "keywords": [
-    "mcp",
-    "model-context-protocol",
-    "server",
-    "build",
-    "bundler",
-    "esbuild",
-    "typescript",
-    "framework"
-  ]
+  }
 }

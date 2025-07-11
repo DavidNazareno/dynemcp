@@ -5,5 +5,13 @@ type DevMode = 'default' | 'inspector'
 export type DevOptions = {
   mode?: DevMode
   internalRun?: boolean
+  environment?: 'dev' | 'prod'
   _: string[]
+  entry?: string
+  outDir?: string
+  outFile?: string
+  clean?: boolean
+  external?: string
+  define?: string
+  watch?: boolean
 }

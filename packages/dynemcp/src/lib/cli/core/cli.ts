@@ -1,78 +1,70 @@
 // CLI entry point for DyneMCP
-// Sets up all main commands (dev, build, start, clean, analyze) using yargs and connects them to their handlers.
-// Each command is configured with options and examples for developer usability.
 
-import yargs, { type Argv } from 'yargs'
+import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import chalk from 'chalk'
 
-import { DYNEMCP_CLI, TRANSPORT } from '../../../global/config-all-contants'
-import { dev } from './dev'
-import { buildHandler } from './handler/build'
-import { startHandler } from './handler/start'
-import { cleanHandler } from './handler/clean'
-import { analyzeHandler } from './handler/analyze'
-import type { DevOptions } from './types'
-
-const addConfigOption = (y: Argv) =>
-  y.option('config', {
-    alias: 'c',
-    type: 'string',
-    describe: 'Path to dynemcp.config.ts',
-  })
+import { launchInspectorProcess } from '../../server/main'
+import { spawnProcess } from './utils'
 
 const cli = yargs(hideBin(process.argv))
-  .scriptName(DYNEMCP_CLI.SCRIPT_NAME)
-  .usage(DYNEMCP_CLI.USAGE)
-
-  .command<DevOptions>(
+  .scriptName('dynemcp')
+  .usage(
+    chalk.cyan('\n$0 <command> [options]\n\n') +
+      chalk.bold('DyneMCP CLI') +
+      '\n\n' +
+      'Official CLI to develop and manage DyneMCP servers.\n'
+  )
+  .command(
     'dev [mode]',
-    DYNEMCP_CLI.DESCRIPTIONS.DEV,
+    chalk.bold('Start the server in development mode (watch/hot reload).'),
     (y) =>
       y
         .positional('mode', {
-          describe: DYNEMCP_CLI.DESCRIPTIONS.DEV_MODE,
+          describe: 'Development mode ("default" or "inspector")',
           type: 'string',
-          choices: ['inspector'],
+          choices: ['default', 'inspector'],
+          default: 'default',
         })
-        .option('internal-run', {
-          type: 'boolean',
-          hidden: true,
-        }),
-    dev
+        .example('$0 dev', 'Start the server in default development mode')
+        .example(
+          '$0 dev inspector',
+          'Start the server in inspector mode for debugging'
+        ),
+    async (argv) => {
+      const args = ['tsx', 'src/index.ts']
+      if (argv.mode === 'inspector') {
+        await launchInspectorProcess()
+      } else {
+        spawnProcess('npx', args)
+      }
+    }
   )
-
-  .command(
-    'build',
-    DYNEMCP_CLI.DESCRIPTIONS.BUILD,
-    (y) =>
-      addConfigOption(y)
-        .option('clean', {
-          type: 'boolean',
-          describe: 'Clean before building',
-        })
-        .option('analyze', {
-          type: 'boolean',
-          describe: 'Analyze dependencies after build',
-        }),
-    buildHandler
-  )
-
   .command(
     'start',
-    'Start the server in production mode',
-    addConfigOption,
-    startHandler
+    chalk.bold('Start the server in production mode.'),
+
+    () => {
+      spawnProcess('npx', ['tsx', 'src/index.ts'])
+    }
   )
-
-  .command('clean', 'Clean build directory', addConfigOption, cleanHandler)
-
-  .command('analyze', 'Analyze dependencies', addConfigOption, analyzeHandler)
-
-  .demandCommand(1, 'You need at least one command before moving on')
-  .help()
-  .version()
+  .example('$0 start', 'Start the server in production mode')
+  .demandCommand(
+    1,
+    chalk.red(
+      'You must specify at least one command. Use --help to see available options.'
+    )
+  )
+  .help('help')
   .alias('h', 'help')
+  .version()
   .alias('v', 'version')
+  .epilog(
+    chalk.gray(
+      '\nFor more information, visit: https://dynemcp.dev\n' +
+        'Questions or issues? Report at https://github.com/DavidNazareno/dynemcp/issues'
+    )
+  )
   .strict()
 
-export { dev, cli }
+export { cli }

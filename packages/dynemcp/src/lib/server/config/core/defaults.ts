@@ -62,6 +62,9 @@ export const DEFAULT_SECURITY_CONFIG = {
   },
 }
 
+// Global production mode flag (set manually before build/start)
+export const IS_PROD = process.env.DYNEMCP_PROD === 'true'
+
 /**
  * createDefaultConfig: Creates a default DyneMCP configuration object.
  * @returns {DyneMCPConfig} The default configuration.

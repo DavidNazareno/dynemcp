@@ -96,6 +96,13 @@ export const BUILD = {
     DEV: 'development',
     TEST: 'test',
   },
+
+  COMPONENTS: {
+    TOOLS: 'tools',
+    RESOURCES: 'resources',
+    PROMPTS: 'prompts',
+  },
+  COMPONENTS_TYPES: ['tools', 'resources', 'prompts'],
 }
 
 // Logging Configuration

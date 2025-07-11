@@ -21,7 +21,6 @@ components/
     loaders/
       dynamic-loader.ts     # Dynamic import and normalization utilities
       file-discovery.ts     # Recursively discovers component files
-      ts-compiler.ts        # TypeScript compilation and import resolution
       validators.ts         # Type guards for validating loaded components
 ```
 
@@ -32,7 +31,6 @@ components/
 - **component-loader.ts**: Orchestrates loading of tools, resources, and prompts. Provides generic and specialized loaders for plug-and-play discovery.
 - **core/loaders/dynamic-loader.ts**: Dynamic import and normalization utilities for components.
 - **core/loaders/file-discovery.ts**: Recursively discovers component files for dynamic loading.
-- **core/loaders/ts-compiler.ts**: Utilities for TypeScript compilation and import resolution.
 - **core/loaders/validators.ts**: Type guards for validating loaded tools, resources, and prompts.
 
 ---

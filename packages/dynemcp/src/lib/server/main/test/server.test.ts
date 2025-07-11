@@ -20,7 +20,7 @@ vi.mock('../../../registry/core/registry', () => {
   const mockRegistry: any = {
     loadAll: vi.fn().mockResolvedValue(undefined),
     getAllTools: vi.fn().mockReturnValue([{ module: { name: 'tool1' } }]),
-    getAllResources: vi.fn().mockReturnValue([{ name: 'res1' }]),
+    getAllResources: vi.fn().mockReturnValue([{ module: { name: 'res1' } }]),
     getAllPrompts: vi.fn().mockReturnValue([{ module: { name: 'prompt1' } }]),
     getAllResourceObjects: vi
       .fn()
@@ -43,9 +43,6 @@ vi.mock('../../communication', () => ({
   createTransport: () => ({ connect: transportConnect, close: transportClose }),
 }))
 
-// Mock registerComponents so we don't test its internals here
-vi.mock('../core/initializer', () => ({ registerComponents: vi.fn() }))
-
 // ---------------------------------------------------------------------------
 // Import subject under test AFTER mocks are in place
 // ---------------------------------------------------------------------------
@@ -64,9 +61,10 @@ describe('DyneMCP server class', () => {
     Object.assign(mockRegistry, {
       loadAll: vi.fn().mockResolvedValue(undefined),
       getAllTools: vi.fn().mockReturnValue([{ module: { name: 'tool1' } }]),
-      getAllResources: vi.fn().mockReturnValue([{ name: 'res1' }]),
+      getAllResources: vi.fn().mockReturnValue([{ module: { name: 'res1' } }]),
       getAllPrompts: vi.fn().mockReturnValue([{ module: { name: 'prompt1' } }]),
     })
+    vi.spyOn(mockRegistry, 'loaded', 'get').mockReturnValue(false)
   })
 
   it('initializes and exposes loaded components', async () => {
@@ -87,7 +85,6 @@ describe('DyneMCP server class', () => {
   })
 
   it('start() completes without error', async () => {
-    const mcp = await DyneMCP.create(cfg)
-    await expect(mcp.start()).resolves.not.toThrow()
+    await expect(DyneMCP.start()).resolves.not.toThrow()
   })
 })

@@ -1,0 +1,43 @@
+{
+  "name": "dynemcp-docs",
+  "type": "module",
+  "version": "0.0.21-rc.1",
+  "private": true,
+  "description": "Official DyneMCP documentation: user guide, API, security, and best practices for the MCP framework.",
+  "author": "David Nazareno <dnnzareno@gmail.com>",
+  "homepage": "https://dynemcp.dev/docs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidNazareno/dynemcp.git",
+    "directory": "apps"
+  },
+  "bugs": {
+    "url": "https://github.com/DavidNazareno/dynemcp/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "documentation",
+    "astro",
+    "starlight",
+    "mcp",
+    "model-context-protocol",
+    "dyne",
+    "dyne-mcp",
+    "guide",
+    "api",
+    "security"
+  ],
+  "scripts": {
+    "clean": "rm -rf .astro node_modules ",
+    "dev": "astro dev"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.34.4",
+    "astro": "5.11.0",
+    "sharp": "0.34.2"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.1.11",
+    "@astrojs/check": "^0.5.2"
+  }
+}

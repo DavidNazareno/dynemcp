@@ -18,14 +18,11 @@ export type {
   PromptDefinition,
   LoadedTool,
   LoadedPrompt,
-  LoadedResource,
-  LoadedResourceTemplate,
   PromptArgument,
   PromptMessage,
   CallToolResult,
   SamplingRequest,
   SamplingResult,
-  ResourceTemplateDefinition,
   Root,
   RootList,
 } from './core/interfaces'
@@ -45,5 +42,3 @@ export { prompt } from './core/prompt'
 
 export * from './core/root'
 export * from './auth'
-
-// TODO: Resource template exports removed for production release. Re-implement in a future version if needed.

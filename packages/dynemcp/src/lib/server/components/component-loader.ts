@@ -14,8 +14,14 @@ import {
   validateTool,
   validateResource,
   validatePrompt,
+  validateMiddleware,
 } from './core/loaders/validators'
-import path from 'path'
+import fs from 'fs'
+
+export interface MiddlewareDefinition {
+  // Puedes ajustar esto según la forma esperada de tu middleware
+  [key: string]: any
+}
 
 /**
  * Options for loading components from a directory.
@@ -27,6 +33,7 @@ export interface LoadOptions {
   enabled: boolean
   directory: string
   pattern?: string
+  transport?: string // Added transport option
 }
 
 /**
@@ -36,6 +43,16 @@ export interface LoadOptions {
  */
 export interface LoadResult<T> {
   components: T[]
+  errors: string[]
+}
+
+/**
+ * Centralized component loading result
+ */
+export interface LoadAllComponentsResult {
+  tools: ToolDefinition[]
+  resources: ResourceDefinition[]
+  prompts: PromptDefinition[]
   errors: string[]
 }
 
@@ -59,16 +76,15 @@ export async function loadComponentsFromDirectory<T>(
   const errors: string[] = []
   try {
     // Check if the directory exists before searching
-    if (!(await import('fs').then((fs) => fs.existsSync(directory)))) {
-      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-        console.warn(
-          `Directory ${directory} does not exist, skipping component loading`
-        )
-      }
+    if (!fs.existsSync(directory)) {
+      console.warn(
+        `Directory ${directory} does not exist, skipping component loading`
+      )
+
       return { components: [], errors: [] }
     }
     // Recursively find all matching component files
-    const files = await findFilesRecursively(directory)
+    const files = await findFilesRecursively(directory, options.pattern)
     for (const file of files) {
       try {
         // Dynamically import and validate each component
@@ -79,17 +95,15 @@ export async function loadComponentsFromDirectory<T>(
       } catch (error) {
         const errorMsg = `Failed to load component from ${file}: ${error}`
         errors.push(errorMsg)
-        if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-          console.warn(errorMsg)
-        }
+
+        console.warn(errorMsg)
       }
     }
   } catch (error) {
     const errorMsg = `Failed to scan directory ${directory}: ${error}`
     errors.push(errorMsg)
-    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-      console.warn(errorMsg)
-    }
+
+    console.warn(errorMsg)
   }
   return { components, errors }
 }
@@ -128,51 +142,82 @@ export async function loadPromptsFromDirectory(
 }
 
 /**
- * loadMiddlewareFromDirectory: Loads the middleware.ts file from the src directory.
- * Uses the same robust loading and validation logic as other components.
- * @param directory - The root directory where src/middleware.ts should be located
- * @returns The path to the middleware file if found and valid, null otherwise
+ * loadMiddlewareFromDirectory: Loads all middleware from a directory using the standard middleware validator.
+ * @param options - LoadOptions for middleware
+ * @returns LoadResult<MiddlewareDefinition>
  */
 export async function loadMiddlewareFromDirectory(
-  directory: string
-): Promise<string | null> {
-  try {
-    // Check if the directory exists
-    if (!(await import('fs').then((fs) => fs.existsSync(directory)))) {
-      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-        console.warn(
-          `Directory ${directory} does not exist, skipping middleware loading`
-        )
-      }
-      return null
-    }
+  options: LoadOptions
+): Promise<LoadResult<MiddlewareDefinition>> {
+  return loadComponentsFromDirectory(options, validateMiddleware)
+}
 
-    const middlewarePath = path.join(directory, 'src', 'middleware.ts')
+/**
+ * Centralized function to load all components (tools, resources, prompts) based on environment.
+ * SOLO debe ser usado por el registry. No lo uses directamente en otros módulos.
+ * @internal
+ */
+export async function loadAllComponents(options: {
+  tools: LoadOptions
+  resources: LoadOptions
+  prompts: LoadOptions
+}): Promise<LoadAllComponentsResult> {
+  // Solo modo desarrollo
+  return loadAllComponentsDevelopment(options)
+}
 
-    // Check if the middleware file exists
-    if (!(await import('fs').then((fs) => fs.existsSync(middlewarePath)))) {
-      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-        console.warn(`Middleware file not found at ${middlewarePath}`)
-      }
-      return null
-    }
+/**
+ * Load components in development mode (file discovery)
+ */
+async function loadAllComponentsDevelopment(options: {
+  tools: LoadOptions
+  resources: LoadOptions
+  prompts: LoadOptions
+}): Promise<LoadAllComponentsResult> {
+  const [toolsResult, resourcesResult, promptsResult] = await Promise.all([
+    loadToolsFromDirectory(options.tools),
+    loadResourcesFromDirectory(options.resources),
+    loadPromptsFromDirectory(options.prompts),
+  ])
 
-    // Try to load the file to verify it's a valid TypeScript/JavaScript file
-    try {
-      await import(middlewarePath)
-      return middlewarePath
-    } catch (error) {
-      if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-        console.warn(
-          `Failed to load middleware from ${middlewarePath}: ${error}`
-        )
-      }
-      return null
-    }
-  } catch (error) {
-    if (!process.env.DYNE_MCP_STDIO_LOG_SILENT) {
-      console.warn(`Error loading middleware: ${error}`)
-    }
-    return null
+  const allErrors = [
+    ...toolsResult.errors,
+    ...resourcesResult.errors,
+    ...promptsResult.errors,
+  ]
+
+  return {
+    tools: toolsResult.components,
+    resources: resourcesResult.components,
+    prompts: promptsResult.components,
+    errors: allErrors,
   }
+}
+
+// Legacy functions for backward compatibility (deprecated)
+export async function loadAllTools(): Promise<ToolDefinition[]> {
+  const result = await loadAllComponents({
+    tools: { enabled: true, directory: './src/tools' },
+    resources: { enabled: false, directory: '' },
+    prompts: { enabled: false, directory: '' },
+  })
+  return result.tools
+}
+
+export async function loadAllResources(): Promise<ResourceDefinition[]> {
+  const result = await loadAllComponents({
+    tools: { enabled: false, directory: '' },
+    resources: { enabled: true, directory: './src/resources' },
+    prompts: { enabled: false, directory: '' },
+  })
+  return result.resources
+}
+
+export async function loadAllPrompts(): Promise<PromptDefinition[]> {
+  const result = await loadAllComponents({
+    tools: { enabled: false, directory: '' },
+    resources: { enabled: false, directory: '' },
+    prompts: { enabled: true, directory: './src/prompts' },
+  })
+  return result.prompts
 }

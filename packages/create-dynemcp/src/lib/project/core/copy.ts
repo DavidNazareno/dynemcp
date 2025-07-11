@@ -1,13 +1,7 @@
 import fs from 'fs-extra'
 import path from 'path'
-import fastGlob from 'fast-glob'
-
-type GlobFunction = (
-  patterns: string | string[],
-  options?: object
-) => Promise<string[]>
-
-const { glob } = fastGlob as { glob: GlobFunction }
+import pkg from 'fast-glob'
+const { glob } = pkg
 
 interface CopyOptions {
   parents?: boolean
@@ -32,8 +26,6 @@ export async function copy(
       ignore: ['**/node_modules/**', '**/.git/**'],
     })
 
-    console.log('[DEBUG] Archivos encontrados para copiar:', files)
-
     for (const file of files) {
       const src = path.resolve(cwd, file)
       const filename = rename
@@ -44,10 +36,8 @@ export async function copy(
         ? path.join(destination, relativeDir, filename)
         : path.join(destination, filename)
 
-      // Ensure the directory exists
       await fs.ensureDir(path.dirname(dest))
       await fs.copy(src, dest)
-      console.log(`[DEBUG] Copiado: ${src} -> ${dest}`)
     }
   } catch (error) {
     console.error('❌ Error copying files:', error)

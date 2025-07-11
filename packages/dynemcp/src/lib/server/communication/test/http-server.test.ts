@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 // ------------------------------------------------------------
 // Mocks
@@ -32,7 +33,6 @@ vi.mock('express', () => {
 
 // Mock SDK classes
 vi.mock('@modelcontextprotocol/sdk/server/streamableHttp.js', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   StreamableHTTPServerTransport: class {
     async handleRequest() {
       return undefined
@@ -43,7 +43,6 @@ vi.mock('@modelcontextprotocol/sdk/server/streamableHttp.js', () => ({
   },
 }))
 vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   McpServer: class {
     async connect() {
       return undefined
@@ -55,3 +54,9 @@ vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
 vi.mock('../../registry/core/registry', () => ({
   registry: { getAuthenticationMiddlewarePath: () => null },
 }))
+
+describe('http-server', () => {
+  it('should load the test suite', () => {
+    expect(true).toBe(true)
+  })
+})

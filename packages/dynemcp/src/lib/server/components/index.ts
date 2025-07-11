@@ -7,6 +7,3 @@
 
 // Component loading helpers (dynamic discovery and validation)
 export * from './component-loader'
-
-// Component creation helpers (factory functions for tools/resources/prompts)
-// export * from './component-creators' // Archivo no existe

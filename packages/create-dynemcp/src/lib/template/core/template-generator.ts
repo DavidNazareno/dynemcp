@@ -13,6 +13,7 @@ import { Sema } from 'async-sema'
 
 import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces'
 import {
+  INSPECTOR_VERSION,
   LOGGING,
   PATHS,
   SDK_VERSION,
@@ -34,23 +35,18 @@ export const installTemplate = async (
   args: InstallTemplateArgs
 ): Promise<void> => {
   try {
-    console.log('[installTemplate] Start', args)
     console.log(`Using ${args.packageManager}.`)
 
     if (templatesDir === undefined) {
       throw new Error('Templates directory not found')
     }
 
-    // Copy the template files to the target directory.
     console.log('\nInitializing project with template:', args.template, '\n')
     const templatePath = path.join(getTemplatesDir(), args.template)
     const copySource = ['**/*', '**/.*']
     if (!args.eslint) copySource.push('!.eslintrc.js', '!.eslintignore')
     if (!args.tailwind)
       copySource.push('!tailwind.config.js', '!postcss.config.js')
-
-    console.log('[installTemplate] templatePath:', templatePath)
-    console.log('[installTemplate] copySource:', copySource)
 
     await copy(copySource, args.root, {
       parents: true,
@@ -69,7 +65,6 @@ export const installTemplate = async (
         }
       },
     })
-    console.log('[installTemplate] Copy complete')
 
     const tsconfigFile = path.join(
       args.root,
@@ -88,7 +83,6 @@ export const installTemplate = async (
       )
     }
 
-    // update import alias in any files if not using the default
     if (args.importAlias !== '@/*') {
       const globFn = fastGlob.glob || fastGlob
       const files = await globFn('**/*', {
@@ -126,13 +120,11 @@ export const installTemplate = async (
         recursive: true,
       })
 
-      // Check if the template already has a src/ directory structure
       const templateHasSrcStructure = await fs
         .stat(path.join(args.root, PATHS.SOURCE_DIR))
         .catch(() => false)
 
       if (!templateHasSrcStructure) {
-        // Only reorganize directories if template doesn't already have src/ structure
         await Promise.all(
           SRC_DIR_NAMES.map(async (dir) => {
             if (dir === PATHS.SOURCE_DIR) {
@@ -160,21 +152,11 @@ export const installTemplate = async (
     const version = process.env.DYNEMCP_TEST_VERSION ?? pkgVersion
 
     const generateScripts = () => {
-      const baseScripts = {
-        build: 'dynemcp build',
-        start: 'dynemcp start',
-        clean: 'dynemcp clean',
-        analyze: 'dynemcp analyze',
-        format: 'prettier --write .',
-        lint: args.eslint ? 'eslint . --ext .js,.jsx,.ts,.tsx' : undefined,
-        'eslint:fix': args.eslint
-          ? 'eslint . --ext .js,.jsx,.ts,.tsx --fix'
-          : undefined,
-      }
       return {
-        ...baseScripts,
         dev: 'dynemcp dev',
         inspector: 'dynemcp dev inspector',
+        start: 'dynemcp start',
+        format: 'prettier --write .',
       }
     }
 
@@ -187,6 +169,7 @@ export const installTemplate = async (
       devDependencies: Record<string, string>
       engines?: Record<string, string>
       packageManager?: string
+      type?: string
     }
 
     const packageJson: PackageJson = {
@@ -194,52 +177,25 @@ export const installTemplate = async (
       version: '0.1.0',
       private: true,
       scripts: generateScripts(),
+      type: 'module',
       dependencies: {
         '@dynemcp/dynemcp': `^${version}`,
         '@modelcontextprotocol/sdk': `^${SDK_VERSION}`,
         zod: '^3.25.71',
       },
       devDependencies: {
-        '@dynemcp/dynemcp': `^${version}`,
         prettier: '^3.2.5',
       },
-    }
-    /* 
-    if (args.template === 'http-server' || args.template === 'secure-agent') {
-      packageJson.dependencies['express'] = '^4.19.2'
-      packageJson.dependencies['cors'] = '^2.8.5'
-      packageJson.devDependencies['@types/express'] = '^4.17.21'
-      packageJson.devDependencies['@types/cors'] = '^2.8.17'
-    }
-
-    if (!packageJson.scripts.lint) {
-      delete packageJson.scripts.lint
     }
 
     if (args.mode === 'ts') {
       packageJson.devDependencies = {
         ...packageJson.devDependencies,
-        '@types/node': '^20.11.30',
-        '@typescript-eslint/eslint-plugin': '^8.33.1',
-        '@typescript-eslint/parser': '^8.33.1',
         typescript: '^5.4.2',
-        'ts-node': '^10.9.2',
+        tsx: '^4.0.0',
+        '@modelcontextprotocol/inspector': `^${INSPECTOR_VERSION}`,
       }
     }
-
-    if (args.eslint) {
-      packageJson.devDependencies = {
-        ...packageJson.devDependencies,
-        eslint: '^9.28.0',
-        'eslint-config-prettier': '^9.1.0',
-        prettier: '^3.2.5',
-      }
-    }
-
-    packageJson.devDependencies = {
-      ...packageJson.devDependencies,
-      vitest: '^1.4.0',
-    } */
 
     packageJson.engines = {
       node: '>=20.0.0',
@@ -289,8 +245,6 @@ export const installTemplate = async (
         )
       }
     }
-
-    console.log('[installTemplate] Finished successfully')
   } catch (error) {
     console.error('[installTemplate] Error:', error)
     throw error

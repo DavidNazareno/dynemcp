@@ -1,14 +1,17 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import type {
-  ToolDefinition,
+  LoadedTool,
   ResourceDefinition,
   PromptDefinition,
   PromptMessage,
 } from '../../api'
 import type { ServerInitializationOptions } from './interfaces'
 import { createTextResponse, createErrorResponse } from '../../api'
+import type { DyneMCPConfig } from '../../config/core/interfaces'
+import { loadConfig } from '../../config/core/loader'
 import { registry } from '../../registry/core/registry'
+import { fileLogger } from '../../../../global/logger'
 
 // Server initializer logic for DyneMCP main module
 // Handles registration of tools, resources, and prompts with the MCP server instance.
@@ -26,51 +29,36 @@ export function createMCPServerInstance(
   })
 }
 
+// Utility to normalize names (e.g. "greeter Good" -> "greeter_good")
+function normalizeName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_') // replace symbols and spaces with _
+    .replace(/^_+|_+$/g, '') // remove _ at start/end
+}
+
 /**
  * Registers all tools with the MCP server.
  */
-export function registerTools(
-  server: McpServer,
-  tools: ToolDefinition[]
-): void {
+export function registerTools(server: McpServer, tools: LoadedTool[]): void {
   for (const tool of tools) {
     server.registerTool(
-      tool.name,
+      normalizeName(tool.name),
       {
         title: tool.name,
-        description: tool.description,
-        inputSchema: (tool as any).inputSchema,
-        annotations: (tool as any).annotations,
+        description: tool.description || '',
+        inputSchema: tool.inputSchema, // <-- ZodRawShape, el SDK genera automáticamente el JSON Schema
+        annotations: tool.annotations,
       },
       async (args: Record<string, unknown>) => {
         try {
-          const result = await (tool as any).execute(args || {})
+          const result = await tool.execute(args || {})
           if (
             result &&
             typeof result === 'object' &&
             Array.isArray((result as { content?: unknown[] }).content)
           ) {
-            // Sanitiza el contenido para asegurar que cada item tenga el formato correcto
-            const safeContent = (result as { content: unknown[] }).content.map(
-              (item) => {
-                if (
-                  item &&
-                  typeof item === 'object' &&
-                  'type' in item &&
-                  typeof (item as any).type === 'string'
-                ) {
-                  if (
-                    (item as any).type === 'text' &&
-                    typeof (item as any).text === 'string'
-                  ) {
-                    return { type: 'text', text: (item as any).text }
-                  }
-                  // Here you can add validations for other types (image, audio, etc.)
-                }
-                return { type: 'text', text: JSON.stringify(item) }
-              }
-            )
-            return { ...result, content: safeContent }
+            return result
           }
           return createTextResponse(String(result))
         } catch (error) {
@@ -116,7 +104,7 @@ export function registerResources(
     }
 
     server.registerResource(
-      resource.name,
+      normalizeName(resource.name),
       resource.uri,
       {
         title: resource.name,
@@ -145,7 +133,7 @@ export function registerPrompts(
     )
 
     server.registerPrompt(
-      prompt.name,
+      normalizeName(prompt.name),
       {
         title: prompt.name,
         description: prompt.description || `Prompt: ${prompt.name}`,
@@ -226,16 +214,33 @@ export function registerPrompts(
 
 /**
  * Registers tools, resources, and prompts with the MCP server (main entrypoint).
+ * Ahora usa el registry como única fuente de componentes.
  */
-export function registerComponents(
+export async function registerComponents(
   server: McpServer,
-  tools: ToolDefinition[],
-  resources: ResourceDefinition[],
-  prompts: PromptDefinition[]
-): void {
+  config?: DyneMCPConfig
+): Promise<void> {
+  // Siempre usamos el registry para cargar y obtener los componentes
+  if (!registry.loaded) {
+    let resolvedConfig: DyneMCPConfig
+    if (!config) {
+      resolvedConfig = await loadConfig()
+    } else {
+      resolvedConfig = config
+    }
+    await registry.loadAll({
+      tools: resolvedConfig.tools,
+      resources: resolvedConfig.resources,
+      prompts: resolvedConfig.prompts,
+    })
+  }
+  // Obtenemos los componentes del registry
+  const tools = registry.getAllTools().map((item) => item.module)
+  const resources = registry.getAllResources().map((item) => item.module)
+  const prompts = registry.getAllPrompts().map((item) => item.module)
+
   registerTools(server, tools)
-  const realResources = registry.getAllResourceObjects()
-  registerResources(server, realResources)
+  registerResources(server, resources)
   registerPrompts(server, prompts)
 }
 

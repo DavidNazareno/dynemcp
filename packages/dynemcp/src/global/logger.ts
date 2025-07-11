@@ -1,4 +1,7 @@
 import chalk from 'chalk'
+import pino from 'pino'
+import { join } from 'path'
+import { existsSync, mkdirSync } from 'fs'
 
 // Logger utilities for DyneMCP CLI
 // Provides ConsoleLogger and StderrLogger for colored and error stream logging.
@@ -56,3 +59,44 @@ export class StderrLogger implements Logger {
     console.error(chalk.gray(message))
   }
 }
+
+// FileLogger: logs to file using Pino
+export class FileLogger implements Logger {
+  private logger: pino.Logger
+
+  constructor() {
+    const logDir = join(process.cwd(), 'logs')
+    if (!existsSync(logDir)) {
+      mkdirSync(logDir, { recursive: true })
+    }
+    const date = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+    const logFile = join(logDir, `${date}.log`)
+    this.logger = pino(
+      {
+        level: 'info',
+      },
+      pino.destination(logFile)
+    )
+  }
+
+  log(message: string) {
+    this.logger.info(message)
+  }
+  warn(message: string) {
+    this.logger.warn(message)
+  }
+  error(message: string) {
+    this.logger.error(message)
+  }
+  info(message: string) {
+    this.logger.info(message)
+  }
+  success(message: string) {
+    this.logger.info(`[SUCCESS] ${message}`)
+  }
+  debug(message: string) {
+    this.logger.debug(message)
+  }
+}
+
+export const fileLogger = new FileLogger()

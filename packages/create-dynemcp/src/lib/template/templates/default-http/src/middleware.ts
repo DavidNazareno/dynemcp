@@ -2,7 +2,7 @@
 import {
   dynemcpMiddleware,
   type DynemcpMiddlewareConfig,
-} from '@dynemcp/dynemcp/server/api/auth/dynemcp-middleware'
+} from '@dynemcp/dynemcp'
 
 /**
  * DyneMCP authentication middleware.
