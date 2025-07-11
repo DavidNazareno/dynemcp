@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/source",
-  "version": "0.0.27",
+  "version": "0.1.0",
   "description": "Official DyneMCP monorepo: framework, CLI, and documentation for creating secure and scalable MCP servers.",
   "author": "David Nazareno <dnnzareno@gmail.com>",
   "homepage": "https://dynemcp.pages.dev",
@@ -71,7 +71,6 @@
     "@swc/cli": "~0.6.0",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
-    "@types/minimatch": "^6.0.0",
     "@types/node": "18.16.9",
     "@types/react": "19.0.0",
     "@types/react-dom": "19.0.0",

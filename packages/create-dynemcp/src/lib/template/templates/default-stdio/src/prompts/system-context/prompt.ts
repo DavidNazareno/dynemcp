@@ -21,7 +21,7 @@ async function getMessages(args: Record<string, any> = {}) {
 
   return [
     {
-      role: 'user',
+      role: userRole,
       content: {
         type: 'text',
         text: `You are an AI assistant working with the DyneMCP framework. You have access to various tools and resources to help the ${userRole}.
