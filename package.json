@@ -67,7 +67,7 @@
     "@nxtensions/astro": "^19.0.1",
     "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-typescript": "^12.1.4",
-    "@swc-node/register": "~1.9.1",
+    "@swc-node/register": "~1.10.10",
     "@swc/cli": "~0.6.0",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
