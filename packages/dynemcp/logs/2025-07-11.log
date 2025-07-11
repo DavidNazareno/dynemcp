@@ -1,0 +1,27 @@
+{"level":30,"time":1752237386105,"pid":29295,"hostname":"Jesuss-Mac-mini.local","msg":"Loading components..."}
+{"level":30,"time":1752237386105,"pid":29295,"hostname":"Jesuss-Mac-mini.local","msg":"✅ Loaded 1 tools, 1 resources, 1 prompts"}
+{"level":30,"time":1752237386106,"pid":29295,"hostname":"Jesuss-Mac-mini.local","msg":"Loading components..."}
+{"level":30,"time":1752237386106,"pid":29295,"hostname":"Jesuss-Mac-mini.local","msg":"✅ Loaded 1 tools, 1 resources, 1 prompts"}
+{"level":30,"time":1752237386106,"pid":29295,"hostname":"Jesuss-Mac-mini.local","msg":"Loading components..."}
+{"level":30,"time":1752237386106,"pid":29295,"hostname":"Jesuss-Mac-mini.local","msg":"✅ Loaded 1 tools, 1 resources, 1 prompts"}
+{"level":30,"time":1752237386106,"pid":29295,"hostname":"Jesuss-Mac-mini.local","msg":"Loading components..."}
+{"level":30,"time":1752237386106,"pid":29295,"hostname":"Jesuss-Mac-mini.local","msg":"✅ Loaded 1 tools, 1 resources, 1 prompts"}
+{"level":30,"time":1752237386261,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"🚀 Initializing DyneMCP server..."}
+{"level":30,"time":1752237386261,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"Loaded tools: 1"}
+{"level":30,"time":1752237386261,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"  - tool: tool1"}
+{"level":30,"time":1752237386261,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"Loaded resources: 1"}
+{"level":30,"time":1752237386261,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"  - resource: res1"}
+{"level":30,"time":1752237386261,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"Loaded prompts: 1"}
+{"level":30,"time":1752237386261,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"  - prompt: prompt1"}
+{"level":30,"time":1752237386261,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"✅ DyneMCP server initialized correctly"}
+{"level":30,"time":1752237386264,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"🚀 Initializing DyneMCP server..."}
+{"level":30,"time":1752237386264,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"Loaded tools: 1"}
+{"level":30,"time":1752237386264,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"  - tool: tool1"}
+{"level":30,"time":1752237386264,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"Loaded resources: 1"}
+{"level":30,"time":1752237386264,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"  - resource: res1"}
+{"level":30,"time":1752237386264,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"Loaded prompts: 1"}
+{"level":30,"time":1752237386264,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"  - prompt: prompt1"}
+{"level":30,"time":1752237386264,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"✅ DyneMCP server initialized correctly"}
+{"level":30,"time":1752237386264,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"🔌 Connecting transport: Object"}
+{"level":30,"time":1752237386264,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"🔗 Connecting transport with connect() method..."}
+{"level":30,"time":1752237386264,"pid":29294,"hostname":"Jesuss-Mac-mini.local","msg":"✅ DyneMCP server started"}
