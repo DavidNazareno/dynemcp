@@ -1,224 +1,137 @@
-# DyneMCP - Framework de Protocolo de Contexto de Modelo (MCP)
+# DyneMCP Monorepo
 
-[![Licencia: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![Nx](https://img.shields.io/badge/Nx-21.2-orange.svg)](https://nx.dev/)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/DavidNazareno?color=db61a2&label=Sponsor&logo=github&style=flat-square)](https://github.com/sponsors/DavidNazareno)
 
-> Un framework completo para crear servidores MCP (Model Context Protocol) con herramientas modernas de desarrollo y un sistema de build optimizado.
+> A modern, modular framework and ecosystem for building Model Context Protocol (MCP) servers, tools, and agents.
 
-## 🚀 Visión General
+---
 
-DyneMCP es un monorepo que contiene un ecosistema completo para el desarrollo de servidores MCP:
+## Packages
 
-- **@dynemcp/dynemcp**: Framework principal con runtime de servidor y sistema de build
-- **@dynemcp/create-dynemcp**: Generador CLI para crear nuevos proyectos MCP
-- **Plantillas**: Múltiples plantillas preconfiguradas para diferentes casos de uso
+### [`@dynemcp/dynemcp`](./packages/dynemcp)
 
-## 📦 Paquetes
+- **Core framework** for building, running, and managing MCP servers and tools.
+- Unified CLI, robust build system, and extensible server runtime.
+- Security-first, production-ready, and fully MCP protocol compliant.
+- Modular architecture: CLI, build system, server runtime, config, and utilities.
+- See [`packages/dynemcp/README.md`](./packages/dynemcp/README.md) for details.
 
-### [@dynemcp/dynemcp](./packages/dynemcp)
+### [`@dynemcp/create-dynemcp`](./packages/create-dynemcp)
 
-El framework principal incluye:
+- **Official project generator** for DyneMCP.
+- Interactive CLI to scaffold new MCP servers with best practices and modern tooling.
+- Multiple templates: default, calculator, HTTP server, secure agent, dynamic agent.
+- Zero-config, TypeScript, ESBuild, hot reload, and security features included.
+- See [`packages/create-dynemcp/README.md`](./packages/create-dynemcp/README.md) for template details and usage.
 
-- ⚡ Servidor MCP con soporte completo para tools, resources y prompts
-- 🏗️ Sistema de build optimizado con esbuild
-- 🔄 Modo desarrollo con hot reload
-- 📝 Configuración declarativa
-- 🌐 Múltiples transportes (stdio, HTTP, SSE)
-- 🔧 Sistema de registro dinámico
-- 🎯 Capacidades de sampling de modelos
-- 🔒 Funciones de seguridad integradas
+### [`dynemcp-docs`](./apps/dynemcp-docs)
 
-### [@dynemcp/create-dynemcp](./packages/create-dynemcp)
+- Documentation site for DyneMCP, built with Astro + Starlight.
+- Contains guides, API docs, and usage examples.
+- Source: [`apps/dynemcp-docs/`](./apps/dynemcp-docs/)
 
-Generador de proyectos que ofrece:
+---
 
-- 🎯 CLI interactivo para crear nuevos proyectos
-- 📋 Múltiples plantillas especializadas
-- 📦 Configuración automática de dependencias
-- 🔧 Setup inmediato para desarrollo
+## Quickstart
 
-## 🏗️ Plantillas Disponibles
-
-### [Default](./packages/create-dynemcp/src/templates/default)
-
-Plantilla básica con ejemplos mínimos de tools, resources y prompts.
-
-- **Caso de uso**: Aprender los básicos de MCP, automatización simple
-- **Características**: Ejemplo básico de tool, resource y prompt
-- **Transporte**: stdio
-
-### [Calculator](./packages/create-dynemcp/src/templates/calculator)
-
-Agente matemático con:
-
-- **Caso de uso**: Cálculos matemáticos, herramientas educativas
-- **Características**: Calculadora básica y avanzada, referencias matemáticas, prompts especializados
-- **Transporte**: stdio
-- **Herramientas**: Aritmética básica, funciones matemáticas avanzadas
-
-### [HTTP Server](./packages/create-dynemcp/src/templates/http-server)
-
-Servidor básico usando transporte HTTP con:
-
-- **Caso de uso**: Integración web, endpoints API
-- **Características**: Configuración de servidor Express, transporte HTTP
-- **Transporte**: HTTP
-- **Herramientas**: Herramientas de saludo, información del servidor
-
-### [Secure Agent](./packages/create-dynemcp/src/templates/secure-agent)
-
-Agente listo para producción con:
-
-- **Caso de uso**: Aplicaciones empresariales, entornos seguros
-- **Características**: Autenticación por API key, middleware de seguridad, logging de auditoría
-- **Transporte**: HTTP con autenticación
-- **Seguridad**: Rate limiting, CORS, validación de entrada
-
-### [Dynamic Agent](./packages/create-dynemcp/src/templates/dynamic-agent)
-
-Agente avanzado que demuestra:
-
-- **Caso de uso**: Investigación en IA, sistemas adaptativos, agentes autoaprendientes
-- **Características**: Registro dinámico de herramientas, sampling de modelos, persistencia de memoria
-- **Transporte**: stdio
-- **Avanzado**: Algoritmos de aprendizaje, adaptación de herramientas
-
-## 🚀 Inicio Rápido
-
-### Instalación Global
+### Install dependencies
 
 ```bash
-npm install -g @dynemcp/create-dynemcp
-```
-
-### Crear un Nuevo Proyecto
-
-```bash
-# Modo interactivo
-create-dynemcp mi-agente
-
-# Con plantilla específica
-create-dynemcp mi-calculadora --template calculator
-
-# Modo no interactivo
-create-dynemcp mi-agente --yes --template default
-```
-
-### Desarrollo Local
-
-```bash
-# Clonar el repositorio
-git clone https://github.com/dynemcp/dynemcp.git
-cd dynemcp
-
-# Instalar dependencias
 pnpm install
+```
 
-# Ejecutar todos los tests
-pnpm test
+### Build all packages
 
-# Construir todos los paquetes
+```bash
 pnpm build
+```
 
-# Desarrollo con modo watch
+### Run tests
+
+```bash
+pnpm test
+```
+
+### Start development mode (watch)
+
+```bash
 pnpm dev
 ```
 
-## 🔧 Comandos de Desarrollo
+### Generate a new MCP project
 
 ```bash
-# Build
-pnpm build                    # Construir todos los paquetes
-pnpm clean                    # Limpiar builds previos
+# Interactive mode
+pnpm dlx @dynemcp/create-dynemcp my-agent
 
-# Calidad de código
-pnpm lint                     # Linting con ESLint
-pnpm lint:fix                 # Arreglar errores de lint
-pnpm format                   # Formatear código con Prettier
-pnpm beautify                 # Format + lint fix
-
-# Testing
-pnpm test                     # Ejecutar tests
-pnpm test:watch               # Tests en modo watch
-pnpm test:coverage            # Tests con coverage
-
-# Versionado y publicación
-pnpm version:patch            # Versión patch
-pnpm version:minor            # Versión minor
-pnpm version:major            # Versión major
-pnpm version:canary           # Versión canary
-pnpm publish                  # Publicar a npm
-pnpm publish:canary           # Publicar versión canary
+# With a specific template
+pnpm dlx @dynemcp/create-dynemcp my-server --template http-server
 ```
 
-## 🏛️ Arquitectura
+---
 
-### Estructura del Monorepo
+## Monorepo Structure
 
 ```
 dynemcp/
 ├── packages/
-│   ├── dynemcp/              # Framework principal
-│   │   ├── src/lib/server/   # Servidor MCP
-│   │   ├── src/lib/build/    # Sistema de build
-│   │   └── src/cli.ts        # CLI principal
-│   │
-│   └── create-dynemcp/       # Generador de proyectos
-│       ├── src/lib/          # Lógica del generador
-│       └── src/templates/    # Plantillas de proyecto
-│
-├── examples/                 # Ejemplos de uso
-├── scripts/                  # Scripts de automatización
-└── docs/                     # Documentación adicional
+│   ├── dynemcp/              # Core framework
+│   └── create-dynemcp/       # Project generator CLI & templates
+├── apps/
+│   └── dynemcp-docs/         # Documentation site (Astro + Starlight)
+├── scripts/                  # Automation scripts
+├── docs/                     # Additional documentation
+└── ...                       # Nx, config, etc.
 ```
 
-### Flujo de Desarrollo
+---
 
-1. **Desarrollo**: Usa `pnpm dev` para modo watch
-2. **Build**: Usa `pnpm build` para construir todos los paquetes
-3. **Test**: Usa `pnpm test` para ejecutar la suite de tests
-4. **Publish**: Usa `pnpm publish` para publicar a npm
+## Contributing
 
-## 🤝 Contribuir
+1. Fork the repo and create a feature branch.
+2. Make your changes and add tests as needed.
+3. Run `pnpm lint` and `pnpm test` to ensure code quality.
+4. Open a Pull Request with a clear description.
 
-1. Haz fork del proyecto
-2. Crea una rama de feature (`git checkout -b feature/mi-feature`)
-3. Haz commit de tus cambios (`git commit -m 'Agrega feature'`)
-4. Haz push a la rama (`git push origin feature/mi-feature`)
-5. Abre un Pull Request
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
 
-### Guía de Contribución
+---
 
-- Sigue las convenciones de código existentes
-- Agrega tests para nuevas funcionalidades
-- Actualiza la documentación cuando sea necesario
-- Usa commits semánticos
+## Technologies
 
-## 📋 Tecnologías
+- **TypeScript 5.8+**
+- **Nx 21.2** (monorepo management)
+- **ESBuild** (bundling)
+- **Vitest** (testing)
+- **ESLint + Prettier** (code quality)
+- **pnpm** (package management)
+- **Astro + Starlight** (documentation)
 
-- **TypeScript 5.8+**: Lenguaje principal
-- **Nx 21.2**: Herramientas de monorepo
-- **ESBuild**: Bundling optimizado
-- **Vitest**: Framework de testing
-- **ESLint + Prettier**: Calidad de código
-- **pnpm**: Gestión de paquetes
+---
 
-## 📄 Licencia
+## 🤝 Support the Project
 
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+If DyneMCP has been helpful to you, please consider supporting its development so I can keep advancing the project!
 
-## 🔗 Enlaces Útiles
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/DavidNazareno?color=db61a2&label=Sponsor&logo=github&style=flat-square)](https://github.com/sponsors/DavidNazareno)
 
-- [Documentación de MCP](https://modelcontextprotocol.io/)
-- [Guía de Desarrollo](./CONTRIBUTING.md)
-- [Issues y Feature Requests](https://github.com/dynemcp/dynemcp/issues)
-- [Discusiones](https://github.com/dynemcp/dynemcp/discussions)
+Your support helps maintain and improve the framework for the entire MCP community.
 
-## 📈 Estado del Proyecto
+---
 
-- ✅ Framework core estable
-- ✅ Sistema de build optimizado
-- ✅ Plantillas funcionales
-- ✅ CLI interactivo
-- 🔄 Documentación en progreso
+## License
+
+MIT — see [LICENSE](./LICENSE) for details.
+
+---
+
+**Useful Links:**
+
+- [Official Documentation](https://dynemcp.pages.dev/guides/getting-started/)
+- [MCP Protocol Documentation](https://modelcontextprotocol.io/)
+- [Project Documentation](./apps/dynemcp-docs/)
+- [Issues & Feature Requests](https://github.com/dynemcp/dynemcp/issues)
+- [Discussions](https://github.com/dynemcp/dynemcp/discussions)
