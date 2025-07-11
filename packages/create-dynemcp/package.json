@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/create-dynemcp",
-  "version": "0.0.27",
+  "version": "0.1.0",
   "private": false,
   "publishConfig": {
     "access": "public"

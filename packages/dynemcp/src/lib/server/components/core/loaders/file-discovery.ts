@@ -4,8 +4,7 @@
 
 import fs from 'fs'
 import path from 'path'
-// @ts-expect-error: minimatch has no types installed in this project
-import minimatch from 'minimatch'
+import { minimatch } from 'minimatch'
 
 export async function findFilesRecursively(
   dir: string,
