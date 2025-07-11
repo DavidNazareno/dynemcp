@@ -55,7 +55,6 @@ export function withErrorHandling<T extends (...args: unknown[]) => unknown>(
   return async (...args: Parameters<T>) => {
     try {
       const result = await fn(...args)
-      // Si ya es un CallToolResult válido, lo devolvemos
       if (
         result &&
         typeof result === 'object' &&
@@ -63,15 +62,12 @@ export function withErrorHandling<T extends (...args: unknown[]) => unknown>(
       ) {
         return result as CallToolResult
       }
-      // Si es string, lo normalizamos
       if (typeof result === 'string') {
         return createTextResponse(result)
       }
-      // Si es un objeto con 'text', lo normalizamos
       if (result && typeof result === 'object' && 'text' in result) {
         return createTextResponse((result as any).text)
       }
-      // Si es un array de strings, lo normalizamos
       if (
         Array.isArray(result) &&
         result.every((item) => typeof item === 'string')
@@ -80,7 +76,6 @@ export function withErrorHandling<T extends (...args: unknown[]) => unknown>(
           content: (result as string[]).map((text) => ({ type: 'text', text })),
         }
       }
-      // Si es un array de objetos con 'text', lo normalizamos
       if (
         Array.isArray(result) &&
         result.every(
@@ -94,7 +89,6 @@ export function withErrorHandling<T extends (...args: unknown[]) => unknown>(
           })),
         }
       }
-      // Si no, lo serializamos como texto
       return createTextResponse(JSON.stringify(result))
     } catch (error: unknown) {
       return createErrorResponse(error as Error)

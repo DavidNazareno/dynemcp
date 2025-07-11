@@ -2,7 +2,7 @@
 
 ## Overview
 
-The DyneMCP CLI provides a unified, extensible command-line interface for the DyneMCP framework. It cubre los comandos de ciclo de vida del servidor: desarrollo y producción. El CLI es modular, type-safe, y diseñado para mantenibilidad y fácil extensión.
+The DyneMCP CLI provides a unified, extensible command-line interface for the DyneMCP framework. It covers the server lifecycle commands: development and production. The CLI is modular, type-safe, and designed for maintainability and easy extension.
 
 ---
 
@@ -11,16 +11,11 @@ The DyneMCP CLI provides a unified, extensible command-line interface for the Dy
 ```
 cli/
   README.md         # This documentation
-  index.ts          # Public re-export: { cli, dev, ConsoleLogger, StderrLogger }
+  index.ts          # Public re-export: { cli, ConsoleLogger, StderrLogger }
   core/
     cli.ts          # Main CLI entry point: command registration and handlers
-    dev.ts          # Handler for 'dev' command (inspector/default mode)
-    logger.ts       # Logger interface and implementations (console, stderr)
-    run.ts          # Main dev server runner (hot-reload, shutdown, inspector integration)
     types.ts        # CLI-specific types (DevOptions, etc.)
-    utils.ts        # Helpers (spawnProcess, transport/host/port resolution)
-    handler/
-      start.ts      # Handler for 'start' command
+    utils.ts        # Helpers (spawnProcess, etc.)
 ```
 
 ---
@@ -28,27 +23,24 @@ cli/
 ## Main Files (core/)
 
 - **cli.ts**: CLI entry point. Sets up all main commands (`dev`, `start`) using yargs and connects them to their handlers.
-- **dev.ts**: Handler for the `dev` command. Decides between inspector mode and default dev mode.
-- **logger.ts**: Provides `ConsoleLogger` and `StderrLogger` for colored and error stream logging.
-- **run.ts**: Handles dev server logic, hot-reload, server startup, graceful shutdown, and MCP Inspector integration.
-- **types.ts**: Defines types for CLI argument parsing and handler logic.
-- **utils.ts**: Utility functions for process spawning and transport/host/port resolution.
-- **handler/**: Contains command-specific handler for `start`.
+- **types.ts**: Defines types for CLI argument parsing and handler logic (`DevOptions`, etc.).
+- **utils.ts**: Utility functions for process spawning and helpers.
+- **index.ts**: Re-exports the CLI and logger implementations for public use.
 
 ---
 
 ## Public API
 
 - **cli**: The yargs CLI instance, ready to be executed.
-- **dev**: Programmatic entrypoint for dev mode (used by the CLI and tests).
-- **ConsoleLogger, StderrLogger**: Logger implementations for consistent output.
+- **ConsoleLogger, StderrLogger**: Logger implementations for consistent output to stdout and stderr.
+- **Logger**: Type for custom logger implementations.
 
 ---
 
 ## Supported Commands
 
 - `dev [mode]`  
-  Starts the development server. Supports `inspector` mode for advanced debugging.
+  Starts the development server. Supports `default` and `inspector` modes.
 - `start`  
   Starts the server in production mode.
 
@@ -64,7 +56,7 @@ cli/
 ## Usage Examples
 
 ```
-# Start dev server (auto transport)
+# Start dev server (default mode)
 dynemcp dev
 
 # Start dev server in inspector mode
@@ -82,14 +74,8 @@ dynemcp start -c ./myconfig.ts
 - Add new helpers in `core/utils.ts`.
 - Add new types in `core/types.ts`.
 - Use `ConsoleLogger` and `StderrLogger` for consistent output.
-- Place command-specific logic in `core/handler/` for separation of concerns.
-
----
-
-## Best Practices
-
 - Keep all implementation logic in `core/` and only re-export from `index.ts`.
-- Only expose the minimal public API (`cli`, `dev`, `ConsoleLogger`, `StderrLogger`).
+- Only expose the minimal public API (`cli`, `ConsoleLogger`, `StderrLogger`).
 - Use async/await for all I/O and process management.
 - Keep command handlers minimal; delegate logic to helpers or submodules.
 - Document new commands and options in this README.

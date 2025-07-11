@@ -9,7 +9,6 @@
 DyneMCP is a professional, batteries-included framework for MCP server development. It brings together:
 
 - **Unified CLI** for all developer and ops tasks
-- **Zero-config, type-safe build system**
 - **Extensible, robust server runtime**
 - **Best-in-class security and production defaults**
 - **Clear, modular architecture for easy onboarding and extension**
@@ -45,7 +44,6 @@ dynemcp/
 ### 2. Build System ([src/build/](./src/build/README.md))
 
 - Handles all build, watch, clean, analyze, and CLI bundling tasks.
-- **Zero-config:** always uses a default, production-ready config.
 - Modular: includes `main/`, `bundler/`, `config/`, and `bin/` submodules.
 - See [`src/build/README.md`](./src/build/README.md) for API, CLI, and best practices.
 
@@ -119,10 +117,6 @@ dynemcp/
 ### Install
 
 ```sh
-npm install dynemcp
-# or
-yarn add dynemcp
-# or
 pnpm add dynemcp
 ```
 
@@ -135,24 +129,15 @@ dynemcp dev
 # Start dev server with Inspector
 dynemcp dev inspector
 
-# Build for production
-dynemcp build --clean
-
 # Start production server
 dynemcp start
 
-# Clean build directory
-dynemcp clean
-
-# Analyze dependencies
-dynemcp analyze
 ```
 
 ---
 
 ## Why DyneMCP?
 
-- **Zero-config, production-ready:** No need to tweak endless configs—just build and deploy.
 - **Professional, modular architecture:** Easy to extend, maintain, and onboard new developers.
 - **Security-first:** Built-in checks and best practices to keep your deployments safe.
 - **Full MCP protocol compliance:** Works out of the box with all MCP clients and hosts.

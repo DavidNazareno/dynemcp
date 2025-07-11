@@ -26,11 +26,9 @@ export async function loadComponentFromFile<T>(
       exported = exported.default
     }
     if (!exported) return null
-    // If the export has a toDefinition method, use it to get the normalized definition
     if (typeof exported.toDefinition === 'function') {
       exported = exported.toDefinition()
     }
-    // Normalize legacy "parameters" to "inputSchema" for tools
     if (
       typeof exported === 'object' &&
       'parameters' in exported &&
@@ -41,8 +39,7 @@ export async function loadComponentFromFile<T>(
       delete normalized.parameters
       exported = normalized
     }
-    // Logging para depuración
-    // console.log('[DyneMCP] Loaded component from', filePath, exported)
+
     if (validator(exported)) {
       return exported
     }

@@ -22,7 +22,6 @@ export async function findFilesRecursively(
       if (entry.isDirectory()) {
         await scanDirectory(fullPath)
       } else if (entry.isFile()) {
-        // If a pattern is provided, use minimatch to filter relative to the base dir
         const relPath = path.relative(dir, fullPath)
         if (!pattern || minimatch(relPath, pattern)) {
           files.push(fullPath)

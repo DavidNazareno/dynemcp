@@ -53,3 +53,5 @@ out
 examples/
 test-output
 .astro
+
+.logs

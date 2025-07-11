@@ -191,7 +191,6 @@ export class HTTPServers {
         const lastEventId = req.headers['last-event-id'] as string | undefined
         if (lastEventId && this.options?.resumability?.enabled) {
           fileLogger.info(`📡 Resuming from event ID: ${lastEventId}`)
-          // Implement replay logic if needed
         }
 
         const keepAlive = setInterval(() => {
@@ -330,7 +329,6 @@ export class HTTPServers {
         console.warn('No SSE clients connected to send message')
       }
     } else {
-      // HTTP MCP: delega a StreamableHTTPServerTransport
       await this.transport.send(message, options)
     }
   }

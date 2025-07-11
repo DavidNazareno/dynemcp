@@ -13,5 +13,5 @@ export type DevOptions = {
   clean?: boolean
   external?: string
   define?: string
-  watch?: boolean // Habilita modo watch/hot reload
+  watch?: boolean
 }

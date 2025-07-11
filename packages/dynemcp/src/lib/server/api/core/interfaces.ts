@@ -7,13 +7,12 @@
 // - Used throughout the API module for type safety and extension.
 
 import { z } from 'zod'
-import type { ZodRawShape, ZodTypeAny, ZodObject } from 'zod'
+import type { ZodRawShape, ZodTypeAny } from 'zod'
 // Import types from the SDK
 import type {
   Tool as SDKTool,
   Resource as SDKResource,
   Prompt as SDKPrompt,
-  SamplingMessage as SDKSamplingMessage,
   CallToolResult as SDKCallToolResult,
   Root as SDKRoot,
   RootsListChangedNotification as SDKRootsListChangedNotification,
@@ -49,11 +48,10 @@ export type ResourceDefinition = SDKResource
 export type PromptDefinition = SDKPrompt
 
 // Internal types for loaded/executable logic
-// LoadedTool tiene su propia definición con inputSchema como ZodRawShape
 export interface LoadedTool {
   name: string
   description?: string
-  inputSchema: z.ZodRawShape // <-- Solo ZodRawShape
+  inputSchema: z.ZodRawShape
   outputSchema?: {
     [x: string]: unknown
     type: 'object'
@@ -88,10 +86,7 @@ export interface LoadedPrompt extends PromptDefinition {
 export type InferSchema<T> = T extends z.ZodType ? z.infer<T> : never
 
 // Sampling types (MCP)
-export type SamplingMessage = SDKSamplingMessage
-// (There are no explicit SamplingRequest/SamplingResult in the SDK)
 
-// SamplingRequest and SamplingResult according to the official MCP documentation
 export interface SamplingRequest {
   messages: Array<{
     role: 'user' | 'assistant'
@@ -126,30 +121,3 @@ export interface SamplingResult {
 export type Root = SDKRoot
 export type RootList = Root[]
 export type RootChangeNotification = SDKRootsListChangedNotification
-
-// No additional interfaces are needed here, the main types come from the SDK.
-
-// Resource template definition for dynamic resources
-export interface ResourceTemplateDefinition {
-  uriTemplate: string
-  name: string
-  description?: string
-  mimeType?: string
-  getContent: (params: Record<string, string>) => Promise<string> | string
-}
-
-export interface LoadedResource extends ResourceDefinition {
-  content: string | (() => string | Promise<string>)
-  paramsSchema?: ZodRawShape | ZodObject<any, any, any>
-  complete?: (params: {
-    argument: string
-    partialInput: string
-    context?: Record<string, unknown>
-  }) => Promise<string[]> | string[]
-  // Add more fields as needed for dynamic resources
-}
-
-export interface LoadedResourceTemplate extends ResourceTemplateDefinition {
-  paramsSchema?: ZodRawShape | ZodObject<any, any, any>
-  // Add more fields as needed for dynamic resource templates
-}

@@ -20,7 +20,6 @@ import {
 import type { MiddlewareDefinition } from '../../components/component-loader'
 import { validateTool } from '../../components/core/loaders/validators'
 import { paginateWithCursor } from '../../api/core/utils'
-import { getResourceMeta } from '../../api/core/resource'
 import path from 'path'
 import { fileLogger } from '../../../../global/logger'
 

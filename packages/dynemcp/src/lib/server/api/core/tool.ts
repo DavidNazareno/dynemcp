@@ -22,6 +22,9 @@ export type ContentItem =
 /**
  * Normalizes the result of a tool to MCP protocol format.
  * Handles strings, objects, arrays, and error cases.
+ *
+ * @param result - The raw result returned by a tool handler
+ * @returns An object in MCP protocol format, or an error object if invalid
  */
 function normalizeToolResult(result: any) {
   // String simple
@@ -41,7 +44,6 @@ function normalizeToolResult(result: any) {
   ) {
     return { content: [result] }
   }
-  // Simple object { text: ... }
   if (
     result &&
     typeof result === 'object' &&
@@ -50,7 +52,6 @@ function normalizeToolResult(result: any) {
   ) {
     return { content: [{ type: 'text', text: result.text }] }
   }
-  // Array of strings or objects
   if (Array.isArray(result)) {
     const content = result.map((item) => {
       if (typeof item === 'string') {
@@ -67,12 +68,10 @@ function normalizeToolResult(result: any) {
       ) {
         return item
       }
-      // If not valid, stringify it
       return { type: 'text', text: JSON.stringify(item) }
     })
     return { content }
   }
-  // If it is not a valid object, return MCP error
   return {
     isError: true,
     content: [
@@ -85,7 +84,11 @@ function normalizeToolResult(result: any) {
 }
 
 /**
- * Wrapper for error handling and MCP result normalization.
+ * Wraps a tool handler function with error handling and MCP result normalization.
+ * Ensures that any thrown errors are caught and returned in a standard format.
+ *
+ * @param fn - The tool handler function to wrap
+ * @returns An async function that returns a normalized MCP result or error
  */
 function withErrorHandling<T extends (...args: any[]) => any>(fn: T): T {
   return (async (...args: any[]) => {
@@ -104,7 +107,27 @@ function withErrorHandling<T extends (...args: any[]) => any>(fn: T): T {
 }
 
 /**
- * Simplified typed tool creator function.
+ * Defines a DyneMCP tool using a configuration object with strong typing.
+ *
+ * Usage example:
+ *
+ * export const myTool = createTypedTool({
+ *   name: 'my-tool',
+ *   description: 'A sample tool',
+ *   schema: z.object({ input: z.string() }),
+ *   execute: async (input) => ({ content: [{ type: 'text', text: 'Hello ' + input.input }] })
+ * })
+ *
+ * @param config - Tool configuration object
+ *   - name: Unique tool name (required)
+ *   - description: Tool description (required)
+ *   - schema: Zod schema for input validation (required)
+ *   - inputSchema: (Optional) Zod schema or shape for input
+ *   - outputSchema: (Optional) Zod schema or shape for output
+ *   - annotations: (Optional) Additional metadata
+ *   - execute: Tool handler function (required)
+ *   - complete: (Optional) Completion function for argument suggestions
+ * @returns LoadedTool (MCP-compatible)
  */
 export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
   name: string
@@ -122,15 +145,12 @@ export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
     context?: Record<string, unknown>
   }) => Promise<string[]> | string[]
 }): LoadedTool {
-  // Asegurarse de que inputSchema es un ZodObject
   const inputSchema =
     config.inputSchema instanceof z.ZodType
       ? config.inputSchema
       : config.inputSchema && typeof config.inputSchema === 'object'
         ? z.object(config.inputSchema as z.ZodRawShape)
         : config.schema
-
-  const inputJsonSchema = zodToJsonSchema(inputSchema)
 
   function extractPropertiesAndRequired(jsonSchema: any) {
     const result: any = {}
@@ -161,18 +181,40 @@ export function createTypedTool<T extends z.ZodObject<z.ZodRawShape>>(config: {
   return {
     name: config.name,
     description: config.description,
-    inputSchema: inputSchema.shape, // <-- Solo ZodRawShape
+    inputSchema: inputSchema.shape,
     outputSchema: outputSchemaObj,
     annotations: config.annotations,
     execute: withErrorHandling(config.execute as any),
-    parameters: {}, // Optionally fill if needed
+    parameters: {},
     complete: config.complete,
   }
 }
 
 /**
- * Functional API for defining DyneMCP tools.
- * Allows simple and flexible syntax for tool definition and execution.
+ * Defines a DyneMCP tool using a functional API for flexibility and simplicity.
+ *
+ * Usage example:
+ *
+ * export const myTool = tool(
+ *   z.object({ input: z.string() }),
+ *   async (input) => ({ content: [{ type: 'text', text: 'Hello ' + input.input }] }),
+ *   {
+ *     name: 'my-tool',
+ *     description: 'A sample tool',
+ *   }
+ * )
+ *
+ * @param schema - Zod schema for input validation (required)
+ * @param handler - Tool handler function (required)
+ * @param options - Tool options object
+ *   - name: Unique tool name (required)
+ *   - description: Tool description (optional)
+ *   - inputSchema: (Optional) Zod schema or shape for input
+ *   - outputSchema: (Optional) Zod schema or shape for output
+ *   - annotations: (Optional) Additional metadata
+ *   - meta: (Optional) Extra metadata
+ *   - complete: (Optional) Completion function for argument suggestions
+ * @returns LoadedTool (MCP-compatible)
  */
 export function tool<
   T extends z.ZodObject<z.ZodRawShape>,
@@ -194,15 +236,12 @@ export function tool<
     }) => Promise<string[]> | string[]
   }
 ): LoadedTool {
-  // Asegurarse de que inputSchema es un ZodObject
   const inputSchema =
     options.inputSchema instanceof z.ZodType
       ? options.inputSchema
       : options.inputSchema && typeof options.inputSchema === 'object'
         ? z.object(options.inputSchema as z.ZodRawShape)
         : schema
-
-  const inputJsonSchema = zodToJsonSchema(inputSchema)
 
   function extractPropertiesAndRequired(jsonSchema: any) {
     const result: any = {}
@@ -233,11 +272,11 @@ export function tool<
   return {
     name: options.name,
     description: options.description ?? '',
-    inputSchema: inputSchema.shape, // <-- Solo ZodRawShape
+    inputSchema: inputSchema.shape,
     outputSchema: outputSchemaObj,
     annotations: options.annotations ?? options.meta,
     execute: withErrorHandling(handler as any),
-    parameters: {}, // Optionally fill if needed
+    parameters: {},
     complete: options.complete,
   }
 }

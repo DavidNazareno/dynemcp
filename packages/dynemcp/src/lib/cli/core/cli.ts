@@ -1,25 +1,36 @@
 // CLI entry point for DyneMCP
-// Elimina cualquier comando relacionado con build, clean, serve, watch, etc. Solo deja los comandos relevantes para modo watch/dev.
 
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import chalk from 'chalk'
 
 import { launchInspectorProcess } from '../../server/main'
 import { spawnProcess } from './utils'
 
 const cli = yargs(hideBin(process.argv))
   .scriptName('dynemcp')
-  .usage('$0 <cmd> [args]')
+  .usage(
+    chalk.cyan('\n$0 <command> [options]\n\n') +
+      chalk.bold('DyneMCP CLI') +
+      '\n\n' +
+      'Official CLI to develop and manage DyneMCP servers.\n'
+  )
   .command(
     'dev [mode]',
-    'Start development server (always in watch/hot reload mode)',
+    chalk.bold('Start the server in development mode (watch/hot reload).'),
     (y) =>
-      y.positional('mode', {
-        describe: 'Development mode (default or inspector)',
-        type: 'string',
-        choices: ['default', 'inspector'],
-        default: 'default',
-      }),
+      y
+        .positional('mode', {
+          describe: 'Development mode ("default" or "inspector")',
+          type: 'string',
+          choices: ['default', 'inspector'],
+          default: 'default',
+        })
+        .example('$0 dev', 'Start the server in default development mode')
+        .example(
+          '$0 dev inspector',
+          'Start the server in inspector mode for debugging'
+        ),
     async (argv) => {
       const args = ['tsx', 'src/index.ts']
       if (argv.mode === 'inspector') {
@@ -29,14 +40,31 @@ const cli = yargs(hideBin(process.argv))
       }
     }
   )
-  .command('start', 'Start production server (no watch, no inspector)', () =>
-    spawnProcess('npx', ['tsx', 'src/index.ts'])
+  .command(
+    'start',
+    chalk.bold('Start the server in production mode.'),
+
+    () => {
+      spawnProcess('npx', ['tsx', 'src/index.ts'])
+    }
   )
-  .demandCommand(1, 'You need at least one command before moving on')
-  .help()
-  .version()
+  .example('$0 start', 'Start the server in production mode')
+  .demandCommand(
+    1,
+    chalk.red(
+      'You must specify at least one command. Use --help to see available options.'
+    )
+  )
+  .help('help')
   .alias('h', 'help')
+  .version()
   .alias('v', 'version')
+  .epilog(
+    chalk.gray(
+      '\nFor more information, visit: https://dynemcp.dev\n' +
+        'Questions or issues? Report at https://github.com/DavidNazareno/dynemcp/issues'
+    )
+  )
   .strict()
 
 export { cli }
