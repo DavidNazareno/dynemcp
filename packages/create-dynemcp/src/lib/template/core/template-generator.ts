@@ -157,10 +157,6 @@ export const installTemplate = async (
         inspector: 'dynemcp dev inspector',
         start: 'dynemcp start',
         format: 'prettier --write .',
-        lint: args.eslint ? 'eslint . --ext .js,.jsx,.ts,.tsx' : undefined,
-        'eslint:fix': args.eslint
-          ? 'eslint . --ext .js,.jsx,.ts,.tsx --fix'
-          : undefined,
       }
     }
 

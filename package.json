@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/source",
-  "version": "0.0.20-canary.20250626T18090",
+  "version": "0.0.21-rc.1",
   "description": "Official DyneMCP monorepo: framework, CLI, and documentation for creating secure and scalable MCP servers.",
   "author": "David Nazareno <dnnzareno@gmail.com>",
   "homepage": "https://dynemcp.dev",
