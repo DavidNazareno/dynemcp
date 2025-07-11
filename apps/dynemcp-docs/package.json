@@ -38,6 +38,6 @@
   },
   "devDependencies": {
     "tailwindcss": "^4.1.11",
-    "@astrojs/check": "^0.5.2"
+    "@astrojs/check": "^0.9.4"
   }
 }
