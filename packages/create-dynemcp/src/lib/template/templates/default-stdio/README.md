@@ -151,7 +151,6 @@ export default systemPrompt({
 })
 ```
 
-
 ## 🔒 Authentication Middleware (JWT)
 
 This template includes a ready-to-use JWT authentication middleware in `src/middleware.ts`.

@@ -54,7 +54,6 @@ The following commands are available for releasing:
 The versioning system consists of two main scripts:
 
 1. **version-packages.js**: Handles versioning of packages based on changesets
-
    - Exits any previous pre-release mode
    - Sets up the appropriate pre-release mode (canary, rc) if needed
    - Creates an empty changeset if none exist (for canary releases)
