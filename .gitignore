@@ -54,4 +54,4 @@ examples/
 test-output
 .astro
 
-.logs
+packages/dynemcp/logs
