@@ -61,7 +61,7 @@ const cli = yargs(hideBin(process.argv))
   .alias('v', 'version')
   .epilog(
     chalk.gray(
-      '\nFor more information, visit: https://dynemcp.dev\n' +
+      '\nFor more information, visit: https://dynemcp.pages.dev\n' +
         'Questions or issues? Report at https://github.com/DavidNazareno/dynemcp/issues'
     )
   )

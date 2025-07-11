@@ -5,7 +5,7 @@
   "private": true,
   "description": "Official DyneMCP documentation: user guide, API, security, and best practices for the MCP framework.",
   "author": "David Nazareno <dnnzareno@gmail.com>",
-  "homepage": "https://dynemcp.dev/docs",
+  "homepage": "https://dynemcp.pages.dev",
   "repository": {
     "type": "git",
     "url": "https://github.com/DavidNazareno/dynemcp.git",

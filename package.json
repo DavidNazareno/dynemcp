@@ -3,7 +3,7 @@
   "version": "0.0.21-rc.1",
   "description": "Official DyneMCP monorepo: framework, CLI, and documentation for creating secure and scalable MCP servers.",
   "author": "David Nazareno <dnnzareno@gmail.com>",
-  "homepage": "https://dynemcp.dev",
+  "homepage": "https://dynemcp.pages.dev",
   "repository": {
     "type": "git",
     "url": "https://github.com/DavidNazareno/dynemcp.git"

@@ -30,7 +30,7 @@ npm start
 \`\`\`
 
 ## Documentation
-Visit [dynemcp.dev](https://dynemcp.dev) for comprehensive documentation and examples.`
+Visit [dynemcp.dev](https://dynemcp.pages.dev) for comprehensive documentation and examples.`
 }
 
 // --- Export --- //

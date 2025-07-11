@@ -192,7 +192,7 @@ If the token is valid, you'll get a response. If not, you'll get a 401 Unauthori
 
 ## 📚 Learn More
 
-- [DyneMCP Documentation](https://dynemcp.dev)
+- [DyneMCP Documentation](https://dynemcp.pages.dev)
 - [MCP Protocol Specification](https://spec.modelcontextprotocol.io/)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 
