@@ -63,7 +63,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.13.3",
-    "chalk": "4.1.2",
+    "chalk": "5.4.1",
     "cors": "^2.8.5",
     "esbuild": "0.25.5",
     "execa": "^5.1.1",
