@@ -54,7 +54,7 @@ const templatesDir = getTemplatesDir()
 // Get the path to a template file
 const configPath = getTemplateFile({
   template: 'default',
-  file: 'dynemcp.config.json',
+  file: 'dynemcp.config.ts',
 })
 
 // Install a template

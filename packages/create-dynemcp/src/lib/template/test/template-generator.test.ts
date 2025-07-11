@@ -7,7 +7,6 @@ vi.mock('../../shared', () => ({
   // The template directory used by getTemplateFile
   getTemplatesDir: () => '/tmp/templates',
   // Stub implementations for the rest of the exports that template-generator relies on
-  getPackageVersion: () => '1.0.0',
   copy: vi.fn(),
   installDependencies: vi.fn(),
 }))

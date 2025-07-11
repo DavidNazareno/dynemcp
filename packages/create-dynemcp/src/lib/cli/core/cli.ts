@@ -3,19 +3,15 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import inquirer from 'inquirer'
 import ora from 'ora'
-import { readFileSync } from 'fs'
 import {
   createProject,
   installDependencies,
   validateProjectName,
 } from '../../project'
-import { fileURLToPath } from 'url'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const packageJsonPath = path.resolve(__dirname, '../../../package.json')
-const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'))
-const version = packageJson.version
+declare const __VERSION__: string
+
+const version = __VERSION__
 
 const program = new Command('create-dynemcp')
   .version(

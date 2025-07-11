@@ -11,7 +11,6 @@ import { createTextResponse, createErrorResponse } from '../../api'
 import type { DyneMCPConfig } from '../../config/core/interfaces'
 import { loadConfig } from '../../config/core/loader'
 import { registry } from '../../registry/core/registry'
-import { fileLogger } from '../../../../global/logger'
 
 // Server initializer logic for DyneMCP main module
 // Handles registration of tools, resources, and prompts with the MCP server instance.

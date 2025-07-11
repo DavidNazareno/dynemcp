@@ -6,4 +6,4 @@
  */
 export { copy } from './core/file-operations'
 export { installDependencies } from './core/package-operations'
-export { getPackageVersion, getTemplatesDir } from './core/path-operations'
+export { getTemplatesDir } from './core/path-operations'

@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/source",
-  "version": "0.0.21-rc.1",
+  "version": "0.0.25-rc.5",
   "description": "Official DyneMCP monorepo: framework, CLI, and documentation for creating secure and scalable MCP servers.",
   "author": "David Nazareno <dnnzareno@gmail.com>",
   "homepage": "https://dynemcp.pages.dev",
@@ -65,6 +65,7 @@
     "@nx/vite": "21.2.0",
     "@nx/web": "21.2.0",
     "@nxtensions/astro": "^19.0.1",
+    "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-typescript": "^12.1.4",
     "@swc-node/register": "~1.9.1",
     "@swc/cli": "~0.6.0",
