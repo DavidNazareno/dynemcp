@@ -29,6 +29,9 @@
     "oauth2"
   ],
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./dist/lib/index.js",
   "module": "./dist/lib/index.js",

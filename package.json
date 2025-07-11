@@ -52,7 +52,7 @@
     "publish:rc": "RELEASE_TYPE=release-candidate tsx scripts/publish-packages.ts",
     "publish:dry-run": "DRY_RUN=true tsx scripts/publish-packages.ts"
   },
-  "private": false,
+  "private": true,
   "devDependencies": {
     "@eslint/compat": "^1.1.1",
     "@eslint/eslintrc": "^3.3.1",

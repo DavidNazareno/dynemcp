@@ -2,6 +2,9 @@
   "name": "@dynemcp/create-dynemcp",
   "version": "0.0.27",
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
