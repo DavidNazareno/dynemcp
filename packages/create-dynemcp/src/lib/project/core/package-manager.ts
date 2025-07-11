@@ -21,7 +21,6 @@ export function detectPackageManager(): string {
  * or available package managers on the system.
  */
 export function getPkgManager(): PackageManager {
-  // User rule: prefer pnpm
   try {
     execa(PACKAGE_MANAGER.PREFERRED, ['--version'], { stdio: 'ignore' })
     return PACKAGE_MANAGER.PREFERRED

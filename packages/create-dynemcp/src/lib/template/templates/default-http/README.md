@@ -48,23 +48,23 @@ export default {
   tools: {
     enabled: true,
     directory: './src/tools',
-    pattern: '**/*.{ts,js}',
+    pattern: '**/*.ts',
   },
   resources: {
     enabled: true,
     directory: './src/resources',
-    pattern: '**/*.{ts,js}',
+    pattern: '**/*.ts',
   },
   prompts: {
     enabled: true,
     directory: './src/prompts',
-    pattern: '**/*.{ts,js}',
+    pattern: '**/*.ts',
   },
-
   transport: {
-    type: 'streamable-http',
+    type: 'http',
     options: {
-      port: 8081,
+      mode: 'streamable-http',
+      port: 3001,
       endpoint: '/mcp',
       oauth2Issuer: 'https://your-auth-server',
       oauth2Audience: 'https://your-mcp-server',

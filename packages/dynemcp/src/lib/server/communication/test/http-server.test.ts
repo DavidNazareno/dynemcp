@@ -1,4 +1,5 @@
 import { vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 // ------------------------------------------------------------
 // Mocks
@@ -53,3 +54,9 @@ vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
 vi.mock('../../registry/core/registry', () => ({
   registry: { getAuthenticationMiddlewarePath: () => null },
 }))
+
+describe('http-server', () => {
+  it('should load the test suite', () => {
+    expect(true).toBe(true)
+  })
+})

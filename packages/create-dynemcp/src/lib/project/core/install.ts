@@ -6,7 +6,6 @@ import fs from 'fs-extra'
 export async function installDependencies(projectPath: string): Promise<void> {
   const { default: execa } = await import('execa')
   const args = ['install']
-  // Only install if package.json exists
   if (!fs.existsSync(`${projectPath}/package.json`)) {
     return
   }

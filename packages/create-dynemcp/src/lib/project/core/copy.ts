@@ -36,7 +36,6 @@ export async function copy(
         ? path.join(destination, relativeDir, filename)
         : path.join(destination, filename)
 
-      // Ensure the directory exists
       await fs.ensureDir(path.dirname(dest))
       await fs.copy(src, dest)
     }

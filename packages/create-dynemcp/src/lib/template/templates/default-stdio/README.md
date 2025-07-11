@@ -48,17 +48,17 @@ export default {
   tools: {
     enabled: true,
     directory: './src/tools',
-    pattern: '**/*.{ts,js}',
+    pattern: '**/*.ts',
   },
   resources: {
     enabled: true,
     directory: './src/resources',
-    pattern: '**/*.{ts,js}',
+    pattern: '**/*.ts',
   },
   prompts: {
     enabled: true,
     directory: './src/prompts',
-    pattern: '**/*.{ts,js}',
+    pattern: '**/*.ts',
   },
   transport: {
     type: 'stdio',

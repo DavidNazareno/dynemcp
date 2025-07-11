@@ -10,10 +10,8 @@ export async function createProject(
   projectName: string,
   template: string
 ): Promise<void> {
-  // Create project directory
   await fs.mkdir(projectPath, { recursive: true })
 
-  // Use the existing installTemplate function
   await installTemplate({
     appName: projectName,
     root: projectPath,

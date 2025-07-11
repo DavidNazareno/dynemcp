@@ -41,7 +41,6 @@ export const installTemplate = async (
       throw new Error('Templates directory not found')
     }
 
-    // Copy the template files to the target directory.
     console.log('\nInitializing project with template:', args.template, '\n')
     const templatePath = path.join(getTemplatesDir(), args.template)
     const copySource = ['**/*', '**/.*']
@@ -84,7 +83,6 @@ export const installTemplate = async (
       )
     }
 
-    // update import alias in any files if not using the default
     if (args.importAlias !== '@/*') {
       const globFn = fastGlob.glob || fastGlob
       const files = await globFn('**/*', {
@@ -122,13 +120,11 @@ export const installTemplate = async (
         recursive: true,
       })
 
-      // Check if the template already has a src/ directory structure
       const templateHasSrcStructure = await fs
         .stat(path.join(args.root, PATHS.SOURCE_DIR))
         .catch(() => false)
 
       if (!templateHasSrcStructure) {
-        // Only reorganize directories if template doesn't already have src/ structure
         await Promise.all(
           SRC_DIR_NAMES.map(async (dir) => {
             if (dir === PATHS.SOURCE_DIR) {
@@ -196,43 +192,14 @@ export const installTemplate = async (
       },
     }
 
-    /*   if (args.template === 'http-server' || args.template === 'secure-agent') {
-      packageJson.dependencies['express'] = '^4.19.2'
-      packageJson.dependencies['cors'] = '^2.8.5'
-      packageJson.devDependencies['@types/express'] = '^4.17.21'
-      packageJson.devDependencies['@types/cors'] = '^2.8.17'
-    }
-
-    if (!packageJson.scripts.lint) {
-      delete packageJson.scripts.lint
-    }
- */
     if (args.mode === 'ts') {
       packageJson.devDependencies = {
         ...packageJson.devDependencies,
-        //'@types/node': '^20.11.30',
         typescript: '^5.4.2',
         tsx: '^4.0.0',
         '@modelcontextprotocol/inspector': `^${INSPECTOR_VERSION}`,
-        //'@typescript-eslint/eslint-plugin': '^8.33.1',
-        //'@typescript-eslint/parser': '^8.33.1',
-        //  'ts-node': '^10.9.2',
       }
     }
-    /* 
-    if (args.eslint) {
-      packageJson.devDependencies = {
-        ...packageJson.devDependencies,
-        eslint: '^9.28.0',
-        'eslint-config-prettier': '^9.1.0',
-        prettier: '^3.2.5',
-      }
-    }
-
-    packageJson.devDependencies = {
-      ...packageJson.devDependencies,
-      vitest: '^1.4.0',
-    } */
 
     packageJson.engines = {
       node: '>=20.0.0',

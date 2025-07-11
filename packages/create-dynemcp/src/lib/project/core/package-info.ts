@@ -9,7 +9,6 @@ import { getTemplatesDir } from '../../template'
  */
 export function getPackageVersion(): string {
   try {
-    // Get the templates directory path and navigate up to find package.json
     const templatesDir = getTemplatesDir()
     const packageJsonPath = path.resolve(templatesDir, '../../package.json')
 
@@ -21,5 +20,5 @@ export function getPackageVersion(): string {
     console.warn('Failed to read package.json version:', error)
   }
 
-  return '0.0.1' // Default version if not found
+  return '0.0.1'
 }

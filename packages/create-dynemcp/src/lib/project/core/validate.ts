@@ -17,13 +17,11 @@ export function validateProjectName(name: string): ValidationResult {
     problems.push('Project name cannot be longer than 214 characters')
   }
 
-  // Check for invalid characters
   const invalidChars = /[<>:"/\\|?*]/
   if (invalidChars.test(name)) {
     problems.push('Project name contains invalid characters')
   }
 
-  // Check for reserved names
   const reservedNames = [
     'node_modules',
     'package.json',
@@ -53,7 +51,6 @@ export function validateProjectPath(projectPath: string): {
   valid: boolean
   message?: string
 } {
-  // Check if directory exists and is not empty
   if (fs.existsSync(projectPath)) {
     const files = fs.readdirSync(projectPath)
     if (files.length > 0) {

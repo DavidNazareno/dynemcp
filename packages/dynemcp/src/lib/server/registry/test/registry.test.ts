@@ -25,7 +25,13 @@ vi.mock('../../components/component-loader', () => {
       components: [fakePrompt],
       errors: [],
     }),
-    loadMiddlewareFromDirectory: vi.fn().mockResolvedValue(null),
+    loadMiddlewareFromDirectory: vi.fn().mockResolvedValue({ components: [] }),
+    loadAllComponents: vi.fn().mockResolvedValue({
+      tools: [fakeTool],
+      resources: [fakeResource],
+      prompts: [fakePrompt],
+      errors: [],
+    }),
   }
 })
 
