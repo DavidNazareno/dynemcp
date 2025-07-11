@@ -2,41 +2,41 @@
   "name": "dynemcp-docs",
   "$schema": "../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "apps/src",
+  "sourceRoot": "apps/dynemcp-docs/src",
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "options": {
         "command": "astro build",
-        "cwd": "apps"
+        "cwd": "apps/dynemcp-docs"
       }
     },
     "dev": {
       "executor": "nx:run-commands",
       "options": {
         "command": "astro dev --port 4321 --host",
-        "cwd": "apps"
+        "cwd": "apps/dynemcp-docs"
       }
     },
     "preview": {
       "executor": "nx:run-commands",
       "options": {
         "command": "astro preview",
-        "cwd": "apps"
+        "cwd": "apps/dynemcp-docs"
       }
     },
     "check": {
       "executor": "nx:run-commands",
       "options": {
         "command": "astro check",
-        "cwd": "apps"
+        "cwd": "apps/dynemcp-docs"
       }
     },
     "sync": {
       "executor": "nx:run-commands",
       "options": {
         "command": "astro sync",
-        "cwd": "apps"
+        "cwd": "apps/dynemcp-docs"
       }
     }
   },
