@@ -61,9 +61,6 @@ importers:
       '@swc/helpers':
         specifier: ~0.5.11
         version: 0.5.17
-      '@types/minimatch':
-        specifier: ^6.0.0
-        version: 6.0.0
       '@types/node':
         specifier: 18.16.9
         version: 18.16.9
@@ -249,9 +246,6 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
-      minimatch:
-        specifier: ^5.1.6
-        version: 5.1.6
       picomatch:
         specifier: ^4.0.2
         version: 4.0.2
@@ -286,9 +280,6 @@ importers:
       '@types/jsonwebtoken':
         specifier: ^9.0.10
         version: 9.0.10
-      '@types/minimatch':
-        specifier: ^6.0.0
-        version: 6.0.0
       '@types/node':
         specifier: ^24.0.10
         version: 24.0.10
@@ -2730,8 +2721,8 @@ packages:
         integrity: sha512-IM1zzRV4W3HtVgftdQiiOmA0AdJlCtMLe00FXaHwgt3rAnNsIyDqshvkIW3hj/iu5hu8ERP7KIYki6NkqDxAwQ==,
       }
     peerDependencies:
-      '@types/react': 19.1.1
-      '@types/react-dom': 19.1.2
+      '@types/react': '*'
+      '@types/react-dom': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
       react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
     peerDependenciesMeta:
