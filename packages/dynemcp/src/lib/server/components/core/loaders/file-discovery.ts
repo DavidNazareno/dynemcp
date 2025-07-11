@@ -4,13 +4,14 @@
 
 import fs from 'fs'
 import path from 'path'
-import { minimatch } from 'minimatch'
+import picomatch from 'picomatch'
 
 export async function findFilesRecursively(
   dir: string,
   pattern?: string
 ): Promise<string[]> {
   const files: string[] = []
+  const isMatch = pattern ? picomatch(pattern) : null
 
   async function scanDirectory(currentDir: string) {
     const entries = await fs.promises.readdir(currentDir, {
@@ -22,7 +23,7 @@ export async function findFilesRecursively(
         await scanDirectory(fullPath)
       } else if (entry.isFile()) {
         const relPath = path.relative(dir, fullPath)
-        if (!pattern || minimatch(relPath, pattern)) {
+        if (!isMatch || isMatch(relPath)) {
           files.push(fullPath)
         }
       }
