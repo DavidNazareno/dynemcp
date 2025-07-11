@@ -1,7 +1,7 @@
 {
   "name": "dynemcp-docs",
   "type": "module",
-  "version": "0.0.25-rc.5",
+  "version": "0.0.26",
   "private": true,
   "description": "Official DyneMCP documentation: user guide, API, security, and best practices for the MCP framework.",
   "author": "David Nazareno <dnnzareno@gmail.com>",
