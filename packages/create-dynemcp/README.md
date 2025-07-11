@@ -497,7 +497,7 @@ npx @dynemcp/create-dynemcp my-project
 
 ### Getting Help
 
-- 📖 [Documentation](https://dynemcp.dev)
+- 📖 [Documentation](https://dynemcp.pages.dev)
 - 🐛 [Report Issues](https://github.com/dynemcp/dynemcp/issues)
 - 💬 [Discussions](https://github.com/dynemcp/dynemcp/discussions)
 - 📧 [Email Support](mailto:support@dynemcp.dev)
@@ -528,4 +528,4 @@ This project is licensed under the MIT License - see the [LICENSE](../../LICENSE
 - [DyneMCP Framework](https://github.com/DavidNazareno/dynemcp)
 - [MCP Specification](https://modelcontextprotocol.io/)
 - [npm Package](https://www.npmjs.com/package/@dynemcp/create-dynemcp)
-- [Documentation](https://dynemcp.dev/create-dynemcp)
+- [Documentation](https://dynemcp.pages.dev/guides/getting-started)
