@@ -12,6 +12,7 @@
 ## Packages
 
 ### [`@dynemcp/dynemcp`](./packages/dynemcp)
+
 - **Core framework** for building, running, and managing MCP servers and tools.
 - Unified CLI, robust build system, and extensible server runtime.
 - Security-first, production-ready, and fully MCP protocol compliant.
@@ -19,6 +20,7 @@
 - See [`packages/dynemcp/README.md`](./packages/dynemcp/README.md) for details.
 
 ### [`@dynemcp/create-dynemcp`](./packages/create-dynemcp)
+
 - **Official project generator** for DyneMCP.
 - Interactive CLI to scaffold new MCP servers with best practices and modern tooling.
 - Multiple templates: default, calculator, HTTP server, secure agent, dynamic agent.
@@ -26,6 +28,7 @@
 - See [`packages/create-dynemcp/README.md`](./packages/create-dynemcp/README.md) for template details and usage.
 
 ### [`dynemcp-docs`](./apps/dynemcp-docs)
+
 - Documentation site for DyneMCP, built with Astro + Starlight.
 - Contains guides, API docs, and usage examples.
 - Source: [`apps/dynemcp-docs/`](./apps/dynemcp-docs/)
@@ -126,6 +129,7 @@ MIT — see [LICENSE](./LICENSE) for details.
 ---
 
 **Useful Links:**
+
 - [Official Documentation](https://dynemcp.pages.dev/guides/getting-started/)
 - [MCP Protocol Documentation](https://modelcontextprotocol.io/)
 - [Project Documentation](./apps/dynemcp-docs/)
