@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/create-dynemcp",
-  "version": "0.0.21-rc.1",
+  "version": "0.0.25-rc.5",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",

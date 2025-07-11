@@ -1,6 +1,6 @@
 {
   "name": "@dynemcp/dynemcp",
-  "version": "0.0.21-rc.1",
+  "version": "0.0.25-rc.5",
   "description": "Official DyneMCP framework for creating robust, secure, and scalable MCP servers in TypeScript.",
   "author": "David Nazareno <dnnzareno@gmail.com>",
   "homepage": "https://dynemcp.pages.dev",

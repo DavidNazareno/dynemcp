@@ -10,7 +10,7 @@ DyneMCP is a modern, modular framework for building, running, and managing Model
 The official way to create a new DyneMCP project is using the project generator:
 
 ```bash
-pnpx create-dynemcp my-project
+pnpm dlx @dynemcp/create-dynemcp my-project
 ```
 
 When you run the create command, you'll be guided through an interactive process that will:
@@ -23,13 +23,13 @@ You can also use non-interactive mode with various options:
 
 ```bash
 # Use default-stdio template
-pnpx create-dynemcp my-agent --template default-stdio --yes
+pnpm dlx @dynemcp/create-dynemcp my-agent --template default-stdio --yes
 
 # Use default-http template
-pnpx create-dynemcp my-server --template default-http --yes
+pnpm dlx @dynemcp/create-dynemcp my-server --template default-http --yes
 
 # Skip dependency installation
-pnpx create-dynemcp my-agent --template default-http --yes --skip-install
+pnpm dlx @dynemcp/create-dynemcp my-agent --template default-http --yes --skip-install
 ```
 
 ## Project Structure

@@ -1,15 +1,12 @@
-import {
-  installDependencies,
-  copy,
-  getPackageVersion,
-  getTemplatesDir,
-} from '../../shared'
+import { installDependencies, copy, getTemplatesDir } from '../../shared'
 
 import fastGlob from 'fast-glob'
 import os from 'os'
 import fs from 'fs/promises'
 import path from 'path'
 import { Sema } from 'async-sema'
+
+declare const __VERSION__: string
 
 import type { GetTemplateFileArgs, InstallTemplateArgs } from './interfaces'
 import {
@@ -20,7 +17,7 @@ import {
 } from '../../../global/config-all-constants'
 
 const templatesDir = getTemplatesDir()
-const pkgVersion = getPackageVersion()
+const pkgVersion = __VERSION__
 
 export const getTemplateFile = ({
   template,

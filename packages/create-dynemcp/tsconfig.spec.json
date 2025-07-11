@@ -27,7 +27,8 @@
     "src/lib/cli/core/cli.ts",
     "src/**/*.d.ts",
     "src/lib/project/**/*.ts",
-    "src/lib/cli/core/**/*.ts"
+    "src/lib/cli/core/**/*.ts",
+    "src/lib/template/core/**/*.ts"
   ],
   "exclude": ["src/lib/template/templates"]
 }

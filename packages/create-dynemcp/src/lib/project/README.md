@@ -45,9 +45,6 @@ It is designed to be the single source of truth for all project-related logic, e
 
 ### Package and Dependency Management
 
-- **`getPackageVersion(): string`**  
-  Returns the version of the package from `package.json`.
-
 - **`getPkgManager(): PackageManager`**  
   Returns the preferred package manager for the project (e.g., pnpm).
 
